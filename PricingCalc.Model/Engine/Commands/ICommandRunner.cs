@@ -1,9 +1,8 @@
-﻿using System;
-
-namespace PricingCalc.Model.Engine.Commands
+﻿namespace PricingCalc.Model.Engine.Commands
 {
     public interface ICommandRunner
     {
-        ExecutionResult Run(IBaseModel model, Action<IModel> action);
+        ExecutionResult Run<TModel>(ModelCommand<TModel> command, TModel model)
+            where TModel : IBaseModel;
     }
 }

@@ -28,9 +28,14 @@ namespace PricingCalc.Model.Engine.Commands
                 throw new ArgumentException($"Parameter '{parameter.Name}' is not initialized");
             }
 
+            return _runner.Run(this, _model);
+        }
+
+        internal void Run(IModel model)
+        {
             Logger.Information("Running '{Command}' command. Parameters {Parameters}", GetType().Name, _parameters);
 
-            return _runner.Run(_model, ExecuteInternal);
+            ExecuteInternal(model);
         }
 
         protected abstract void ExecuteInternal(IModel model);

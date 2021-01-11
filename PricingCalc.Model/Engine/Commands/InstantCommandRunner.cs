@@ -5,13 +5,19 @@ namespace PricingCalc.Model.Engine.Commands
 {
     internal class InstantCommandRunner : ICommandRunner
     {
-        public ExecutionResult Run(IBaseModel model, Action<IModel> action)
+        public ExecutionResult Run<TModel>(ModelCommand<TModel> command, TModel model)
+            where TModel : IBaseModel
         {
             try
             {
-                ((BaseModel)model).View.Mutate(action);
+                if (model is BaseModel baseModel)
+                {
+                    baseModel.View.Mutate(command.Run);
 
-                return ExecutionResult.Success;
+                    return ExecutionResult.Success;
+                }
+
+                throw new InvalidOperationException($"Unable to run command on model of type {model.GetType()}");
             }
             catch (Exception ex)
             {
