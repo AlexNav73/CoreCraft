@@ -41,7 +41,7 @@ namespace PricingCalc.Model.Engine
 
                 changes.Apply(snapshot);
 
-                var newModel = new Model(snapshot.ToList());
+                var newModel = new Model(snapshot.GetShardsInternalUnsafe().ToList());
                 var oldModel = Interlocked.Exchange(ref _model, newModel);
 
                 Changed?.Invoke(this, new ModelChangedEventArgs(oldModel, newModel, changes));
