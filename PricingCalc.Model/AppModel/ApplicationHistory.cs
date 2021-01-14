@@ -10,19 +10,17 @@ namespace PricingCalc.Model.AppModel
 {
     internal class ApplicationHistory : DisposableBase, IApplicationHistory
     {
-        private readonly IView _view;
+        private readonly ApplicationModel _model;
         private readonly IStorage _storage;
         private readonly Stack<IWritableModelChanges> _undoStack;
         private readonly Stack<IWritableModelChanges> _redoStack;
 
-        public ApplicationHistory(IView view, IStorage storage)
+        public ApplicationHistory(ApplicationModel model, IStorage storage)
         {
-            _view = view;
+            _model = model;
             _storage = storage;
             _undoStack = new Stack<IWritableModelChanges>();
             _redoStack = new Stack<IWritableModelChanges>();
-
-            _view.Changed += OnModelChanged;
         }
 
         public event EventHandler? Changed;
@@ -33,7 +31,7 @@ namespace PricingCalc.Model.AppModel
 
             try
             {
-                _storage.Save(path, _view.UnsafeModel, changes);
+                _storage.Save(path, _model.UnsafeModel, changes);
 
                 _redoStack.Clear();
                 _undoStack.Clear();
@@ -48,16 +46,14 @@ namespace PricingCalc.Model.AppModel
 
         public void Load(string path)
         {
-            _view.Changed -= OnModelChanged;
             try
             {
-                _view.Mutate(snapshot => _storage.Load(path, snapshot));
+                _model.Mutate(snapshot => _storage.Load(path, snapshot));
             }
             catch (Exception ex)
             {
                 Logger.Error(ex, "Error occurred while model loading from {Path}", path);
             }
-            _view.Changed += OnModelChanged;
         }
 
         public void Clear()
@@ -72,14 +68,11 @@ namespace PricingCalc.Model.AppModel
         {
             if (_undoStack.Count > 0)
             {
-                _view.Changed -= OnModelChanged;
-
                 var changes = _undoStack.Pop();
                 _redoStack.Push(changes);
-                _view.Apply(changes.Invert());
+                _model.Apply(changes.Invert());
 
                 Changed?.Invoke(this, EventArgs.Empty);
-                _view.Changed += OnModelChanged;
             }
         }
 
@@ -87,14 +80,11 @@ namespace PricingCalc.Model.AppModel
         {
             if (_redoStack.Count > 0)
             {
-                _view.Changed -= OnModelChanged;
-
                 var changes = _redoStack.Pop();
                 _undoStack.Push(changes);
-                _view.Apply(changes);
+                _model.Apply(changes);
 
                 Changed?.Invoke(this, EventArgs.Empty);
-                _view.Changed += OnModelChanged;
             }
         }
 
@@ -103,15 +93,10 @@ namespace PricingCalc.Model.AppModel
             return _undoStack.Count > 0;
         }
 
-        private void OnModelChanged(object? sender, ModelChangedEventArgs e)
+        internal void OnModelChanged(MutateResult result)
         {
-            _undoStack.Push((IWritableModelChanges)e.Changes);
+            _undoStack.Push(result.Changes);
             Changed?.Invoke(this, EventArgs.Empty);
-        }
-
-        protected override void DisposeManagedObjects()
-        {
-            _view.Changed -= OnModelChanged;
         }
     }
 }

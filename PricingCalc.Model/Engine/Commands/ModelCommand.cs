@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using PricingCalc.Core;
+using PricingCalc.Model.Engine.Commands.Runners;
 
 namespace PricingCalc.Model.Engine.Commands
 {

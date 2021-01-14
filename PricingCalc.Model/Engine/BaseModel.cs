@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PricingCalc.Core;
 using PricingCalc.Model.Engine.Core;
 
 namespace PricingCalc.Model.Engine
 {
-    internal abstract class BaseModel : DisposableBase, IBaseModel
+    internal abstract class BaseModel : IBaseModel
     {
         private readonly IView _view;
         private readonly HashSet<Action<ModelChangedEventArgs>> _subscriptions;
@@ -17,11 +16,9 @@ namespace PricingCalc.Model.Engine
         {
             _subscriptions = new HashSet<Action<ModelChangedEventArgs>>();
             _view = view;
-
-            view.Changed += OnModelChanged;
         }
 
-        internal IView View => _view;
+        internal IModel UnsafeModel => _view.UnsafeModel;
 
         public T Shard<T>() where T : IModelShard
         {
@@ -43,9 +40,33 @@ namespace PricingCalc.Model.Engine
             return new UnsubscribeOnDispose(onModelChanges, _subscriptions);
         }
 
-        private void OnModelChanged(object? sender, ModelChangedEventArgs e)
+        internal MutateResult Mutate(Action<IModel> action, bool notify = true)
         {
-            _currentChanges = e;
+            var result = _view.Mutate(action);
+
+            if (result.Changes.HasChanges() && notify)
+            {
+                RaiseModelChangesEvent(result);
+            }
+
+            return result;
+        }
+
+        internal void Apply(IWritableModelChanges changes)
+        {
+            if (changes.HasChanges())
+            {
+                var result = _view.Apply(changes);
+
+                RaiseModelChangesEvent(result);
+            }
+        }
+
+        internal abstract void RaiseEvent(MutateResult result);
+
+        protected void RaiseModelChangesEvent(MutateResult result)
+        {
+            _currentChanges = new ModelChangedEventArgs(result.OldModel, result.NewModel, result.Changes);
 
             var observers = _subscriptions.ToArray();
             foreach (var observer in observers)
@@ -54,11 +75,6 @@ namespace PricingCalc.Model.Engine
             }
 
             _currentChanges = null;
-        }
-
-        protected override void DisposeManagedObjects()
-        {
-            _view.Changed -= OnModelChanged;
         }
     }
 }

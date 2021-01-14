@@ -17,9 +17,7 @@ namespace PricingCalc.Model.Engine
 
         public IModel UnsafeModel => _model;
 
-        public event EventHandler<ModelChangedEventArgs>? Changed;
-
-        public void Mutate(Action<IModel> action)
+        public MutateResult Mutate(Action<IModel> action)
         {
             var snapshot = new TrackableModel(_model);
 
@@ -27,25 +25,20 @@ namespace PricingCalc.Model.Engine
 
             var newModel = new Model(snapshot.GetShardsInternalUnsafe().ToList());
             var oldModel = Interlocked.Exchange(ref _model, newModel);
-            if (snapshot.Changes.HasChanges())
-            {
-                Changed?.Invoke(this, new ModelChangedEventArgs(oldModel, newModel, snapshot.Changes));
-            }
+
+            return new MutateResult(oldModel, newModel, snapshot.Changes);
         }
 
-        public void Apply(IWritableModelChanges changes)
+        public MutateResult Apply(IWritableModelChanges changes)
         {
-            if (changes.HasChanges())
-            {
-                var snapshot = new CachedModel(_model);
+            var snapshot = new CachedModel(_model);
 
-                changes.Apply(snapshot);
+            changes.Apply(snapshot);
 
-                var newModel = new Model(snapshot.GetShardsInternalUnsafe().ToList());
-                var oldModel = Interlocked.Exchange(ref _model, newModel);
+            var newModel = new Model(snapshot.GetShardsInternalUnsafe().ToList());
+            var oldModel = Interlocked.Exchange(ref _model, newModel);
 
-                Changed?.Invoke(this, new ModelChangedEventArgs(oldModel, newModel, changes));
-            }
+            return new MutateResult(oldModel, newModel, changes);
         }
     }
 }

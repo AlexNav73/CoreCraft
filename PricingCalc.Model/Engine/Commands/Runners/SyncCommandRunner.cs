@@ -1,9 +1,9 @@
 ﻿using System;
 using PricingCalc.Core;
 
-namespace PricingCalc.Model.Engine.Commands
+namespace PricingCalc.Model.Engine.Commands.Runners
 {
-    internal class InstantCommandRunner : ICommandRunner
+    internal class SyncCommandRunner : ISyncCommandRunner
     {
         public ExecutionResult Run<TModel>(ModelCommand<TModel> command, TModel model)
             where TModel : IBaseModel
@@ -12,7 +12,8 @@ namespace PricingCalc.Model.Engine.Commands
             {
                 if (model is BaseModel baseModel)
                 {
-                    baseModel.View.Mutate(command.Run);
+                    var result = baseModel.Mutate(command.Run, false);
+                    baseModel.RaiseEvent(result);
 
                     return ExecutionResult.Success;
                 }

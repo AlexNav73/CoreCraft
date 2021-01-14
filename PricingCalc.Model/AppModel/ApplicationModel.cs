@@ -6,18 +6,29 @@ namespace PricingCalc.Model.AppModel
 {
     internal class ApplicationModel : BaseModel, IApplicationModel
     {
+        private readonly ApplicationHistory _history;
+
         public ApplicationModel(
             IReadOnlyCollection<IApplicationModelShard> shards,
             IStorage storage,
             IApplicationModelCommands commands)
             : base(new View(shards))
         {
-            History = new ApplicationHistory(View, storage);
+            _history = new ApplicationHistory(this, storage);
             Commands = commands;
         }
 
-        public IApplicationHistory History { get; }
+        public IApplicationHistory History => _history;
 
         public IApplicationModelCommands Commands { get; }
+
+        internal override void RaiseEvent(MutateResult result)
+        {
+            if (result.Changes.HasChanges())
+            {
+                RaiseModelChangesEvent(result);
+                _history.OnModelChanged(result);
+            }
+        }
     }
 }
