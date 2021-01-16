@@ -2,6 +2,6 @@
 {
     public interface IModelCommand
     {
-        ExecutionResult Execute();
+        void Execute();
     }
 }

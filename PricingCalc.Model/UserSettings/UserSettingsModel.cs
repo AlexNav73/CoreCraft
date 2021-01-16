@@ -18,7 +18,7 @@ namespace PricingCalc.Model.UserSettings
 
         public IUserSettingsHistory History => _history;
 
-        internal override void RaiseEvent(MutateResult result)
+        internal override void RaiseEvent(ModelChangeResult result)
         {
             if (result.Changes.HasChanges())
             {

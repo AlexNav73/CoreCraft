@@ -1,9 +1,7 @@
-﻿using PricingCalc.Model.Engine.Commands;
-
-namespace PricingCalc.Model.AppModel
+﻿namespace PricingCalc.Model.AppModel
 {
     public interface IApplicationModelCommands
     {
-        ExecutionResult Clear();
+        void Clear();
     }
 }

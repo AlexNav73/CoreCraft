@@ -40,7 +40,7 @@ namespace PricingCalc.Model.Engine
             return new UnsubscribeOnDispose(onModelChanges, _subscriptions);
         }
 
-        internal MutateResult Mutate(Action<IModel> action, bool notify = true)
+        internal ModelChangeResult Mutate(Action<IModel> action, bool notify = true)
         {
             var result = _view.Mutate(action);
 
@@ -62,9 +62,9 @@ namespace PricingCalc.Model.Engine
             }
         }
 
-        internal abstract void RaiseEvent(MutateResult result);
+        internal abstract void RaiseEvent(ModelChangeResult result);
 
-        protected void RaiseModelChangesEvent(MutateResult result)
+        protected void RaiseModelChangesEvent(ModelChangeResult result)
         {
             _currentChanges = new ModelChangedEventArgs(result.OldModel, result.NewModel, result.Changes);
 

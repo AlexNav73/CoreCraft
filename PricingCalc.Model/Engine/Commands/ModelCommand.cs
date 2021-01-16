@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using PricingCalc.Core;
-using PricingCalc.Model.Engine.Commands.Runners;
 
 namespace PricingCalc.Model.Engine.Commands
 {
@@ -20,7 +19,7 @@ namespace PricingCalc.Model.Engine.Commands
             _parameters = new List<ICommandParameter>();
         }
 
-        public virtual ExecutionResult Execute()
+        public virtual void Execute()
         {
             if (_parameters.Any(x => !x.IsInitialized))
             {
@@ -29,7 +28,7 @@ namespace PricingCalc.Model.Engine.Commands
                 throw new ArgumentException($"Parameter '{parameter.Name}' is not initialized");
             }
 
-            return _runner.Run(this, _model);
+            _runner.Run(this, _model);
         }
 
         internal void Run(IModel model)

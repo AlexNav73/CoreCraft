@@ -7,8 +7,8 @@ namespace PricingCalc.Model.Engine
     {
         IModel UnsafeModel { get; }
 
-        MutateResult Mutate(Action<IModel> action);
+        ModelChangeResult Mutate(Action<IModel> action);
 
-        MutateResult Apply(IWritableModelChanges changes);
+        ModelChangeResult Apply(IWritableModelChanges changes);
     }
 }

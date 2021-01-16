@@ -93,7 +93,7 @@ namespace PricingCalc.Model.AppModel
             return _undoStack.Count > 0;
         }
 
-        internal void OnModelChanged(MutateResult result)
+        internal void OnModelChanged(ModelChangeResult result)
         {
             _undoStack.Push(result.Changes);
             Changed?.Invoke(this, EventArgs.Empty);

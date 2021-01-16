@@ -30,7 +30,7 @@ namespace PricingCalc.Model.UserSettings
             }
         }
 
-        internal void OnModelChanged(MutateResult result)
+        internal void OnModelChanged(ModelChangeResult result)
         {
             _storage.Save(_userSettingsFile, _model.UnsafeModel, new[] { result.Changes });
         }

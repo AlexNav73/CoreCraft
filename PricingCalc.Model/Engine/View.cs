@@ -17,7 +17,7 @@ namespace PricingCalc.Model.Engine
 
         public IModel UnsafeModel => _model;
 
-        public MutateResult Mutate(Action<IModel> action)
+        public ModelChangeResult Mutate(Action<IModel> action)
         {
             var snapshot = new TrackableModel(_model);
 
@@ -26,10 +26,10 @@ namespace PricingCalc.Model.Engine
             var newModel = new Model(snapshot.GetShardsInternalUnsafe().ToList());
             var oldModel = Interlocked.Exchange(ref _model, newModel);
 
-            return new MutateResult(oldModel, newModel, snapshot.Changes);
+            return new ModelChangeResult(oldModel, newModel, snapshot.Changes);
         }
 
-        public MutateResult Apply(IWritableModelChanges changes)
+        public ModelChangeResult Apply(IWritableModelChanges changes)
         {
             var snapshot = new CachedModel(_model);
 
@@ -38,7 +38,7 @@ namespace PricingCalc.Model.Engine
             var newModel = new Model(snapshot.GetShardsInternalUnsafe().ToList());
             var oldModel = Interlocked.Exchange(ref _model, newModel);
 
-            return new MutateResult(oldModel, newModel, changes);
+            return new ModelChangeResult(oldModel, newModel, changes);
         }
     }
 }

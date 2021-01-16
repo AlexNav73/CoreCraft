@@ -12,10 +12,10 @@ namespace PricingCalc.Model.AppModel
             _commandFactory = commandFactory;
         }
 
-        public ExecutionResult Clear()
+        public void Clear()
         {
             var command = _commandFactory.Create<IClearModelCommand<IApplicationModel>>();
-            return command.Execute();
+            command.Execute();
         }
     }
 }

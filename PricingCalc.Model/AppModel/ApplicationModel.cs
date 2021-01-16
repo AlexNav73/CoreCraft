@@ -22,7 +22,7 @@ namespace PricingCalc.Model.AppModel
 
         public IApplicationModelCommands Commands { get; }
 
-        internal override void RaiseEvent(MutateResult result)
+        internal override void RaiseEvent(ModelChangeResult result)
         {
             if (result.Changes.HasChanges())
             {
