@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,57 +9,119 @@ namespace PricingCalc.Model.Engine.Commands
     {
         public static readonly SequentialTaskScheduler Instance = new SequentialTaskScheduler();
 
-        private readonly Queue<Task> _queue;
-        private readonly object _mutex = new object();
+        [ThreadStatic]
+        private static bool _currentThreadIsProcessingItems;
+
+        private readonly LinkedList<Task> _queue;
+
+        private int _runningParallelTasks = 0;
 
         private SequentialTaskScheduler()
         {
-            _queue = new Queue<Task>();
+            _queue = new LinkedList<Task>();
         }
 
         protected override void QueueTask(Task task)
         {
-            if (task is not null)
+            lock (_queue)
             {
-                lock (_queue)
+                _queue.AddLast(task);
+                if (_runningParallelTasks == 0)
                 {
-                    _queue.Enqueue(task);
+                    _runningParallelTasks++;
+                    // NOTE: In the article about TaskScheduler in the example
+                    // UnsafeQueueUserWorkItem is using to speed up queuing task
+                    // by skipping of thread restrictions checks. If a thread with
+                    // restrictions calls UnsafeQueueUserWorkItem, a new thread will
+                    // execute delegate under default restrictions. It is unsafe.
+                    // In future, plug-in system could be implemented and using unsafe
+                    // method could open a security hole. For now, performance is ok and
+                    // usage of unsafe method is not necessary.
+                    ThreadPool.QueueUserWorkItem(Execute, null);
                 }
-                ThreadPool.QueueUserWorkItem(Execute, null);
             }
         }
 
         private void Execute(object? state)
         {
-            // TODO: Yield thread if it can't lock on mutex
-            lock (_mutex)
+            _currentThreadIsProcessingItems = true;
+            try
             {
-                Task? task = null;
-
-                lock (_queue)
+                while (true)
                 {
-                    if (_queue.Count > 0)
-                        task = _queue.Dequeue();
-                }
+                    Task task;
 
-                if (task != null)
-                {
+                    lock (_queue)
+                    {
+                        if (_queue.Count == 0)
+                        {
+                            _runningParallelTasks--;
+                            break;
+                        }
+
+                        task = _queue.First!.Value;
+                        _queue.RemoveFirst();
+                    }
+
                     TryExecuteTask(task);
                 }
             }
-        }
-
-        protected override IEnumerable<Task>? GetScheduledTasks()
-        {
-            lock (_queue)
+            finally
             {
-                return _queue.ToArray();
+                _currentThreadIsProcessingItems = false;
             }
         }
 
         protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
         {
-            return false;
+            if (!_currentThreadIsProcessingItems)
+            {
+                return false;
+            }
+
+            if (taskWasPreviouslyQueued)
+            {
+                if (TryDequeue(task))
+                {
+                    return TryExecuteTask(task);
+                }
+
+                return false;
+            }
+
+            return TryExecuteTask(task);
+        }
+
+        protected override IEnumerable<Task>? GetScheduledTasks()
+        {
+            bool lockTaken = false;
+            try
+            {
+                Monitor.TryEnter(_queue, ref lockTaken);
+                if (lockTaken)
+                {
+                    return _queue;
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            finally
+            {
+                if (lockTaken)
+                {
+                    Monitor.Exit(_queue);
+                }
+            }
+        }
+
+        protected sealed override bool TryDequeue(Task task)
+        {
+            lock (_queue)
+            {
+                return _queue.Remove(task);
+            }
         }
     }
 }
