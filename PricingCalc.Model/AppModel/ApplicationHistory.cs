@@ -4,21 +4,18 @@ using System.Linq;
 using PricingCalc.Core;
 using PricingCalc.Model.Engine;
 using PricingCalc.Model.Engine.Core;
-using PricingCalc.Model.Engine.Persistence;
 
 namespace PricingCalc.Model.AppModel
 {
     internal class ApplicationHistory : DisposableBase, IApplicationHistory
     {
         private readonly ApplicationModel _model;
-        private readonly IStorage _storage;
         private readonly Stack<IWritableModelChanges> _undoStack;
         private readonly Stack<IWritableModelChanges> _redoStack;
 
-        public ApplicationHistory(ApplicationModel model, IStorage storage)
+        public ApplicationHistory(ApplicationModel model)
         {
             _model = model;
-            _storage = storage;
             _undoStack = new Stack<IWritableModelChanges>();
             _redoStack = new Stack<IWritableModelChanges>();
         }
@@ -31,7 +28,7 @@ namespace PricingCalc.Model.AppModel
 
             try
             {
-                _storage.Save(path, _model.UnsafeModel, changes);
+                _model.Save(path, changes);
 
                 _redoStack.Clear();
                 _undoStack.Clear();
@@ -48,7 +45,7 @@ namespace PricingCalc.Model.AppModel
         {
             try
             {
-                _model.Mutate(snapshot => _storage.Load(path, snapshot));
+                _model.Load(path);
             }
             catch (Exception ex)
             {

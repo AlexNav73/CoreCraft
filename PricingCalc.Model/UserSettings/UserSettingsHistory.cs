@@ -1,7 +1,6 @@
 ﻿using System;
 using PricingCalc.Core;
 using PricingCalc.Model.Engine;
-using PricingCalc.Model.Engine.Persistence;
 
 namespace PricingCalc.Model.UserSettings
 {
@@ -10,19 +9,17 @@ namespace PricingCalc.Model.UserSettings
         private const string _userSettingsFile = "UserSettings.user";
 
         private readonly UserSettingsModel _model;
-        private readonly IStorage _storage;
 
-        public UserSettingsHistory(UserSettingsModel model, IStorage storage)
+        public UserSettingsHistory(UserSettingsModel model)
         {
             _model = model;
-            _storage = storage;
         }
 
         public void Load()
         {
             try
             {
-                _model.Mutate(model => _storage.Load(_userSettingsFile, model));
+                _model.Load(_userSettingsFile);
             }
             catch (Exception ex)
             {
@@ -32,7 +29,7 @@ namespace PricingCalc.Model.UserSettings
 
         internal void OnModelChanged(ModelChangeResult result)
         {
-            _storage.Save(_userSettingsFile, _model.UnsafeModel, new[] { result.Changes });
+            _model.Save(_userSettingsFile, new[] { result.Changes });
         }
     }
 }

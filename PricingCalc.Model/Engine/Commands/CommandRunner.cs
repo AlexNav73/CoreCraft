@@ -24,7 +24,7 @@ namespace PricingCalc.Model.Engine.Commands
         {
             try
             {
-                var result = (model as BaseModel)!.Mutate(command.Run, false);
+                var result = (model as BaseModel)!.Run(command);
 
                 Task.Factory.StartNew(
                     () => (model as BaseModel)?.RaiseEvent(result),

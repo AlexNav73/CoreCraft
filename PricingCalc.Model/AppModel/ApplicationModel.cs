@@ -12,9 +12,9 @@ namespace PricingCalc.Model.AppModel
             IReadOnlyCollection<IApplicationModelShard> shards,
             IStorage storage,
             IApplicationModelCommands commands)
-            : base(new View(shards))
+            : base(new View(shards), storage)
         {
-            _history = new ApplicationHistory(this, storage);
+            _history = new ApplicationHistory(this);
             Commands = commands;
         }
 

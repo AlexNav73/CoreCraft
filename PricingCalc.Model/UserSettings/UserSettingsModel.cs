@@ -11,9 +11,9 @@ namespace PricingCalc.Model.UserSettings
         public UserSettingsModel(
             IReadOnlyCollection<IUserSettingsModelShard> shards,
             IStorage storage)
-            : base(new View(shards))
+            : base(new View(shards), storage)
         {
-            _history = new UserSettingsHistory(this, storage);
+            _history = new UserSettingsHistory(this);
         }
 
         public IUserSettingsHistory History => _history;
