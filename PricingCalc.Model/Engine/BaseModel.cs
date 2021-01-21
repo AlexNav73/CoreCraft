@@ -42,6 +42,16 @@ namespace PricingCalc.Model.Engine
             return new UnsubscribeOnDispose(onModelChanges, _subscriptions);
         }
 
+        public ModelChangeResult Run(ModelCommand command)
+        {
+            return _view.Mutate(snapshot => command.Run(snapshot));
+        }
+
+        public virtual void RaiseEvent(ModelChangeResult result)
+        {
+            RaiseModelChangesEvent(result);
+        }
+
         internal void Save(string path, IReadOnlyList<IModelChanges> changes)
         {
             _storage.Save(path, _view.UnsafeModel, changes);
@@ -65,13 +75,6 @@ namespace PricingCalc.Model.Engine
                 RaiseModelChangesEvent(result);
             }
         }
-
-        internal ModelChangeResult Run(ModelCommand command)
-        {
-            return _view.Mutate(snapshot => command.Run(snapshot));
-        }
-
-        internal abstract void RaiseEvent(ModelChangeResult result);
 
         protected void RaiseModelChangesEvent(ModelChangeResult result)
         {

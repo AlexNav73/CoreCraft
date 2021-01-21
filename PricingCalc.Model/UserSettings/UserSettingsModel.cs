@@ -18,11 +18,11 @@ namespace PricingCalc.Model.UserSettings
 
         public IUserSettingsHistory History => _history;
 
-        internal override void RaiseEvent(ModelChangeResult result)
+        public override void RaiseEvent(ModelChangeResult result)
         {
             if (result.Changes.HasChanges())
             {
-                RaiseModelChangesEvent(result);
+                base.RaiseEvent(result);
                 _history.OnModelChanged(result);
             }
         }

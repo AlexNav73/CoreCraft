@@ -7,8 +7,7 @@ namespace PricingCalc.Model.Engine.Commands
 {
     internal class CommandRunner : ICommandRunner
     {
-        public void Run<TModel>(ModelCommand<TModel> command, TModel model)
-            where TModel : IBaseModel
+        public void Run(ModelCommand command, IBaseModel model)
         {
             var UITaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
@@ -19,15 +18,14 @@ namespace PricingCalc.Model.Engine.Commands
                 SequentialTaskScheduler.Instance);
         }
 
-        private static void RunCommand<TModel>(ModelCommand<TModel> command, TModel model, TaskScheduler scheduler)
-            where TModel : IBaseModel
+        private static void RunCommand(ModelCommand command, IBaseModel model, TaskScheduler scheduler)
         {
             try
             {
-                var result = (model as BaseModel)!.Run(command);
+                var result = model.Run(command);
 
                 Task.Factory.StartNew(
-                    () => (model as BaseModel)?.RaiseEvent(result),
+                    () => model.RaiseEvent(result),
                     CancellationToken.None,
                     TaskCreationOptions.None,
                     scheduler);

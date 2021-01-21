@@ -2,7 +2,6 @@
 {
     public interface ICommandRunner
     {
-        void Run<TModel>(ModelCommand<TModel> command, TModel model)
-            where TModel : IBaseModel;
+        void Run(ModelCommand command, IBaseModel model);
     }
 }
