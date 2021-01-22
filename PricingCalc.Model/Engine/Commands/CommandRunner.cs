@@ -1,39 +1,17 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using PricingCalc.Core;
-
-namespace PricingCalc.Model.Engine.Commands
+﻿namespace PricingCalc.Model.Engine.Commands
 {
     internal class CommandRunner : ICommandRunner
     {
-        public void Run(ModelCommand command, IBaseModel model)
-        {
-            var UITaskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+        private readonly IJobService _jobService;
 
-            Task.Factory.StartNew(
-                () => RunCommand(command, model, UITaskScheduler),
-                CancellationToken.None,
-                TaskCreationOptions.DenyChildAttach,
-                SequentialTaskScheduler.Instance);
+        public CommandRunner(IJobService jobService)
+        {
+            _jobService = jobService;
         }
 
-        private static void RunCommand(ModelCommand command, IBaseModel model, TaskScheduler scheduler)
+        public void Run(ModelCommand command, IBaseModel model)
         {
-            try
-            {
-                var result = model.Run(command);
-
-                Task.Factory.StartNew(
-                    () => model.RaiseEvent(result),
-                    CancellationToken.None,
-                    TaskCreationOptions.None,
-                    scheduler);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, "Command execution failed");
-            }
+            _jobService.StartNew(() => model.Run(command), result => model.RaiseEvent(result));
         }
     }
 }

@@ -10,8 +10,9 @@ namespace PricingCalc.Model.UserSettings
 
         public UserSettingsModel(
             IReadOnlyCollection<IUserSettingsModelShard> shards,
-            IStorage storage)
-            : base(new View(shards), storage)
+            IStorage storage,
+            IJobService jobService)
+            : base(new View(shards), storage, jobService)
         {
             _history = new UserSettingsHistory(this);
         }

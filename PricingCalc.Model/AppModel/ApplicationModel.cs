@@ -11,16 +11,13 @@ namespace PricingCalc.Model.AppModel
         public ApplicationModel(
             IReadOnlyCollection<IApplicationModelShard> shards,
             IStorage storage,
-            IApplicationModelCommands commands)
-            : base(new View(shards), storage)
+            IJobService jobService)
+            : base(new View(shards), storage, jobService)
         {
             _history = new ApplicationHistory(this);
-            Commands = commands;
         }
 
         public IApplicationHistory History => _history;
-
-        public IApplicationModelCommands Commands { get; }
 
         public override void RaiseEvent(ModelChangeResult result)
         {

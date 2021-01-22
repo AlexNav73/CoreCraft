@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PricingCalc.Model.Engine.Commands;
 using PricingCalc.Model.Engine.Core;
+using PricingCalc.Model.Engine.GenericCommands;
 using PricingCalc.Model.Engine.Persistence;
 
 namespace PricingCalc.Model.Engine
@@ -11,15 +12,17 @@ namespace PricingCalc.Model.Engine
     {
         private readonly IView _view;
         private readonly IStorage _storage;
+        private readonly IJobService _jobService;
         private readonly HashSet<Action<ModelChangedEventArgs>> _subscriptions;
 
         private volatile ModelChangedEventArgs? _currentChanges;
 
-        protected BaseModel(IView view, IStorage storage)
+        protected BaseModel(IView view, IStorage storage, IJobService jobService)
         {
             _subscriptions = new HashSet<Action<ModelChangedEventArgs>>();
             _view = view;
             _storage = storage;
+            _jobService = jobService;
         }
 
         public T Shard<T>() where T : IModelShard
@@ -52,31 +55,53 @@ namespace PricingCalc.Model.Engine
             RaiseModelChangesEvent(result);
         }
 
-        internal void Save(string path, IReadOnlyList<IModelChanges> changes)
+        internal void Save(string path, IReadOnlyList<IModelChanges> changes, Action continueWith)
         {
-            _storage.Save(path, _view.UnsafeModel, changes);
+            _jobService.StartNew(() => _storage.Save(path, _view.UnsafeModel, changes), continueWith);
         }
 
         internal void Load(string path)
         {
-            var result = _view.Mutate(snapshot => _storage.Load(path, snapshot));
-            if (result.Changes.HasChanges())
-            {
-                RaiseModelChangesEvent(result);
-            }
+            _jobService.StartNew(
+                () => _view.Mutate(snapshot => _storage.Load(path, snapshot)),
+                result =>
+                {
+                    if (result.Changes.HasChanges())
+                    {
+                        RaiseModelChangesEvent(result);
+                    }
+                });
         }
 
-        internal void Apply(IWritableModelChanges changes)
+        internal void Apply(IWritableModelChanges changes, Action continueWith)
         {
             if (changes.HasChanges())
             {
-                var result = _view.Apply(changes);
-
-                RaiseModelChangesEvent(result);
+                _jobService.StartNew(
+                    () => _view.Apply(changes),
+                    result =>
+                    {
+                        RaiseModelChangesEvent(result);
+                        continueWith();
+                    });
             }
         }
 
-        protected void RaiseModelChangesEvent(ModelChangeResult result)
+        internal void Clear(Action continueWith)
+        {
+            var runner = new CommandRunner(_jobService);
+            var clearCommand = new ClearModelCommand(this, runner);
+
+            _jobService.StartNew(
+                () => _view.Mutate(model => clearCommand.Run(model)),
+                result =>
+                {
+                    RaiseEvent(result);
+                    continueWith();
+                });
+        }
+
+        private void RaiseModelChangesEvent(ModelChangeResult result)
         {
             _currentChanges = new ModelChangedEventArgs(result.OldModel, result.NewModel, result.Changes);
 

@@ -26,39 +26,29 @@ namespace PricingCalc.Model.AppModel
         {
             var changes = _undoStack.Reverse().ToArray();
 
-            try
+            _model.Save(path, changes, () =>
             {
-                _model.Save(path, changes);
-
                 _redoStack.Clear();
                 _undoStack.Clear();
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, "Error occurred while saving changes to {Path}", path);
-            }
 
-            Changed?.Invoke(this, EventArgs.Empty);
+                Changed?.Invoke(this, EventArgs.Empty);
+            });
         }
 
         public void Load(string path)
         {
-            try
-            {
-                _model.Load(path);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, "Error occurred while model loading from {Path}", path);
-            }
+            _model.Load(path);
         }
 
         public void Clear()
         {
-            _undoStack.Clear();
-            _redoStack.Clear();
+            _model.Clear(() =>
+            {
+                _undoStack.Clear();
+                _redoStack.Clear();
 
-            Changed?.Invoke(this, EventArgs.Empty);
+                Changed?.Invoke(this, EventArgs.Empty);
+            });
         }
 
         public void Undo()
@@ -67,9 +57,9 @@ namespace PricingCalc.Model.AppModel
             {
                 var changes = _undoStack.Pop();
                 _redoStack.Push(changes);
-                _model.Apply(changes.Invert());
-
-                Changed?.Invoke(this, EventArgs.Empty);
+                _model.Apply(
+                    changes.Invert(),
+                    () => Changed?.Invoke(this, EventArgs.Empty));
             }
         }
 
@@ -79,9 +69,9 @@ namespace PricingCalc.Model.AppModel
             {
                 var changes = _redoStack.Pop();
                 _undoStack.Push(changes);
-                _model.Apply(changes);
-
-                Changed?.Invoke(this, EventArgs.Empty);
+                _model.Apply(
+                    changes,
+                    () => Changed?.Invoke(this, EventArgs.Empty));
             }
         }
 

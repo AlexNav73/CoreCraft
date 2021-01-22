@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PricingCalc.Model.Engine.Commands
+namespace PricingCalc.Model.Engine
 {
     internal class SequentialTaskScheduler : TaskScheduler
     {
@@ -94,7 +94,7 @@ namespace PricingCalc.Model.Engine.Commands
 
         protected override IEnumerable<Task>? GetScheduledTasks()
         {
-            bool lockTaken = false;
+            var lockTaken = false;
             try
             {
                 Monitor.TryEnter(_queue, ref lockTaken);

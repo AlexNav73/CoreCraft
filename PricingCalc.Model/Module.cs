@@ -1,8 +1,8 @@
 ﻿using Autofac;
 using PricingCalc.Core.Extensions;
 using PricingCalc.Model.AppModel;
+using PricingCalc.Model.Engine;
 using PricingCalc.Model.Engine.Commands;
-using PricingCalc.Model.GenericCommands;
 using PricingCalc.Model.UserSettings;
 
 namespace PricingCalc.Model
@@ -13,9 +13,7 @@ namespace PricingCalc.Model
         {
             builder.RegisterType<CommandFactory>().As<ICommandFactory>();
             builder.RegisterType<CommandRunner>().As<ICommandRunner>();
-
-            builder.RegisterType<ApplicationModelCommands>().As<IApplicationModelCommands>();
-            builder.RegisterGeneric(typeof(ClearModelCommand<>)).As(typeof(IClearModelCommand<>));
+            builder.RegisterType<JobService>().As<IJobService>();
 
             builder.RegisterType<ApplicationModel>().As<IApplicationModel>().SingleInstance();
             builder.RegisterType<UserSettingsModel>().As<IUserSettingsModel>().SingleInstance();
