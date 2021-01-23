@@ -48,7 +48,7 @@ namespace PricingCalc.Model.Engine
 
         public async Task Run(ModelCommand command)
         {
-            var result = await _jobService.StartNew(() => _view.Mutate(snapshot => command.Run(snapshot)));
+            var result = await _jobService.Enqueue(() => _view.Mutate(snapshot => command.Run(snapshot)));
 
             if (result.Changes.HasChanges())
             {
@@ -63,12 +63,12 @@ namespace PricingCalc.Model.Engine
 
         internal async Task Save(string path, IReadOnlyList<IModelChanges> changes)
         {
-            await _jobService.StartNew(() => _storage.Save(path, _view.UnsafeModel, changes));
+            await _jobService.Enqueue(async () => await _storage.Save(path, _view.UnsafeModel, changes));
         }
 
         internal async Task Load(string path)
         {
-            var result = await _jobService.StartNew(() => _view.Mutate(snapshot => _storage.Load(path, snapshot)));
+            var result = await _jobService.Enqueue(() => _view.Mutate(snapshot => _storage.Load(path, snapshot)));
 
             if (result.Changes.HasChanges())
             {
@@ -80,7 +80,7 @@ namespace PricingCalc.Model.Engine
         {
             if (changes.HasChanges())
             {
-                var result = await _jobService.StartNew(() => _view.Apply(changes));
+                var result = await _jobService.Enqueue(() => _view.Apply(changes));
 
                 RaiseModelChangesEvent(result);
             }
@@ -90,7 +90,7 @@ namespace PricingCalc.Model.Engine
         {
             var clearCommand = new ClearModelCommand(this);
 
-            var result = await _jobService.StartNew(() => _view.Mutate(model => clearCommand.Run(model)));
+            var result = await _jobService.Enqueue(() => _view.Mutate(model => clearCommand.Run(model)));
 
             if (result.Changes.HasChanges())
             {

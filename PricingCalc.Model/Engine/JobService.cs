@@ -6,7 +6,7 @@ namespace PricingCalc.Model.Engine
 {
     internal class JobService : IJobService
     {
-        public Task<T> StartNew<T>(Func<T> job)
+        public Task<T> Enqueue<T>(Func<T> job)
         {
             return Task.Factory.StartNew(
                 job,
@@ -15,7 +15,7 @@ namespace PricingCalc.Model.Engine
                 SequentialTaskScheduler.Instance);
         }
 
-        public Task StartNew(Action job)
+        public Task Enqueue(Action job)
         {
             return Task.Factory.StartNew(
                 job,
