@@ -5,8 +5,8 @@ namespace PricingCalc.Model.Engine
 {
     public interface IJobService
     {
-        Task StartNew<T>(Func<T> job, Action<T> continueWith);
+        Task<T> StartNew<T>(Func<T> job);
 
-        Task StartNew(Action job, Action continueWith);
+        Task StartNew(Action job);
     }
 }

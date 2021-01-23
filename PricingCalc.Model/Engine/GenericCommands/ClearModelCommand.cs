@@ -7,8 +7,7 @@ namespace PricingCalc.Model.Engine.GenericCommands
 {
     internal class ClearModelCommand : ModelCommand<BaseModel>, IModelCommand
     {
-        public ClearModelCommand(BaseModel model, ICommandRunner runner)
-            : base(model, runner)
+        public ClearModelCommand(BaseModel model) : base(model)
         {
         }
 

@@ -12,7 +12,6 @@ namespace PricingCalc.Model
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<CommandFactory>().As<ICommandFactory>();
-            builder.RegisterType<CommandRunner>().As<ICommandRunner>();
             builder.RegisterType<JobService>().As<IJobService>();
 
             builder.RegisterType<ApplicationModel>().As<IApplicationModel>().SingleInstance();

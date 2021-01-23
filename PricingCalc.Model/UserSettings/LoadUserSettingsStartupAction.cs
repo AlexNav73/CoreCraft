@@ -13,9 +13,9 @@ namespace PricingCalc.Model.UserSettings
 
         public StartupStage Stage => StartupStage.LoadUserSettings;
 
-        public void Execute()
+        public async void Execute()
         {
-            _userSettings.History.Load();
+            await _userSettings.History.Load();
         }
     }
 }

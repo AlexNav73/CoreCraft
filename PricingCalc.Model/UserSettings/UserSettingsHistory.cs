@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using PricingCalc.Core;
 using PricingCalc.Model.Engine;
 
@@ -15,14 +16,14 @@ namespace PricingCalc.Model.UserSettings
             _model = model;
         }
 
-        public void Load()
+        public async Task Load()
         {
-            _model.Load(_userSettingsFile);
+            await _model.Load(_userSettingsFile);
         }
 
-        internal void OnModelChanged(ModelChangeResult result)
+        internal async void OnModelChanged(ModelChangeResult result)
         {
-            _model.Save(_userSettingsFile, new[] { result.Changes }, () => { });
+            await _model.Save(_userSettingsFile, new[] { result.Changes });
         }
     }
 }

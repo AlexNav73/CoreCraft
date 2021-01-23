@@ -1,7 +1,9 @@
-﻿namespace PricingCalc.Model.UserSettings
+﻿using System.Threading.Tasks;
+
+namespace PricingCalc.Model.UserSettings
 {
     public interface IUserSettingsHistory
     {
-        void Load();
+        Task Load();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace PricingCalc.Model.AppModel
 {
@@ -6,15 +7,15 @@ namespace PricingCalc.Model.AppModel
     {
         event EventHandler Changed;
 
-        void Save(string path);
+        Task Save(string path);
 
-        void Load(string path);
+        Task Load(string path);
 
-        void Clear();
+        Task Clear();
 
-        void Undo();
+        Task Undo();
 
-        void Redo();
+        Task Redo();
 
         bool HasChanges();
     }

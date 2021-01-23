@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using PricingCalc.Model.Engine.Commands;
 using PricingCalc.Model.Engine.Core;
 
@@ -10,8 +11,6 @@ namespace PricingCalc.Model.Engine
 
         T Shard<T>() where T : IModelShard;
 
-        ModelChangeResult Run(ModelCommand command);
-
-        void RaiseEvent(ModelChangeResult result);
+        Task Run(ModelCommand command);
     }
 }

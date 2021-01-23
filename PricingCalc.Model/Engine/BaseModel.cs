@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using PricingCalc.Model.Engine.Commands;
 using PricingCalc.Model.Engine.Core;
 using PricingCalc.Model.Engine.GenericCommands;
@@ -45,9 +46,14 @@ namespace PricingCalc.Model.Engine
             return new UnsubscribeOnDispose(onModelChanges, _subscriptions);
         }
 
-        public ModelChangeResult Run(ModelCommand command)
+        public async Task Run(ModelCommand command)
         {
-            return _view.Mutate(snapshot => command.Run(snapshot));
+            var result = await _jobService.StartNew(() => _view.Mutate(snapshot => command.Run(snapshot)));
+
+            if (result.Changes.HasChanges())
+            {
+                RaiseEvent(result);
+            }
         }
 
         public virtual void RaiseEvent(ModelChangeResult result)
@@ -55,50 +61,41 @@ namespace PricingCalc.Model.Engine
             RaiseModelChangesEvent(result);
         }
 
-        internal void Save(string path, IReadOnlyList<IModelChanges> changes, Action continueWith)
+        internal async Task Save(string path, IReadOnlyList<IModelChanges> changes)
         {
-            _jobService.StartNew(() => _storage.Save(path, _view.UnsafeModel, changes), continueWith);
+            await _jobService.StartNew(() => _storage.Save(path, _view.UnsafeModel, changes));
         }
 
-        internal void Load(string path)
+        internal async Task Load(string path)
         {
-            _jobService.StartNew(
-                () => _view.Mutate(snapshot => _storage.Load(path, snapshot)),
-                result =>
-                {
-                    if (result.Changes.HasChanges())
-                    {
-                        RaiseModelChangesEvent(result);
-                    }
-                });
-        }
+            var result = await _jobService.StartNew(() => _view.Mutate(snapshot => _storage.Load(path, snapshot)));
 
-        internal void Apply(IWritableModelChanges changes, Action continueWith)
-        {
-            if (changes.HasChanges())
+            if (result.Changes.HasChanges())
             {
-                _jobService.StartNew(
-                    () => _view.Apply(changes),
-                    result =>
-                    {
-                        RaiseModelChangesEvent(result);
-                        continueWith();
-                    });
+                RaiseModelChangesEvent(result);
             }
         }
 
-        internal void Clear(Action continueWith)
+        internal async Task Apply(IWritableModelChanges changes)
         {
-            var runner = new CommandRunner(_jobService);
-            var clearCommand = new ClearModelCommand(this, runner);
+            if (changes.HasChanges())
+            {
+                var result = await _jobService.StartNew(() => _view.Apply(changes));
 
-            _jobService.StartNew(
-                () => _view.Mutate(model => clearCommand.Run(model)),
-                result =>
-                {
-                    RaiseEvent(result);
-                    continueWith();
-                });
+                RaiseModelChangesEvent(result);
+            }
+        }
+
+        internal async Task Clear()
+        {
+            var clearCommand = new ClearModelCommand(this);
+
+            var result = await _jobService.StartNew(() => _view.Mutate(model => clearCommand.Run(model)));
+
+            if (result.Changes.HasChanges())
+            {
+                RaiseEvent(result);
+            }
         }
 
         private void RaiseModelChangesEvent(ModelChangeResult result)

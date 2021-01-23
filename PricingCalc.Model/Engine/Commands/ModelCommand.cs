@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using PricingCalc.Core;
 
 namespace PricingCalc.Model.Engine.Commands
@@ -14,7 +15,7 @@ namespace PricingCalc.Model.Engine.Commands
             _parameters = new List<ICommandParameter>();
         }
 
-        public void Execute()
+        public async void Execute()
         {
             if (_parameters.Any(x => !x.IsInitialized))
             {
@@ -23,7 +24,7 @@ namespace PricingCalc.Model.Engine.Commands
                 throw new ArgumentException($"Parameter '{parameter.Name}' is not initialized");
             }
 
-            Run();
+            await Run();
         }
 
         internal void Run(IModel model)
@@ -33,7 +34,7 @@ namespace PricingCalc.Model.Engine.Commands
             ExecuteInternal(model);
         }
 
-        protected abstract void Run();
+        protected abstract Task Run();
 
         protected abstract void ExecuteInternal(IModel model);
 
@@ -49,17 +50,15 @@ namespace PricingCalc.Model.Engine.Commands
         where TModel : IBaseModel
     {
         private readonly TModel _model;
-        private readonly ICommandRunner _runner;
 
-        protected ModelCommand(TModel model, ICommandRunner runner)
+        protected ModelCommand(TModel model)
         {
             _model = model;
-            _runner = runner;
         }
 
-        protected sealed override void Run()
+        protected sealed override async Task Run()
         {
-            _runner.Run(this, _model);
+            await _model.Run(this);
         }
     }
 }
