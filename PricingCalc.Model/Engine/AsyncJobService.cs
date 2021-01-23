@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace PricingCalc.Model.Engine
 {
-    internal class JobService : IJobService
+    public class AsyncJobService : IJobService
     {
         public Task<T> Enqueue<T>(Func<T> job)
         {
