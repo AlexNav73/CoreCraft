@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using PricingCalc.Core;
+﻿using System.Threading.Tasks;
 using PricingCalc.Model.Engine;
 
 namespace PricingCalc.Model.UserSettings
@@ -14,6 +12,8 @@ namespace PricingCalc.Model.UserSettings
         public UserSettingsHistory(UserSettingsModel model)
         {
             _model = model;
+
+            _model.ModelChanged += OnModelChanged;
         }
 
         public async Task Load()
@@ -21,9 +21,9 @@ namespace PricingCalc.Model.UserSettings
             await _model.Load(_userSettingsFile);
         }
 
-        internal async void OnModelChanged(ModelChangeResult result)
+        internal async void OnModelChanged(object? sender, ModelChangedEventArgs args)
         {
-            await _model.Save(_userSettingsFile, new[] { result.Changes });
+            await _model.Save(_userSettingsFile, new[] { args.Changes });
         }
     }
 }

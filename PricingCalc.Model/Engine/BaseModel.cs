@@ -26,6 +26,8 @@ namespace PricingCalc.Model.Engine
             _jobService = jobService;
         }
 
+        public event EventHandler<ModelChangedEventArgs>? ModelChanged;
+
         public T Shard<T>() where T : IModelShard
         {
             return _view.UnsafeModel.Shard<T>();
@@ -52,13 +54,9 @@ namespace PricingCalc.Model.Engine
 
             if (result.Changes.HasChanges())
             {
+                NotifySubscribers(result);
                 RaiseEvent(result);
             }
-        }
-
-        public virtual void RaiseEvent(ModelChangeResult result)
-        {
-            RaiseModelChangesEvent(result);
         }
 
         internal async Task Save(string path, IReadOnlyList<IModelChanges> changes)
@@ -72,7 +70,7 @@ namespace PricingCalc.Model.Engine
 
             if (result.Changes.HasChanges())
             {
-                RaiseModelChangesEvent(result);
+                NotifySubscribers(result);
             }
         }
 
@@ -82,7 +80,7 @@ namespace PricingCalc.Model.Engine
             {
                 var result = await _jobService.Enqueue(() => _view.Apply(changes));
 
-                RaiseModelChangesEvent(result);
+                NotifySubscribers(result);
             }
         }
 
@@ -94,11 +92,11 @@ namespace PricingCalc.Model.Engine
 
             if (result.Changes.HasChanges())
             {
-                RaiseEvent(result);
+                NotifySubscribers(result);
             }
         }
 
-        private void RaiseModelChangesEvent(ModelChangeResult result)
+        private void NotifySubscribers(ModelChangeResult result)
         {
             _currentChanges = new ModelChangedEventArgs(result.OldModel, result.NewModel, result.Changes);
 
@@ -109,6 +107,11 @@ namespace PricingCalc.Model.Engine
             }
 
             _currentChanges = null;
+        }
+
+        private void RaiseEvent(ModelChangeResult result)
+        {
+            ModelChanged?.Invoke(this, new ModelChangedEventArgs(result.OldModel, result.NewModel, result.Changes));
         }
     }
 }

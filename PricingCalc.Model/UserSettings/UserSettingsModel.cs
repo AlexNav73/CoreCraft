@@ -6,26 +6,15 @@ namespace PricingCalc.Model.UserSettings
 {
     internal class UserSettingsModel : BaseModel, IUserSettingsModel
     {
-        private readonly UserSettingsHistory _history;
-
         public UserSettingsModel(
             IReadOnlyCollection<IUserSettingsModelShard> shards,
             IStorage storage,
             IJobService jobService)
             : base(new View(shards), storage, jobService)
         {
-            _history = new UserSettingsHistory(this);
+            History = new UserSettingsHistory(this);
         }
 
-        public IUserSettingsHistory History => _history;
-
-        public override void RaiseEvent(ModelChangeResult result)
-        {
-            if (result.Changes.HasChanges())
-            {
-                base.RaiseEvent(result);
-                _history.OnModelChanged(result);
-            }
-        }
+        public IUserSettingsHistory History { get; }
     }
 }

@@ -2,5 +2,5 @@
 
 namespace PricingCalc.Model.Engine
 {
-    public record ModelChangeResult(IModel OldModel, IModel NewModel, IWritableModelChanges Changes);
+    internal record ModelChangeResult(IModel OldModel, IModel NewModel, IWritableModelChanges Changes);
 }

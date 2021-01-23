@@ -19,6 +19,8 @@ namespace PricingCalc.Model.AppModel
             _model = model;
             _undoStack = new Stack<IWritableModelChanges>();
             _redoStack = new Stack<IWritableModelChanges>();
+
+            _model.ModelChanged += OnModelChanged;
         }
 
         public event EventHandler? Changed;
@@ -79,9 +81,9 @@ namespace PricingCalc.Model.AppModel
             return _undoStack.Count > 0;
         }
 
-        internal void OnModelChanged(ModelChangeResult result)
+        internal void OnModelChanged(object? sender, ModelChangedEventArgs args)
         {
-            _undoStack.Push(result.Changes);
+            _undoStack.Push((IWritableModelChanges)args.Changes);
             Changed?.Invoke(this, EventArgs.Empty);
         }
     }
