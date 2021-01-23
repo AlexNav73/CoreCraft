@@ -1,13 +1,14 @@
 ﻿using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PricingCalc.Model.Generators
 {
     internal partial class ApplicationModelGenerator
     {
-        public void GenerateModelShards(IndentedTextWriter code, ModelDefinition definition, string type)
+        public void GenerateModelShards(IndentedTextWriter code, IEnumerable<ModelShard> shards, string type)
         {
-            foreach (var modelShard in definition.Shards)
+            foreach (var modelShard in shards)
             {
                 DefineModelShardInterface(code, modelShard, type);
                 EmptyLine(code);

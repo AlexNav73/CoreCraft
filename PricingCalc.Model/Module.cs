@@ -1,9 +1,6 @@
 ﻿using Autofac;
-using PricingCalc.Core.Extensions;
-using PricingCalc.Model.AppModel;
 using PricingCalc.Model.Engine;
 using PricingCalc.Model.Engine.Commands;
-using PricingCalc.Model.UserSettings;
 
 namespace PricingCalc.Model
 {
@@ -13,11 +10,6 @@ namespace PricingCalc.Model
         {
             builder.RegisterType<CommandFactory>().As<ICommandFactory>();
             builder.RegisterType<JobService>().As<IJobService>();
-
-            builder.RegisterType<ApplicationModel>().As<IApplicationModel>().SingleInstance();
-            builder.RegisterType<UserSettingsModel>().As<IUserSettingsModel>().SingleInstance();
-
-            builder.RegisterStartupAction<LoadUserSettingsStartupAction>();
         }
     }
 }

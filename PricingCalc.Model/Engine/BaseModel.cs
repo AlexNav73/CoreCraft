@@ -9,7 +9,7 @@ using PricingCalc.Model.Engine.Persistence;
 
 namespace PricingCalc.Model.Engine
 {
-    internal abstract class BaseModel : IBaseModel
+    public abstract class BaseModel : IBaseModel
     {
         private readonly IView _view;
         private readonly IStorage _storage;
@@ -18,10 +18,10 @@ namespace PricingCalc.Model.Engine
 
         private volatile ModelChangedEventArgs? _currentChanges;
 
-        protected BaseModel(IView view, IStorage storage, IJobService jobService)
+        protected BaseModel(IReadOnlyCollection<IModelShard> shards, IStorage storage, IJobService jobService)
         {
             _subscriptions = new HashSet<Action<ModelChangedEventArgs>>();
-            _view = view;
+            _view = new View(shards);
             _storage = storage;
             _jobService = jobService;
         }
@@ -59,12 +59,12 @@ namespace PricingCalc.Model.Engine
             }
         }
 
-        internal async Task Save(string path, IReadOnlyList<IModelChanges> changes)
+        public async Task Save(string path, IReadOnlyList<IModelChanges> changes)
         {
             await _jobService.Enqueue(async () => await _storage.Save(path, _view.UnsafeModel, changes));
         }
 
-        internal async Task Load(string path)
+        public async Task Load(string path)
         {
             var result = await _jobService.Enqueue(() => _view.Mutate(snapshot => _storage.Load(path, snapshot)));
 
@@ -74,7 +74,7 @@ namespace PricingCalc.Model.Engine
             }
         }
 
-        internal async Task Apply(IWritableModelChanges changes)
+        public async Task Apply(IWritableModelChanges changes)
         {
             if (changes.HasChanges())
             {
@@ -84,7 +84,7 @@ namespace PricingCalc.Model.Engine
             }
         }
 
-        internal async Task Clear()
+        public async Task Clear()
         {
             var clearCommand = new ClearModelCommand(this);
 

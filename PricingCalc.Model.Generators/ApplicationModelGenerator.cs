@@ -13,24 +13,30 @@ namespace PricingCalc.Model.Generators
         protected override void ExecuteInternal(GeneratorExecutionContext context, IndentedTextWriter code)
         {
             var compilation = (CSharpCompilation)context.Compilation;
-            var file = context.AdditionalFiles.SingleOrDefault();
-            if (file != null)
-            {
-                var options = new JsonSerializerSettings();
-                var serializer = JsonSerializer.Create(options);
-                var modelScheme = serializer.Deserialize<ModelScheme>(new JsonTextReader(new StringReader(File.ReadAllText(file.Path))));
+            var options = new JsonSerializerSettings();
+            var serializer = JsonSerializer.Create(options);
+            var insertPreambula = true;
 
-                Generate(compilation, code, modelScheme);
+            foreach (var file in context.AdditionalFiles)
+            {
+                if (file.Path.EndsWith(".model.json"))
+                {
+                    if (insertPreambula)
+                    {
+                        Preambula(code);
+                        insertPreambula = false;
+                    }
+
+                    var modelScheme = serializer.Deserialize<ModelScheme>(new JsonTextReader(new StringReader(File.ReadAllText(file.Path))));
+
+                    Generate(compilation, code, modelScheme);
+                }
             }
         }
 
         private void Generate(CSharpCompilation compilation, IndentedTextWriter code, ModelScheme modelScheme)
         {
-            Preambula(code);
-
-            var totalShards = modelScheme.AppModel.Shards.Union(modelScheme.UserSettings.Shards);
-
-            code.WriteLine($"namespace {compilation.AssemblyName}.Model");
+            code.WriteLine($"namespace {compilation.AssemblyName}.{modelScheme.Name}");
             Block(code, () =>
             {
                 code.WriteLine("using PricingCalc.Model.Engine;");
@@ -40,16 +46,15 @@ namespace PricingCalc.Model.Generators
                 code.WriteLine($"using {compilation.AssemblyName}.Model.Entities;");
                 EmptyLine(code);
 
-                GenerateModelShards(code, modelScheme.AppModel, "PricingCalc.Model.AppModel.IApplicationModelShard");
-                GenerateModelShards(code, modelScheme.UserSettings, "PricingCalc.Model.UserSettings.IUserSettingsModelShard");
-                GenerateStorages(code, totalShards);
+                GenerateModelShards(code, modelScheme.Shards, modelScheme.ShardType);
+                GenerateStorages(code, modelScheme.Shards);
             });
             EmptyLine(code);
 
-            code.WriteLine($"namespace {compilation.AssemblyName}.Model.Entities");
+            code.WriteLine($"namespace {compilation.AssemblyName}.{modelScheme.Name}.Entities");
             Block(code, () =>
             {
-                GenerateEntities(code, totalShards);
+                GenerateEntities(code, modelScheme.Shards);
             });
         }
 
