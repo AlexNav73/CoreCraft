@@ -10,19 +10,14 @@ namespace PricingCalc.Model.Engine.Commands
     {
         private readonly IList<ICommandParameter> _parameters;
 
-        public ModelCommand()
+        protected ModelCommand()
         {
             _parameters = new List<ICommandParameter>();
         }
 
         public async void Execute()
         {
-            if (_parameters.Any(x => !x.IsInitialized))
-            {
-                var parameter = _parameters.First(x => !x.IsInitialized);
-
-                throw new ArgumentException($"Parameter '{parameter.Name}' is not initialized");
-            }
+            AssertParameters();
 
             await Run();
         }
@@ -43,6 +38,16 @@ namespace PricingCalc.Model.Engine.Commands
             var parameter = new CommandParameter<T>(name);
             _parameters.Add(parameter);
             return parameter;
+        }
+
+        private void AssertParameters()
+        {
+            if (_parameters.Any(x => !x.IsInitialized))
+            {
+                var parameter = _parameters.First(x => !x.IsInitialized);
+
+                throw new ArgumentException($"Parameter '{parameter.Name}' is not initialized");
+            }
         }
     }
 
