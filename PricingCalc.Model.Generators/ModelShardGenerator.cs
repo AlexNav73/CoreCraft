@@ -321,21 +321,6 @@ namespace PricingCalc.Model.Generators
                     code.WriteLine($"public {Property($"I{RelationType(relation)}", relation.Name, "get; private set;")}");
                 }
                 EmptyLine(code);
-
-                code.WriteLine("public void Clear()");
-                Block(code, () =>
-                {
-                    foreach (var relation in modelShard.Relations)
-                    {
-                        code.WriteLine($"{relation.Name}.Clear();");
-                    }
-                    EmptyLine(code);
-
-                    foreach (var collection in modelShard.Collections)
-                    {
-                        code.WriteLine($"{collection.Name}.Clear();");
-                    }
-                });
             }
         }
     }

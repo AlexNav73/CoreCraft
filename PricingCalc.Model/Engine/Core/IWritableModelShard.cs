@@ -2,6 +2,5 @@
 {
     public interface IWritableModelShard : IModelShard
     {
-        void Clear();
     }
 }

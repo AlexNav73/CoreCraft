@@ -48,12 +48,6 @@ namespace PricingCalc.Model.Engine.Core
             _childToParentRelations.Remove(child, parent);
         }
 
-        public void Clear()
-        {
-            _parentToChildRelations.Clear();
-            _childToParentRelations.Clear();
-        }
-
         public IRelation<TParent, TChild> Copy()
         {
             return new Relation<TParent, TChild>(

@@ -65,15 +65,6 @@ namespace PricingCalc.Model.Engine.ChangesTracking
             _collection.Remove(entity);
         }
 
-        public void Clear()
-        {
-            foreach (var entity in _collection)
-            {
-                _changes.Add(EntityAction.Remove, entity, _collection.Get(entity), default!);
-            }
-            _collection.Clear();
-        }
-
         public IEnumerator<TEntity> GetEnumerator()
         {
             return _collection.GetEnumerator();

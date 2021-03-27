@@ -13,7 +13,5 @@ namespace PricingCalc.Model.Engine.Core
         IEnumerable<TChild> Children(TParent parent);
 
         IEnumerable<TParent> Parents(TChild child);
-
-        void Clear();
     }
 }

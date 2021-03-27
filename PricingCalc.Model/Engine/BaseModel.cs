@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using PricingCalc.Model.Engine.Commands;
 using PricingCalc.Model.Engine.Core;
-using PricingCalc.Model.Engine.GenericCommands;
 using PricingCalc.Model.Engine.Persistence;
 
 namespace PricingCalc.Model.Engine
@@ -80,18 +79,6 @@ namespace PricingCalc.Model.Engine
             {
                 var result = await _jobService.Enqueue(() => _view.Apply(changes));
 
-                NotifySubscribers(result);
-            }
-        }
-
-        public async Task Clear()
-        {
-            var clearCommand = new ClearModelCommand(this);
-
-            var result = await _jobService.Enqueue(() => _view.Mutate(model => clearCommand.Run(model)));
-
-            if (result.Changes.HasChanges())
-            {
                 NotifySubscribers(result);
             }
         }

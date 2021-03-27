@@ -91,13 +91,6 @@ namespace PricingCalc.Model.Engine.Core
             _entities.Remove(entity);
         }
 
-        public void Clear()
-        {
-            _relation.Clear();
-            _data.Clear();
-            _entities.Clear();
-        }
-
         public Collection<TEntity, TData> Copy()
         {
             return new Collection<TEntity, TData>(

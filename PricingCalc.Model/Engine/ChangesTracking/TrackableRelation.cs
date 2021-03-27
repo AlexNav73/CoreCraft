@@ -42,19 +42,6 @@ namespace PricingCalc.Model.Engine.ChangesTracking
             return _relation.Parents(child);
         }
 
-        public void Clear()
-        {
-            foreach (var parent in _relation)
-            {
-                foreach (var child in _relation.Children(parent))
-                {
-                    _changes.Add(RelationAction.Unlinked, parent, child);
-                }
-            }
-
-            _relation.Clear();
-        }
-
         public IEnumerator<TParent> GetEnumerator()
         {
             return _relation.GetEnumerator();

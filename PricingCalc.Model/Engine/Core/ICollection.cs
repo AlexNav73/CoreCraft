@@ -15,7 +15,5 @@ namespace PricingCalc.Model.Engine.Core
         TData Get(TEntity entity);
 
         void Remove(TEntity entity);
-
-        void Clear();
     }
 }
