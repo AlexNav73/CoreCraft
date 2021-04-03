@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PricingCalc.Core;
+using Serilog;
 
 namespace PricingCalc.Model.Engine.Commands
 {
@@ -24,7 +24,7 @@ namespace PricingCalc.Model.Engine.Commands
 
         internal void Run(IModel model)
         {
-            Logger.Information("Running '{Command}' command. Parameters {Parameters}", GetType().Name, _parameters);
+            Log.Information("Running '{Command}' command. Parameters {Parameters}", GetType().Name, _parameters);
 
             ExecuteInternal(model);
         }
