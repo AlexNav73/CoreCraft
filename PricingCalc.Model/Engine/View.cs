@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using PricingCalc.Model.Engine.Core;
 
 namespace PricingCalc.Model.Engine
 {
-    internal class View : IView
+    internal sealed class View
     {
         private volatile IModel _model;
 
@@ -17,24 +16,23 @@ namespace PricingCalc.Model.Engine
 
         public IModel UnsafeModel => _model;
 
-        public ModelChangeResult Mutate(Action<IModel> action)
+        public TrackableSnapshot CreateTrackableSnapshot()
         {
-            var snapshot = new TrackableModel(_model);
-
-            action(snapshot);
-
-            var newModel = new Model(snapshot.GetShardsInternalUnsafe().ToList());
-            var oldModel = Interlocked.Exchange(ref _model, newModel);
-
-            return new ModelChangeResult(oldModel, newModel, snapshot.Changes);
+            return new TrackableSnapshot(_model);
         }
 
-        public ModelChangeResult Apply(IWritableModelChanges changes)
+        public Snapshot CreateSnapshot()
         {
-            var snapshot = new CachedModel(_model);
+            return new Snapshot(_model);
+        }
 
-            changes.Apply(snapshot);
+        public IModel CopyModel()
+        {
+            return new Model(_model.Select(x => ((ICopy<IModelShard>)x).Copy()).ToArray());
+        }
 
+        public ModelChangeResult ApplySnapshot(Snapshot snapshot, IWritableModelChanges changes)
+        {
             var newModel = new Model(snapshot.GetShardsInternalUnsafe().ToList());
             var oldModel = Interlocked.Exchange(ref _model, newModel);
 

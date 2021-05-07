@@ -3,9 +3,9 @@ using PricingCalc.Model.Engine.Core;
 
 namespace PricingCalc.Model.Engine
 {
-    internal class TrackableModel : CachedModel
+    internal class TrackableSnapshot : Snapshot
     {
-        public TrackableModel(IModel model) : base(model)
+        public TrackableSnapshot(IModel model) : base(model)
         {
             Changes = new WritableModelChanges();
         }

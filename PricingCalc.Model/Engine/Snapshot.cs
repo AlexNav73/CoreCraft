@@ -5,12 +5,12 @@ using PricingCalc.Model.Engine.Core;
 
 namespace PricingCalc.Model.Engine
 {
-    internal class CachedModel : IModel
+    internal class Snapshot : IModel
     {
         private readonly IModel _model;
         private readonly IList<IModelShard> _copies;
 
-        public CachedModel(IModel model)
+        public Snapshot(IModel model)
         {
             _model = model;
             _copies = new List<IModelShard>();

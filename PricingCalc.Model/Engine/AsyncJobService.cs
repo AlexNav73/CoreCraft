@@ -6,7 +6,7 @@ namespace PricingCalc.Model.Engine
 {
     public class AsyncJobService : IJobService
     {
-        public Task<T> Enqueue<T>(Func<T> job)
+        public Task Enqueue(Action job)
         {
             return Task.Factory.StartNew(
                 job,
@@ -15,13 +15,9 @@ namespace PricingCalc.Model.Engine
                 SequentialTaskScheduler.Instance);
         }
 
-        public Task Enqueue(Action job)
+        public Task RunParallel(Action job)
         {
-            return Task.Factory.StartNew(
-                job,
-                CancellationToken.None,
-                TaskCreationOptions.DenyChildAttach,
-                SequentialTaskScheduler.Instance);
+            return Task.Run(job);
         }
     }
 }

@@ -5,8 +5,8 @@ namespace PricingCalc.Model.Engine
 {
     public interface IJobService
     {
-        Task<T> Enqueue<T>(Func<T> job);
-
         Task Enqueue(Action job);
+
+        Task RunParallel(Action job);
     }
 }

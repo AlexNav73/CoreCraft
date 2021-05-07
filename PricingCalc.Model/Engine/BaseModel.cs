@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 using PricingCalc.Model.Engine.Commands;
 using PricingCalc.Model.Engine.Core;
 using PricingCalc.Model.Engine.Persistence;
+using Serilog;
 
 namespace PricingCalc.Model.Engine
 {
     public abstract class BaseModel : IBaseModel
     {
-        private readonly IView _view;
+        private readonly View _view;
         private readonly IStorage _storage;
         private readonly IJobService _jobService;
         private readonly HashSet<Action<ModelChangedEventArgs>> _subscriptions;
@@ -49,8 +50,20 @@ namespace PricingCalc.Model.Engine
 
         public async Task Run(ModelCommand command)
         {
-            var result = await _jobService.Enqueue(() => _view.Mutate(snapshot => command.Run(snapshot)));
+            var snapshot = _view.CreateTrackableSnapshot();
 
+            try
+            {
+                await _jobService.Enqueue(() => command.Run(snapshot));
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Command execution failed. Command {Command}", command.GetType());
+
+                return;
+            }
+
+            var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
             if (result.Changes.HasChanges())
             {
                 NotifySubscribers(result);
@@ -60,13 +73,31 @@ namespace PricingCalc.Model.Engine
 
         public async Task Save(string path, IReadOnlyList<IModelChanges> changes)
         {
-            await _jobService.Enqueue(async () => await _storage.Save(path, _view.UnsafeModel, changes));
+            // Create disconnected copy of model to send it for saving
+            // If some changes would be made to the model while saving,
+            // it wouldn't break saving, because we will save copy of the model
+            // created when user pressed the Save button
+            var copy = _view.CopyModel();
+
+            await _jobService.RunParallel(() => _storage.Save(path, copy, changes));
         }
 
         public async Task Load(string path)
         {
-            var result = await _jobService.Enqueue(() => _view.Mutate(snapshot => _storage.Load(path, snapshot)));
+            var snapshot = _view.CreateTrackableSnapshot();
 
+            try
+            {
+                await _jobService.Enqueue(() => _storage.Load(path, snapshot));
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Model loading failed");
+
+                return;
+            }
+
+            var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
             if (result.Changes.HasChanges())
             {
                 NotifySubscribers(result);
@@ -77,8 +108,20 @@ namespace PricingCalc.Model.Engine
         {
             if (changes.HasChanges())
             {
-                var result = await _jobService.Enqueue(() => _view.Apply(changes));
+                var snapshot = _view.CreateSnapshot();
 
+                try
+                {
+                    await _jobService.Enqueue(() => changes.Apply(snapshot));
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Applying changes has failed");
+
+                    return;
+                }
+
+                var result = _view.ApplySnapshot(snapshot, changes);
                 NotifySubscribers(result);
             }
         }
