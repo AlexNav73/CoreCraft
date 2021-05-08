@@ -12,17 +12,15 @@ namespace PricingCalc.Model.Engine
     public abstract class BaseModel : IBaseModel, ICommandRunner
     {
         private readonly View _view;
-        private readonly IStorage _storage;
         private readonly IJobService _jobService;
         private readonly HashSet<Action<ModelChangedEventArgs>> _subscriptions;
 
         private volatile ModelChangedEventArgs? _currentChanges;
 
-        protected BaseModel(IReadOnlyCollection<IModelShard> shards, IStorage storage, IJobService jobService)
+        protected BaseModel(IReadOnlyCollection<IModelShard> shards, IJobService jobService)
         {
             _subscriptions = new HashSet<Action<ModelChangedEventArgs>>();
             _view = new View(shards);
-            _storage = storage;
             _jobService = jobService;
         }
 
@@ -71,7 +69,7 @@ namespace PricingCalc.Model.Engine
             }
         }
 
-        public async Task Save(string path, IReadOnlyList<IModelChanges> changes)
+        public async Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes)
         {
             // Create disconnected copy of model to send it for saving
             // If some changes would be made to the model while saving,
@@ -79,16 +77,16 @@ namespace PricingCalc.Model.Engine
             // created when user pressed the Save button
             var copy = _view.CopyModel();
 
-            await _jobService.RunParallel(() => _storage.Save(path, copy, changes));
+            await _jobService.RunParallel(() => storage.Save(path, copy, changes));
         }
 
-        public async Task Load(string path)
+        public async Task Load(IStorage storage, string path)
         {
             var snapshot = _view.CreateTrackableSnapshot();
 
             try
             {
-                await _jobService.Enqueue(() => _storage.Load(path, snapshot));
+                await _jobService.Enqueue(() => storage.Load(path, snapshot));
             }
             catch (Exception ex)
             {
