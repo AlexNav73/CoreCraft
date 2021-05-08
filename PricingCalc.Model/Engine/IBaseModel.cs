@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
-using PricingCalc.Model.Engine.Commands;
 using PricingCalc.Model.Engine.Core;
 
 namespace PricingCalc.Model.Engine
@@ -10,7 +8,5 @@ namespace PricingCalc.Model.Engine
         IDisposable Subscribe(Action<ModelChangedEventArgs> onModelChanges);
 
         T Shard<T>() where T : IModelShard;
-
-        Task Run(ModelCommand command);
     }
 }

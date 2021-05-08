@@ -2,8 +2,8 @@
 
 namespace PricingCalc.Model.Engine.Commands
 {
-    public interface IModelCommand
+    internal interface ICommandRunner
     {
-        Task Execute();
+        Task Run(IRunnable runnable);
     }
 }

@@ -6,30 +6,31 @@ using Serilog;
 
 namespace PricingCalc.Model.Engine.Commands
 {
-    public abstract class ModelCommand : IModelCommand
+    public abstract class ModelCommand<TModel> : IModelCommand, IRunnable
+        where TModel : IBaseModel
     {
+        private readonly ICommandRunner _model;
         private readonly IList<ICommandParameter> _parameters;
 
-        protected ModelCommand()
+        protected ModelCommand(TModel model)
         {
+            _model = (ICommandRunner)model;
             _parameters = new List<ICommandParameter>();
         }
 
-        public async void Execute()
+        public Task Execute()
         {
             AssertParameters();
 
-            await Run();
+            return _model.Run(this);
         }
 
-        internal void Run(IModel model)
+        void IRunnable.Run(IModel model)
         {
             Log.Information("Running '{Command}' command. Parameters {Parameters}", GetType().Name, _parameters);
 
             ExecuteInternal(model);
         }
-
-        protected abstract Task Run();
 
         protected abstract void ExecuteInternal(IModel model);
 
@@ -48,22 +49,6 @@ namespace PricingCalc.Model.Engine.Commands
 
                 throw new ArgumentException($"Parameter '{parameter.Name}' is not initialized");
             }
-        }
-    }
-
-    public abstract class ModelCommand<TModel> : ModelCommand
-        where TModel : IBaseModel
-    {
-        private readonly TModel _model;
-
-        protected ModelCommand(TModel model)
-        {
-            _model = model;
-        }
-
-        protected sealed override async Task Run()
-        {
-            await _model.Run(this);
         }
     }
 }

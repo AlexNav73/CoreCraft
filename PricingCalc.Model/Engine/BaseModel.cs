@@ -9,7 +9,7 @@ using Serilog;
 
 namespace PricingCalc.Model.Engine
 {
-    public abstract class BaseModel : IBaseModel
+    public abstract class BaseModel : IBaseModel, ICommandRunner
     {
         private readonly View _view;
         private readonly IStorage _storage;
@@ -48,19 +48,19 @@ namespace PricingCalc.Model.Engine
             return new UnsubscribeOnDispose(onModelChanges, _subscriptions);
         }
 
-        public async Task Run(ModelCommand command)
+        async Task ICommandRunner.Run(IRunnable runnable)
         {
             var snapshot = _view.CreateTrackableSnapshot();
 
             try
             {
-                await _jobService.Enqueue(() => command.Run(snapshot));
+                await _jobService.Enqueue(() => runnable.Run(snapshot));
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Command execution failed. Command {Command}", command.GetType());
+                Log.Warning(ex, "Command execution failed. Command {Command}", runnable.GetType());
 
-                return;
+                throw;
             }
 
             var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
@@ -94,7 +94,7 @@ namespace PricingCalc.Model.Engine
             {
                 Log.Warning(ex, "Model loading failed");
 
-                return;
+                throw;
             }
 
             var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
@@ -118,7 +118,7 @@ namespace PricingCalc.Model.Engine
                 {
                     Log.Warning(ex, "Applying changes has failed");
 
-                    return;
+                    throw;
                 }
 
                 var result = _view.ApplySnapshot(snapshot, changes);
