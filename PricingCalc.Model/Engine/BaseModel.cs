@@ -17,7 +17,7 @@ namespace PricingCalc.Model.Engine
 
         private volatile ModelChangedEventArgs? _currentChanges;
 
-        protected BaseModel(IReadOnlyCollection<IModelShard> shards, IJobService jobService)
+        protected BaseModel(IEnumerable<IModelShard> shards, IJobService jobService)
         {
             _subscriptions = new HashSet<Action<ModelChangedEventArgs>>();
             _view = new View(shards);
@@ -78,6 +78,17 @@ namespace PricingCalc.Model.Engine
             var copy = _view.CopyModel();
 
             await _jobService.RunParallel(() => storage.Save(path, copy, changes));
+        }
+
+        public async Task Save(IStorage storage, string path)
+        {
+            // Create disconnected copy of model to send it for saving
+            // If some changes would be made to the model while saving,
+            // it wouldn't break saving, because we will save copy of the model
+            // created when user pressed the Save button
+            var copy = _view.CopyModel();
+
+            await _jobService.RunParallel(() => storage.Save(path, copy));
         }
 
         public async Task Load(IStorage storage, string path)

@@ -6,6 +6,8 @@ namespace PricingCalc.Model.Engine.Persistence
     {
         void Save(string path, IRepository repository, IModelChanges changes);
 
-        void Load(string path, IRepository repository, IModel model);
+        void Save(string path, IRepository repository);
+
+        void Load(string path, IRepository repository);
     }
 }

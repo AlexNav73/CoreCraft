@@ -58,7 +58,7 @@ namespace PricingCalc.Model.Generators
                 EmptyLine(code);
                 ImplementModelShardInterface(code, modelShard);
                 EmptyLine(code);
-                ImplementIHaveStorageInterface(code, modelShard);
+                ImplementIHaveStorageInterface(code);
                 EmptyLine(code);
                 ImplementTrackableInterface(code, modelShard);
                 EmptyLine(code);
@@ -80,6 +80,9 @@ namespace PricingCalc.Model.Generators
                     {
                         code.WriteLine($"{relation.Name} = new {RelationType(relation)}(new {relation.ParentRelationType}<I{relation.ParentType}, I{relation.ChildType}>(), new {relation.ChildRelationType}<I{relation.ChildType}, I{relation.ParentType}>());");
                     }
+                    EmptyLine(code);
+
+                    code.WriteLine($"Storage = new {modelShard.Name}ModelShardStorage(this);");
                 });
             }
 
@@ -98,9 +101,9 @@ namespace PricingCalc.Model.Generators
                 EmptyLine(code);
             }
 
-            void ImplementIHaveStorageInterface(IndentedTextWriter code, ModelShard modelShard)
+            void ImplementIHaveStorageInterface(IndentedTextWriter code)
             {
-                code.WriteLine($"public IModelShardStorage Storage {{ get; }} = new {modelShard.Name}ModelShardStorage();");
+                code.WriteLine("public IModelShardStorage Storage { get; }");
             }
 
             void ImplementTrackableInterface(IndentedTextWriter code, ModelShard modelShard)
@@ -281,13 +284,15 @@ namespace PricingCalc.Model.Generators
                 new[]
                 {
                     $"I{modelShard.Name}ModelShard",
-                    "IWritableModelShard"
+                    "IWritableModelShard",
+                    "IHaveStorage"
                 },
                 () =>
                 {
                     DefineCtor(code, modelShard);
                     EmptyLine(code);
                     ImplementModelShardInterface(code, modelShard);
+                    ImplementIHaveStorageInterface(code);
                 });
 
             void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
@@ -305,6 +310,8 @@ namespace PricingCalc.Model.Generators
                     {
                         code.WriteLine($"{relation.Name} = new Trackable{RelationType(relation)}(frame.{relation.Name}, modelShard.{relation.Name});");
                     }
+
+                    code.WriteLine($"Storage = new {modelShard.Name}ModelShardStorage(this);");
                 });
             }
 
@@ -321,6 +328,11 @@ namespace PricingCalc.Model.Generators
                     code.WriteLine($"public {Property($"I{RelationType(relation)}", relation.Name, "get; private set;")}");
                 }
                 EmptyLine(code);
+            }
+
+            void ImplementIHaveStorageInterface(IndentedTextWriter code)
+            {
+                code.WriteLine("public IModelShardStorage Storage { get; }");
             }
         }
     }

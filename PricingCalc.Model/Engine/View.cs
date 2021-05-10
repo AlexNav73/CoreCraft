@@ -9,7 +9,7 @@ namespace PricingCalc.Model.Engine
     {
         private volatile IModel _model;
 
-        public View(IReadOnlyCollection<IModelShard> shards)
+        public View(IEnumerable<IModelShard> shards)
         {
             _model = new Model(shards);
         }
@@ -28,12 +28,12 @@ namespace PricingCalc.Model.Engine
 
         public IModel CopyModel()
         {
-            return new Model(_model.Select(x => ((ICopy<IModelShard>)x).Copy()).ToArray());
+            return new Model(_model.Select(x => ((ICopy<IModelShard>)x).Copy()));
         }
 
         public ModelChangeResult ApplySnapshot(Snapshot snapshot, IWritableModelChanges changes)
         {
-            var newModel = new Model(snapshot.GetShardsInternalUnsafe().ToList());
+            var newModel = new Model(snapshot.GetShardsInternalUnsafe());
             var oldModel = Interlocked.Exchange(ref _model, newModel);
 
             return new ModelChangeResult(oldModel, newModel, changes);

@@ -9,9 +9,9 @@ namespace PricingCalc.Model.Engine
     {
         private readonly IReadOnlyCollection<IModelShard> _shards;
 
-        public Model(IReadOnlyCollection<IModelShard> shards)
+        public Model(IEnumerable<IModelShard> shards)
         {
-            _shards = shards;
+            _shards = shards.ToArray();
         }
 
         public T Shard<T>() where T : IModelShard

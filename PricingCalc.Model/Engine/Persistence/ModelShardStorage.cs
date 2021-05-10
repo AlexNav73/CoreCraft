@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using PricingCalc.Model.Engine.ChangesTracking;
 using PricingCalc.Model.Engine.Core;
 
@@ -8,6 +9,13 @@ namespace PricingCalc.Model.Engine.Persistence
         where TShard : IModelShard
         where TFrame : class, IChangesFrame
     {
+        protected ModelShardStorage(TShard shard)
+        {
+            Shard = shard;
+        }
+
+        protected TShard Shard { get; }
+
         public void Save(string path, IRepository repository, IModelChanges changes)
         {
             if (changes.TryGetFrame<TFrame>(out var frame))
@@ -16,18 +24,21 @@ namespace PricingCalc.Model.Engine.Persistence
             }
         }
 
-        public void Load(string path, IRepository repository, IModel model)
+        public void Save(string path, IRepository repository)
         {
-            var modelShard = model.Shard<TShard>();
-            if (modelShard != null)
-            {
-                LoadInternal(path, repository, modelShard);
-            }
+            SaveInternal(path, repository);
+        }
+
+        public void Load(string path, IRepository repository)
+        {
+            LoadInternal(path, repository);
         }
 
         protected abstract void SaveInternal(string path, IRepository repository, TFrame changes);
 
-        protected abstract void LoadInternal(string path, IRepository repository, TShard shard);
+        protected abstract void SaveInternal(string path, IRepository repository);
+
+        protected abstract void LoadInternal(string path, IRepository repository);
 
         protected void Save<TEntity, TData>(IRepository repository, string name, ICollectionChanges<TEntity, TData> changes, Scheme scheme)
             where TEntity : IEntity, ICopy<TEntity>
@@ -74,6 +85,13 @@ namespace PricingCalc.Model.Engine.Persistence
             }
         }
 
+        protected void Save<TEntity, TData>(IRepository repository, string name, ICollection<TEntity, TData> collection, Scheme scheme)
+            where TEntity : IEntity, ICopy<TEntity>
+            where TData : IEntityProperties, ICopy<TData>
+        {
+            repository.Insert(name, collection.Select(x => new KeyValuePair<TEntity, TData>(x, collection.Get(x))).ToArray(), scheme);
+        }
+
         protected void Save<TParent, TChild>(IRepository repository, string name, IRelationCollectionChanges<TParent, TChild> changes)
             where TParent : IEntity
             where TChild : IEntity
@@ -107,6 +125,13 @@ namespace PricingCalc.Model.Engine.Persistence
             {
                 repository.Delete(name, unlinked);
             }
+        }
+
+        protected void Save<TParent, TChild>(IRepository repository, string name, IRelation<TParent, TChild> relation)
+            where TParent : IEntity
+            where TChild : IEntity
+        {
+            repository.Insert(name, relation.SelectMany(x => relation.Children(x).Select(y => new KeyValuePair<TParent, TChild>(x, y))).ToArray());
         }
 
         protected void Load<TEntity, TData>(IRepository repository, string name, ICollection<TEntity, TData> collection, Scheme scheme)

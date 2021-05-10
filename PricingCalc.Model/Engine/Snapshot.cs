@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using PricingCalc.Model.Engine.Core;
@@ -8,25 +9,24 @@ namespace PricingCalc.Model.Engine
     internal class Snapshot : IModel
     {
         private readonly IModel _model;
-        private readonly IList<IModelShard> _copies;
+        private readonly IDictionary<Type, IModelShard> _copies;
 
         public Snapshot(IModel model)
         {
             _model = model;
-            _copies = new List<IModelShard>();
+            _copies = new Dictionary<Type, IModelShard>();
         }
 
         public virtual T Shard<T>() where T : IModelShard
         {
-            var shard = _copies.OfType<T>().SingleOrDefault();
-            if (shard != null)
+            if (_copies.TryGetValue(typeof(T), out var shard))
             {
-                return shard;
+                return (T)shard;
             }
 
             var modelShard = _model.Shard<T>();
             var copy = ((ICopy<T>)modelShard).Copy();
-            _copies.Add(copy);
+            _copies.Add(typeof(T), copy);
 
             return copy;
         }
@@ -39,24 +39,23 @@ namespace PricingCalc.Model.Engine
         public IEnumerable<IModelShard> GetShardsInternalUnsafe()
         {
             var shards = _model
-                .Where(x => !_copies.Any(k => k.GetType() == x.GetType()))
-                .Union(_copies);
+                .Where(x => !_copies.Keys.Any(y => x.GetType().IsAssignableTo(y)))
+                .Union(_copies.Values);
 
             return shards;
         }
 
-        public IEnumerator<IModelShard> GetEnumerator()
+        public virtual IEnumerator<IModelShard> GetEnumerator()
         {
-            var copies = _model
-                .Where(x => !_copies.Any(k => k.GetType() == x.GetType()))
-                .Select(x => ((ICopy<IModelShard>)x).Copy());
+            var shards = _model
+                .Where(x => !_copies.Keys.Any(y => x.GetType().IsAssignableTo(y)));
 
-            foreach (var copy in copies)
+            foreach (var shard in shards)
             {
-                _copies.Add(copy);
+                _copies.Add(shard.GetType(), ((ICopy<IModelShard>)shard).Copy());
             }
 
-            return _copies.GetEnumerator();
+            return _copies.Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

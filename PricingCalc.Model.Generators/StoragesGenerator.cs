@@ -24,6 +24,10 @@ namespace PricingCalc.Model.Generators
             },
             () =>
             {
+                code.WriteLine($"public {modelShard.Name}ModelShardStorage(I{modelShard.Name}ModelShard shard) : base(shard)");
+                Block(code, () => { });
+                EmptyLine(code);
+
                 foreach (var collection in modelShard.Collections)
                 {
                     var entity = modelShard.Entities.Single(x => x.Name == collection.Type);
@@ -50,12 +54,28 @@ namespace PricingCalc.Model.Generators
                 });
                 EmptyLine(code);
 
-                code.WriteLine($"protected override void LoadInternal(string path, IRepository repository, I{modelShard.Name}ModelShard shard)");
+                code.WriteLine($"protected override void SaveInternal(string path, IRepository repository)");
                 Block(code, () =>
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"Load(repository, \"{modelShard.Name}.{collection.Name}\", shard.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
+                        code.WriteLine($"Save(repository, \"{modelShard.Name}.{collection.Name}\", Shard.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
+                    }
+                    EmptyLine(code);
+
+                    foreach (var relation in modelShard.Relations)
+                    {
+                        code.WriteLine($"Save(repository, \"{modelShard.Name}.{relation.Name}\", Shard.{relation.Name});");
+                    }
+                });
+                EmptyLine(code);
+
+                code.WriteLine($"protected override void LoadInternal(string path, IRepository repository)");
+                Block(code, () =>
+                {
+                    foreach (var collection in modelShard.Collections)
+                    {
+                        code.WriteLine($"Load(repository, \"{modelShard.Name}.{collection.Name}\", Shard.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
                     }
                     EmptyLine(code);
 
@@ -64,7 +84,7 @@ namespace PricingCalc.Model.Generators
                         var parentCollection = modelShard.Collections.Single(x => x.Type == relation.ParentType).Name;
                         var childCollection = modelShard.Collections.Single(x => x.Type == relation.ChildType).Name;
 
-                        code.WriteLine($"Load(repository, \"{modelShard.Name}.{relation.Name}\", shard.{relation.Name}, shard.{parentCollection}, shard.{childCollection});");
+                        code.WriteLine($"Load(repository, \"{modelShard.Name}.{relation.Name}\", Shard.{relation.Name}, Shard.{parentCollection}, Shard.{childCollection});");
                     }
                 });
             });
