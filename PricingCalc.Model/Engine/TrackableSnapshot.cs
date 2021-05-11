@@ -7,12 +7,8 @@ namespace PricingCalc.Model.Engine
 {
     internal class TrackableSnapshot : Snapshot
     {
-        private readonly IDictionary<Type, IModelShard> _trackables;
-
         public TrackableSnapshot(IModel model) : base(model)
         {
-            _trackables = new Dictionary<Type, IModelShard>();
-
             Changes = new WritableModelChanges();
         }
 
@@ -20,29 +16,25 @@ namespace PricingCalc.Model.Engine
 
         public override T Shard<T>()
         {
-            if (_trackables.TryGetValue(typeof(T), out var shard))
-            {
-                return (T)shard;
-            }
-
             var modelShard = (ITrackableModelShard)base.Shard<T>();
             var trackable = modelShard.AsTrackable(Changes);
-            _trackables.Add(typeof(T), trackable);
 
             return (T)trackable;
         }
 
         public override IEnumerator<IModelShard> GetEnumerator()
         {
-            var trackables = new List<IModelShard>();
             var baseEnumerator = base.GetEnumerator();
 
-            while (baseEnumerator.MoveNext())
+            IEnumerable<IModelShard> EnumerateTrackables()
             {
-                trackables.Add(((ITrackableModelShard)baseEnumerator.Current).AsTrackable(Changes));
+                while (baseEnumerator.MoveNext())
+                {
+                    yield return ((ITrackableModelShard)baseEnumerator.Current).AsTrackable(Changes);
+                }
             }
 
-            return trackables.GetEnumerator();
+            return EnumerateTrackables().GetEnumerator();
         }
     }
 }
