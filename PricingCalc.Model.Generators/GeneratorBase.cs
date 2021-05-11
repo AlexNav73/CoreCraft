@@ -1,6 +1,5 @@
 ﻿using System;
 using System.CodeDom.Compiler;
-using System.IO;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -27,13 +26,7 @@ namespace PricingCalc.Model.Generators
         {
             try
             {
-                using (var writer = new StringWriter())
-                using (var code = new IndentedTextWriter(writer, "    "))
-                {
-                    ExecuteInternal(context, code);
-
-                    context.AddSource("Model.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
-                }
+                ExecuteInternal(context);
             }
             catch (Exception ex)
             {
@@ -41,7 +34,12 @@ namespace PricingCalc.Model.Generators
             }
         }
 
-        protected abstract void ExecuteInternal(GeneratorExecutionContext context, IndentedTextWriter code);
+        protected abstract void ExecuteInternal(GeneratorExecutionContext context);
+
+        protected void AddSourceFile(GeneratorExecutionContext context, string fileName, string content)
+        {
+            context.AddSource($"{fileName}.g.cs", SourceText.From(content, Encoding.UTF8));
+        }
 
         protected void Preambula(IndentedTextWriter code)
         {

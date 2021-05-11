@@ -1,6 +1,5 @@
 ﻿using System.CodeDom.Compiler;
 using System.IO;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
@@ -10,33 +9,37 @@ namespace PricingCalc.Model.Generators
     [Generator]
     internal partial class ApplicationModelGenerator : GeneratorBase
     {
-        protected override void ExecuteInternal(GeneratorExecutionContext context, IndentedTextWriter code)
+        private const string ModelFileExtension = ".model.json";
+
+        protected override void ExecuteInternal(GeneratorExecutionContext context)
         {
             var compilation = (CSharpCompilation)context.Compilation;
             var options = new JsonSerializerSettings();
             var serializer = JsonSerializer.Create(options);
-            var insertPreambula = true;
 
             foreach (var file in context.AdditionalFiles)
             {
-                if (file.Path.EndsWith(".model.json"))
+                if (file.Path.EndsWith(ModelFileExtension))
                 {
-                    if (insertPreambula)
-                    {
-                        Preambula(code);
-                        insertPreambula = false;
-                    }
-
+                    var fileName = Path.GetFileName(file.Path);
                     var modelScheme = serializer.Deserialize<ModelScheme>(new JsonTextReader(new StringReader(File.ReadAllText(file.Path))));
 
-                    Generate(compilation, code, modelScheme);
+                    using (var writer = new StringWriter())
+                    using (var code = new IndentedTextWriter(writer, "    "))
+                    {
+                        Preambula(code);
+                        Generate(compilation, code, modelScheme);
+
+                        var generatedFileName = fileName.Replace(ModelFileExtension, "");
+                        AddSourceFile(context, generatedFileName, writer.ToString());
+                    }
                 }
             }
         }
 
         private void Generate(CSharpCompilation compilation, IndentedTextWriter code, ModelScheme modelScheme)
         {
-            code.WriteLine($"namespace {compilation.AssemblyName}.{modelScheme.Name}");
+            code.WriteLine($"namespace {compilation.AssemblyName}.Model");
             Block(code, () =>
             {
                 code.WriteLine("using PricingCalc.Model.Engine;");
@@ -51,7 +54,7 @@ namespace PricingCalc.Model.Generators
             });
             EmptyLine(code);
 
-            code.WriteLine($"namespace {compilation.AssemblyName}.{modelScheme.Name}.Entities");
+            code.WriteLine($"namespace {compilation.AssemblyName}.Model.Entities");
             Block(code, () =>
             {
                 GenerateEntities(code, modelScheme.Shards);
