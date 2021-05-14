@@ -11,6 +11,7 @@ namespace PricingCalc.Model.Engine.Core
         where TEntity : IEntity, ICopy<TEntity>
         where TData : ICopy<TData>
     {
+        // TODO: Can the _relation be removed without performance degradation?
         private readonly IDictionary<Guid, int> _relation;
         private readonly IList<TEntity> _entities;
         private readonly IList<TData> _data;
@@ -35,6 +36,8 @@ namespace PricingCalc.Model.Engine.Core
 
         public IEntityFactory<TEntity, TData> Factory { get; }
 
+        public int Count => _entities.Count;
+
         public void Add(TEntity entity, TData data)
         {
             if (_relation.TryAdd(entity.Id, _data.Count))
@@ -52,16 +55,6 @@ namespace PricingCalc.Model.Engine.Core
             }
 
             throw new KeyNotFoundException();
-        }
-
-        public int IndexOf(TEntity entity)
-        {
-            return _entities.IndexOf(entity);
-        }
-
-        public TEntity ElementAt(int index)
-        {
-            return _entities[index];
         }
 
         public void Modify(TEntity entity, Action<TData> modifier)

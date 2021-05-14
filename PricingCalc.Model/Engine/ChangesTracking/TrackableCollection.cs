@@ -23,6 +23,8 @@ namespace PricingCalc.Model.Engine.ChangesTracking
 
         public IEntityFactory<TEntity, TData> Factory => _collection.Factory;
 
+        public int Count => _collection.Count;
+
         public void Add(TEntity entity, TData data)
         {
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -31,19 +33,9 @@ namespace PricingCalc.Model.Engine.ChangesTracking
             _collection.Add(entity, data);
         }
 
-        public TEntity ElementAt(int index)
-        {
-            return _collection.ElementAt(index);
-        }
-
         public TData Get(TEntity entity)
         {
             return _collection.Get(entity);
-        }
-
-        public int IndexOf(TEntity entity)
-        {
-            return _collection.IndexOf(entity);
         }
 
         public void Modify(TEntity entity, Action<TData> modifier)

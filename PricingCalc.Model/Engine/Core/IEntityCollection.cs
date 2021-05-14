@@ -2,11 +2,9 @@
 
 namespace PricingCalc.Model.Engine.Core
 {
-    public interface IEntityCollection<TEntity> : IEnumerable<TEntity>
+    public interface IEntityCollection<out TEntity> : IEnumerable<TEntity>
         where TEntity : IEntity
     {
-        int IndexOf(TEntity entity);
-
-        TEntity ElementAt(int index);
+        int Count { get; }
     }
 }
