@@ -1,0 +1,93 @@
+﻿{
+  "shardType": "PricingCalc.Model.Tests.Infrastructure.ITestModelShard",
+  "shards": [
+    {
+      "name": "Fake",
+      "version": "0.1.0",
+      "entities": [
+        {
+          "name": "FirstEntity",
+          "properties": [
+            {
+              "name": "NonNullableStringProperty",
+              "type": "string",
+              "defaultValue": "string.Empty"
+            },
+            {
+              "name": "NullableStringProperty",
+              "type": "string",
+              "isNullable": "true"
+            },
+            {
+              "name": "NullableStringWithDefaultValueProperty",
+              "type": "string",
+              "isNullable": "true",
+              "defaultValue": "string.Empty"
+            }
+          ]
+        },
+        {
+          "name": "SecondEntity",
+          "properties": [
+            {
+              "name": "IntProperty",
+              "type": "int"
+            },
+            {
+              "name": "BoolProperty",
+              "type": "bool"
+            },
+            {
+              "name": "DoubleProperty",
+              "type": "double"
+            },
+            {
+              "name": "FloatProperty",
+              "type": "float"
+            }
+          ]
+        }
+      ],
+      "collections": [
+        {
+          "name": "FirstCollection",
+          "type": "FirstEntity"
+        },
+        {
+          "name": "SecondCollection",
+          "type": "SecondEntity"
+        }
+      ],
+      "relations": [
+        {
+          "name": "OneToOneRelation",
+          "parentType": "FirstEntity",
+          "childType": "SecondEntity",
+          "parentRelationType": "OneToOne",
+          "childRelationType": "OneToOne"
+        },
+        {
+          "name": "OneToManyRelation",
+          "parentType": "FirstEntity",
+          "childType": "SecondEntity",
+          "parentRelationType": "OneToMany",
+          "childRelationType": "OneToOne"
+        },
+        {
+          "name": "ManyToOneRelation",
+          "parentType": "FirstEntity",
+          "childType": "SecondEntity",
+          "parentRelationType": "OneToOne",
+          "childRelationType": "OneToMany"
+        },
+        {
+          "name": "ManyToManyRelation",
+          "parentType": "FirstEntity",
+          "childType": "SecondEntity",
+          "parentRelationType": "OneToMany",
+          "childRelationType": "OneToMany"
+        }
+      ]
+    }
+  ]
+}
