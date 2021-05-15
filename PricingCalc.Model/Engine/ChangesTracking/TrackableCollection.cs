@@ -7,18 +7,18 @@ using PricingCalc.Model.Engine.Core;
 namespace PricingCalc.Model.Engine.ChangesTracking
 {
     [DebuggerDisplay("{_collection}")]
-    public class TrackableCollection<TEntity, TData> : ICollection<TEntity, TData>
+    public class TrackableCollection<TEntity, TData> : ICollectionInternal<TEntity, TData>
         where TEntity : IEntity, ICopy<TEntity>
         where TData : ICopy<TData>, IEquatable<TData>
     {
         private readonly ICollectionChanges<TEntity, TData> _changes;
-        private readonly ICollection<TEntity, TData> _collection;
+        private readonly ICollectionInternal<TEntity, TData> _collection;
 
         public TrackableCollection(ICollectionChanges<TEntity, TData> changesCollection,
             ICollection<TEntity, TData> modelCollection)
         {
             _changes = changesCollection;
-            _collection = modelCollection;
+            _collection = (ICollectionInternal<TEntity, TData>)modelCollection;
         }
 
         public int Count => _collection.Count;

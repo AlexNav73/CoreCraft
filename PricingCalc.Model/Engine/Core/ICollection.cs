@@ -8,12 +8,17 @@ namespace PricingCalc.Model.Engine.Core
     {
         IEntityBuilder<TEntity, TData> Create();
 
-        void Add(TEntity entity, TData data);
-
         void Modify(TEntity entity, Action<TData> modifier);
 
         TData Get(TEntity entity);
 
         void Remove(TEntity entity);
+    }
+
+    internal interface ICollectionInternal<TEntity, TData> : ICollection<TEntity, TData>
+        where TEntity : IEntity, ICopy<TEntity>
+        where TData : ICopy<TData>
+    {
+        void Add(TEntity entity, TData data);
     }
 }

@@ -6,18 +6,18 @@ namespace PricingCalc.Model.Engine.Core
         where TEntity : IEntity, ICopy<TEntity>
         where TData : ICopy<TData>
     {
-        private readonly ICollection<TEntity, TData> _collection;
+        private readonly ICollectionInternal<TEntity, TData> _collection;
         private readonly IFactory<TEntity, TData> _factory;
         private readonly Guid _id;
         private readonly Action<TData> _initializer;
 
-        public EntityBuilder(ICollection<TEntity, TData> collection, IFactory<TEntity, TData> factory)
+        public EntityBuilder(ICollectionInternal<TEntity, TData> collection, IFactory<TEntity, TData> factory)
             : this(collection, factory, Guid.NewGuid(), p => { })
         {
         }
 
         private EntityBuilder(
-            ICollection<TEntity, TData> collection,
+            ICollectionInternal<TEntity, TData> collection,
             IFactory<TEntity, TData> factory,
             Guid id,
             Action<TData> initializer)

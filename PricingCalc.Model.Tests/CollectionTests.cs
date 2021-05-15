@@ -24,26 +24,13 @@ namespace PricingCalc.Model.Tests
         }
 
         [Test]
-        public void AddEntityToCollectionTest()
-        {
-            Assert.That(_collection.Count, Is.EqualTo(0));
-
-            var firstEntityId = Guid.NewGuid();
-            _collection.Add(new FirstEntity(firstEntityId), new FirstEntityProperties());
-
-            Assert.That(_collection.Count, Is.EqualTo(1));
-            Assert.That(_collection.Single().Id, Is.EqualTo(firstEntityId));
-        }
-
-        [Test]
-        public void CreateEntityWithFluidApiTest()
+        public void CreateEntityTest()
         {
             Assert.That(_collection.Count, Is.EqualTo(0));
 
             var firstEntityId = Guid.NewGuid();
             var entity = _collection.Create()
                 .WithId(firstEntityId)
-                .WithInit(p => { })
                 .Build();
 
             Assert.That(_collection.Count, Is.EqualTo(1));
@@ -52,17 +39,48 @@ namespace PricingCalc.Model.Tests
         }
 
         [Test]
+        public void AddExistingEntityToCollectionTest()
+        {
+            Assert.That(_collection.Count, Is.EqualTo(0));
+
+            var entity = _collection.Create().Build();
+
+            Assert.That(_collection.Count, Is.EqualTo(1));
+            Assert.That(_collection.Single(), Is.EqualTo(entity));
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                _collection.Create()
+                    .WithId(entity.Id)
+                    .Build();
+            });
+        }
+
+        [Test]
         public void RemoveEntitiyFromCollectionTest()
         {
-            var entity = _collection.Create()
-                .WithInit(p => { })
-                .Build();
+            var entity = _collection.Create().Build();
 
             Assert.That(_collection.Count, Is.EqualTo(1));
 
             _collection.Remove(entity);
 
             Assert.That(_collection.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void RemoveNotExistingEntityTest()
+        {
+            _collection.Create().Build();
+
+            Assert.That(_collection.Count, Is.EqualTo(1));
+            Assert.Throws<KeyNotFoundException>(() => _collection.Remove(new FirstEntity(Guid.NewGuid())));
+        }
+
+        [Test]
+        public void RemoveFromEmptyCollectionTest()
+        {
+            Assert.That(_collection.Count, Is.EqualTo(0));
+            Assert.Throws<KeyNotFoundException>(() => _collection.Remove(new FirstEntity(Guid.NewGuid())));
         }
 
         [Test]
@@ -136,7 +154,7 @@ namespace PricingCalc.Model.Tests
         }
 
         [Test]
-        public void CopyCollection()
+        public void CopyCollectionTest()
         {
             var value = "test";
             var entity = _collection.Create()
@@ -149,6 +167,11 @@ namespace PricingCalc.Model.Tests
             Assert.That(ReferenceEquals(_collection, copy), Is.False);
             Assert.That(_collection.Count, Is.EqualTo(copy.Count));
             Assert.That(entity, Is.EqualTo(copiedEntity));
+
+            var props = _collection.Get(entity);
+            var copiedProps = copy.Get(copiedEntity);
+
+            Assert.That(props, Is.EqualTo(copiedProps));
         }
     }
 }
