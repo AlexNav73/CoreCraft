@@ -2,7 +2,7 @@
 
 namespace PricingCalc.Model.Engine.Core
 {
-    public interface IRelation<TParent, TChild> : IEnumerable<TParent>
+    public interface IRelation<TParent, TChild> : IEnumerable<TParent>, ICopy<IRelation<TParent, TChild>>
         where TParent : IEntity
         where TChild : IEntity
     {

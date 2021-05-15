@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using PricingCalc.Model.Engine.Core;
-using PricingCalc.Model.Engine.Fluent;
 using PricingCalc.Model.Tests.Model.Entities;
 
 namespace PricingCalc.Model.Tests
@@ -14,7 +14,7 @@ namespace PricingCalc.Model.Tests
         [SetUp]
         public void Setup()
         {
-            _collection = new Collection<IFirstEntity, IFirstEntityProperties>(new EntityFactory<FirstEntity, FirstEntityProperties>(id => new FirstEntity() { Id = id }));
+            _collection = new Collection<IFirstEntity, IFirstEntityProperties>(id => new FirstEntity(id), () => new FirstEntityProperties());
         }
 
         [TearDown]
@@ -29,10 +29,10 @@ namespace PricingCalc.Model.Tests
             Assert.That(_collection.Count, Is.EqualTo(0));
 
             var firstEntityId = Guid.NewGuid();
-            _collection.Add(new FirstEntity() { Id = firstEntityId }, new FirstEntityProperties());
+            _collection.Add(new FirstEntity(firstEntityId), new FirstEntityProperties());
 
             Assert.That(_collection.Count, Is.EqualTo(1));
-            Assert.That(_collection.First().Id, Is.EqualTo(firstEntityId));
+            Assert.That(_collection.Single().Id, Is.EqualTo(firstEntityId));
         }
 
         [Test]
@@ -41,12 +41,13 @@ namespace PricingCalc.Model.Tests
             Assert.That(_collection.Count, Is.EqualTo(0));
 
             var firstEntityId = Guid.NewGuid();
-            var entity = _collection.Create(firstEntityId)
-                .Initialize(p => { })
-                .Finish();
+            var entity = _collection.Create()
+                .WithId(firstEntityId)
+                .WithInit(p => { })
+                .Build();
 
             Assert.That(_collection.Count, Is.EqualTo(1));
-            Assert.That(_collection.First(), Is.EqualTo(entity));
+            Assert.That(_collection.Single(), Is.EqualTo(entity));
             Assert.That(entity.Id, Is.EqualTo(firstEntityId));
         }
 
@@ -54,8 +55,8 @@ namespace PricingCalc.Model.Tests
         public void RemoveEntitiyFromCollectionTest()
         {
             var entity = _collection.Create()
-                .Initialize(p => { })
-                .Finish();
+                .WithInit(p => { })
+                .Build();
 
             Assert.That(_collection.Count, Is.EqualTo(1));
 
@@ -69,11 +70,11 @@ namespace PricingCalc.Model.Tests
         {
             var value = "test";
             var entity = _collection.Create()
-                .Initialize(p =>
+                .WithInit(p =>
                 {
                     p.NonNullableStringProperty = value;
                 })
-                .Finish();
+                .Build();
 
             Assert.That(_collection.Count, Is.EqualTo(1));
 
@@ -84,17 +85,37 @@ namespace PricingCalc.Model.Tests
         }
 
         [Test]
+        public void GetWithInvalidEntityTest()
+        {
+            var entity = _collection.Create().Build();
+
+            Assert.That(_collection.Count, Is.EqualTo(1));
+
+            var properties = _collection.Get(entity);
+
+            Assert.That(properties, Is.Not.Null);
+            Assert.Throws<KeyNotFoundException>(() => _collection.Get(new FirstEntity(Guid.NewGuid())));
+        }
+
+        [Test]
+        public void GetFromEmptyCollectionTest()
+        {
+            Assert.That(_collection.Count, Is.EqualTo(0));
+            Assert.Throws<KeyNotFoundException>(() => _collection.Get(new FirstEntity(Guid.NewGuid())));
+        }
+
+        [Test]
         public void ModifyPropertiesTest()
         {
             var value = "test";
             var newValue = "new value";
 
             var entity = _collection.Create()
-                .Initialize(p =>
+                .WithInit(p =>
                 {
                     p.NonNullableStringProperty = value;
                 })
-                .Finish();
+                .Build();
 
             var properties = _collection.Get(entity);
             Assert.That(properties.NonNullableStringProperty, Is.EqualTo(value));
@@ -104,6 +125,30 @@ namespace PricingCalc.Model.Tests
 
             Assert.That(properties, Is.Not.Null);
             Assert.That(properties.NonNullableStringProperty, Is.EqualTo(newValue));
+        }
+
+        [Test]
+        public void ModifyNotExistingEntityTest()
+        {
+            Assert.That(_collection.Count, Is.EqualTo(0));
+            Assert.Throws<KeyNotFoundException>(() =>
+                _collection.Modify(new FirstEntity(Guid.NewGuid()), p => p.NullableStringProperty = "test"));
+        }
+
+        [Test]
+        public void CopyCollection()
+        {
+            var value = "test";
+            var entity = _collection.Create()
+                .WithInit(p => p.NonNullableStringProperty = value)
+                .Build();
+
+            var copy = _collection.Copy();
+            var copiedEntity = _collection.Single();
+
+            Assert.That(ReferenceEquals(_collection, copy), Is.False);
+            Assert.That(_collection.Count, Is.EqualTo(copy.Count));
+            Assert.That(entity, Is.EqualTo(copiedEntity));
         }
     }
 }

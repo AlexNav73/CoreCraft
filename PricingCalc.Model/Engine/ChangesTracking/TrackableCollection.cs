@@ -21,9 +21,12 @@ namespace PricingCalc.Model.Engine.ChangesTracking
             _collection = modelCollection;
         }
 
-        public IEntityFactory<TEntity, TData> Factory => _collection.Factory;
-
         public int Count => _collection.Count;
+
+        public IEntityBuilder<TEntity, TData> Create()
+        {
+            return new EntityBuilder<TEntity, TData>(this, (IFactory<TEntity, TData>)_collection);
+        }
 
         public void Add(TEntity entity, TData data)
         {
@@ -65,6 +68,11 @@ namespace PricingCalc.Model.Engine.ChangesTracking
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public ICollection<TEntity, TData> Copy()
+        {
+            throw new InvalidOperationException("Collection can't be copied because it is attached to changes tracking system");
         }
     }
 }

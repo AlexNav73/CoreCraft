@@ -72,7 +72,7 @@ namespace PricingCalc.Model.Generators
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{collection.Name} = new {CollectionType(collection)}(new EntityFactory<{collection.Type}, {collection.Type}Properties>(id => new {collection.Type}() {{ Id = id }}));");
+                        code.WriteLine($"{collection.Name} = new {CollectionType(collection)}(id => new {collection.Type}(id), () => new {collection.Type}Properties());");
                     }
                     EmptyLine(code);
 
@@ -123,13 +123,13 @@ namespace PricingCalc.Model.Generators
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"var {collection.Name.ToLower()} = ((ICopy<I{CollectionType(collection)}>){collection.Name}).Copy();");
+                        code.WriteLine($"var {collection.Name.ToLower()} = {collection.Name}.Copy();");
                     }
                     EmptyLine(code);
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"var {relation.Name.ToLower()} = ((ICopy<I{RelationType(relation)}>){relation.Name}).Copy();");
+                        code.WriteLine($"var {relation.Name.ToLower()} = {relation.Name}.Copy();");
                     }
                     EmptyLine(code);
 

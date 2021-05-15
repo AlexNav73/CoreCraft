@@ -41,13 +41,20 @@ namespace PricingCalc.Model.Generators
             code.WriteLine($"internal sealed record {entity.Name} : I{entity.Name}");
             Block(code, () =>
             {
-                code.WriteLine($"public {Property("global::System.Guid", "Id", "get; internal set;")}");
+                code.WriteLine($"public {Property("global::System.Guid", "Id", "get;")}");
+                EmptyLine(code);
+
+                code.WriteLine($"internal {entity.Name}(global::System.Guid id)");
+                Block(code, () =>
+                {
+                    code.WriteLine("Id = id;");
+                });
                 EmptyLine(code);
 
                 code.WriteLine($"public I{entity.Name} Copy()");
                 Block(code, () =>
                 {
-                    code.WriteLine("return this with { Id = Id };");
+                    code.WriteLine($"return new {entity.Name}(Id);");
                 });
             });
         }

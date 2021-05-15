@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using PricingCalc.Model.Engine.Core;
@@ -50,6 +51,11 @@ namespace PricingCalc.Model.Engine.ChangesTracking
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public IRelation<TParent, TChild> Copy()
+        {
+            throw new InvalidOperationException("Relation can't be copied because it is attached to changes tracking system");
         }
     }
 }

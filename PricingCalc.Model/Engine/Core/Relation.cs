@@ -6,7 +6,7 @@ using System.Diagnostics;
 namespace PricingCalc.Model.Engine.Core
 {
     [DebuggerDisplay(@"Parent [{_parentToChildRelations}] Children [{_childToParentRelations}]")]
-    public class Relation<TParent, TChild> : IRelation<TParent, TChild>, ICopy<IRelation<TParent, TChild>>
+    public class Relation<TParent, TChild> : IRelation<TParent, TChild>
         where TParent : IEntity
         where TChild : IEntity
     {
