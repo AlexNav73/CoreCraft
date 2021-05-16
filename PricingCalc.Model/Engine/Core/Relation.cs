@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -23,11 +22,6 @@ namespace PricingCalc.Model.Engine.Core
 
         public void Add(TParent parent, TChild child)
         {
-            if (!CanAdd(parent, child))
-            {
-                throw new InvalidOperationException($"Can't add {parent} - {child} link");
-            }
-
             _parentToChildRelations.Add(parent, child);
             _childToParentRelations.Add(child, parent);
         }
@@ -53,14 +47,6 @@ namespace PricingCalc.Model.Engine.Core
             return new Relation<TParent, TChild>(
                 _parentToChildRelations.Copy(),
                 _childToParentRelations.Copy());
-        }
-
-        private bool CanAdd(TParent parent, TChild child)
-        {
-            var canLinkParent = _parentToChildRelations.CanAdd(parent, child);
-            var canLinkChild = _childToParentRelations.CanAdd(child, parent);
-
-            return canLinkParent && canLinkChild;
         }
 
         public IEnumerator<TParent> GetEnumerator()

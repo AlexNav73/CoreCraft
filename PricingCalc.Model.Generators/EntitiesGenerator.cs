@@ -44,6 +44,12 @@ namespace PricingCalc.Model.Generators
                 code.WriteLine($"public {Property("global::System.Guid", "Id", "get;")}");
                 EmptyLine(code);
 
+                code.WriteLine($"internal {entity.Name}() : this(global::System.Guid.NewGuid())");
+                Block(code, () =>
+                {
+                });
+                EmptyLine(code);
+
                 code.WriteLine($"internal {entity.Name}(global::System.Guid id)");
                 Block(code, () =>
                 {

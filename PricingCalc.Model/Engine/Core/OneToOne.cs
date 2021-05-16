@@ -21,11 +21,6 @@ namespace PricingCalc.Model.Engine.Core
             _relation = relation;
         }
 
-        public bool CanAdd(TParent parent, TChild child)
-        {
-            return !_relation.ContainsKey(parent);
-        }
-
         public void Add(TParent parent, TChild child)
         {
             if (!_relation.TryAdd(parent, child))

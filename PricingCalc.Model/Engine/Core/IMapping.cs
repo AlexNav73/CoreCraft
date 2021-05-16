@@ -10,8 +10,6 @@ namespace PricingCalc.Model.Engine.Core
 
         void Remove(TParent parent, TChild child);
 
-        bool CanAdd(TParent parent, TChild child);
-
         IEnumerable<TChild> Children(TParent parent);
 
         void Clear();

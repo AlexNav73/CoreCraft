@@ -17,12 +17,6 @@ namespace PricingCalc.Model.Tests
             _collection = new Collection<IFirstEntity, IFirstEntityProperties>(id => new FirstEntity(id), () => new FirstEntityProperties());
         }
 
-        [TearDown]
-        public void Teardown()
-        {
-            _collection = null;
-        }
-
         [Test]
         public void CreateEntityTest()
         {
@@ -73,14 +67,14 @@ namespace PricingCalc.Model.Tests
             _collection.Create().Build();
 
             Assert.That(_collection.Count, Is.EqualTo(1));
-            Assert.Throws<KeyNotFoundException>(() => _collection.Remove(new FirstEntity(Guid.NewGuid())));
+            Assert.Throws<KeyNotFoundException>(() => _collection.Remove(new FirstEntity()));
         }
 
         [Test]
         public void RemoveFromEmptyCollectionTest()
         {
             Assert.That(_collection.Count, Is.EqualTo(0));
-            Assert.Throws<KeyNotFoundException>(() => _collection.Remove(new FirstEntity(Guid.NewGuid())));
+            Assert.Throws<KeyNotFoundException>(() => _collection.Remove(new FirstEntity()));
         }
 
         [Test]
@@ -112,14 +106,14 @@ namespace PricingCalc.Model.Tests
             var properties = _collection.Get(entity);
 
             Assert.That(properties, Is.Not.Null);
-            Assert.Throws<KeyNotFoundException>(() => _collection.Get(new FirstEntity(Guid.NewGuid())));
+            Assert.Throws<KeyNotFoundException>(() => _collection.Get(new FirstEntity()));
         }
 
         [Test]
         public void GetFromEmptyCollectionTest()
         {
             Assert.That(_collection.Count, Is.EqualTo(0));
-            Assert.Throws<KeyNotFoundException>(() => _collection.Get(new FirstEntity(Guid.NewGuid())));
+            Assert.Throws<KeyNotFoundException>(() => _collection.Get(new FirstEntity()));
         }
 
         [Test]
@@ -150,7 +144,7 @@ namespace PricingCalc.Model.Tests
         {
             Assert.That(_collection.Count, Is.EqualTo(0));
             Assert.Throws<KeyNotFoundException>(() =>
-                _collection.Modify(new FirstEntity(Guid.NewGuid()), p => p.NullableStringProperty = "test"));
+                _collection.Modify(new FirstEntity(), p => p.NullableStringProperty = "test"));
         }
 
         [Test]
