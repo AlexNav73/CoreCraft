@@ -7,7 +7,7 @@ using System.Linq;
 namespace PricingCalc.Model.Engine.Core
 {
     [DebuggerDisplay("Count = {Count}")]
-    public class Collection<TEntity, TData> : ICollectionInternal<TEntity, TData>, IFactory<TEntity, TData>
+    public class Collection<TEntity, TData> : ICollection<TEntity, TData>, IFactory<TEntity, TData>
         where TEntity : IEntity, ICopy<TEntity>
         where TData : ICopy<TData>
     {
@@ -37,17 +37,17 @@ namespace PricingCalc.Model.Engine.Core
 
         public Func<TData> DataFactory => _dataCreator;
 
-        public IEntityBuilder<TEntity, TData> Create()
+        public EntityBuilder<TEntity, TData> Create()
         {
-            return new EntityBuilder<TEntity, TData>(this, this);
-        }
-
-        public void Add(TEntity entity, TData data)
-        {
-            if (!_relation.TryAdd(entity.Id, data))
+            void Add(TEntity entity, TData data)
             {
-                throw new InvalidOperationException($"Entity [{entity}] can't be added to the collection");
+                if (!_relation.TryAdd(entity.Id, data))
+                {
+                    throw new InvalidOperationException($"Entity [{entity}] can't be added to the collection");
+                }
             }
+
+            return new EntityBuilder<TEntity, TData>(Add, this);
         }
 
         public TData Get(TEntity entity)

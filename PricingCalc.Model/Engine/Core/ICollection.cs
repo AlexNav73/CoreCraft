@@ -6,19 +6,12 @@ namespace PricingCalc.Model.Engine.Core
         where TEntity : IEntity, ICopy<TEntity>
         where TData : ICopy<TData>
     {
-        IEntityBuilder<TEntity, TData> Create();
+        EntityBuilder<TEntity, TData> Create();
 
         void Modify(TEntity entity, Action<TData> modifier);
 
         TData Get(TEntity entity);
 
         void Remove(TEntity entity);
-    }
-
-    internal interface ICollectionInternal<TEntity, TData> : ICollection<TEntity, TData>
-        where TEntity : IEntity, ICopy<TEntity>
-        where TData : ICopy<TData>
-    {
-        void Add(TEntity entity, TData data);
     }
 }

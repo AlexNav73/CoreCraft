@@ -2,40 +2,55 @@
 
 namespace PricingCalc.Model.Engine.Core
 {
-    internal sealed class EntityBuilder<TEntity, TData> : IEntityBuilder<TEntity, TData>
+    public sealed class EntityBuilder<TEntity, TData>
         where TEntity : IEntity, ICopy<TEntity>
         where TData : ICopy<TData>
     {
-        private readonly ICollectionInternal<TEntity, TData> _collection;
+        private readonly Action<TEntity, TData> _adder;
         private readonly IFactory<TEntity, TData> _factory;
         private readonly Guid _id;
         private readonly Action<TData> _initializer;
 
-        public EntityBuilder(ICollectionInternal<TEntity, TData> collection, IFactory<TEntity, TData> factory)
-            : this(collection, factory, Guid.NewGuid(), p => { })
+        internal EntityBuilder(
+            Action<TEntity, TData> adder,
+            IFactory<TEntity, TData> factory)
+            : this(adder, factory, Guid.NewGuid(), p => { })
         {
         }
 
         private EntityBuilder(
-            ICollectionInternal<TEntity, TData> collection,
+            Action<TEntity, TData> adder,
             IFactory<TEntity, TData> factory,
             Guid id,
             Action<TData> initializer)
         {
-            _collection = collection;
+            _adder = adder;
             _factory = factory;
             _id = id;
             _initializer = initializer;
         }
 
-        public IEntityBuilder<TEntity, TData> WithId(Guid id)
+        public EntityBuilder<TEntity, TData> WithId(Guid id)
         {
-            return new EntityBuilder<TEntity, TData>(_collection, _factory, id, _initializer);
+            return new EntityBuilder<TEntity, TData>(_adder, _factory, id, _initializer);
         }
 
-        public IEntityBuilder<TEntity, TData> WithInit(Action<TData> initializer)
+        public EntityBuilder<TEntity, TData> WithInit(Action<TData> initializer)
         {
-            return new EntityBuilder<TEntity, TData>(_collection, _factory, _id, initializer);
+            return new EntityBuilder<TEntity, TData>(_adder, _factory, _id, initializer);
+        }
+
+        internal EntityBuilder<TEntity, TData> WithAddHook(Action<TEntity, TData> hook)
+        {
+            return new EntityBuilder<TEntity, TData>(
+                (e, p) =>
+                {
+                    _adder(e, p);
+                    hook(e, p);
+                },
+                _factory,
+                _id,
+                _initializer);
         }
 
         public TEntity Build()
@@ -45,9 +60,14 @@ namespace PricingCalc.Model.Engine.Core
 
             _initializer(data);
 
-            _collection.Add(entity, data);
+            _adder(entity, data);
 
             return entity;
+        }
+
+        internal void Finish(TEntity entity, TData data)
+        {
+            _adder(entity, data);
         }
     }
 }

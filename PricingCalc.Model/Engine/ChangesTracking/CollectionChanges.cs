@@ -38,19 +38,18 @@ namespace PricingCalc.Model.Engine.ChangesTracking
 
         public void Apply(ICollection<TEntity, TData> collection)
         {
-            var col = (ICollectionInternal<TEntity, TData>)collection;
             foreach (var change in _changes)
             {
                 switch (change.Action)
                 {
                     case EntityAction.Add:
-                        col.Add(change.Entity, change.NewData);
+                        collection.Create().Finish(change.Entity, change.NewData);
                         break;
                     case EntityAction.Remove:
-                        col.Remove(change.Entity);
+                        collection.Remove(change.Entity);
                         break;
                     case EntityAction.Modify:
-                        col.Modify(change.Entity, d =>
+                        collection.Modify(change.Entity, d =>
                         {
                             var bag = new PropertiesBag();
                             change.NewData.WriteTo(bag);

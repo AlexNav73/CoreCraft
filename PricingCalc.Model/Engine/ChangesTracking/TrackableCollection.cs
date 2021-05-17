@@ -7,33 +7,26 @@ using PricingCalc.Model.Engine.Core;
 namespace PricingCalc.Model.Engine.ChangesTracking
 {
     [DebuggerDisplay("{_collection}")]
-    public class TrackableCollection<TEntity, TData> : ICollectionInternal<TEntity, TData>
+    public class TrackableCollection<TEntity, TData> : ICollection<TEntity, TData>
         where TEntity : IEntity, ICopy<TEntity>
         where TData : ICopy<TData>, IEquatable<TData>
     {
         private readonly ICollectionChanges<TEntity, TData> _changes;
-        private readonly ICollectionInternal<TEntity, TData> _collection;
+        private readonly ICollection<TEntity, TData> _collection;
 
-        public TrackableCollection(ICollectionChanges<TEntity, TData> changesCollection,
+        public TrackableCollection(
+            ICollectionChanges<TEntity, TData> changesCollection,
             ICollection<TEntity, TData> modelCollection)
         {
             _changes = changesCollection;
-            _collection = (ICollectionInternal<TEntity, TData>)modelCollection;
+            _collection = modelCollection;
         }
 
         public int Count => _collection.Count;
 
-        public IEntityBuilder<TEntity, TData> Create()
+        public EntityBuilder<TEntity, TData> Create()
         {
-            return new EntityBuilder<TEntity, TData>(this, (IFactory<TEntity, TData>)_collection);
-        }
-
-        public void Add(TEntity entity, TData data)
-        {
-#pragma warning disable CS8604 // Possible null reference argument.
-            _changes.Add(EntityAction.Add, entity, default, data);
-#pragma warning restore CS8604 // Possible null reference argument.
-            _collection.Add(entity, data);
+            return _collection.Create().WithAddHook((e, d) => _changes.Add(EntityAction.Add, e, default!, d));
         }
 
         public TData Get(TEntity entity)
