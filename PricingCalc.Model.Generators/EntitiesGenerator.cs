@@ -22,18 +22,18 @@ namespace PricingCalc.Model.Generators
         {
             foreach (var entity in modelShard.Entities)
             {
-                DefineEntityType(code, entity);
+                DefineEntityType(code, entity, modelShard);
                 EmptyLine(code);
-                DefineEntityPropertiesInterface(code, entity);
+                DefineEntityPropertiesInterface(code, entity, modelShard);
                 EmptyLine(code);
                 DefineEntityPropertiesClass(code, entity);
             }
         }
 
-        private void DefineEntityType(IndentedTextWriter code, Entity entity)
+        private void DefineEntityType(IndentedTextWriter code, Entity entity, ModelShard shard)
         {
             GeneratedCodeAttribute(code);
-            Interface(code, $"I{entity.Name}", new[] { "IEntity", $"ICopy<I{entity.Name}>" }, () => { });
+            Interface(code, shard.IsInternal, $"I{entity.Name}", new[] { "IEntity", $"ICopy<I{entity.Name}>" }, () => { });
             EmptyLine(code);
 
             GeneratedCodeAttribute(code);
@@ -65,10 +65,10 @@ namespace PricingCalc.Model.Generators
             });
         }
 
-        private void DefineEntityPropertiesInterface(IndentedTextWriter code, Entity entity)
+        private void DefineEntityPropertiesInterface(IndentedTextWriter code, Entity entity, ModelShard shard)
         {
             GeneratedCodeAttribute(code);
-            Interface(code, $"I{EntityPropertiesType(entity.Name)}", new[]
+            Interface(code, shard.IsInternal, $"I{EntityPropertiesType(entity.Name)}", new[]
             {
                 $"IEntityProperties",
                 $"ICopy<I{EntityPropertiesType(entity.Name)}>",

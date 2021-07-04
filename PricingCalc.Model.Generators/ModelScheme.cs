@@ -10,6 +10,8 @@ namespace PricingCalc.Model.Generators
 
         public string Version { get; init; }
 
+        public bool IsInternal { get; init; }
+
         public IEnumerable<Entity> Entities { get; init; }
 
         public IEnumerable<Collection> Collections { get; init; }

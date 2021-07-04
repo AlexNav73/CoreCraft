@@ -76,9 +76,9 @@ namespace PricingCalc.Model.Generators
             }
         }
 
-        protected void Interface(IndentedTextWriter code, string name, string[] bases, Action body)
+        protected void Interface(IndentedTextWriter code, bool isInternal, string name, string[] bases, Action body)
         {
-            code.WriteLine($"public interface {name} : {string.Join(", ", bases)}");
+            code.WriteLine($"{Visibility(isInternal)} interface {name} : {string.Join(", ", bases)}");
             Block(code, () =>
             {
                 body();
@@ -107,6 +107,11 @@ namespace PricingCalc.Model.Generators
         protected void GeneratedCodeAttribute(IndentedTextWriter code)
         {
             code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{typeof(GeneratorBase).Assembly.GetName().Version}\")]");
+        }
+
+        protected string Visibility(bool isInternal)
+        {
+            return isInternal ? "internal" : "public";
         }
 
         protected static string ToCamelCase(string str)

@@ -26,7 +26,7 @@ namespace PricingCalc.Model.Generators
         private void DefineModelShardInterface(IndentedTextWriter code, ModelShard modelShard, string type)
         {
             GeneratedCodeAttribute(code);
-            Interface(code, $"I{modelShard.Name}ModelShard", new[] { type }, () =>
+            Interface(code, modelShard.IsInternal, $"I{modelShard.Name}ModelShard", new[] { type }, () =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
@@ -154,7 +154,7 @@ namespace PricingCalc.Model.Generators
         private void DefineChangesFrameInterface(IndentedTextWriter code, ModelShard modelShard)
         {
             GeneratedCodeAttribute(code);
-            Interface(code, $"I{modelShard.Name}ChangesFrame", new[] { "IChangesFrame" }, () =>
+            Interface(code, modelShard.IsInternal, $"I{modelShard.Name}ChangesFrame", new[] { "IChangesFrame" }, () =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
