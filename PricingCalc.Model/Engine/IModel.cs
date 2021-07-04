@@ -3,8 +3,7 @@ using PricingCalc.Model.Engine.Core;
 
 namespace PricingCalc.Model.Engine
 {
-    public interface IModel : IEnumerable<IModelShard>
+    public interface IModel : IModelShardAccessor, IEnumerable<IModelShard>
     {
-        T Shard<T>() where T : IModelShard;
     }
 }
