@@ -22,21 +22,21 @@ namespace PricingCalc.Model.Generators
         {
             foreach (var entity in modelShard.Entities)
             {
-                DefineEntityType(code, entity, modelShard.Version);
+                DefineEntityType(code, entity);
                 EmptyLine(code);
-                DefineEntityPropertiesInterface(code, entity, modelShard.Version);
+                DefineEntityPropertiesInterface(code, entity);
                 EmptyLine(code);
-                DefineEntityPropertiesClass(code, entity, modelShard.Version);
+                DefineEntityPropertiesClass(code, entity);
             }
         }
 
-        private void DefineEntityType(IndentedTextWriter code, Entity entity, string version)
+        private void DefineEntityType(IndentedTextWriter code, Entity entity)
         {
-            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{version}\")]");
+            GeneratedCodeAttribute(code);
             Interface(code, $"I{entity.Name}", new[] { "IEntity", $"ICopy<I{entity.Name}>" }, () => { });
             EmptyLine(code);
 
-            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{version}\")]");
+            GeneratedCodeAttribute(code);
             code.WriteLine("[global::System.Diagnostics.DebuggerDisplay(\"Id = {Id}\")]");
             code.WriteLine($"internal sealed record {entity.Name} : I{entity.Name}");
             Block(code, () =>
@@ -65,9 +65,9 @@ namespace PricingCalc.Model.Generators
             });
         }
 
-        private void DefineEntityPropertiesInterface(IndentedTextWriter code, Entity entity, string version)
+        private void DefineEntityPropertiesInterface(IndentedTextWriter code, Entity entity)
         {
-            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{version}\")]");
+            GeneratedCodeAttribute(code);
             Interface(code, $"I{EntityPropertiesType(entity.Name)}", new[]
             {
                 $"IEntityProperties",
@@ -83,9 +83,9 @@ namespace PricingCalc.Model.Generators
             });
         }
 
-        private void DefineEntityPropertiesClass(IndentedTextWriter code, Entity entity, string version)
+        private void DefineEntityPropertiesClass(IndentedTextWriter code, Entity entity)
         {
-            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{version}\")]");
+            GeneratedCodeAttribute(code);
             Class(code, "sealed", $"{EntityPropertiesType(entity.Name)}", new[] { $"I{EntityPropertiesType(entity.Name)}" }, () =>
             {
                 foreach (var prop in entity.Properties)

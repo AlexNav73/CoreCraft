@@ -104,6 +104,11 @@ namespace PricingCalc.Model.Generators
             code.WriteLineNoTabs(string.Empty);
         }
 
+        protected void GeneratedCodeAttribute(IndentedTextWriter code)
+        {
+            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{typeof(GeneratorBase).Assembly.GetName().Version}\")]");
+        }
+
         protected static string ToCamelCase(string str)
         {
             if (str != string.Empty && char.IsUpper(str[0]))

@@ -25,7 +25,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineModelShardInterface(IndentedTextWriter code, ModelShard modelShard, string type)
         {
-            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{modelShard.Version}\")]");
+            GeneratedCodeAttribute(code);
             Interface(code, $"I{modelShard.Name}ModelShard", new[] { type }, () =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -44,7 +44,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineModelShardClass(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{modelShard.Version}\")]");
+            GeneratedCodeAttribute(code);
             Class(code, "sealed", $"{modelShard.Name}ModelShard", new[]
             {
                 $"I{modelShard.Name}ModelShard",
@@ -153,7 +153,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineChangesFrameInterface(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{modelShard.Version}\")]");
+            GeneratedCodeAttribute(code);
             Interface(code, $"I{modelShard.Name}ChangesFrame", new[] { "IChangesFrame" }, () =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -172,7 +172,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineChangesFrameClass(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{modelShard.Version}\")]");
+            GeneratedCodeAttribute(code);
             Class(code, "sealed", $"{modelShard.Name}ChangesFrame",
                 new[]
                 {
@@ -279,7 +279,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineTrackableModelShardClass(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{modelShard.Version}\")]");
+            GeneratedCodeAttribute(code);
             Class(code, "sealed", $"Trackable{modelShard.Name}ModelShard",
                 new[]
                 {
