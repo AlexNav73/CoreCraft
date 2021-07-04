@@ -131,17 +131,29 @@ namespace PricingCalc.Model.Engine.Persistence
             where TParent : IEntity
             where TChild : IEntity
         {
-            repository.Insert(name, relation.SelectMany(x => relation.Children(x).Select(y => new KeyValuePair<TParent, TChild>(x, y))).ToArray());
+            var pairs = relation
+                .SelectMany(x => relation.Children(x).Select(y => new KeyValuePair<TParent, TChild>(x, y)));
+
+            repository.Insert(name, pairs.ToArray());
         }
 
-        protected void Load<TEntity, TData>(IRepository repository, string name, ICollection<TEntity, TData> collection, Scheme scheme)
+        protected void Load<TEntity, TData>(
+            IRepository repository,
+            string name,
+            ICollection<TEntity, TData> collection,
+            Scheme scheme)
             where TEntity : IEntity, ICopy<TEntity>
             where TData : IEntityProperties, ICopy<TData>
         {
             repository.Select(name, collection, scheme);
         }
 
-        protected void Load<TParent, TChild>(IRepository repository, string name, IRelation<TParent, TChild> relation, IEntityCollection<TParent> parents, IEntityCollection<TChild> children)
+        protected void Load<TParent, TChild>(
+            IRepository repository,
+            string name,
+            IRelation<TParent, TChild> relation,
+            IEntityCollection<TParent> parents,
+            IEntityCollection<TChild> children)
             where TParent : IEntity
             where TChild : IEntity
         {

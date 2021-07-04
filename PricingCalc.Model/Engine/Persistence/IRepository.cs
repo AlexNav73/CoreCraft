@@ -5,6 +5,10 @@ namespace PricingCalc.Model.Engine.Persistence
 {
     public interface IRepository
     {
+        void UpdateVersionInfo(string modelShardName, string version);
+
+        void Migrate(string modelShardName, Version version);
+
         void Insert<TEntity, TData>(string name, IReadOnlyCollection<KeyValuePair<TEntity, TData>> items, Scheme scheme)
             where TEntity : IEntity
             where TData : IEntityProperties;
