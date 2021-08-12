@@ -1,0 +1,291 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Linq;
+using Microsoft.Data.Sqlite;
+using PricingCalc.Core;
+using PricingCalc.Model.Engine.Core;
+using PricingCalc.Model.Engine.Persistence;
+
+namespace PricingCalc.Model.Storage.Sqlite
+{
+    public sealed class SqliteRepository : DisposableBase, IRepository
+    {
+        private const string _versionTableName = "_ModelShards";
+
+        private readonly IEnumerable<IMigration> _migrations;
+        private readonly SqliteConnection _connection;
+
+        public SqliteRepository(string path, IEnumerable<IMigration> migrations)
+        {
+            _migrations = migrations;
+
+            _connection = new SqliteConnection($"Filename={path}");
+            _connection.Open();
+        }
+
+        public DbTransaction BeginTransaction()
+        {
+            return _connection.BeginTransaction();
+        }
+
+        public void UpdateVersionInfo(string modelShardName, string version)
+        {
+            ExecuteNonQuery(QueryBuilder.CreateVersionTable(_versionTableName));
+
+            var command = _connection.CreateCommand();
+            command.CommandText = QueryBuilder.UpdateShardVersion(_versionTableName);
+            var nameParam = command.Parameters.Add("$Name", SqliteType.Text);
+            nameParam.Value = modelShardName;
+            var versionParam = command.Parameters.Add("$Version", SqliteType.Text);
+            versionParam.Value = version;
+            command.ExecuteNonQuery();
+        }
+
+        public void Migrate(string modelShardName, Engine.Version version)
+        {
+            var oldVersion = Version(modelShardName);
+            if (oldVersion != null && oldVersion < version)
+            {
+                var pendingMigrations = _migrations
+                    .Where(x => x.ModelSharedName == modelShardName)
+                    .Where(x => x.Version > oldVersion && x.Version <= version);
+
+                foreach (var migration in pendingMigrations)
+                {
+                    migration.Migrate(new SqliteMigrator());
+                }
+            }
+        }
+
+        public void Insert<TEntity, TData>(
+            string name,
+            IReadOnlyCollection<KeyValuePair<TEntity, TData>> items,
+            Scheme scheme)
+            where TEntity : IEntity
+            where TData : IEntityProperties
+        {
+            ExecuteNonQuery(QueryBuilder.Collections.CreateTable(scheme, name));
+            ExecuteCollectionCommand(QueryBuilder.Collections.Insert(scheme, name), items, scheme);
+        }
+
+        public void Insert<TParent, TChild>(
+            string name,
+            IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
+            where TParent : IEntity
+            where TChild : IEntity
+        {
+            ExecuteNonQuery(QueryBuilder.Relations.CreateTable(name));
+            ExecuteRelationCommand(QueryBuilder.Relations.Insert(name), relations);
+        }
+
+        public void Update<TEntity, TData>(string name, IReadOnlyCollection<KeyValuePair<TEntity, TData>> items, Scheme scheme)
+            where TEntity : IEntity
+            where TData : IEntityProperties
+        {
+            ExecuteCollectionCommand(QueryBuilder.Collections.Update(scheme, name), items, scheme);
+        }
+
+        public void Delete<TEntity>(string name, IReadOnlyCollection<TEntity> entities)
+            where TEntity : IEntity
+        {
+            var command = _connection.CreateCommand();
+            command.CommandText = QueryBuilder.Collections.Delete(name);
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = "$Id";
+            command.Parameters.Add(parameter);
+
+            foreach (var entity in entities)
+            {
+                parameter.Value = entity.Id;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        public void Delete<TParent, TChild>(string name, IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
+            where TParent : IEntity
+            where TChild : IEntity
+        {
+            ExecuteRelationCommand(QueryBuilder.Relations.Delete(name), relations);
+        }
+
+        public void Select<TEntity, TData>(string name, ICollection<TEntity, TData> collection, Scheme scheme)
+            where TEntity : IEntity, ICopy<TEntity>
+            where TData : IEntityProperties, ICopy<TData>
+        {
+            if (!IfExists(name))
+            {
+                return;
+            }
+
+            var command = _connection.CreateCommand();
+            command.CommandText = QueryBuilder.Collections.Select(scheme, name);
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                var bag = new PropertiesBag();
+                var id = reader.GetGuid(0);
+
+                for (var i = 0; i < scheme.Properties.Count; i++)
+                {
+                    bag.Write(scheme.Properties[i].Name, Convert.ChangeType(reader.GetValue(i + 1), scheme.Properties[i].Type));
+                }
+
+                collection.Create()
+                    .WithId(id)
+                    .WithInit(p => p.ReadFrom(bag))
+                    .Build();
+            }
+        }
+
+        public void Select<TParent, TChild>(string name, IRelation<TParent, TChild> relation, IEntityCollection<TParent> parentCollection, IEntityCollection<TChild> childCollection)
+            where TParent : IEntity
+            where TChild : IEntity
+        {
+            if (!IfExists(name))
+            {
+                return;
+            }
+
+            var command = _connection.CreateCommand();
+            command.CommandText = QueryBuilder.Relations.Select(name);
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                var parentId = reader.GetGuid(0);
+                var childId = reader.GetGuid(1);
+
+                var parent = parentCollection.Single(x => x.Id == parentId);
+                var child = childCollection.Single(x => x.Id == childId);
+
+                relation.Add(parent, child);
+            }
+        }
+
+        private void ExecuteCollectionCommand<TEntity, TData>(string query, IReadOnlyCollection<KeyValuePair<TEntity, TData>> items, Scheme scheme)
+            where TEntity : IEntity
+            where TData : IEntityProperties
+        {
+            var command = _connection.CreateCommand();
+            command.CommandText = query;
+            var parameters = CreateParameters(command, scheme);
+
+            foreach (var pair in items)
+            {
+                AssignValuesToParameters(parameters, pair.Key, pair.Value);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        private void ExecuteRelationCommand<TParent, TChild>(string query, IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
+            where TParent : IEntity
+            where TChild : IEntity
+        {
+            var command = _connection.CreateCommand();
+            command.CommandText = query;
+
+            var parentParameter = command.CreateParameter();
+            parentParameter.ParameterName = "$ParentId";
+            command.Parameters.Add(parentParameter);
+            var childParameter = command.CreateParameter();
+            childParameter.ParameterName = "$ChildId";
+            command.Parameters.Add(childParameter);
+
+            foreach (var pair in relations)
+            {
+                parentParameter.Value = pair.Key.Id;
+                childParameter.Value = pair.Value.Id;
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        private void ExecuteNonQuery(string commandText)
+        {
+            var command = _connection.CreateCommand();
+            command.CommandText = commandText;
+            command.ExecuteNonQuery();
+        }
+
+        private static IDictionary<string, SqliteParameter> CreateParameters(SqliteCommand command, Scheme scheme)
+        {
+            var parameters = new Dictionary<string, SqliteParameter>();
+
+            var idParameter = command.CreateParameter();
+            idParameter.ParameterName = "$Id";
+            parameters.Add("Id", idParameter);
+            command.Parameters.Add(idParameter);
+
+            for (var i = 0; i < scheme.Properties.Count; i++)
+            {
+                var parameter = command.CreateParameter();
+                parameter.ParameterName = $"${scheme.Properties[i].Name}";
+                parameter.IsNullable = scheme.Properties[i].IsNullable;
+                parameters.Add(scheme.Properties[i].Name, parameter);
+                command.Parameters.Add(parameter);
+            }
+
+            return parameters;
+        }
+
+        private static void AssignValuesToParameters<TEntity, TData>(IDictionary<string, SqliteParameter> parameters, TEntity entity, TData data)
+            where TEntity : IEntity
+            where TData : IEntityProperties
+        {
+            parameters["Id"].Value = entity.Id;
+
+            var bag = new PropertiesBag();
+            data.WriteTo(bag);
+
+            foreach (var property in bag)
+            {
+                if (property.Value != null)
+                {
+                    parameters[property.Key].Value = property.Value;
+                }
+                else
+                {
+                    parameters[property.Key].Value = DBNull.Value;
+                }
+            }
+        }
+
+        private Engine.Version? Version(string name)
+        {
+            var command = _connection.CreateCommand();
+            command.CommandText = QueryBuilder.Version(_versionTableName, name);
+
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                return Engine.Version.FromString(reader.GetString(0));
+            }
+
+            return null;
+        }
+
+        private bool IfExists(string name)
+        {
+            var command = _connection.CreateCommand();
+            command.CommandText = QueryBuilder.IfTableExists(name);
+
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                return reader.GetBoolean(0);
+            }
+
+            return false;
+        }
+
+        protected override void DisposeManagedObjects()
+        {
+            _connection.Close();
+            _connection.Dispose();
+        }
+    }
+}
