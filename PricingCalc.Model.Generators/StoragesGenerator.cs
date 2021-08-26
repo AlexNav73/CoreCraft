@@ -11,22 +11,22 @@ namespace PricingCalc.Model.Generators
             foreach (var modelShard in shards)
             {
                 DefineStorage(code, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
             }
         }
 
         private void DefineStorage(IndentedTextWriter code, ModelShard modelShard)
         {
-            GeneratedCodeAttribute(code);
-            Class(code, "sealed", $"{modelShard.Name}ModelShardStorage", new[]
+            code.GeneratedCodeAttribute();
+            code.Class("sealed", $"{modelShard.Name}ModelShardStorage", new[]
             {
                 $"ModelShardStorage<I{modelShard.Name}ModelShard, I{modelShard.Name}ChangesFrame>"
             },
             () =>
             {
                 code.WriteLine($"public {modelShard.Name}ModelShardStorage(I{modelShard.Name}ModelShard shard) : base(shard)");
-                Block(code, () => { });
-                EmptyLine(code);
+                code.Block(() => { });
+                code.EmptyLine();
 
                 foreach (var collection in modelShard.Collections)
                 {
@@ -36,57 +36,57 @@ namespace PricingCalc.Model.Generators
 
                     code.WriteLine($"private static readonly Scheme _{ToCamelCase(collection.Name)}Scheme = new(new Property[] {{ {array} }});");
                 }
-                EmptyLine(code);
+                code.EmptyLine();
 
                 code.WriteLine($"protected override void SaveInternal(string path, IRepository repository, I{modelShard.Name}ChangesFrame changes)");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     code.WriteLine($"repository.UpdateVersionInfo(\"{modelShard.Name}\", \"{modelShard.Version}\");");
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     foreach (var collection in modelShard.Collections)
                     {
                         code.WriteLine($"Save(repository, \"{modelShard.Name}.{collection.Name}\", changes.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
                     }
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
                         code.WriteLine($"Save(repository, \"{modelShard.Name}.{relation.Name}\", changes.{relation.Name});");
                     }
                 });
-                EmptyLine(code);
+                code.EmptyLine();
 
                 code.WriteLine($"protected override void SaveInternal(string path, IRepository repository)");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     code.WriteLine($"repository.UpdateVersionInfo(\"{modelShard.Name}\", \"{modelShard.Version}\");");
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     foreach (var collection in modelShard.Collections)
                     {
                         code.WriteLine($"Save(repository, \"{modelShard.Name}.{collection.Name}\", Shard.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
                     }
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
                         code.WriteLine($"Save(repository, \"{modelShard.Name}.{relation.Name}\", Shard.{relation.Name});");
                     }
                 });
-                EmptyLine(code);
+                code.EmptyLine();
 
                 code.WriteLine($"protected override void LoadInternal(string path, IRepository repository)");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     code.WriteLine($"repository.Migrate(\"{modelShard.Name}\", new Version({modelShard.Version.Replace(".", ", ")}));");
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     foreach (var collection in modelShard.Collections)
                     {
                         code.WriteLine($"Load(repository, \"{modelShard.Name}.{collection.Name}\", Shard.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
                     }
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {

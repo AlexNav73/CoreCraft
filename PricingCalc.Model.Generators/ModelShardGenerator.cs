@@ -11,41 +11,41 @@ namespace PricingCalc.Model.Generators
             foreach (var modelShard in shards)
             {
                 DefineModelShardInterface(code, modelShard, type);
-                EmptyLine(code);
+                code.EmptyLine();
                 DefineModelShardClass(code, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
                 DefineChangesFrameInterface(code, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
                 DefineChangesFrameClass(code, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
                 DefineTrackableModelShardClass(code, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
             }
         }
 
         private void DefineModelShardInterface(IndentedTextWriter code, ModelShard modelShard, string type)
         {
-            GeneratedCodeAttribute(code);
-            Interface(code, modelShard.IsInternal, $"I{modelShard.Name}ModelShard", new[] { type }, () =>
+            code.GeneratedCodeAttribute();
+            code.Interface(modelShard.IsInternal, $"I{modelShard.Name}ModelShard", new[] { type }, () =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine(Property($"I{CollectionType(collection)}", collection.Name, "get;"));
+                    code.WriteLine(Property($"I{Type(collection)}", collection.Name, "get;"));
                 }
 
-                EmptyLine(code);
+                code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine(Property($"I{RelationType(relation)}", relation.Name, "get;"));
+                    code.WriteLine(Property($"I{Type(relation)}", relation.Name, "get;"));
                 }
             });
         }
 
         private void DefineModelShardClass(IndentedTextWriter code, ModelShard modelShard)
         {
-            GeneratedCodeAttribute(code);
-            Class(code, "sealed", $"{modelShard.Name}ModelShard", new[]
+            code.GeneratedCodeAttribute();
+            code.Class("sealed", $"{modelShard.Name}ModelShard", new[]
             {
                 $"I{modelShard.Name}ModelShard",
                 $"ICopy<I{modelShard.Name}ModelShard>",
@@ -55,32 +55,32 @@ namespace PricingCalc.Model.Generators
             () =>
             {
                 DefineCtor(code, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
                 ImplementModelShardInterface(code, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
                 ImplementIHaveStorageInterface(code);
-                EmptyLine(code);
+                code.EmptyLine();
                 ImplementTrackableInterface(code, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
                 ImplementCopyInterface(code, modelShard);
             });
 
             void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
             {
                 code.WriteLine($"public {modelShard.Name}ModelShard()");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{collection.Name} = new {CollectionType(collection)}(id => new {collection.Type}(id), () => new {collection.Type}Properties());");
+                        code.WriteLine($"{collection.Name} = new {Type(collection)}(id => new {collection.Type}(id), () => new {collection.Type}Properties());");
                     }
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{relation.Name} = new {RelationType(relation)}(new {relation.ParentRelationType}<I{relation.ParentType}, I{relation.ChildType}>(), new {relation.ChildRelationType}<I{relation.ChildType}, I{relation.ParentType}>());");
+                        code.WriteLine($"{relation.Name} = new {Type(relation)}(new {relation.ParentRelationType}<I{relation.ParentType}, I{relation.ChildType}>(), new {relation.ChildRelationType}<I{relation.ChildType}, I{relation.ParentType}>());");
                     }
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     code.WriteLine($"Storage = new {modelShard.Name}ModelShardStorage(this);");
                 });
@@ -90,15 +90,15 @@ namespace PricingCalc.Model.Generators
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"public {Property($"I{CollectionType(collection)}", collection.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{Type(collection)}", collection.Name, "get; private set;")}");
                 }
-                EmptyLine(code);
+                code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"public {Property($"I{RelationType(relation)}", relation.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name, "get; private set;")}");
                 }
-                EmptyLine(code);
+                code.EmptyLine();
             }
 
             void ImplementIHaveStorageInterface(IndentedTextWriter code)
@@ -109,7 +109,7 @@ namespace PricingCalc.Model.Generators
             void ImplementTrackableInterface(IndentedTextWriter code, ModelShard modelShard)
             {
                 code.WriteLine($"public IModelShard AsTrackable(IWritableModelChanges modelChanges)");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     code.WriteLine($"var frame = modelChanges.Add(new {modelShard.Name}ChangesFrame());");
                     code.WriteLine($"return new Trackable{modelShard.Name}ModelShard(this, frame);");
@@ -119,28 +119,28 @@ namespace PricingCalc.Model.Generators
             void ImplementCopyInterface(IndentedTextWriter code, ModelShard modelShard)
             {
                 code.WriteLine($"public I{modelShard.Name}ModelShard Copy()");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     foreach (var collection in modelShard.Collections)
                     {
                         code.WriteLine($"var {collection.Name.ToLower()} = {collection.Name}.Copy();");
                     }
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
                         code.WriteLine($"var {relation.Name.ToLower()} = {relation.Name}.Copy();");
                     }
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     code.WriteLine($"return new {modelShard.Name}ModelShard()");
-                    Block(code, () =>
+                    code.Block(() =>
                     {
                         foreach (var collection in modelShard.Collections)
                         {
                             code.WriteLine($"{collection.Name} = {collection.Name.ToLower()},");
                         }
-                        EmptyLine(code);
+                        code.EmptyLine();
 
                         foreach (var relation in modelShard.Relations)
                         {
@@ -153,27 +153,27 @@ namespace PricingCalc.Model.Generators
 
         private void DefineChangesFrameInterface(IndentedTextWriter code, ModelShard modelShard)
         {
-            GeneratedCodeAttribute(code);
-            Interface(code, modelShard.IsInternal, $"I{modelShard.Name}ChangesFrame", new[] { "IChangesFrame" }, () =>
+            code.GeneratedCodeAttribute();
+            code.Interface(modelShard.IsInternal, $"I{modelShard.Name}ChangesFrame", new[] { "IChangesFrame" }, () =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine(Property($"I{CollectionChangesType(collection)}", collection.Name, "get;"));
+                    code.WriteLine(Property($"I{ChangesType(collection)}", collection.Name, "get;"));
                 }
 
-                EmptyLine(code);
+                code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine(Property($"I{RelationChangesType(relation)}", relation.Name, "get;"));
+                    code.WriteLine(Property($"I{ChangesType(relation)}", relation.Name, "get;"));
                 }
             });
         }
 
         private void DefineChangesFrameClass(IndentedTextWriter code, ModelShard modelShard)
         {
-            GeneratedCodeAttribute(code);
-            Class(code, "sealed", $"{modelShard.Name}ChangesFrame",
+            code.GeneratedCodeAttribute();
+            code.Class("sealed", $"{modelShard.Name}ChangesFrame",
                 new[]
                 {
                     $"I{modelShard.Name}ChangesFrame",
@@ -182,30 +182,30 @@ namespace PricingCalc.Model.Generators
                 () =>
                 {
                     DefineCtor(code, modelShard);
-                    EmptyLine(code);
+                    code.EmptyLine();
                     ImplementModelShardChangesFrameInterface(code, modelShard);
-                    EmptyLine(code);
+                    code.EmptyLine();
                     DefineInvertMethod(code, modelShard);
-                    EmptyLine(code);
+                    code.EmptyLine();
                     DefineApplyMethod(code, modelShard);
-                    EmptyLine(code);
+                    code.EmptyLine();
                     ImplementChangesFrameInterface(code, modelShard);
                 });
 
             void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
             {
                 code.WriteLine($"public {modelShard.Name}ChangesFrame()");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{collection.Name} = new {CollectionChangesType(collection)}();");
+                        code.WriteLine($"{collection.Name} = new {ChangesType(collection)}();");
                     }
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{relation.Name} = new {RelationChangesType(relation)}();");
+                        code.WriteLine($"{relation.Name} = new {ChangesType(relation)}();");
                     }
                 });
             }
@@ -214,29 +214,29 @@ namespace PricingCalc.Model.Generators
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"public {Property($"I{CollectionChangesType(collection)}", collection.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{ChangesType(collection)}", collection.Name, "get; private set;")}");
                 }
-                EmptyLine(code);
+                code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"public {Property($"I{RelationChangesType(relation)}", relation.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{ChangesType(relation)}", relation.Name, "get; private set;")}");
                 }
             }
 
             void DefineInvertMethod(IndentedTextWriter code, ModelShard modelShard)
             {
                 code.WriteLine($"public IWritableChangesFrame Invert()");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     code.WriteLine($"return new {modelShard.Name}ChangesFrame()");
-                    Block(code, () =>
+                    code.Block(() =>
                     {
                         foreach (var collection in modelShard.Collections)
                         {
                             code.WriteLine($"{collection.Name} = {collection.Name}.Invert(),");
                         }
-                        EmptyLine(code);
+                        code.EmptyLine();
 
                         foreach (var relation in modelShard.Relations)
                         {
@@ -249,10 +249,10 @@ namespace PricingCalc.Model.Generators
             void DefineApplyMethod(IndentedTextWriter code, ModelShard modelShard)
             {
                 code.WriteLine($"public void Apply(IModel model)");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     code.WriteLine($"var modelShard = model.Shard<I{modelShard.Name}ModelShard>();");
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     var operations = modelShard.Relations.Select(x => $"{x.Name}.Apply(modelShard.{x.Name});")
                         .Union(modelShard.Collections.Select(x => $"{x.Name}.Apply(modelShard.{x.Name});"));
@@ -267,7 +267,7 @@ namespace PricingCalc.Model.Generators
             void ImplementChangesFrameInterface(IndentedTextWriter code, ModelShard modelShard)
             {
                 code.WriteLine($"public bool HasChanges()");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     var checks = modelShard.Collections.Select(x => $"{x.Name}.HasChanges()")
                         .Union(modelShard.Relations.Select(x => $"{x.Name}.HasChanges()"));
@@ -279,8 +279,8 @@ namespace PricingCalc.Model.Generators
 
         private void DefineTrackableModelShardClass(IndentedTextWriter code, ModelShard modelShard)
         {
-            GeneratedCodeAttribute(code);
-            Class(code, "sealed", $"Trackable{modelShard.Name}ModelShard",
+            code.GeneratedCodeAttribute();
+            code.Class("sealed", $"Trackable{modelShard.Name}ModelShard",
                 new[]
                 {
                     $"I{modelShard.Name}ModelShard",
@@ -290,7 +290,7 @@ namespace PricingCalc.Model.Generators
                 () =>
                 {
                     DefineCtor(code, modelShard);
-                    EmptyLine(code);
+                    code.EmptyLine();
                     ImplementModelShardInterface(code, modelShard);
                     ImplementIHaveStorageInterface(code);
                 });
@@ -298,17 +298,17 @@ namespace PricingCalc.Model.Generators
             void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
             {
                 code.WriteLine($"public Trackable{modelShard.Name}ModelShard(I{modelShard.Name}ModelShard modelShard, I{modelShard.Name}ChangesFrame frame)");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{collection.Name} = new Trackable{CollectionType(collection)}(frame.{collection.Name}, modelShard.{collection.Name});");
+                        code.WriteLine($"{collection.Name} = new Trackable{Type(collection)}(frame.{collection.Name}, modelShard.{collection.Name});");
                     }
-                    EmptyLine(code);
+                    code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{relation.Name} = new Trackable{RelationType(relation)}(frame.{relation.Name}, modelShard.{relation.Name});");
+                        code.WriteLine($"{relation.Name} = new Trackable{Type(relation)}(frame.{relation.Name}, modelShard.{relation.Name});");
                     }
 
                     code.WriteLine($"Storage = new {modelShard.Name}ModelShardStorage(this);");
@@ -319,15 +319,15 @@ namespace PricingCalc.Model.Generators
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"public {Property($"I{CollectionType(collection)}", collection.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{Type(collection)}", collection.Name, "get; private set;")}");
                 }
-                EmptyLine(code);
+                code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"public {Property($"I{RelationType(relation)}", relation.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name, "get; private set;")}");
                 }
-                EmptyLine(code);
+                code.EmptyLine();
             }
 
             void ImplementIHaveStorageInterface(IndentedTextWriter code)

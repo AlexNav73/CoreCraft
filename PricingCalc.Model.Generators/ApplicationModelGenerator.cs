@@ -27,7 +27,7 @@ namespace PricingCalc.Model.Generators
                     using (var writer = new StringWriter())
                     using (var code = new IndentedTextWriter(writer, "    "))
                     {
-                        Preambula(code);
+                        code.Preambula();
                         Generate(compilation, code, modelScheme);
 
                         var generatedFileName = fileName.Replace(ModelFileExtension, "");
@@ -40,22 +40,22 @@ namespace PricingCalc.Model.Generators
         private void Generate(CSharpCompilation compilation, IndentedTextWriter code, ModelScheme modelScheme)
         {
             code.WriteLine($"namespace {compilation.AssemblyName}.Model");
-            Block(code, () =>
+            code.Block(() =>
             {
                 code.WriteLine("using PricingCalc.Model.Engine;");
                 code.WriteLine("using PricingCalc.Model.Engine.Core;");
                 code.WriteLine("using PricingCalc.Model.Engine.ChangesTracking;");
                 code.WriteLine("using PricingCalc.Model.Engine.Persistence;");
                 code.WriteLine($"using {compilation.AssemblyName}.Model.Entities;");
-                EmptyLine(code);
+                code.EmptyLine();
 
                 GenerateModelShards(code, modelScheme.Shards, modelScheme.ShardType);
                 GenerateStorages(code, modelScheme.Shards);
             });
-            EmptyLine(code);
+            code.EmptyLine();
 
             code.WriteLine($"namespace {compilation.AssemblyName}.Model.Entities");
-            Block(code, () =>
+            code.Block(() =>
             {
                 GenerateEntities(code, modelScheme.Shards);
             });
@@ -73,14 +73,16 @@ namespace PricingCalc.Model.Generators
             return Property(prop.IsNullable ? $"{prop.Type}?" : prop.Type, prop.Name, accessors);
         }
 
-        private static string CollectionType(Collection collection) => $"Collection<I{collection.Type}, I{EntityPropertiesType(collection.Type)}>";
+        private static string Type(Collection collection) => $"Collection<I{collection.Type}, I{PropertiesType(collection.Type)}>";
 
-        private static string RelationType(Relation relation) => $"Relation<I{relation.ParentType}, I{relation.ChildType}>";
+        private static string Type(Relation relation) => $"Relation<I{relation.ParentType}, I{relation.ChildType}>";
 
-        private static string CollectionChangesType(Collection collection) => $"CollectionChanges<I{collection.Type}, I{EntityPropertiesType(collection.Type)}>";
+        private static string ChangesType(Collection collection) => $"CollectionChanges<I{collection.Type}, I{PropertiesType(collection.Type)}>";
 
-        private static string RelationChangesType(Relation relation) => $"RelationCollectionChanges<I{relation.ParentType}, I{relation.ChildType}>";
+        private static string ChangesType(Relation relation) => $"RelationCollectionChanges<I{relation.ParentType}, I{relation.ChildType}>";
 
-        private static string EntityPropertiesType(string type) => $"{type}Properties";
+        private static string PropertiesType(Entity entitiy) => PropertiesType(entitiy.Name);
+
+        private static string PropertiesType(string type) => $"{type}Properties";
     }
 }

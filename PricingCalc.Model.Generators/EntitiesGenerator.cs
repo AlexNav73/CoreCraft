@@ -9,12 +9,12 @@ namespace PricingCalc.Model.Generators
         public void GenerateEntities(IndentedTextWriter code, IEnumerable<ModelShard> shards)
         {
             code.WriteLine("using PricingCalc.Model.Engine.Core;");
-            EmptyLine(code);
+            code.EmptyLine();
 
             foreach (var modelShard in shards)
             {
                 DefineEntities(code, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
             }
         }
 
@@ -23,42 +23,42 @@ namespace PricingCalc.Model.Generators
             foreach (var entity in modelShard.Entities)
             {
                 DefineEntityType(code, entity, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
                 DefineEntityPropertiesInterface(code, entity, modelShard);
-                EmptyLine(code);
+                code.EmptyLine();
                 DefineEntityPropertiesClass(code, entity);
             }
         }
 
         private void DefineEntityType(IndentedTextWriter code, Entity entity, ModelShard shard)
         {
-            GeneratedCodeAttribute(code);
-            Interface(code, shard.IsInternal, $"I{entity.Name}", new[] { "IEntity", $"ICopy<I{entity.Name}>" }, () => { });
-            EmptyLine(code);
+            code.GeneratedCodeAttribute();
+            code.Interface(shard.IsInternal, $"I{entity.Name}", new[] { "IEntity", $"ICopy<I{entity.Name}>" }, () => { });
+            code.EmptyLine();
 
-            GeneratedCodeAttribute(code);
+            code.GeneratedCodeAttribute();
             code.WriteLine("[global::System.Diagnostics.DebuggerDisplay(\"Id = {Id}\")]");
             code.WriteLine($"internal sealed record {entity.Name} : I{entity.Name}");
-            Block(code, () =>
+            code.Block(() =>
             {
                 code.WriteLine($"public {Property("global::System.Guid", "Id", "get;")}");
-                EmptyLine(code);
+                code.EmptyLine();
 
                 code.WriteLine($"internal {entity.Name}() : this(global::System.Guid.NewGuid())");
-                Block(code, () =>
+                code.Block(() =>
                 {
                 });
-                EmptyLine(code);
+                code.EmptyLine();
 
                 code.WriteLine($"internal {entity.Name}(global::System.Guid id)");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     code.WriteLine("Id = id;");
                 });
-                EmptyLine(code);
+                code.EmptyLine();
 
                 code.WriteLine($"public I{entity.Name} Copy()");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     code.WriteLine($"return new {entity.Name}(Id);");
                 });
@@ -67,12 +67,12 @@ namespace PricingCalc.Model.Generators
 
         private void DefineEntityPropertiesInterface(IndentedTextWriter code, Entity entity, ModelShard shard)
         {
-            GeneratedCodeAttribute(code);
-            Interface(code, shard.IsInternal, $"I{EntityPropertiesType(entity.Name)}", new[]
+            code.GeneratedCodeAttribute();
+            code.Interface(shard.IsInternal, $"I{PropertiesType(entity)}", new[]
             {
                 $"IEntityProperties",
-                $"ICopy<I{EntityPropertiesType(entity.Name)}>",
-                $"global::System.IEquatable<I{EntityPropertiesType(entity.Name)}>"
+                $"ICopy<I{PropertiesType(entity)}>",
+                $"global::System.IEquatable<I{PropertiesType(entity)}>"
             },
             () =>
             {
@@ -85,28 +85,28 @@ namespace PricingCalc.Model.Generators
 
         private void DefineEntityPropertiesClass(IndentedTextWriter code, Entity entity)
         {
-            GeneratedCodeAttribute(code);
-            Class(code, "sealed", $"{EntityPropertiesType(entity.Name)}", new[] { $"I{EntityPropertiesType(entity.Name)}" }, () =>
+            code.GeneratedCodeAttribute();
+            code.Class("sealed", $"{PropertiesType(entity)}", new[] { $"I{PropertiesType(entity)}" }, () =>
             {
                 foreach (var prop in entity.Properties)
                 {
                     code.WriteLine($"public {DefineProperty(prop, "get; set;")}");
                 }
-                EmptyLine(code);
+                code.EmptyLine();
 
                 DefineCtor(code, entity);
-                EmptyLine(code);
+                code.EmptyLine();
                 ImplementCopyInterface(code, entity);
-                EmptyLine(code);
+                code.EmptyLine();
                 ImplementEntityPropertiesInterface(code, entity);
-                EmptyLine(code);
+                code.EmptyLine();
                 ImplementEquatableInterface(code, entity);
             });
 
             void DefineCtor(IndentedTextWriter code, Entity entity)
             {
-                code.WriteLine($"public {EntityPropertiesType(entity.Name)}()");
-                Block(code, () =>
+                code.WriteLine($"public {PropertiesType(entity)}()");
+                code.Block(() =>
                 {
                     foreach (var prop in entity.Properties.Where(x => !x.IsNullable && !string.IsNullOrEmpty(x.DefaultValue)))
                     {
@@ -117,11 +117,11 @@ namespace PricingCalc.Model.Generators
 
             void ImplementCopyInterface(IndentedTextWriter code, Entity entity)
             {
-                code.WriteLine($"public I{EntityPropertiesType(entity.Name)} Copy()");
-                Block(code, () =>
+                code.WriteLine($"public I{PropertiesType(entity)} Copy()");
+                code.Block(() =>
                 {
-                    code.WriteLine($"return new {EntityPropertiesType(entity.Name)}()");
-                    Block(code, () =>
+                    code.WriteLine($"return new {PropertiesType(entity)}()");
+                    code.Block(() =>
                     {
                         foreach (var prop in entity.Properties)
                         {
@@ -134,17 +134,17 @@ namespace PricingCalc.Model.Generators
             void ImplementEntityPropertiesInterface(IndentedTextWriter code, Entity entity)
             {
                 code.WriteLine($"public void ReadFrom(IPropertiesBag bag)");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     foreach (var prop in entity.Properties)
                     {
                         code.WriteLine($"{prop.Name} = bag.Read<{prop.Type}>(\"{prop.Name}\");");
                     }
                 });
-                EmptyLine(code);
+                code.EmptyLine();
 
                 code.WriteLine($"public void WriteTo(IPropertiesBag bag)");
-                Block(code, () =>
+                code.Block(() =>
                 {
                     foreach (var prop in entity.Properties)
                     {
@@ -155,8 +155,8 @@ namespace PricingCalc.Model.Generators
 
             void ImplementEquatableInterface(IndentedTextWriter code, Entity entity)
             {
-                code.WriteLine($"public bool Equals(I{EntityPropertiesType(entity.Name)}? other)");
-                Block(code, () =>
+                code.WriteLine($"public bool Equals(I{PropertiesType(entity)}? other)");
+                code.Block(() =>
                 {
                     var isNotNull = "return other != null";
                     var properties = entity.Properties.Select(GeneratePropertyEqualityComparison);
