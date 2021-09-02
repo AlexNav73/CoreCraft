@@ -1,4 +1,4 @@
-using FakeItEasy;
+﻿using FakeItEasy;
 using NUnit.Framework;
 using PricingCalc.Model.Engine.Core;
 using PricingCalc.Model.Tests.Model.Entities;
@@ -50,7 +50,7 @@ namespace PricingCalc.Model.Tests
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
 
-            var children = _relation.Children(firstEntity);
+            _relation.Children(firstEntity);
 
             A.CallTo(() => _parentMapping.Children(firstEntity)).MustHaveHappened();
             A.CallTo(() => _childMapping.Children(secondEntity)).MustNotHaveHappened();
@@ -62,7 +62,7 @@ namespace PricingCalc.Model.Tests
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
 
-            var children = _relation.Parents(secondEntity);
+            _relation.Parents(secondEntity);
 
             A.CallTo(() => _parentMapping.Children(firstEntity)).MustNotHaveHappened();
             A.CallTo(() => _childMapping.Children(secondEntity)).MustHaveHappened();
@@ -71,7 +71,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void RelationCopyTest()
         {
-            var copy = _relation.Copy();
+            _relation.Copy();
 
             A.CallTo(() => _parentMapping.Copy()).MustHaveHappened();
             A.CallTo(() => _childMapping.Copy()).MustHaveHappened();
@@ -80,7 +80,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void RelationEnumeratorTest()
         {
-            var copy = _relation.GetEnumerator();
+            _relation.GetEnumerator();
 
             A.CallTo(() => _parentMapping.GetEnumerator()).MustHaveHappened();
             A.CallTo(() => _childMapping.GetEnumerator()).MustNotHaveHappened();
