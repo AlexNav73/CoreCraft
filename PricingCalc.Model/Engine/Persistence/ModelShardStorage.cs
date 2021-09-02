@@ -40,7 +40,7 @@ namespace PricingCalc.Model.Engine.Persistence
 
         protected abstract void LoadInternal(string path, IRepository repository);
 
-        protected void Save<TEntity, TData>(IRepository repository, string name, ICollectionChanges<TEntity, TData> changes, Scheme scheme)
+        protected void Save<TEntity, TData>(IRepository repository, string name, ICollectionChangeSet<TEntity, TData> changes, Scheme scheme)
             where TEntity : IEntity, ICopy<TEntity>
             where TData : IEntityProperties, ICopy<TData>
         {
@@ -57,15 +57,15 @@ namespace PricingCalc.Model.Engine.Persistence
             {
                 switch (change.Action)
                 {
-                    case EntityAction.Add:
-                        added.Add(new KeyValuePair<TEntity, TData>(change.Entity, change.NewData));
+                    case CollectionAction.Add:
+                        added.Add(new KeyValuePair<TEntity, TData>(change.Entity, change.NewData!));
                         break;
 
-                    case EntityAction.Modify:
-                        modified.Add(new KeyValuePair<TEntity, TData>(change.Entity, change.NewData));
+                    case CollectionAction.Modify:
+                        modified.Add(new KeyValuePair<TEntity, TData>(change.Entity, change.NewData!));
                         break;
 
-                    case EntityAction.Remove:
+                    case CollectionAction.Remove:
                         removed.Add(change.Entity);
                         break;
                 }
@@ -92,7 +92,7 @@ namespace PricingCalc.Model.Engine.Persistence
             repository.Insert(name, collection.Select(x => new KeyValuePair<TEntity, TData>(x, collection.Get(x))).ToArray(), scheme);
         }
 
-        protected void Save<TParent, TChild>(IRepository repository, string name, IRelationCollectionChanges<TParent, TChild> changes)
+        protected void Save<TParent, TChild>(IRepository repository, string name, IRelationChangeSet<TParent, TChild> changes)
             where TParent : IEntity
             where TChild : IEntity
         {

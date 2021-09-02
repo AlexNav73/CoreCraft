@@ -8,30 +8,30 @@ using PricingCalc.Model.Engine.Core;
 namespace PricingCalc.Model.Engine.ChangesTracking
 {
     [DebuggerDisplay("HasChanges = {HasChanges()}")]
-    public class CollectionChanges<TEntity, TData> : ICollectionChanges<TEntity, TData>
+    public class CollectionChangeSet<TEntity, TData> : ICollectionChangeSet<TEntity, TData>
         where TEntity : IEntity, ICopy<TEntity>
         where TData : IEntityProperties, ICopy<TData>
     {
-        private readonly IList<IEntityChange<TEntity, TData>> _changes;
+        private readonly IList<ICollectionChange<TEntity, TData>> _changes;
 
-        public CollectionChanges() : this(new List<IEntityChange<TEntity, TData>>())
+        public CollectionChangeSet() : this(new List<ICollectionChange<TEntity, TData>>())
         {
         }
 
-        private CollectionChanges(IList<IEntityChange<TEntity, TData>> changes)
+        private CollectionChangeSet(IList<ICollectionChange<TEntity, TData>> changes)
         {
             _changes = changes;
         }
 
-        public void Add(EntityAction action, TEntity entity, TData oldData, TData newData)
+        public void Add(CollectionAction action, TEntity entity, TData? oldData, TData? newData)
         {
-            _changes.Add(new EntityChange<TEntity, TData>(action, entity, oldData, newData));
+            _changes.Add(new CollectionChange<TEntity, TData>(action, entity, oldData, newData));
         }
 
-        public ICollectionChanges<TEntity, TData> Invert()
+        public ICollectionChangeSet<TEntity, TData> Invert()
         {
             var inverted = _changes.Reverse().Select(x => x.Invert()).ToList();
-            return new CollectionChanges<TEntity, TData>(inverted);
+            return new CollectionChangeSet<TEntity, TData>(inverted);
         }
 
         public bool HasChanges() => _changes.Count > 0;
@@ -42,17 +42,17 @@ namespace PricingCalc.Model.Engine.ChangesTracking
             {
                 switch (change.Action)
                 {
-                    case EntityAction.Add:
-                        collection.Create().Finish(change.Entity, change.NewData);
+                    case CollectionAction.Add:
+                        collection.Create().Finish(change.Entity, change.NewData!);
                         break;
-                    case EntityAction.Remove:
+                    case CollectionAction.Remove:
                         collection.Remove(change.Entity);
                         break;
-                    case EntityAction.Modify:
+                    case CollectionAction.Modify:
                         collection.Modify(change.Entity, d =>
                         {
                             var bag = new PropertiesBag();
-                            change.NewData.WriteTo(bag);
+                            change.NewData!.WriteTo(bag);
                             d.ReadFrom(bag);
                         });
                         break;
@@ -62,7 +62,7 @@ namespace PricingCalc.Model.Engine.ChangesTracking
             }
         }
 
-        public IEnumerator<IEntityChange<TEntity, TData>> GetEnumerator()
+        public IEnumerator<ICollectionChange<TEntity, TData>> GetEnumerator()
         {
             return _changes.GetEnumerator();
         }

@@ -11,10 +11,10 @@ namespace PricingCalc.Model.Engine.ChangesTracking
         where TParent : IEntity
         where TChild : IEntity
     {
-        private readonly IRelationCollectionChanges<TParent, TChild> _changes;
+        private readonly IRelationChangeSet<TParent, TChild> _changes;
         private readonly IRelation<TParent, TChild> _relation;
 
-        public TrackableRelation(IRelationCollectionChanges<TParent, TChild> changesCollection,
+        public TrackableRelation(IRelationChangeSet<TParent, TChild> changesCollection,
             IRelation<TParent, TChild> modelRelation)
         {
             _changes = changesCollection;

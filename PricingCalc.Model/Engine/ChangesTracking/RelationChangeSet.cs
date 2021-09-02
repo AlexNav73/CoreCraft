@@ -7,18 +7,18 @@ using PricingCalc.Model.Engine.Core;
 namespace PricingCalc.Model.Engine.ChangesTracking
 {
     [DebuggerDisplay("HasChanges = {HasChanges()}")]
-    public class RelationCollectionChanges<TParent, TChild> : IRelationCollectionChanges<TParent, TChild>
+    public class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TParent, TChild>
         where TParent : IEntity
         where TChild : IEntity
     {
         private readonly IList<IRelationChange<TParent, TChild>> _changes;
 
-        public RelationCollectionChanges()
+        public RelationChangeSet()
             : this(new List<IRelationChange<TParent, TChild>>())
         {
         }
 
-        private RelationCollectionChanges(IList<IRelationChange<TParent, TChild>> changes)
+        private RelationChangeSet(IList<IRelationChange<TParent, TChild>> changes)
         {
             _changes = changes;
         }
@@ -28,10 +28,10 @@ namespace PricingCalc.Model.Engine.ChangesTracking
             _changes.Add(new RelationChange<TParent, TChild>(action, parent, child));
         }
 
-        public IRelationCollectionChanges<TParent, TChild> Invert()
+        public IRelationChangeSet<TParent, TChild> Invert()
         {
             var inverted = _changes.Reverse().Select(x => x.Invert()).ToList();
-            return new RelationCollectionChanges<TParent, TChild>(inverted);
+            return new RelationChangeSet<TParent, TChild>(inverted);
         }
 
         public bool HasChanges() => _changes.Count > 0;

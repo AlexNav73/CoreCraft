@@ -77,9 +77,9 @@ namespace PricingCalc.Model.Generators
 
         private static string Type(Relation relation) => $"Relation<I{relation.ParentType}, I{relation.ChildType}>";
 
-        private static string ChangesType(Collection collection) => $"CollectionChanges<I{collection.Type}, I{PropertiesType(collection.Type)}>";
+        private static string ChangesType(Collection collection) => $"CollectionChangeSet<I{collection.Type}, I{PropertiesType(collection.Type)}>";
 
-        private static string ChangesType(Relation relation) => $"RelationCollectionChanges<I{relation.ParentType}, I{relation.ChildType}>";
+        private static string ChangesType(Relation relation) => $"RelationChangeSet<I{relation.ParentType}, I{relation.ChildType}>";
 
         private static string PropertiesType(Entity entitiy) => PropertiesType(entitiy.Name);
 

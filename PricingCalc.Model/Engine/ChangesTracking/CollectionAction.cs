@@ -1,6 +1,6 @@
 ﻿namespace PricingCalc.Model.Engine.ChangesTracking
 {
-    public enum EntityAction
+    public enum CollectionAction
     {
         Add,
         Remove,

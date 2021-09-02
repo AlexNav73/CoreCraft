@@ -11,11 +11,11 @@ namespace PricingCalc.Model.Engine.ChangesTracking
         where TEntity : IEntity, ICopy<TEntity>
         where TData : ICopy<TData>, IEquatable<TData>
     {
-        private readonly ICollectionChanges<TEntity, TData> _changes;
+        private readonly ICollectionChangeSet<TEntity, TData> _changes;
         private readonly ICollection<TEntity, TData> _collection;
 
         public TrackableCollection(
-            ICollectionChanges<TEntity, TData> changesCollection,
+            ICollectionChangeSet<TEntity, TData> changesCollection,
             ICollection<TEntity, TData> modelCollection)
         {
             _changes = changesCollection;
@@ -26,7 +26,7 @@ namespace PricingCalc.Model.Engine.ChangesTracking
 
         public EntityBuilder<TEntity, TData> Create()
         {
-            return _collection.Create().WithAddHook((e, d) => _changes.Add(EntityAction.Add, e, default!, d));
+            return _collection.Create().WithAddHook((e, d) => _changes.Add(CollectionAction.Add, e, default, d));
         }
 
         public TData Get(TEntity entity)
@@ -42,14 +42,14 @@ namespace PricingCalc.Model.Engine.ChangesTracking
 
             if (!oldData.Equals(newData))
             {
-                _changes.Add(EntityAction.Modify, entity, oldData, newData);
+                _changes.Add(CollectionAction.Modify, entity, oldData, newData);
             }
         }
 
         public void Remove(TEntity entity)
         {
             var data = _collection.Get(entity);
-            _changes.Add(EntityAction.Remove, entity, data, default!);
+            _changes.Add(CollectionAction.Remove, entity, data, default);
             _collection.Remove(entity);
         }
 
