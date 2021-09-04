@@ -63,9 +63,37 @@ namespace PricingCalc.Model.Generators
             code.WriteLineNoTabs(string.Empty);
         }
 
+        public static void GeneratedClassAttributes(this IndentedTextWriter code)
+        {
+            code.GeneratedCodeAttribute();
+            code.CompilerGeneratedCodeAttribute();
+            code.DebuggerNonUserCodeAttribute();
+        }
+
+        public static void GeneratedInterfaceAttributes(this IndentedTextWriter code)
+        {
+            code.GeneratedCodeAttribute();
+            code.CompilerGeneratedCodeAttribute();
+        }
+
         public static void GeneratedCodeAttribute(this IndentedTextWriter code)
         {
-            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"C# Source Generator\", \"{typeof(GeneratorBase).Assembly.GetName().Version}\")]");
+            code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(\"C# Source Generator\", \"{typeof(GeneratorBase).Assembly.GetName().Version}\")]");
+        }
+
+        public static void CompilerGeneratedCodeAttribute(this IndentedTextWriter code)
+        {
+            code.WriteLine("[global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]");
+        }
+
+        public static void DebuggerNonUserCodeAttribute(this IndentedTextWriter code)
+        {
+            code.WriteLine("[global::System.Diagnostics.DebuggerNonUserCodeAttribute()]");
+        }
+
+        public static void DebuggerDisplay(this IndentedTextWriter code, string template)
+        {
+            code.WriteLine($"[global::System.Diagnostics.DebuggerDisplayAttribute(\"{template}\")]");
         }
 
         private static string Visibility(bool isInternal)

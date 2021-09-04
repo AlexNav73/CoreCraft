@@ -24,7 +24,7 @@ namespace PricingCalc.Model.Tests
         {
             var changes = new CollectionChangeSet<IFirstEntity, IFirstEntityProperties>();
             var entity = new FirstEntity();
-            var props = new FirstEntityProperties();
+            var props = A.Fake<IFirstEntityProperties>();
             var factory = A.Fake<IFactory<IFirstEntity, IFirstEntityProperties>>();
 
             Guid? expectedId = null;

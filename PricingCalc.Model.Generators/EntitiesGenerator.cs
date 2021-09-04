@@ -32,12 +32,12 @@ namespace PricingCalc.Model.Generators
 
         private void DefineEntityType(IndentedTextWriter code, Entity entity, ModelShard shard)
         {
-            code.GeneratedCodeAttribute();
+            code.GeneratedInterfaceAttributes();
             code.Interface(shard.IsInternal, $"I{entity.Name}", new[] { "IEntity", $"ICopy<I{entity.Name}>" }, () => { });
             code.EmptyLine();
 
-            code.GeneratedCodeAttribute();
-            code.WriteLine("[global::System.Diagnostics.DebuggerDisplay(\"Id = {Id}\")]");
+            code.GeneratedClassAttributes();
+            code.DebuggerDisplay("Id = {Id}");
             code.WriteLine($"internal sealed record {entity.Name} : I{entity.Name}");
             code.Block(() =>
             {
@@ -67,7 +67,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineEntityPropertiesInterface(IndentedTextWriter code, Entity entity, ModelShard shard)
         {
-            code.GeneratedCodeAttribute();
+            code.GeneratedInterfaceAttributes();
             code.Interface(shard.IsInternal, $"I{PropertiesType(entity)}", new[]
             {
                 $"IEntityProperties",
@@ -85,7 +85,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineEntityPropertiesClass(IndentedTextWriter code, Entity entity)
         {
-            code.GeneratedCodeAttribute();
+            code.GeneratedClassAttributes();
             code.Class("sealed", $"{PropertiesType(entity)}", new[] { $"I{PropertiesType(entity)}" }, () =>
             {
                 foreach (var prop in entity.Properties)

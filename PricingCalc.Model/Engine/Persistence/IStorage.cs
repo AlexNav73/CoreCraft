@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using PricingCalc.Model.Engine.Core;
+using PricingCalc.Model.Engine.ChangesTracking;
 
 namespace PricingCalc.Model.Engine.Persistence
 {

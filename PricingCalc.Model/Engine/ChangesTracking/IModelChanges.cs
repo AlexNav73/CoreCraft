@@ -1,6 +1,4 @@
-﻿using PricingCalc.Model.Engine.ChangesTracking;
-
-namespace PricingCalc.Model.Engine.Core
+﻿namespace PricingCalc.Model.Engine.ChangesTracking
 {
     public interface IModelChanges
     {

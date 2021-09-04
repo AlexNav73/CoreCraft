@@ -9,7 +9,7 @@ using PricingCalc.Model.Engine.Persistence;
 
 namespace PricingCalc.Model.Storage.Sqlite
 {
-    public sealed class SqliteRepository : DisposableBase, IRepository
+    internal class SqliteRepository : DisposableBase, IRepository
     {
         private const string _versionTableName = "_ModelShards";
 

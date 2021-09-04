@@ -25,7 +25,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineModelShardInterface(IndentedTextWriter code, ModelShard modelShard, string type)
         {
-            code.GeneratedCodeAttribute();
+            code.GeneratedInterfaceAttributes();
             code.Interface(modelShard.IsInternal, $"I{modelShard.Name}ModelShard", new[] { type }, () =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -44,7 +44,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineModelShardClass(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.GeneratedCodeAttribute();
+            code.GeneratedClassAttributes();
             code.Class("sealed", $"{modelShard.Name}ModelShard", new[]
             {
                 $"I{modelShard.Name}ModelShard",
@@ -90,13 +90,13 @@ namespace PricingCalc.Model.Generators
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"public {Property($"I{Type(collection)}", collection.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{Type(collection)}", collection.Name)}");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name)}");
                 }
                 code.EmptyLine();
             }
@@ -153,7 +153,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineChangesFrameInterface(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.GeneratedCodeAttribute();
+            code.GeneratedInterfaceAttributes();
             code.Interface(modelShard.IsInternal, $"I{modelShard.Name}ChangesFrame", new[] { "IChangesFrame" }, () =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -172,7 +172,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineChangesFrameClass(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.GeneratedCodeAttribute();
+            code.GeneratedClassAttributes();
             code.Class("sealed", $"{modelShard.Name}ChangesFrame",
                 new[]
                 {
@@ -214,13 +214,13 @@ namespace PricingCalc.Model.Generators
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"public {Property($"I{ChangesType(collection)}", collection.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{ChangesType(collection)}", collection.Name)}");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"public {Property($"I{ChangesType(relation)}", relation.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{ChangesType(relation)}", relation.Name)}");
                 }
             }
 
@@ -279,12 +279,11 @@ namespace PricingCalc.Model.Generators
 
         private void DefineTrackableModelShardClass(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.GeneratedCodeAttribute();
+            code.GeneratedClassAttributes();
             code.Class("sealed", $"Trackable{modelShard.Name}ModelShard",
                 new[]
                 {
                     $"I{modelShard.Name}ModelShard",
-                    "IWritableModelShard",
                     "IHaveStorage"
                 },
                 () =>
@@ -319,13 +318,13 @@ namespace PricingCalc.Model.Generators
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"public {Property($"I{Type(collection)}", collection.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{Type(collection)}", collection.Name)}");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name, "get; private set;")}");
+                    code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name)}");
                 }
                 code.EmptyLine();
             }

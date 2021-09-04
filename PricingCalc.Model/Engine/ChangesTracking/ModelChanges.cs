@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using PricingCalc.Model.Engine.ChangesTracking;
 
-namespace PricingCalc.Model.Engine.Core
+namespace PricingCalc.Model.Engine.ChangesTracking
 {
     internal class ModelChanges : IModelChanges
     {

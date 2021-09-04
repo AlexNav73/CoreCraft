@@ -17,7 +17,7 @@ namespace PricingCalc.Model.Generators
 
         private void DefineStorage(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.GeneratedCodeAttribute();
+            code.GeneratedClassAttributes();
             code.Class("sealed", $"{modelShard.Name}ModelShardStorage", new[]
             {
                 $"ModelShardStorage<I{modelShard.Name}ModelShard, I{modelShard.Name}ChangesFrame>"

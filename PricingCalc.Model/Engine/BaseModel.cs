@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PricingCalc.Model.Engine.ChangesTracking;
 using PricingCalc.Model.Engine.Commands;
 using PricingCalc.Model.Engine.Core;
 using PricingCalc.Model.Engine.Persistence;
