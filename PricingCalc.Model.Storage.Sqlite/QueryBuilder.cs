@@ -11,26 +11,27 @@ namespace PricingCalc.Model.Storage.Sqlite
             return $@"SELECT IIF (EXISTS (SELECT 0 FROM sqlite_master WHERE type = 'table' AND name = '{name}'), TRUE, FALSE) result";
         }
 
-        internal static string CreateVersionTable(string versionTableName)
+        internal static string DropTable(string name)
         {
-            return @$"
-CREATE TABLE IF NOT EXISTS [{versionTableName}] (
-    [Name] TEXT NOT NULL UNIQUE,
-    [Version] TEXT NOT NULL,
+            return $"DROP TABLE IF EXISTS {name};";
+        }
 
-    PRIMARY KEY ([Name])
+        internal static class Migrations
+        {
+            internal const string CreateMigrationTable = @"
+CREATE TABLE IF NOT EXISTS [_MigrationHistory] (
+    [Timestamp] INTEGER NOT NULL UNIQUE,
+    [Name] TEXT NOT NULL UNIQUE,
+
+    PRIMARY KEY ([Timestamp])
 );
 ";
-        }
 
-        internal static string UpdateShardVersion(string versionTableName)
-        {
-            return $"REPLACE INTO [{versionTableName}] ([Name], [Version]) VALUES ($Name, $Version);";
-        }
+            internal const string ClearMigrationTable = "DELETE FROM [_MigrationHistory]";
 
-        internal static string Version(string versionTableName, string name)
-        {
-            return $"SELECT [Version] FROM [{versionTableName}] WHERE [Name] = '{name}';";
+            internal const string InsertMigration = "INSERT INTO [_MigrationHistory] ([Timestamp], [Name]) VALUES ($Timestamp, $Name);";
+
+            internal const string GetLatestMigration = "SELECT [Timestamp], [Name] FROM [_MigrationHistory];";
         }
 
         internal static class Collections

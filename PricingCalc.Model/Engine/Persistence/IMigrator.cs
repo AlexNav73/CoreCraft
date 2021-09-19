@@ -2,5 +2,6 @@
 {
     public interface IMigrator
     {
+        void DropTable(string name);
     }
 }

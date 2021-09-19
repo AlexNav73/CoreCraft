@@ -1,9 +1,7 @@
 ﻿{
-  "shardType": "PricingCalc.Model.Tests.Infrastructure.ITestModelShard",
   "shards": [
     {
       "name": "Fake",
-      "version": "0.1.0",
       "entities": [
         {
           "name": "FirstEntity",

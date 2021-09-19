@@ -8,16 +8,16 @@ namespace PricingCalc.Model.Storage.Sqlite
 {
     public sealed class SqliteModelStorage : IStorage
     {
-        private readonly IEnumerable<IMigration> _migrations;
+        private readonly MigrationRunner _migrationRunner;
 
         public SqliteModelStorage(IEnumerable<IMigration> migrations)
         {
-            _migrations = migrations;
+            _migrationRunner = new MigrationRunner(migrations);
         }
 
         public void Save(string path, IModel model, IReadOnlyList<IModelChanges> changes)
         {
-            using var repository = new SqliteRepository(path, _migrations);
+            using var repository = new SqliteRepository(path);
             using var transaction = repository.BeginTransaction();
 
             for (var i = 0; i < changes.Count; i++)
@@ -33,8 +33,10 @@ namespace PricingCalc.Model.Storage.Sqlite
 
         public void Save(string path, IModel model)
         {
-            using var repository = new SqliteRepository(path, _migrations);
+            using var repository = new SqliteRepository(path);
             using var transaction = repository.BeginTransaction();
+
+            _migrationRunner.UpdateSaveLatestMigration(repository);
 
             foreach (var modelShard in model)
             {
@@ -51,7 +53,9 @@ namespace PricingCalc.Model.Storage.Sqlite
                 return;
             }
 
-            using var repository = new SqliteRepository(path, _migrations);
+            using var repository = new SqliteRepository(path);
+
+            _migrationRunner.Run(repository);
 
             foreach (var modelShard in model)
             {

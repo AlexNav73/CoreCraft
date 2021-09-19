@@ -2,9 +2,7 @@
 {
     public interface IMigration
     {
-        string ModelSharedName { get; }
-
-        Version Version { get; }
+        long Timestamp { get; }
 
         void Migrate(IMigrator migrator);
     }

@@ -49,7 +49,7 @@ namespace PricingCalc.Model.Generators
                 code.WriteLine($"using {compilation.AssemblyName}.Model.Entities;");
                 code.EmptyLine();
 
-                GenerateModelShards(code, modelScheme.Shards, modelScheme.ShardType);
+                GenerateModelShards(code, modelScheme.Shards);
                 GenerateStorages(code, modelScheme.Shards);
             });
             code.EmptyLine();

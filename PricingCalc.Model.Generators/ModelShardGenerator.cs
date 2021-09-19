@@ -6,11 +6,11 @@ namespace PricingCalc.Model.Generators
 {
     internal partial class ApplicationModelGenerator
     {
-        public void GenerateModelShards(IndentedTextWriter code, IEnumerable<ModelShard> shards, string type)
+        public void GenerateModelShards(IndentedTextWriter code, IEnumerable<ModelShard> shards)
         {
             foreach (var modelShard in shards)
             {
-                DefineModelShardInterface(code, modelShard, type);
+                DefineModelShardInterface(code, modelShard);
                 code.EmptyLine();
                 DefineModelShardClass(code, modelShard);
                 code.EmptyLine();
@@ -23,10 +23,10 @@ namespace PricingCalc.Model.Generators
             }
         }
 
-        private void DefineModelShardInterface(IndentedTextWriter code, ModelShard modelShard, string type)
+        private void DefineModelShardInterface(IndentedTextWriter code, ModelShard modelShard)
         {
             code.GeneratedInterfaceAttributes();
-            code.Interface(modelShard.IsInternal, $"I{modelShard.Name}ModelShard", new[] { type }, () =>
+            code.Interface(modelShard.IsInternal, $"I{modelShard.Name}ModelShard", new[] { "IModelShard" }, () =>
             {
                 foreach (var collection in modelShard.Collections)
                 {

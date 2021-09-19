@@ -11,15 +11,10 @@ namespace PricingCalc.Model.Storage.Sqlite
 {
     internal class SqliteRepository : DisposableBase, IRepository
     {
-        private const string _versionTableName = "_ModelShards";
-
-        private readonly IEnumerable<IMigration> _migrations;
         private readonly SqliteConnection _connection;
 
-        public SqliteRepository(string path, IEnumerable<IMigration> migrations)
+        public SqliteRepository(string path)
         {
-            _migrations = migrations;
-
             _connection = new SqliteConnection($"Filename={path}");
             _connection.Open();
         }
@@ -29,33 +24,42 @@ namespace PricingCalc.Model.Storage.Sqlite
             return _connection.BeginTransaction();
         }
 
-        public void UpdateVersionInfo(string modelShardName, string version)
+        public (long timestamp, string name)? GetLatestigration()
         {
-            ExecuteNonQuery(QueryBuilder.CreateVersionTable(_versionTableName));
+            if (Exists("_MigrationHistory"))
+            {
+                var command = _connection.CreateCommand();
+                command.CommandText = QueryBuilder.Migrations.GetLatestMigration;
+
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return (reader.GetInt64(0), reader.GetString(1));
+                }
+            }
+
+            return null;
+        }
+
+        public void UpdateLatestMigration(long timestamp, string name)
+        {
+            ExecuteNonQuery(QueryBuilder.Migrations.CreateMigrationTable);
+            ExecuteNonQuery(QueryBuilder.Migrations.ClearMigrationTable);
 
             var command = _connection.CreateCommand();
-            command.CommandText = QueryBuilder.UpdateShardVersion(_versionTableName);
-            var nameParam = command.Parameters.Add("$Name", SqliteType.Text);
-            nameParam.Value = modelShardName;
-            var versionParam = command.Parameters.Add("$Version", SqliteType.Text);
-            versionParam.Value = version;
+            command.CommandText = QueryBuilder.Migrations.InsertMigration;
+            var nameParam = command.Parameters.Add("$Timestamp", SqliteType.Integer);
+            nameParam.Value = timestamp;
+            var versionParam = command.Parameters.Add("$Name", SqliteType.Text);
+            versionParam.Value = name;
             command.ExecuteNonQuery();
         }
 
-        public void Migrate(string modelShardName, Engine.Version version)
+        public void ExecuteNonQuery(string commandText)
         {
-            var oldVersion = Version(modelShardName);
-            if (oldVersion != null && oldVersion < version)
-            {
-                var pendingMigrations = _migrations
-                    .Where(x => x.ModelSharedName == modelShardName)
-                    .Where(x => x.Version > oldVersion && x.Version <= version);
-
-                foreach (var migration in pendingMigrations)
-                {
-                    migration.Migrate(new SqliteMigrator());
-                }
-            }
+            var command = _connection.CreateCommand();
+            command.CommandText = commandText;
+            command.ExecuteNonQuery();
         }
 
         public void Insert<TEntity, TData>(
@@ -114,7 +118,7 @@ namespace PricingCalc.Model.Storage.Sqlite
             where TEntity : IEntity, ICopy<TEntity>
             where TData : IEntityProperties, ICopy<TData>
         {
-            if (!IfExists(name))
+            if (!Exists(name))
             {
                 return;
             }
@@ -144,7 +148,7 @@ namespace PricingCalc.Model.Storage.Sqlite
             where TParent : IEntity
             where TChild : IEntity
         {
-            if (!IfExists(name))
+            if (!Exists(name))
             {
                 return;
             }
@@ -204,13 +208,6 @@ namespace PricingCalc.Model.Storage.Sqlite
             }
         }
 
-        private void ExecuteNonQuery(string commandText)
-        {
-            var command = _connection.CreateCommand();
-            command.CommandText = commandText;
-            command.ExecuteNonQuery();
-        }
-
         private static IDictionary<string, SqliteParameter> CreateParameters(SqliteCommand command, Scheme scheme)
         {
             var parameters = new Dictionary<string, SqliteParameter>();
@@ -254,21 +251,7 @@ namespace PricingCalc.Model.Storage.Sqlite
             }
         }
 
-        private Engine.Version? Version(string name)
-        {
-            var command = _connection.CreateCommand();
-            command.CommandText = QueryBuilder.Version(_versionTableName, name);
-
-            using var reader = command.ExecuteReader();
-            if (reader.Read())
-            {
-                return Engine.Version.FromString(reader.GetString(0));
-            }
-
-            return null;
-        }
-
-        private bool IfExists(string name)
+        private bool Exists(string name)
         {
             var command = _connection.CreateCommand();
             command.CommandText = QueryBuilder.IfTableExists(name);

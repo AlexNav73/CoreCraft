@@ -2,13 +2,11 @@
 
 namespace PricingCalc.Model.Generators
 {
-    internal record ModelScheme(string ShardType, IEnumerable<ModelShard> Shards);
+    internal record ModelScheme(IEnumerable<ModelShard> Shards);
 
     internal record ModelShard
     {
         public string Name { get; init; }
-
-        public string Version { get; init; }
 
         public bool IsInternal { get; init; }
 

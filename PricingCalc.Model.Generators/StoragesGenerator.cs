@@ -41,9 +41,6 @@ namespace PricingCalc.Model.Generators
                 code.WriteLine($"protected override void SaveInternal(string path, IRepository repository, I{modelShard.Name}ChangesFrame changes)");
                 code.Block(() =>
                 {
-                    code.WriteLine($"repository.UpdateVersionInfo(\"{modelShard.Name}\", \"{modelShard.Version}\");");
-                    code.EmptyLine();
-
                     foreach (var collection in modelShard.Collections)
                     {
                         code.WriteLine($"Save(repository, \"{modelShard.Name}.{collection.Name}\", changes.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
@@ -60,9 +57,6 @@ namespace PricingCalc.Model.Generators
                 code.WriteLine($"protected override void SaveInternal(string path, IRepository repository)");
                 code.Block(() =>
                 {
-                    code.WriteLine($"repository.UpdateVersionInfo(\"{modelShard.Name}\", \"{modelShard.Version}\");");
-                    code.EmptyLine();
-
                     foreach (var collection in modelShard.Collections)
                     {
                         code.WriteLine($"Save(repository, \"{modelShard.Name}.{collection.Name}\", Shard.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
@@ -79,9 +73,6 @@ namespace PricingCalc.Model.Generators
                 code.WriteLine($"protected override void LoadInternal(string path, IRepository repository)");
                 code.Block(() =>
                 {
-                    code.WriteLine($"repository.Migrate(\"{modelShard.Name}\", new Version({modelShard.Version.Replace(".", ", ")}));");
-                    code.EmptyLine();
-
                     foreach (var collection in modelShard.Collections)
                     {
                         code.WriteLine($"Load(repository, \"{modelShard.Name}.{collection.Name}\", Shard.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
