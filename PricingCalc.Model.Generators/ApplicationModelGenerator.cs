@@ -61,13 +61,6 @@ namespace PricingCalc.Model.Generators
             });
         }
 
-        private string GeneratePropertyEqualityComparison(Property prop) => prop switch
-        {
-            Property p when p.IsNullable && !p.Type.Contains("string") => $"(({prop.Name} == null && other.{prop.Name} == null) || ({prop.Name} != null && {prop.Name}.Equals(other.{prop.Name})))",
-            Property p when p.Type.Contains("string") => $"string.Equals({prop.Name}, other.{prop.Name})",
-            _ => $"{prop.Name}.Equals(other.{prop.Name})"
-        };
-
         private string DefineProperty(Property prop, string accessors)
         {
             return Property(prop.IsNullable ? $"{prop.Type}?" : prop.Type, prop.Name, accessors);

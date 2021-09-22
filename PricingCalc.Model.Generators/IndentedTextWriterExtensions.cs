@@ -43,7 +43,7 @@ namespace PricingCalc.Model.Generators
         public static void Interface(this IndentedTextWriter code, bool isInternal, string name, string[] bases, Action body)
         {
             code.WriteLine($"{Visibility(isInternal)} interface {name} : {string.Join(", ", bases)}");
-            Block(code, () =>
+            code.Block(() =>
             {
                 body();
             });
@@ -52,7 +52,7 @@ namespace PricingCalc.Model.Generators
         public static void Class(this IndentedTextWriter code, string attributes, string name, string[] bases, Action body)
         {
             code.WriteLine($"internal {attributes} class {name} : {string.Join(", ", bases)}");
-            Block(code, () =>
+            code.Block(() =>
             {
                 body();
             });

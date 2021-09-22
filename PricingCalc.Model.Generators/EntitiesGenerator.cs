@@ -38,29 +38,19 @@ namespace PricingCalc.Model.Generators
 
             code.GeneratedClassAttributes();
             code.DebuggerDisplay("Id = {Id}");
-            code.WriteLine($"internal sealed record {entity.Name} : I{entity.Name}");
+            code.WriteLine($"internal sealed record {entity.Name}(global::System.Guid Id) : I{entity.Name}");
             code.Block(() =>
             {
-                code.WriteLine($"public {Property("global::System.Guid", "Id", "get;")}");
-                code.EmptyLine();
-
                 code.WriteLine($"internal {entity.Name}() : this(global::System.Guid.NewGuid())");
                 code.Block(() =>
                 {
                 });
                 code.EmptyLine();
 
-                code.WriteLine($"internal {entity.Name}(global::System.Guid id)");
-                code.Block(() =>
-                {
-                    code.WriteLine("Id = id;");
-                });
-                code.EmptyLine();
-
                 code.WriteLine($"public I{entity.Name} Copy()");
                 code.Block(() =>
                 {
-                    code.WriteLine($"return new {entity.Name}(Id);");
+                    code.WriteLine("return this with { };");
                 });
             });
         }
@@ -86,7 +76,8 @@ namespace PricingCalc.Model.Generators
         private void DefineEntityPropertiesClass(IndentedTextWriter code, Entity entity)
         {
             code.GeneratedClassAttributes();
-            code.Class("sealed", $"{PropertiesType(entity)}", new[] { $"I{PropertiesType(entity)}" }, () =>
+            code.WriteLine($"internal sealed record {PropertiesType(entity)} : I{PropertiesType(entity)}");
+            code.Block(() =>
             {
                 foreach (var prop in entity.Properties)
                 {
@@ -120,14 +111,7 @@ namespace PricingCalc.Model.Generators
                 code.WriteLine($"public I{PropertiesType(entity)} Copy()");
                 code.Block(() =>
                 {
-                    code.WriteLine($"return new {PropertiesType(entity)}()");
-                    code.Block(() =>
-                    {
-                        foreach (var prop in entity.Properties)
-                        {
-                            code.WriteLine($"{prop.Name} = {prop.Name},");
-                        }
-                    }, true);
+                    code.WriteLine("return this with { };");
                 });
             }
 
@@ -158,10 +142,7 @@ namespace PricingCalc.Model.Generators
                 code.WriteLine($"public bool Equals(I{PropertiesType(entity)}? other)");
                 code.Block(() =>
                 {
-                    var isNotNull = "return other != null";
-                    var properties = entity.Properties.Select(GeneratePropertyEqualityComparison);
-
-                    code.WriteLine($"{string.Join(" && ", new[] { isNotNull }.Concat(properties))};");
+                    code.WriteLine($"return Equals(({PropertiesType(entity)}?)other);");
                 });
             }
         }

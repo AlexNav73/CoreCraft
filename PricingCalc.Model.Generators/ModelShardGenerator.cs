@@ -98,7 +98,6 @@ namespace PricingCalc.Model.Generators
                 {
                     code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name)}");
                 }
-                code.EmptyLine();
             }
 
             void ImplementIHaveStorageInterface(IndentedTextWriter code)
