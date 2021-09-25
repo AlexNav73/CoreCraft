@@ -1,6 +1,4 @@
-﻿using PricingCalc.Model.Engine.Persistence;
-
-namespace PricingCalc.Model.Storage.Sqlite
+﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations
 {
     internal class SqliteMigrator : IMigrator
     {

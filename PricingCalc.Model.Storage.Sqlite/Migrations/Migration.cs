@@ -1,4 +1,4 @@
-﻿namespace PricingCalc.Model.Engine.Persistence
+﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations
 {
     public abstract class Migration : IMigration
     {

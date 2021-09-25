@@ -3,6 +3,7 @@ using System.IO;
 using PricingCalc.Model.Engine;
 using PricingCalc.Model.Engine.ChangesTracking;
 using PricingCalc.Model.Engine.Persistence;
+using PricingCalc.Model.Storage.Sqlite.Migrations;
 
 namespace PricingCalc.Model.Storage.Sqlite
 {

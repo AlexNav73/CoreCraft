@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using PricingCalc.Model.Engine.Persistence;
 
-namespace PricingCalc.Model.Storage.Sqlite
+namespace PricingCalc.Model.Storage.Sqlite.Migrations
 {
     internal sealed class MigrationRunner
     {
