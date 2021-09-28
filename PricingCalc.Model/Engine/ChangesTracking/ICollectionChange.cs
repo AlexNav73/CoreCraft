@@ -3,8 +3,8 @@
 namespace PricingCalc.Model.Engine.ChangesTracking
 {
     public interface ICollectionChange<TEntity, TData>
-        where TEntity : IEntity
-        where TData : ICopy<TData>
+        where TEntity : Entity
+        where TData : Properties
     {
         CollectionAction Action { get; }
 

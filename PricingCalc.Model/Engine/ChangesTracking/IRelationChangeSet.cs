@@ -4,8 +4,8 @@ using PricingCalc.Model.Engine.Core;
 namespace PricingCalc.Model.Engine.ChangesTracking
 {
     public interface IRelationChangeSet<TParent, TChild> : IEnumerable<IRelationChange<TParent, TChild>>
-        where TParent : IEntity
-        where TChild : IEntity
+        where TParent : Entity
+        where TChild : Entity
     {
         void Add(RelationAction action, TParent parent, TChild child);
 

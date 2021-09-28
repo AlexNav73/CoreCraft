@@ -3,8 +3,8 @@
 namespace PricingCalc.Model.Engine.Core
 {
     public interface IRelation<TParent, TChild> : IEnumerable<TParent>, ICopy<IRelation<TParent, TChild>>
-        where TParent : IEntity
-        where TChild : IEntity
+        where TParent : Entity
+        where TChild : Entity
     {
         void Add(TParent parent, TChild child);
 

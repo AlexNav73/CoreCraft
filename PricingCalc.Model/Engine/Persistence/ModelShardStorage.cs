@@ -41,8 +41,8 @@ namespace PricingCalc.Model.Engine.Persistence
         protected abstract void LoadInternal(string path, IRepository repository);
 
         protected void Save<TEntity, TData>(IRepository repository, string name, ICollectionChangeSet<TEntity, TData> changes, Scheme scheme)
-            where TEntity : IEntity, ICopy<TEntity>
-            where TData : IEntityProperties, ICopy<TData>
+            where TEntity : Entity
+            where TData : Properties
         {
             if (!changes.HasChanges())
             {
@@ -86,15 +86,15 @@ namespace PricingCalc.Model.Engine.Persistence
         }
 
         protected void Save<TEntity, TData>(IRepository repository, string name, ICollection<TEntity, TData> collection, Scheme scheme)
-            where TEntity : IEntity, ICopy<TEntity>
-            where TData : IEntityProperties, ICopy<TData>
+            where TEntity : Entity
+            where TData : Properties
         {
             repository.Insert(name, collection.Select(x => new KeyValuePair<TEntity, TData>(x, collection.Get(x))).ToArray(), scheme);
         }
 
         protected void Save<TParent, TChild>(IRepository repository, string name, IRelationChangeSet<TParent, TChild> changes)
-            where TParent : IEntity
-            where TChild : IEntity
+            where TParent : Entity
+            where TChild : Entity
         {
             if (!changes.HasChanges())
             {
@@ -128,8 +128,8 @@ namespace PricingCalc.Model.Engine.Persistence
         }
 
         protected void Save<TParent, TChild>(IRepository repository, string name, IRelation<TParent, TChild> relation)
-            where TParent : IEntity
-            where TChild : IEntity
+            where TParent : Entity
+            where TChild : Entity
         {
             var pairs = relation
                 .SelectMany(x => relation.Children(x).Select(y => new KeyValuePair<TParent, TChild>(x, y)));
@@ -142,8 +142,8 @@ namespace PricingCalc.Model.Engine.Persistence
             string name,
             ICollection<TEntity, TData> collection,
             Scheme scheme)
-            where TEntity : IEntity, ICopy<TEntity>
-            where TData : IEntityProperties, ICopy<TData>
+            where TEntity : Entity
+            where TData : Properties
         {
             repository.Select(name, collection, scheme);
         }
@@ -154,8 +154,8 @@ namespace PricingCalc.Model.Engine.Persistence
             IRelation<TParent, TChild> relation,
             IEntityCollection<TParent> parents,
             IEntityCollection<TChild> children)
-            where TParent : IEntity
-            where TChild : IEntity
+            where TParent : Entity
+            where TChild : Entity
         {
             repository.Select(name, relation, parents, children);
         }

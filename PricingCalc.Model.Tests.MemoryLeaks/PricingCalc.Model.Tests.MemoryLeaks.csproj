@@ -12,6 +12,7 @@
     <RootNamespace>PricingCalc.Model.Tests.MemoryLeaks</RootNamespace>
     <AssemblyName>PricingCalc.Model.Tests.MemoryLeaks</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>latest</LangVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>

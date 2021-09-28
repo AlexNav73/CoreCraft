@@ -8,8 +8,8 @@ namespace PricingCalc.Model.Engine.ChangesTracking
 {
     [DebuggerDisplay("{_collection}")]
     public class TrackableCollection<TEntity, TData> : ICollection<TEntity, TData>
-        where TEntity : IEntity, ICopy<TEntity>
-        where TData : ICopy<TData>, IEquatable<TData>
+        where TEntity : Entity
+        where TData : Properties
     {
         private readonly ICollectionChangeSet<TEntity, TData> _changes;
         private readonly ICollection<TEntity, TData> _collection;
@@ -24,9 +24,27 @@ namespace PricingCalc.Model.Engine.ChangesTracking
 
         public int Count => _collection.Count;
 
-        public EntityBuilder<TEntity, TData> Create()
+        public TEntity Add(TData data)
         {
-            return _collection.Create().WithAddHook((e, d) => _changes.Add(CollectionAction.Add, e, default, d));
+            var entity = _collection.Add(data);
+            _changes.Add(CollectionAction.Add, entity, default, data);
+            return entity;
+        }
+
+        public TEntity Add(Guid id, Func<TData, TData> init)
+        {
+            var entity = _collection.Add(id, init);
+            var data = _collection.Get(entity);
+
+            _changes.Add(CollectionAction.Add, entity, default, data);
+
+            return entity;
+        }
+
+        public void Add(TEntity entity, TData data)
+        {
+            _collection.Add(entity, data);
+            _changes.Add(CollectionAction.Add, entity, default, data);
         }
 
         public TData Get(TEntity entity)
@@ -34,11 +52,11 @@ namespace PricingCalc.Model.Engine.ChangesTracking
             return _collection.Get(entity);
         }
 
-        public void Modify(TEntity entity, Action<TData> modifier)
+        public void Modify(TEntity entity, Func<TData, TData> modifier)
         {
-            var oldData = _collection.Get(entity).Copy();
+            var oldData = _collection.Get(entity);
             _collection.Modify(entity, modifier);
-            var newData = _collection.Get(entity).Copy();
+            var newData = _collection.Get(entity);
 
             if (!oldData.Equals(newData))
             {

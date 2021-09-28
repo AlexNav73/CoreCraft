@@ -9,12 +9,12 @@ namespace PricingCalc.Model.Tests
 {
     public class CollectionTests
     {
-        private ICollection<IFirstEntity, IFirstEntityProperties> _collection;
+        private ICollection<FirstEntity, FirstEntityProperties> _collection;
 
         [SetUp]
         public void Setup()
         {
-            _collection = new Collection<IFirstEntity, IFirstEntityProperties>(id => new FirstEntity(id), () => new FirstEntityProperties());
+            _collection = new Collection<FirstEntity, FirstEntityProperties>(id => new FirstEntity(id), () => new FirstEntityProperties());
         }
 
         [Test]
@@ -23,9 +23,7 @@ namespace PricingCalc.Model.Tests
             Assert.That(_collection.Count, Is.EqualTo(0));
 
             var firstEntityId = Guid.NewGuid();
-            var entity = _collection.Create()
-                .WithId(firstEntityId)
-                .Build();
+            var entity = _collection.Add(firstEntityId, p => p);
 
             Assert.That(_collection.Count, Is.EqualTo(1));
             Assert.That(_collection.Single(), Is.EqualTo(entity));
@@ -37,22 +35,20 @@ namespace PricingCalc.Model.Tests
         {
             Assert.That(_collection.Count, Is.EqualTo(0));
 
-            var entity = _collection.Create().Build();
+            var entity = _collection.Add(new());
 
             Assert.That(_collection.Count, Is.EqualTo(1));
             Assert.That(_collection.Single(), Is.EqualTo(entity));
             Assert.Throws<InvalidOperationException>(() =>
             {
-                _collection.Create()
-                    .WithId(entity.Id)
-                    .Build();
+                _collection.Add(entity.Id, p => p);
             });
         }
 
         [Test]
         public void RemoveEntitiyFromCollectionTest()
         {
-            var entity = _collection.Create().Build();
+            var entity = _collection.Add(new());
 
             Assert.That(_collection.Count, Is.EqualTo(1));
 
@@ -64,7 +60,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void RemoveNotExistingEntityTest()
         {
-            _collection.Create().Build();
+            _collection.Add(new());
 
             Assert.That(_collection.Count, Is.EqualTo(1));
             Assert.Throws<KeyNotFoundException>(() => _collection.Remove(new FirstEntity()));
@@ -81,12 +77,7 @@ namespace PricingCalc.Model.Tests
         public void GetPropertiesByEntityTest()
         {
             var value = "test";
-            var entity = _collection.Create()
-                .WithInit(p =>
-                {
-                    p.NonNullableStringProperty = value;
-                })
-                .Build();
+            var entity = _collection.Add(new() { NonNullableStringProperty = value });
 
             Assert.That(_collection.Count, Is.EqualTo(1));
 
@@ -99,7 +90,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void GetWithInvalidEntityTest()
         {
-            var entity = _collection.Create().Build();
+            var entity = _collection.Add(new());
 
             Assert.That(_collection.Count, Is.EqualTo(1));
 
@@ -122,17 +113,12 @@ namespace PricingCalc.Model.Tests
             var value = "test";
             var newValue = "new value";
 
-            var entity = _collection.Create()
-                .WithInit(p =>
-                {
-                    p.NonNullableStringProperty = value;
-                })
-                .Build();
+            var entity = _collection.Add(new() { NonNullableStringProperty = value });
 
             var properties = _collection.Get(entity);
             Assert.That(properties.NonNullableStringProperty, Is.EqualTo(value));
 
-            _collection.Modify(entity, p => p.NonNullableStringProperty = newValue);
+            _collection.Modify(entity, p => p with { NonNullableStringProperty = newValue });
             properties = _collection.Get(entity);
 
             Assert.That(properties, Is.Not.Null);
@@ -144,16 +130,14 @@ namespace PricingCalc.Model.Tests
         {
             Assert.That(_collection.Count, Is.EqualTo(0));
             Assert.Throws<KeyNotFoundException>(() =>
-                _collection.Modify(new FirstEntity(), p => p.NullableStringProperty = "test"));
+                _collection.Modify(new FirstEntity(), p => p with { NullableStringProperty = "test" }));
         }
 
         [Test]
         public void CopyCollectionTest()
         {
             var value = "test";
-            var entity = _collection.Create()
-                .WithInit(p => p.NonNullableStringProperty = value)
-                .Build();
+            var entity = _collection.Add(new() { NonNullableStringProperty = value });
 
             var copy = _collection.Copy();
             var copiedEntity = _collection.Single();

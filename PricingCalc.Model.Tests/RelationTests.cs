@@ -7,17 +7,17 @@ namespace PricingCalc.Model.Tests
 {
     public class RelationTests
     {
-        private IRelation<IFirstEntity, ISecondEntity> _relation;
-        private IMapping<IFirstEntity, ISecondEntity> _parentMapping;
-        private IMapping<ISecondEntity, IFirstEntity> _childMapping;
+        private IRelation<FirstEntity, SecondEntity> _relation;
+        private IMapping<FirstEntity, SecondEntity> _parentMapping;
+        private IMapping<SecondEntity, FirstEntity> _childMapping;
 
         [SetUp]
         public void Setup()
         {
-            _parentMapping = A.Fake<IMapping<IFirstEntity, ISecondEntity>>();
-            _childMapping = A.Fake<IMapping<ISecondEntity, IFirstEntity>>();
+            _parentMapping = A.Fake<IMapping<FirstEntity, SecondEntity>>();
+            _childMapping = A.Fake<IMapping<SecondEntity, FirstEntity>>();
 
-            _relation = new Relation<IFirstEntity, ISecondEntity>(_parentMapping, _childMapping);
+            _relation = new Relation<FirstEntity, SecondEntity>(_parentMapping, _childMapping);
         }
 
         [Test]

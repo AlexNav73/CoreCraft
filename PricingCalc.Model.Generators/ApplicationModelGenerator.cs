@@ -66,13 +66,13 @@ namespace PricingCalc.Model.Generators
             return Property(prop.IsNullable ? $"{prop.Type}?" : prop.Type, prop.Name, accessors);
         }
 
-        private static string Type(Collection collection) => $"Collection<I{collection.Type}, I{PropertiesType(collection.Type)}>";
+        private static string Type(Collection collection) => $"Collection<{collection.Type}, {PropertiesType(collection.Type)}>";
 
-        private static string Type(Relation relation) => $"Relation<I{relation.ParentType}, I{relation.ChildType}>";
+        private static string Type(Relation relation) => $"Relation<{relation.ParentType}, {relation.ChildType}>";
 
-        private static string ChangesType(Collection collection) => $"CollectionChangeSet<I{collection.Type}, I{PropertiesType(collection.Type)}>";
+        private static string ChangesType(Collection collection) => $"CollectionChangeSet<{collection.Type}, {PropertiesType(collection.Type)}>";
 
-        private static string ChangesType(Relation relation) => $"RelationChangeSet<I{relation.ParentType}, I{relation.ChildType}>";
+        private static string ChangesType(Relation relation) => $"RelationChangeSet<{relation.ParentType}, {relation.ChildType}>";
 
         private static string PropertiesType(Entity entitiy) => PropertiesType(entitiy.Name);
 

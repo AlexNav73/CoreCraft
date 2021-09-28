@@ -7,14 +7,13 @@ using System.Linq;
 namespace PricingCalc.Model.Engine.Core
 {
     [DebuggerDisplay("Count = {Count}")]
-    public class Collection<TEntity, TData> : ICollection<TEntity, TData>, IFactory<TEntity, TData>
-        where TEntity : IEntity, ICopy<TEntity>
-        where TData : ICopy<TData>
+    public class Collection<TEntity, TData> : ICollection<TEntity, TData>
+        where TEntity : Entity
+        where TData : Properties
     {
-        private readonly Func<Guid, TEntity> _entityCreator;
-        private readonly Func<TData> _dataCreator;
-
         private readonly IDictionary<Guid, TData> _relation;
+        private readonly Func<Guid, TEntity> _entityFactory;
+        private readonly Func<TData> _dataFactory;
 
         public Collection(Func<Guid, TEntity> entityCreator, Func<TData> dataCreator)
             : this(new Dictionary<Guid, TData>(), entityCreator, dataCreator)
@@ -23,33 +22,38 @@ namespace PricingCalc.Model.Engine.Core
 
         private Collection(
             IDictionary<Guid, TData> relation,
-            Func<Guid, TEntity> entityCreator,
-            Func<TData> dataCreator)
+            Func<Guid, TEntity> entityFactory,
+            Func<TData> dataFactory)
         {
             _relation = relation;
-            _entityCreator = entityCreator;
-            _dataCreator = dataCreator;
+            _entityFactory = entityFactory;
+            _dataFactory = dataFactory;
         }
 
         public int Count => _relation.Count;
 
-        public Func<Guid, TEntity> EntityFactory => _entityCreator;
-
-        public Func<TData> DataFactory => _dataCreator;
-
-        public EntityBuilder<TEntity, TData> Create()
+        public TEntity Add(TData data)
         {
-            void Add(TEntity entity, TData data)
-            {
-                if (_relation.ContainsKey(entity.Id))
-                {
-                    throw new InvalidOperationException($"Entity [{entity}] can't be added to the collection");
-                }
+            var entity = _entityFactory(Guid.NewGuid());
+            Add(entity, data);
+            return entity;
+        }
 
-                _relation.Add(entity.Id, data);
+        public TEntity Add(Guid id, Func<TData, TData> init)
+        {
+            var entity = _entityFactory(id);
+            Add(entity, init(_dataFactory()));
+            return entity;
+        }
+
+        public void Add(TEntity entity, TData data)
+        {
+            if (_relation.ContainsKey(entity.Id))
+            {
+                throw new InvalidOperationException($"Entity [{entity}] can't be added to the collection");
             }
 
-            return new EntityBuilder<TEntity, TData>(Add, this);
+            _relation.Add(entity.Id, data);
         }
 
         public TData Get(TEntity entity)
@@ -62,11 +66,11 @@ namespace PricingCalc.Model.Engine.Core
             throw new KeyNotFoundException($"Collection doesn't contain entity [{entity}]");
         }
 
-        public void Modify(TEntity entity, Action<TData> modifier)
+        public void Modify(TEntity entity, Func<TData, TData> modifier)
         {
             if (_relation.TryGetValue(entity.Id, out var data))
             {
-                modifier(data);
+                _relation[entity.Id] = modifier(data);
             }
             else
             {
@@ -92,18 +96,18 @@ namespace PricingCalc.Model.Engine.Core
 
             foreach (var pair in _relation)
             {
-                relation.Add(pair.Key, pair.Value.Copy());
+                relation.Add(pair.Key, pair.Value);
             }
 
             return new Collection<TEntity, TData>(
                 relation,
-                _entityCreator,
-                _dataCreator);
+                _entityFactory,
+                _dataFactory);
         }
 
         public IEnumerator<TEntity> GetEnumerator()
         {
-            return _relation.Keys.Select(_entityCreator).GetEnumerator();
+            return _relation.Keys.Select(_entityFactory).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

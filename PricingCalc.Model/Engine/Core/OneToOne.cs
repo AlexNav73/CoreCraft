@@ -7,8 +7,8 @@ namespace PricingCalc.Model.Engine.Core
 {
     [DebuggerDisplay("Count = {_relation.Keys.Count}")]
     public class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
-        where TParent : IEntity
-        where TChild : IEntity, ICopy<TChild>
+        where TParent : Entity
+        where TChild : Entity
     {
         private readonly IDictionary<TParent, TChild> _relation;
 
@@ -71,7 +71,7 @@ namespace PricingCalc.Model.Engine.Core
             var relation = new Dictionary<TParent, TChild>();
             foreach (var pair in _relation)
             {
-                relation[pair.Key] = pair.Value.Copy();
+                relation[pair.Key] = pair.Value;
             }
             return new OneToOne<TParent, TChild>(relation);
         }

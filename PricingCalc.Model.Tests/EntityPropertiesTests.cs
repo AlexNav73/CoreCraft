@@ -9,30 +9,30 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void CopyPropertiesTest()
         {
-            var initial = (IFirstEntityProperties)new FirstEntityProperties()
+            var initial = new FirstEntityProperties()
             {
                 NullableStringProperty = "abc"
             };
-            var copy = initial.Copy();
+            var copy = initial with { };
 
             Assert.That(ReferenceEquals(initial, copy), Is.False);
             Assert.That(initial.Equals(copy), Is.True);
-            Assert.That(initial == copy, Is.False);
+            Assert.That(initial == copy, Is.True);
             Assert.That(initial.NullableStringProperty, Is.EqualTo(copy.NullableStringProperty));
         }
 
         [Test]
         public void PropertyReadFromTest()
         {
-            var props = (IFirstEntityProperties)new FirstEntityProperties();
+            var props = new FirstEntityProperties();
             var bag = new PropertiesBag();
             var value = "abc";
 
-            bag.Write(nameof(IFirstEntityProperties.NonNullableStringProperty), value);
-            bag.Write<string>(nameof(IFirstEntityProperties.NullableStringProperty), null);
-            bag.Write<string>(nameof(IFirstEntityProperties.NullableStringWithDefaultValueProperty), null);
+            bag.Write(nameof(FirstEntityProperties.NonNullableStringProperty), value);
+            bag.Write<string>(nameof(FirstEntityProperties.NullableStringProperty), null);
+            bag.Write<string>(nameof(FirstEntityProperties.NullableStringWithDefaultValueProperty), null);
 
-            props.ReadFrom(bag);
+            props = (FirstEntityProperties)props.ReadFrom(bag);
 
             Assert.That(props.NonNullableStringProperty, Is.EqualTo(value));
             Assert.That(props.NullableStringProperty, Is.Null);
@@ -43,7 +43,7 @@ namespace PricingCalc.Model.Tests
         public void PropertyWriteToTest()
         {
             var value = "abc";
-            var props = (IFirstEntityProperties)new FirstEntityProperties()
+            var props = new FirstEntityProperties()
             {
                 NonNullableStringProperty = value
             };
@@ -51,24 +51,24 @@ namespace PricingCalc.Model.Tests
 
             props.WriteTo(bag);
 
-            Assert.That(bag.Read<string>(nameof(IFirstEntityProperties.NonNullableStringProperty)), Is.EqualTo(value));
-            Assert.That(bag.Read<string>(nameof(IFirstEntityProperties.NullableStringProperty)), Is.Null);
-            Assert.That(bag.Read<string>(nameof(IFirstEntityProperties.NullableStringWithDefaultValueProperty)), Is.Null);
+            Assert.That(bag.Read<string>(nameof(FirstEntityProperties.NonNullableStringProperty)), Is.EqualTo(value));
+            Assert.That(bag.Read<string>(nameof(FirstEntityProperties.NullableStringProperty)), Is.Null);
+            Assert.That(bag.Read<string>(nameof(FirstEntityProperties.NullableStringWithDefaultValueProperty)), Is.Null);
         }
 
         [Test]
         public void EqualsTest()
         {
             var value = "abc";
-            var first = (IFirstEntityProperties)new FirstEntityProperties()
+            var first = new FirstEntityProperties()
             {
                 NonNullableStringProperty = value
             };
-            var second = (IFirstEntityProperties)new FirstEntityProperties()
+            var second = new FirstEntityProperties()
             {
                 NonNullableStringProperty = value
             };
-            var third = (IFirstEntityProperties)new FirstEntityProperties()
+            var third = new FirstEntityProperties()
             {
                 NonNullableStringProperty = "different"
             };

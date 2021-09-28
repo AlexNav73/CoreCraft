@@ -36,8 +36,8 @@ namespace PricingCalc.Model.Tests.MemoryTests
                     .GetNewObjects(q => q.Type.Is<FirstEntityProperties>())
                     .ObjectsCount;
 
-                Assert.That(countOfFirstEntities, Is.EqualTo(600));
-                Assert.That(countOfFirstEntitiesProps, Is.EqualTo(400));
+                Assert.That(countOfFirstEntities, Is.EqualTo(200));
+                Assert.That(countOfFirstEntitiesProps, Is.EqualTo(200));
             });
         }
     }

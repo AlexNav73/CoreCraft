@@ -3,12 +3,16 @@
 namespace PricingCalc.Model.Engine.Core
 {
     public interface ICollection<TEntity, TData> : IEntityCollection<TEntity>, ICopy<ICollection<TEntity, TData>>
-        where TEntity : IEntity, ICopy<TEntity>
-        where TData : ICopy<TData>
+        where TEntity : Entity
+        where TData : Properties
     {
-        EntityBuilder<TEntity, TData> Create();
+        TEntity Add(TData data);
 
-        void Modify(TEntity entity, Action<TData> modifier);
+        TEntity Add(Guid id, Func<TData, TData> init);
+
+        void Add(TEntity entity, TData data);
+
+        void Modify(TEntity entity, Func<TData, TData> modifier);
 
         TData Get(TEntity entity);
 

@@ -2,8 +2,7 @@
 
 namespace PricingCalc.Model.Engine.Core
 {
-    public interface IEntity
+    public abstract record Entity(Guid Id)
     {
-        Guid Id { get; }
     }
 }

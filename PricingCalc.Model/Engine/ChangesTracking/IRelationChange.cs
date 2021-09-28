@@ -3,8 +3,8 @@
 namespace PricingCalc.Model.Engine.ChangesTracking
 {
     public interface IRelationChange<TParent, TChild>
-        where TParent : IEntity
-        where TChild : IEntity
+        where TParent : Entity
+        where TChild : Entity
     {
         RelationAction Action { get; }
 

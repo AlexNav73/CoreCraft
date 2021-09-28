@@ -17,12 +17,14 @@ namespace PricingCalc.Model.Tests.Infrastructure.Commands
 
             for (var i = 0; i < 100; i++)
             {
-                var first = modelShard.FirstCollection.Create()
-                    .WithInit(p => p.NonNullableStringProperty = "test")
-                    .Build();
-                var second = modelShard.SecondCollection.Create()
-                    .WithInit(p => p.FloatProperty = 0.5f)
-                    .Build();
+                var first = modelShard.FirstCollection.Add(new()
+                {
+                    NonNullableStringProperty = "test"
+                });
+                var second = modelShard.SecondCollection.Add(new()
+                {
+                    FloatProperty = 0.5f
+                });
 
                 modelShard.ManyToManyRelation.Add(first, second);
                 modelShard.ManyToOneRelation.Add(first, second);

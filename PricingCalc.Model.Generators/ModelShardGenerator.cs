@@ -78,7 +78,7 @@ namespace PricingCalc.Model.Generators
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{relation.Name} = new {Type(relation)}(new {relation.ParentRelationType}<I{relation.ParentType}, I{relation.ChildType}>(), new {relation.ChildRelationType}<I{relation.ChildType}, I{relation.ParentType}>());");
+                        code.WriteLine($"{relation.Name} = new {Type(relation)}(new {relation.ParentRelationType}<{relation.ParentType}, {relation.ChildType}>(), new {relation.ChildRelationType}<{relation.ChildType}, {relation.ParentType}>());");
                     }
                     code.EmptyLine();
 

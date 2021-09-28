@@ -10,31 +10,26 @@ namespace PricingCalc.Model.Tests
 {
     public class TrackableCollectionTests
     {
-        private ICollection<IFirstEntity, IFirstEntityProperties> _collection;
-        private ICollectionChangeSet<IFirstEntity, IFirstEntityProperties> _changes;
-        private ICollection<IFirstEntity, IFirstEntityProperties> _trackable;
+        private ICollection<FirstEntity, FirstEntityProperties> _collection;
+        private ICollectionChangeSet<FirstEntity, FirstEntityProperties> _changes;
+        private ICollection<FirstEntity, FirstEntityProperties> _trackable;
 
         [SetUp]
         public void Setup()
         {
-            _collection = A.Fake<ICollection<IFirstEntity, IFirstEntityProperties>>();
-            var factory = A.Fake<IFactory<IFirstEntity, IFirstEntityProperties>>();
+            _collection = A.Fake<ICollection<FirstEntity, FirstEntityProperties>>();
 
-            A.CallTo(() => factory.EntityFactory).Returns(id => new FirstEntity(id));
-            A.CallTo(() => factory.DataFactory).Returns(() => new FirstEntityProperties());
-            A.CallTo(() => _collection.Create()).Returns(new EntityBuilder<IFirstEntity, IFirstEntityProperties>((e, d) => { }, factory));
-
-            _changes = new CollectionChangeSet<IFirstEntity, IFirstEntityProperties>();
-            _trackable = new TrackableCollection<IFirstEntity, IFirstEntityProperties>(_changes, _collection);
+            _changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+            _trackable = new TrackableCollection<FirstEntity, FirstEntityProperties>(_changes, _collection);
         }
 
         [Test]
         public void TrackableAddToCollectionTest()
         {
-            _trackable.Create().Build();
+            _trackable.Add(new());
             var change = _changes.Single();
 
-            A.CallTo(() => _collection.Create()).MustHaveHappened();
+            A.CallTo(() => _collection.Add(A<FirstEntityProperties>.Ignored)).MustHaveHappened();
             Assert.That(_changes.HasChanges(), Is.True);
             Assert.That(change.Action, Is.EqualTo(CollectionAction.Add));
             Assert.That(change.Entity, Is.Not.Null);
@@ -45,11 +40,13 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void TrackableRemoveFromCollectionTest()
         {
-            _trackable.Remove(A.Dummy<IFirstEntity>());
+            A.CallTo(() => _collection.Get(A<FirstEntity>.Ignored)).Returns(new FirstEntityProperties());
+
+            _trackable.Remove(A.Dummy<FirstEntity>());
 
             var change = _changes.Single();
 
-            A.CallTo(() => _collection.Remove(A<IFirstEntity>.Ignored)).MustHaveHappened();
+            A.CallTo(() => _collection.Remove(A<FirstEntity>.Ignored)).MustHaveHappened();
             Assert.That(_changes.HasChanges(), Is.True);
             Assert.That(change.Action, Is.EqualTo(CollectionAction.Remove));
             Assert.That(change.Entity, Is.Not.Null);
@@ -60,11 +57,17 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void TrackableModifyEntityInsideCollectionTest()
         {
-            _trackable.Modify(A.Dummy<IFirstEntity>(), p => p.NullableStringProperty = "test");
+            A.CallTo(() => _collection.Get(A<FirstEntity>.Ignored))
+                .ReturnsNextFromSequence(
+                    new FirstEntityProperties(),
+                    new FirstEntityProperties() { NullableStringProperty = "test" }
+                );
+
+            _trackable.Modify(A.Dummy<FirstEntity>(), p => p with { NullableStringProperty = "test" });
 
             var change = _changes.Single();
 
-            A.CallTo(() => _collection.Modify(A<IFirstEntity>.Ignored, A<Action<IFirstEntityProperties>>.Ignored))
+            A.CallTo(() => _collection.Modify(A<FirstEntity>.Ignored, A<Func<FirstEntityProperties, FirstEntityProperties>>.Ignored))
                 .MustHaveHappened();
             Assert.That(_changes.HasChanges(), Is.True);
             Assert.That(change.Action, Is.EqualTo(CollectionAction.Modify));

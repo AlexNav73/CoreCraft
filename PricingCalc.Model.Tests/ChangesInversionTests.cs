@@ -10,7 +10,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void CollectionInvertAddChangeTest()
         {
-            var changes = new CollectionChangeSet<IFirstEntity, IFirstEntityProperties>();
+            var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
             var entity = new FirstEntity();
             var props = new FirstEntityProperties();
 
@@ -27,7 +27,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void CollectionInvertRemoveChangeTest()
         {
-            var changes = new CollectionChangeSet<IFirstEntity, IFirstEntityProperties>();
+            var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
             var entity = new FirstEntity();
             var props = new FirstEntityProperties();
 
@@ -44,7 +44,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void CollectionInvertModifyChangeTest()
         {
-            var changes = new CollectionChangeSet<IFirstEntity, IFirstEntityProperties>();
+            var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
             var entity = new FirstEntity();
             var oldProps = new FirstEntityProperties();
             var newProps = new FirstEntityProperties();
@@ -62,7 +62,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void RelationInvertLinkChangeTest()
         {
-            var changes = new RelationChangeSet<IFirstEntity, ISecondEntity>();
+            var changes = new RelationChangeSet<FirstEntity, SecondEntity>();
             var first = new FirstEntity();
             var second = new SecondEntity();
 
@@ -78,7 +78,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void RelationInvertUnlinkChangeTest()
         {
-            var changes = new RelationChangeSet<IFirstEntity, ISecondEntity>();
+            var changes = new RelationChangeSet<FirstEntity, SecondEntity>();
             var first = new FirstEntity();
             var second = new SecondEntity();
 

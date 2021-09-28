@@ -9,8 +9,8 @@ namespace PricingCalc.Model.Engine.ChangesTracking
 {
     [DebuggerDisplay("HasChanges = {HasChanges()}")]
     public class CollectionChangeSet<TEntity, TData> : ICollectionChangeSet<TEntity, TData>
-        where TEntity : IEntity, ICopy<TEntity>
-        where TData : IEntityProperties, ICopy<TData>
+        where TEntity : Entity
+        where TData : Properties
     {
         private readonly IList<ICollectionChange<TEntity, TData>> _changes;
 
@@ -43,7 +43,7 @@ namespace PricingCalc.Model.Engine.ChangesTracking
                 switch (change.Action)
                 {
                     case CollectionAction.Add:
-                        collection.Create().Finish(change.Entity, change.NewData!);
+                        collection.Add(change.Entity, change.NewData!);
                         break;
                     case CollectionAction.Remove:
                         collection.Remove(change.Entity);
@@ -53,7 +53,8 @@ namespace PricingCalc.Model.Engine.ChangesTracking
                         {
                             var bag = new PropertiesBag();
                             change.NewData!.WriteTo(bag);
-                            d.ReadFrom(bag);
+
+                            return (TData)d.ReadFrom(bag);
                         });
                         break;
                     default:

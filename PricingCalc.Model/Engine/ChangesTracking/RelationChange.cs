@@ -6,8 +6,8 @@ namespace PricingCalc.Model.Engine.ChangesTracking
 {
     [DebuggerDisplay("Action = {Action}")]
     public class RelationChange<TParent, TChild> : IRelationChange<TParent, TChild>
-        where TParent : IEntity
-        where TChild : IEntity
+        where TParent : Entity
+        where TChild : Entity
     {
         public RelationAction Action { get; }
 

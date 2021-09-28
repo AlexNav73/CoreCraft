@@ -65,8 +65,8 @@ namespace PricingCalc.Model.Storage.Sqlite
             string name,
             IReadOnlyCollection<KeyValuePair<TEntity, TData>> items,
             Scheme scheme)
-            where TEntity : IEntity
-            where TData : IEntityProperties
+            where TEntity : Entity
+            where TData : Properties
         {
             ExecuteNonQuery(QueryBuilder.Collections.CreateTable(scheme, name));
             ExecuteCollectionCommand(QueryBuilder.Collections.Insert(scheme, name), items, scheme);
@@ -75,22 +75,22 @@ namespace PricingCalc.Model.Storage.Sqlite
         public void Insert<TParent, TChild>(
             string name,
             IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
-            where TParent : IEntity
-            where TChild : IEntity
+            where TParent : Entity
+            where TChild : Entity
         {
             ExecuteNonQuery(QueryBuilder.Relations.CreateTable(name));
             ExecuteRelationCommand(QueryBuilder.Relations.Insert(name), relations);
         }
 
         public void Update<TEntity, TData>(string name, IReadOnlyCollection<KeyValuePair<TEntity, TData>> items, Scheme scheme)
-            where TEntity : IEntity
-            where TData : IEntityProperties
+            where TEntity : Entity
+            where TData : Properties
         {
             ExecuteCollectionCommand(QueryBuilder.Collections.Update(scheme, name), items, scheme);
         }
 
         public void Delete<TEntity>(string name, IReadOnlyCollection<TEntity> entities)
-            where TEntity : IEntity
+            where TEntity : Entity
         {
             var command = _connection.CreateCommand();
             command.CommandText = QueryBuilder.Collections.Delete(name);
@@ -107,15 +107,15 @@ namespace PricingCalc.Model.Storage.Sqlite
         }
 
         public void Delete<TParent, TChild>(string name, IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
-            where TParent : IEntity
-            where TChild : IEntity
+            where TParent : Entity
+            where TChild : Entity
         {
             ExecuteRelationCommand(QueryBuilder.Relations.Delete(name), relations);
         }
 
         public void Select<TEntity, TData>(string name, ICollection<TEntity, TData> collection, Scheme scheme)
-            where TEntity : IEntity, ICopy<TEntity>
-            where TData : IEntityProperties, ICopy<TData>
+            where TEntity : Entity
+            where TData : Properties
         {
             if (!Exists(name))
             {
@@ -136,16 +136,13 @@ namespace PricingCalc.Model.Storage.Sqlite
                     bag.Write(scheme.Properties[i].Name, Convert.ChangeType(reader.GetValue(i + 1), scheme.Properties[i].Type));
                 }
 
-                collection.Create()
-                    .WithId(id)
-                    .WithInit(p => p.ReadFrom(bag))
-                    .Build();
+                collection.Add(id, p => (TData)p.ReadFrom(bag));
             }
         }
 
         public void Select<TParent, TChild>(string name, IRelation<TParent, TChild> relation, IEntityCollection<TParent> parentCollection, IEntityCollection<TChild> childCollection)
-            where TParent : IEntity
-            where TChild : IEntity
+            where TParent : Entity
+            where TChild : Entity
         {
             if (!Exists(name))
             {
@@ -169,8 +166,8 @@ namespace PricingCalc.Model.Storage.Sqlite
         }
 
         private void ExecuteCollectionCommand<TEntity, TData>(string query, IReadOnlyCollection<KeyValuePair<TEntity, TData>> items, Scheme scheme)
-            where TEntity : IEntity
-            where TData : IEntityProperties
+            where TEntity : Entity
+            where TData : Properties
         {
             var command = _connection.CreateCommand();
             command.CommandText = query;
@@ -185,8 +182,8 @@ namespace PricingCalc.Model.Storage.Sqlite
         }
 
         private void ExecuteRelationCommand<TParent, TChild>(string query, IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
-            where TParent : IEntity
-            where TChild : IEntity
+            where TParent : Entity
+            where TChild : Entity
         {
             var command = _connection.CreateCommand();
             command.CommandText = query;
@@ -229,8 +226,8 @@ namespace PricingCalc.Model.Storage.Sqlite
         }
 
         private static void AssignValuesToParameters<TEntity, TData>(IDictionary<string, SqliteParameter> parameters, TEntity entity, TData data)
-            where TEntity : IEntity
-            where TData : IEntityProperties
+            where TEntity : Entity
+            where TData : Properties
         {
             parameters["Id"].Value = entity.Id;
 

@@ -3,8 +3,8 @@
 namespace PricingCalc.Model.Engine.Core
 {
     public interface IMapping<TParent, TChild> : IEnumerable<TParent>, ICopy<IMapping<TParent, TChild>>
-        where TParent : IEntity
-        where TChild : IEntity
+        where TParent : Entity
+        where TChild : Entity
     {
         void Add(TParent parent, TChild child);
 

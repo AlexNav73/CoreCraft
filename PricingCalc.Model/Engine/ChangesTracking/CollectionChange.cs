@@ -6,8 +6,8 @@ namespace PricingCalc.Model.Engine.ChangesTracking
 {
     [DebuggerDisplay("Action = {Action}")]
     internal class CollectionChange<TEntity, TData> : ICollectionChange<TEntity, TData>
-        where TEntity : IEntity
-        where TData : ICopy<TData>
+        where TEntity : Entity
+        where TData : Properties
     {
         public CollectionAction Action { get; }
 

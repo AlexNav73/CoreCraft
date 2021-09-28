@@ -9,17 +9,17 @@ namespace PricingCalc.Model.Tests
 {
     public class TrackableRelationTests
     {
-        private IRelation<IFirstEntity, ISecondEntity> _relation;
-        private IRelationChangeSet<IFirstEntity, ISecondEntity> _changes;
-        private IRelation<IFirstEntity, ISecondEntity> _trackable;
+        private IRelation<FirstEntity, SecondEntity> _relation;
+        private IRelationChangeSet<FirstEntity, SecondEntity> _changes;
+        private IRelation<FirstEntity, SecondEntity> _trackable;
 
         [SetUp]
         public void Setup()
         {
-            _relation = A.Fake<IRelation<IFirstEntity, ISecondEntity>>();
+            _relation = A.Fake<IRelation<FirstEntity, SecondEntity>>();
 
-            _changes = new RelationChangeSet<IFirstEntity, ISecondEntity>();
-            _trackable = new TrackableRelation<IFirstEntity, ISecondEntity>(_changes, _relation);
+            _changes = new RelationChangeSet<FirstEntity, SecondEntity>();
+            _trackable = new TrackableRelation<FirstEntity, SecondEntity>(_changes, _relation);
         }
 
         [Test]

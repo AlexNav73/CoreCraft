@@ -22,76 +22,42 @@ namespace PricingCalc.Model.Generators
         {
             foreach (var entity in modelShard.Entities)
             {
-                DefineEntityType(code, entity, modelShard);
-                code.EmptyLine();
-                DefineEntityPropertiesInterface(code, entity, modelShard);
+                DefineEntityType(code, entity);
                 code.EmptyLine();
                 DefineEntityPropertiesClass(code, entity);
             }
         }
 
-        private void DefineEntityType(IndentedTextWriter code, Entity entity, ModelShard shard)
+        private void DefineEntityType(IndentedTextWriter code, Entity entity)
         {
-            code.GeneratedInterfaceAttributes();
-            code.Interface(shard.IsInternal, $"I{entity.Name}", new[] { "IEntity", $"ICopy<I{entity.Name}>" }, () => { });
-            code.EmptyLine();
-
             code.GeneratedClassAttributes();
-            code.DebuggerDisplay("Id = {Id}");
-            code.WriteLine($"internal sealed record {entity.Name}(global::System.Guid Id) : I{entity.Name}");
+            code.WriteLine($"public sealed record {entity.Name}(global::System.Guid Id) : Entity(Id)");
             code.Block(() =>
             {
                 code.WriteLine($"internal {entity.Name}() : this(global::System.Guid.NewGuid())");
                 code.Block(() =>
                 {
                 });
-                code.EmptyLine();
-
-                code.WriteLine($"public I{entity.Name} Copy()");
-                code.Block(() =>
-                {
-                    code.WriteLine("return this with { };");
-                });
-            });
-        }
-
-        private void DefineEntityPropertiesInterface(IndentedTextWriter code, Entity entity, ModelShard shard)
-        {
-            code.GeneratedInterfaceAttributes();
-            code.Interface(shard.IsInternal, $"I{PropertiesType(entity)}", new[]
-            {
-                $"IEntityProperties",
-                $"ICopy<I{PropertiesType(entity)}>",
-                $"global::System.IEquatable<I{PropertiesType(entity)}>"
-            },
-            () =>
-            {
-                foreach (var prop in entity.Properties)
-                {
-                    code.WriteLine(DefineProperty(prop, "get; set;"));
-                }
             });
         }
 
         private void DefineEntityPropertiesClass(IndentedTextWriter code, Entity entity)
         {
             code.GeneratedClassAttributes();
-            code.WriteLine($"internal sealed record {PropertiesType(entity)} : I{PropertiesType(entity)}");
+            code.WriteLine($"public sealed record {PropertiesType(entity)} : Properties");
             code.Block(() =>
             {
+                DefineCtor(code, entity);
+                code.EmptyLine();
+
                 foreach (var prop in entity.Properties)
                 {
-                    code.WriteLine($"public {DefineProperty(prop, "get; set;")}");
+                    code.WriteLine($"public {DefineProperty(prop, "get; init;")}");
                 }
                 code.EmptyLine();
 
-                DefineCtor(code, entity);
+                ImplementEntityPropertiesMethods(code, entity);
                 code.EmptyLine();
-                ImplementCopyInterface(code, entity);
-                code.EmptyLine();
-                ImplementEntityPropertiesInterface(code, entity);
-                code.EmptyLine();
-                ImplementEquatableInterface(code, entity);
             });
 
             void DefineCtor(IndentedTextWriter code, Entity entity)
@@ -106,43 +72,29 @@ namespace PricingCalc.Model.Generators
                 });
             }
 
-            void ImplementCopyInterface(IndentedTextWriter code, Entity entity)
+            void ImplementEntityPropertiesMethods(IndentedTextWriter code, Entity entity)
             {
-                code.WriteLine($"public I{PropertiesType(entity)} Copy()");
+                code.WriteLine($"public override Properties ReadFrom(IPropertiesBag bag)");
                 code.Block(() =>
                 {
-                    code.WriteLine("return this with { };");
-                });
-            }
-
-            void ImplementEntityPropertiesInterface(IndentedTextWriter code, Entity entity)
-            {
-                code.WriteLine($"public void ReadFrom(IPropertiesBag bag)");
-                code.Block(() =>
-                {
-                    foreach (var prop in entity.Properties)
+                    code.WriteLine($"return new {PropertiesType(entity)}()");
+                    code.Block(() =>
                     {
-                        code.WriteLine($"{prop.Name} = bag.Read<{prop.Type}>(\"{prop.Name}\");");
-                    }
+                        foreach (var prop in entity.Properties)
+                        {
+                            code.WriteLine($"{prop.Name} = bag.Read<{prop.Type}>(\"{prop.Name}\"),");
+                        }
+                    }, true);
                 });
                 code.EmptyLine();
 
-                code.WriteLine($"public void WriteTo(IPropertiesBag bag)");
+                code.WriteLine($"public override void WriteTo(IPropertiesBag bag)");
                 code.Block(() =>
                 {
                     foreach (var prop in entity.Properties)
                     {
                         code.WriteLine($"bag.Write(\"{prop.Name}\", {prop.Name});");
                     }
-                });
-            }
-
-            void ImplementEquatableInterface(IndentedTextWriter code, Entity entity)
-            {
-                code.WriteLine($"public bool Equals(I{PropertiesType(entity)}? other)");
-                code.Block(() =>
-                {
-                    code.WriteLine($"return Equals(({PropertiesType(entity)}?)other);");
                 });
             }
         }

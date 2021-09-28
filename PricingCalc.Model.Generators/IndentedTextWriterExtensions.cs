@@ -91,11 +91,6 @@ namespace PricingCalc.Model.Generators
             code.WriteLine("[global::System.Diagnostics.DebuggerNonUserCodeAttribute()]");
         }
 
-        public static void DebuggerDisplay(this IndentedTextWriter code, string template)
-        {
-            code.WriteLine($"[global::System.Diagnostics.DebuggerDisplayAttribute(\"{template}\")]");
-        }
-
         private static string Visibility(bool isInternal)
         {
             return isInternal ? "internal" : "public";

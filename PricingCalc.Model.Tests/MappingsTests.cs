@@ -11,7 +11,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToOneAddRelationTest()
         {
-            var mapping = new OneToOne<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -24,7 +24,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToOneAddSecondChildToRelationTest()
         {
-            var mapping = new OneToOne<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -38,7 +38,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToManyAddRelationTest()
         {
-            var mapping = new OneToMany<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -51,7 +51,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToManyAddSecondChildToRelationTest()
         {
-            var mapping = new OneToMany<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -65,7 +65,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToOneGetTest()
         {
-            var mapping = new OneToOne<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -78,7 +78,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToManyGetTest()
         {
-            var mapping = new OneToMany<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -93,7 +93,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToOneRemoveTest()
         {
-            var mapping = new OneToOne<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -107,7 +107,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToOneRemoveFromEmptyReltionTest()
         {
-            var mapping = new OneToOne<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -118,7 +118,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToOneRemoveInvalidEntityTest()
         {
-            var mapping = new OneToOne<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -132,7 +132,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToManyRemoveTest()
         {
-            var mapping = new OneToMany<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -146,7 +146,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToManyRemoveSomeItemsTest()
         {
-            var mapping = new OneToMany<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -163,7 +163,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToManyRemoveFromEmptyReltionTest()
         {
-            var mapping = new OneToMany<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -174,7 +174,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToManyRemoveInvalidEntityTest()
         {
-            var mapping = new OneToMany<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -188,7 +188,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToOneCopyTest()
         {
-            var mapping = new OneToOne<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -204,7 +204,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToManyCopyTest()
         {
-            var mapping = new OneToMany<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -222,7 +222,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToOneEnumeratorTest()
         {
-            var mapping = new OneToOne<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();
@@ -237,7 +237,7 @@ namespace PricingCalc.Model.Tests
         [Test]
         public void OneToManyEnumeratorTest()
         {
-            var mapping = new OneToMany<IFirstEntity, ISecondEntity>();
+            var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
             var firstEntity = new FirstEntity();
             var secondEntity = new SecondEntity();

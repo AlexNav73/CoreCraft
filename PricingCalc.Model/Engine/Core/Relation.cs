@@ -6,8 +6,8 @@ namespace PricingCalc.Model.Engine.Core
 {
     [DebuggerDisplay(@"Parent [{_parentToChildRelations}] Children [{_childToParentRelations}]")]
     public class Relation<TParent, TChild> : IRelation<TParent, TChild>
-        where TParent : IEntity
-        where TChild : IEntity
+        where TParent : Entity
+        where TChild : Entity
     {
         private readonly IMapping<TParent, TChild> _parentToChildRelations;
         private readonly IMapping<TChild, TParent> _childToParentRelations;

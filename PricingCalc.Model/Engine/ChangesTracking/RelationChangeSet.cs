@@ -8,8 +8,8 @@ namespace PricingCalc.Model.Engine.ChangesTracking
 {
     [DebuggerDisplay("HasChanges = {HasChanges()}")]
     public class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TParent, TChild>
-        where TParent : IEntity
-        where TChild : IEntity
+        where TParent : Entity
+        where TChild : Entity
     {
         private readonly IList<IRelationChange<TParent, TChild>> _changes;
 

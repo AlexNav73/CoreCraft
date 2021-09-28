@@ -3,7 +3,7 @@
 namespace PricingCalc.Model.Engine.Core
 {
     public interface IEntityCollection<out TEntity> : IEnumerable<TEntity>
-        where TEntity : IEntity
+        where TEntity : Entity
     {
         int Count { get; }
     }

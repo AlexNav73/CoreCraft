@@ -7,8 +7,8 @@ namespace PricingCalc.Model.Engine.Core
 {
     [DebuggerDisplay("Count = {_relation.Keys.Count}")]
     public class OneToMany<TParent, TChild> : IMapping<TParent, TChild>
-        where TParent : IEntity
-        where TChild : IEntity, ICopy<TChild>
+        where TParent : Entity
+        where TChild : Entity
     {
         private readonly IDictionary<TParent, IList<TChild>> _relation;
 
@@ -96,7 +96,7 @@ namespace PricingCalc.Model.Engine.Core
                 var values = new List<TChild>(pair.Value.Count);
                 for (var i = 0; i < pair.Value.Count; i++)
                 {
-                    values.Add(pair.Value[i].Copy());
+                    values.Add(pair.Value[i]);
                 }
                 relation[pair.Key] = values;
             }
