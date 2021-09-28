@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using Microsoft.Data.Sqlite;
-using PricingCalc.Core;
 using PricingCalc.Model.Engine.Core;
 using PricingCalc.Model.Engine.Persistence;
 

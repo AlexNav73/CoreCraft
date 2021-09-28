@@ -23,10 +23,12 @@ namespace PricingCalc.Model.Engine.Core
 
         public void Add(TParent parent, TChild child)
         {
-            if (!_relation.TryAdd(parent, child))
+            if (_relation.ContainsKey(parent))
             {
                 throw new InvalidOperationException($"Linking {parent} with {child} has failed");
             }
+
+            _relation.Add(parent, child);
         }
 
         public IEnumerable<TChild> Children(TParent parent)

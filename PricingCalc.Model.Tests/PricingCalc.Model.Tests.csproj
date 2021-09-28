@@ -2,13 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="Infrastructure\Model.model.json" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="7.1.0" />
@@ -22,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PricingCalc.Model.Tests.Infrastructure\PricingCalc.Model.Tests.Infrastructure.csproj" />
     <ProjectReference Include="..\PricingCalc.Model\PricingCalc.Model.csproj" />
-    <ProjectReference Include="..\PricingCalc.Model.Generators\PricingCalc.Model.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

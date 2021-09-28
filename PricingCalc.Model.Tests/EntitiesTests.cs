@@ -1,6 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
-using PricingCalc.Model.Tests.Model.Entities;
+using PricingCalc.Model.Tests.Infrastructure.Model.Entities;
 
 namespace PricingCalc.Model.Tests
 {

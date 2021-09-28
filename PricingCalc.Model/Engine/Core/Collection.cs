@@ -41,10 +41,12 @@ namespace PricingCalc.Model.Engine.Core
         {
             void Add(TEntity entity, TData data)
             {
-                if (!_relation.TryAdd(entity.Id, data))
+                if (_relation.ContainsKey(entity.Id))
                 {
                     throw new InvalidOperationException($"Entity [{entity}] can't be added to the collection");
                 }
+
+                _relation.Add(entity.Id, data);
             }
 
             return new EntityBuilder<TEntity, TData>(Add, this);

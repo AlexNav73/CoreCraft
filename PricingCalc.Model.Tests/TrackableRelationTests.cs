@@ -3,7 +3,7 @@ using FakeItEasy;
 using NUnit.Framework;
 using PricingCalc.Model.Engine.ChangesTracking;
 using PricingCalc.Model.Engine.Core;
-using PricingCalc.Model.Tests.Model.Entities;
+using PricingCalc.Model.Tests.Infrastructure.Model.Entities;
 
 namespace PricingCalc.Model.Tests
 {

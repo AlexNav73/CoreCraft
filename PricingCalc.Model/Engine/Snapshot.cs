@@ -39,7 +39,7 @@ namespace PricingCalc.Model.Engine
         public IEnumerable<IModelShard> GetShardsInternalUnsafe()
         {
             var shards = _model
-                .Where(x => !_copies.Keys.Any(y => x.GetType().IsAssignableTo(y)))
+                .Where(x => !_copies.Keys.Any(y => y.IsInstanceOfType(x)))
                 .Union(_copies.Values);
 
             return shards;
@@ -48,7 +48,7 @@ namespace PricingCalc.Model.Engine
         public virtual IEnumerator<IModelShard> GetEnumerator()
         {
             var shards = _model
-                .Where(x => !_copies.Keys.Any(y => x.GetType().IsAssignableTo(y)));
+                .Where(x => !_copies.Keys.Any(y => y.IsInstanceOfType(x)));
 
             foreach (var shard in shards)
             {

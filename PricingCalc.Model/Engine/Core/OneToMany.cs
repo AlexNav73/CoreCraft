@@ -36,10 +36,12 @@ namespace PricingCalc.Model.Engine.Core
             }
             else
             {
-                if (!_relation.TryAdd(parent, new List<TChild>() { child }))
+                if (_relation.ContainsKey(parent))
                 {
                     throw new InvalidOperationException($"Linking {parent} with {child} has failed");
                 }
+
+                _relation.Add(parent, new List<TChild>() { child });
             }
         }
 

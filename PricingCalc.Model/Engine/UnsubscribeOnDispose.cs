@@ -1,5 +1,4 @@
-﻿using PricingCalc.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace PricingCalc.Model.Engine
