@@ -93,12 +93,7 @@ namespace PricingCalc.Model.Engine.Core
             var relation = new Dictionary<TParent, IList<TChild>>();
             foreach (var pair in _relation)
             {
-                var values = new List<TChild>(pair.Value.Count);
-                for (var i = 0; i < pair.Value.Count; i++)
-                {
-                    values.Add(pair.Value[i]);
-                }
-                relation[pair.Key] = values;
+                relation[pair.Key] = new List<TChild>(pair.Value);
             }
             return new OneToMany<TParent, TChild>(relation);
         }

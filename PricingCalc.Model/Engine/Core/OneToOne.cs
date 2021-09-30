@@ -68,12 +68,7 @@ namespace PricingCalc.Model.Engine.Core
 
         public IMapping<TParent, TChild> Copy()
         {
-            var relation = new Dictionary<TParent, TChild>();
-            foreach (var pair in _relation)
-            {
-                relation[pair.Key] = pair.Value;
-            }
-            return new OneToOne<TParent, TChild>(relation);
+            return new OneToOne<TParent, TChild>(new Dictionary<TParent, TChild>(_relation));
         }
     }
 }

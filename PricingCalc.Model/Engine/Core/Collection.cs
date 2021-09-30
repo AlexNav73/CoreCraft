@@ -92,15 +92,8 @@ namespace PricingCalc.Model.Engine.Core
 
         public ICollection<TEntity, TData> Copy()
         {
-            var relation = new Dictionary<Guid, TData>();
-
-            foreach (var pair in _relation)
-            {
-                relation.Add(pair.Key, pair.Value);
-            }
-
             return new Collection<TEntity, TData>(
-                relation,
+                new Dictionary<Guid, TData>(_relation),
                 _entityFactory,
                 _dataFactory);
         }
