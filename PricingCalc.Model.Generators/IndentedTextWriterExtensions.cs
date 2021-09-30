@@ -58,6 +58,14 @@ namespace PricingCalc.Model.Generators
             });
         }
 
+        public static void NoIndent(this IndentedTextWriter code, Action<IndentedTextWriter> action)
+        {
+            var indent = code.Indent;
+            code.Indent = 0;
+            action(code);
+            code.Indent = indent;
+        }
+
         public static void EmptyLine(this IndentedTextWriter code)
         {
             code.WriteLineNoTabs(string.Empty);

@@ -74,7 +74,11 @@ namespace PricingCalc.Model.Generators
 
             void ImplementEntityPropertiesMethods(IndentedTextWriter code, Entity entity)
             {
-                code.WriteLine($"public override Properties ReadFrom(IPropertiesBag bag)");
+                code.NoIndent(c => c.WriteLine("#if NET5_0_OR_GREATER"));
+                code.WriteLine($"public override {PropertiesType(entity)} ReadFrom(IPropertiesBag bag)");
+                code.NoIndent(c => c.WriteLine("#else"));
+                code.WriteLine("public override Properties ReadFrom(IPropertiesBag bag)");
+                code.NoIndent(c => c.WriteLine("#endif"));
                 code.Block(() =>
                 {
                     code.WriteLine($"return new {PropertiesType(entity)}()");
