@@ -3,7 +3,7 @@ using NUnit.Framework;
 using PricingCalc.Model.Tests.Infrastructure;
 using PricingCalc.Model.Tests.Infrastructure.Model;
 using PricingCalc.Model.Tests.Infrastructure.Model.Entities;
-using PricingCalc.Model.Tests.MemoryTests.Commands;
+using PricingCalc.Model.Tests.Infrastructure.Commands;
 
 namespace PricingCalc.Model.Tests.MemoryTests
 {

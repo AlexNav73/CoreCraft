@@ -54,8 +54,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\AddLotOfEntitiesCommand.cs" />
-    <Compile Include="Commands\ModifyAllEntitiesCommand.cs" />
     <Compile Include="MemoryUsageTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

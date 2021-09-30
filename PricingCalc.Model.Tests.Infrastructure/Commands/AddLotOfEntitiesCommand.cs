@@ -1,9 +1,8 @@
 ﻿using PricingCalc.Model.Engine;
 using PricingCalc.Model.Engine.Commands;
-using PricingCalc.Model.Tests.Infrastructure;
 using PricingCalc.Model.Tests.Infrastructure.Model;
 
-namespace PricingCalc.Model.Tests.MemoryTests.Commands
+namespace PricingCalc.Model.Tests.Infrastructure.Commands
 {
     public class AddLotOfEntitiesCommand : ModelCommand<FakeModel>
     {
