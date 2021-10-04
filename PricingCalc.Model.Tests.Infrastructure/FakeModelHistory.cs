@@ -7,25 +7,20 @@ namespace PricingCalc.Model.Tests.Infrastructure
 {
     public class FakeModelHistory : DisposableBase
     {
-        private readonly FakeModel _model;
-        private readonly Stack<IWritableModelChanges> _undoStack;
-        private readonly Stack<IWritableModelChanges> _redoStack;
-
         public FakeModelHistory(FakeModel model)
         {
-            _model = model;
+            UndoStack = new Stack<IWritableModelChanges>();
 
-            _undoStack = new Stack<IWritableModelChanges>();
-            _redoStack = new Stack<IWritableModelChanges>();
-
-            _model.ModelChanged += OnModelChanged;
+            model.ModelChanged += OnModelChanged;
         }
 
         public event EventHandler? Changed;
 
+        public Stack<IWritableModelChanges> UndoStack { get; }
+
         internal void OnModelChanged(object? sender, ModelChangedEventArgs args)
         {
-            _undoStack.Push((IWritableModelChanges)args.Changes);
+            UndoStack.Push((IWritableModelChanges)args.Changes);
             Changed?.Invoke(this, EventArgs.Empty);
         }
     }

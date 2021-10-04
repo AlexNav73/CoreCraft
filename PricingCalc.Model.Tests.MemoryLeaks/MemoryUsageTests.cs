@@ -38,6 +38,8 @@ namespace PricingCalc.Model.Tests.MemoryTests
 
                 Assert.That(countOfFirstEntities, Is.EqualTo(200));
                 Assert.That(countOfFirstEntitiesProps, Is.EqualTo(200));
+
+                Assert.That(model.History.UndoStack.Count, Is.EqualTo(2));
             });
         }
     }
