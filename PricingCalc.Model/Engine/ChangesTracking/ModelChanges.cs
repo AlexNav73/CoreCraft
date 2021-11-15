@@ -1,33 +1,29 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿namespace PricingCalc.Model.Engine.ChangesTracking;
 
-namespace PricingCalc.Model.Engine.ChangesTracking
+internal class ModelChanges : IModelChanges
 {
-    internal class ModelChanges : IModelChanges
+    protected readonly IList<IChangesFrame> Frames;
+
+    public ModelChanges()
+        : this(new List<IChangesFrame>())
     {
-        protected readonly IList<IChangesFrame> Frames;
+    }
 
-        public ModelChanges()
-            : this(new List<IChangesFrame>())
-        {
-        }
+    public ModelChanges(IList<IChangesFrame> frames)
+    {
+        Frames = frames;
+    }
 
-        public ModelChanges(IList<IChangesFrame> frames)
-        {
-            Frames = frames;
-        }
+    public bool TryGetFrame<T>(out T frame)
+        where T : class, IChangesFrame
+    {
+        frame = Frames.OfType<T>().SingleOrDefault()!;
 
-        public bool TryGetFrame<T>(out T frame)
-            where T : class, IChangesFrame
-        {
-            frame = Frames.OfType<T>().SingleOrDefault()!;
+        return frame != null;
+    }
 
-            return frame != null;
-        }
-
-        public bool HasChanges()
-        {
-            return Frames.Any(x => x.HasChanges());
-        }
+    public bool HasChanges()
+    {
+        return Frames.Any(x => x.HasChanges());
     }
 }

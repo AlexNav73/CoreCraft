@@ -19,6 +19,7 @@
 
   <PropertyGroup>
     <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <Target Name="GetDependencyTargetPaths">

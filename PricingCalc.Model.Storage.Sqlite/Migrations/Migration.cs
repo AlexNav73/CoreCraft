@@ -1,14 +1,13 @@
-﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations
+﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations;
+
+public abstract class Migration : IMigration
 {
-    public abstract class Migration : IMigration
+    protected Migration(long timestamp)
     {
-        protected Migration(long timestamp)
-        {
-            Timestamp = timestamp;
-        }
-
-        public long Timestamp { get; }
-
-        public abstract void Migrate(IMigrator migrator);
+        Timestamp = timestamp;
     }
+
+    public long Timestamp { get; }
+
+    public abstract void Migrate(IMigrator migrator);
 }

@@ -1,9 +1,6 @@
-﻿using PricingCalc.Model.Engine.Core;
+﻿namespace PricingCalc.Model.Engine.ChangesTracking;
 
-namespace PricingCalc.Model.Engine.ChangesTracking
+public interface ITrackableModelShard
 {
-    public interface ITrackableModelShard
-    {
-        IModelShard AsTrackable(IWritableModelChanges modelChanges);
-    }
+    IModelShard AsTrackable(IWritableModelChanges modelChanges);
 }

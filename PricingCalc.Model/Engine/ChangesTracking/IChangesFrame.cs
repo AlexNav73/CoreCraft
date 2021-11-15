@@ -1,7 +1,6 @@
-﻿namespace PricingCalc.Model.Engine.ChangesTracking
+﻿namespace PricingCalc.Model.Engine.ChangesTracking;
+
+public interface IChangesFrame
 {
-    public interface IChangesFrame
-    {
-        bool HasChanges();
-    }
+    bool HasChanges();
 }

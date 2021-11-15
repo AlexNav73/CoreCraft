@@ -1,9 +1,6 @@
-﻿using PricingCalc.Model.Engine.Core;
+﻿namespace PricingCalc.Model.Engine;
 
-namespace PricingCalc.Model.Engine
+public interface IModelShardAccessor
 {
-    public interface IModelShardAccessor
-    {
-        T Shard<T>() where T : IModelShard;
-    }
+    T Shard<T>() where T : IModelShard;
 }

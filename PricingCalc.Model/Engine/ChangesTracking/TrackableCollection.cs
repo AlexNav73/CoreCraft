@@ -1,89 +1,85 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Diagnostics;
-using PricingCalc.Model.Engine.Core;
 
-namespace PricingCalc.Model.Engine.ChangesTracking
+namespace PricingCalc.Model.Engine.ChangesTracking;
+
+[DebuggerDisplay("{_collection}")]
+public class TrackableCollection<TEntity, TData> : ICollection<TEntity, TData>
+    where TEntity : Entity
+    where TData : Properties
 {
-    [DebuggerDisplay("{_collection}")]
-    public class TrackableCollection<TEntity, TData> : ICollection<TEntity, TData>
-        where TEntity : Entity
-        where TData : Properties
+    private readonly ICollectionChangeSet<TEntity, TData> _changes;
+    private readonly ICollection<TEntity, TData> _collection;
+
+    public TrackableCollection(
+        ICollectionChangeSet<TEntity, TData> changesCollection,
+        ICollection<TEntity, TData> modelCollection)
     {
-        private readonly ICollectionChangeSet<TEntity, TData> _changes;
-        private readonly ICollection<TEntity, TData> _collection;
+        _changes = changesCollection;
+        _collection = modelCollection;
+    }
 
-        public TrackableCollection(
-            ICollectionChangeSet<TEntity, TData> changesCollection,
-            ICollection<TEntity, TData> modelCollection)
+    public int Count => _collection.Count;
+
+    public TEntity Add(TData data)
+    {
+        var entity = _collection.Add(data);
+        _changes.Add(CollectionAction.Add, entity, default, data);
+        return entity;
+    }
+
+    public TEntity Add(Guid id, Func<TData, TData> init)
+    {
+        var entity = _collection.Add(id, init);
+        var data = _collection.Get(entity);
+
+        _changes.Add(CollectionAction.Add, entity, default, data);
+
+        return entity;
+    }
+
+    public void Add(TEntity entity, TData data)
+    {
+        _collection.Add(entity, data);
+        _changes.Add(CollectionAction.Add, entity, default, data);
+    }
+
+    public TData Get(TEntity entity)
+    {
+        return _collection.Get(entity);
+    }
+
+    public void Modify(TEntity entity, Func<TData, TData> modifier)
+    {
+        var oldData = _collection.Get(entity);
+        _collection.Modify(entity, modifier);
+        var newData = _collection.Get(entity);
+
+        if (!oldData.Equals(newData))
         {
-            _changes = changesCollection;
-            _collection = modelCollection;
+            _changes.Add(CollectionAction.Modify, entity, oldData, newData);
         }
+    }
 
-        public int Count => _collection.Count;
+    public void Remove(TEntity entity)
+    {
+        var data = _collection.Get(entity);
+        _changes.Add(CollectionAction.Remove, entity, data, default);
+        _collection.Remove(entity);
+    }
 
-        public TEntity Add(TData data)
-        {
-            var entity = _collection.Add(data);
-            _changes.Add(CollectionAction.Add, entity, default, data);
-            return entity;
-        }
+    public IEnumerator<TEntity> GetEnumerator()
+    {
+        return _collection.GetEnumerator();
+    }
 
-        public TEntity Add(Guid id, Func<TData, TData> init)
-        {
-            var entity = _collection.Add(id, init);
-            var data = _collection.Get(entity);
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
 
-            _changes.Add(CollectionAction.Add, entity, default, data);
-
-            return entity;
-        }
-
-        public void Add(TEntity entity, TData data)
-        {
-            _collection.Add(entity, data);
-            _changes.Add(CollectionAction.Add, entity, default, data);
-        }
-
-        public TData Get(TEntity entity)
-        {
-            return _collection.Get(entity);
-        }
-
-        public void Modify(TEntity entity, Func<TData, TData> modifier)
-        {
-            var oldData = _collection.Get(entity);
-            _collection.Modify(entity, modifier);
-            var newData = _collection.Get(entity);
-
-            if (!oldData.Equals(newData))
-            {
-                _changes.Add(CollectionAction.Modify, entity, oldData, newData);
-            }
-        }
-
-        public void Remove(TEntity entity)
-        {
-            var data = _collection.Get(entity);
-            _changes.Add(CollectionAction.Remove, entity, data, default);
-            _collection.Remove(entity);
-        }
-
-        public IEnumerator<TEntity> GetEnumerator()
-        {
-            return _collection.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public ICollection<TEntity, TData> Copy()
-        {
-            throw new InvalidOperationException("Collection can't be copied because it is attached to changes tracking system");
-        }
+    public ICollection<TEntity, TData> Copy()
+    {
+        throw new InvalidOperationException("Collection can't be copied because it is attached to changes tracking system");
     }
 }

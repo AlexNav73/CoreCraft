@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿namespace PricingCalc.Model.Engine.Commands;
 
-namespace PricingCalc.Model.Engine.Commands
+public interface IModelCommand
 {
-    public interface IModelCommand
-    {
-        Task Execute();
-    }
+    Task Execute();
 }

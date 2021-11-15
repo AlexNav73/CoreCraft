@@ -1,127 +1,121 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+﻿namespace PricingCalc.Model.Engine;
 
-namespace PricingCalc.Model.Engine
+internal class SequentialTaskScheduler : TaskScheduler
 {
-    internal class SequentialTaskScheduler : TaskScheduler
+    public static readonly SequentialTaskScheduler Instance = new SequentialTaskScheduler();
+
+    [ThreadStatic]
+    private static bool _currentThreadIsProcessingItems;
+
+    private readonly LinkedList<Task> _queue;
+
+    private int _runningParallelTasks = 0;
+
+    private SequentialTaskScheduler()
     {
-        public static readonly SequentialTaskScheduler Instance = new SequentialTaskScheduler();
+        _queue = new LinkedList<Task>();
+    }
 
-        [ThreadStatic]
-        private static bool _currentThreadIsProcessingItems;
-
-        private readonly LinkedList<Task> _queue;
-
-        private int _runningParallelTasks = 0;
-
-        private SequentialTaskScheduler()
+    protected override void QueueTask(Task task)
+    {
+        lock (_queue)
         {
-            _queue = new LinkedList<Task>();
-        }
-
-        protected override void QueueTask(Task task)
-        {
-            lock (_queue)
+            _queue.AddLast(task);
+            if (_runningParallelTasks == 0)
             {
-                _queue.AddLast(task);
-                if (_runningParallelTasks == 0)
-                {
-                    _runningParallelTasks++;
-                    // NOTE: In the article about TaskScheduler in the example
-                    // UnsafeQueueUserWorkItem is using to speed up queuing task
-                    // by skipping of thread restrictions checks. If a thread with
-                    // restrictions calls UnsafeQueueUserWorkItem, a new thread will
-                    // execute delegate under default restrictions. It is unsafe.
-                    // In future, plug-in system could be implemented and using unsafe
-                    // method could open a security hole. For now, performance is ok and
-                    // usage of unsafe method is not necessary.
-                    ThreadPool.QueueUserWorkItem(Execute, null);
-                }
+                _runningParallelTasks++;
+                // NOTE: In the article about TaskScheduler in the example
+                // UnsafeQueueUserWorkItem is using to speed up queuing task
+                // by skipping of thread restrictions checks. If a thread with
+                // restrictions calls UnsafeQueueUserWorkItem, a new thread will
+                // execute delegate under default restrictions. It is unsafe.
+                // In future, plug-in system could be implemented and using unsafe
+                // method could open a security hole. For now, performance is ok and
+                // usage of unsafe method is not necessary.
+                ThreadPool.QueueUserWorkItem(Execute, null);
             }
         }
+    }
 
-        private void Execute(object? state)
+    private void Execute(object? state)
+    {
+        _currentThreadIsProcessingItems = true;
+        try
         {
-            _currentThreadIsProcessingItems = true;
-            try
+            while (true)
             {
-                while (true)
+                Task task;
+
+                lock (_queue)
                 {
-                    Task task;
-
-                    lock (_queue)
+                    if (_queue.Count == 0)
                     {
-                        if (_queue.Count == 0)
-                        {
-                            _runningParallelTasks--;
-                            break;
-                        }
-
-                        task = _queue.First!.Value;
-                        _queue.RemoveFirst();
+                        _runningParallelTasks--;
+                        break;
                     }
 
-                    TryExecuteTask(task);
+                    task = _queue.First!.Value;
+                    _queue.RemoveFirst();
                 }
-            }
-            finally
-            {
-                _currentThreadIsProcessingItems = false;
+
+                TryExecuteTask(task);
             }
         }
-
-        protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+        finally
         {
-            if (!_currentThreadIsProcessingItems)
-            {
-                return false;
-            }
+            _currentThreadIsProcessingItems = false;
+        }
+    }
 
-            if (taskWasPreviouslyQueued)
-            {
-                if (TryDequeue(task))
-                {
-                    return TryExecuteTask(task);
-                }
-
-                return false;
-            }
-
-            return TryExecuteTask(task);
+    protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+    {
+        if (!_currentThreadIsProcessingItems)
+        {
+            return false;
         }
 
-        protected override IEnumerable<Task>? GetScheduledTasks()
+        if (taskWasPreviouslyQueued)
         {
-            var lockTaken = false;
-            try
+            if (TryDequeue(task))
             {
-                Monitor.TryEnter(_queue, ref lockTaken);
-                if (lockTaken)
-                {
-                    return _queue;
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
+                return TryExecuteTask(task);
             }
-            finally
-            {
-                if (lockTaken)
-                {
-                    Monitor.Exit(_queue);
-                }
-            }
+
+            return false;
         }
 
-        protected sealed override bool TryDequeue(Task task)
+        return TryExecuteTask(task);
+    }
+
+    protected override IEnumerable<Task>? GetScheduledTasks()
+    {
+        var lockTaken = false;
+        try
         {
-            lock (_queue)
+            Monitor.TryEnter(_queue, ref lockTaken);
+            if (lockTaken)
             {
-                return _queue.Remove(task);
+                return _queue;
             }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+        finally
+        {
+            if (lockTaken)
+            {
+                Monitor.Exit(_queue);
+            }
+        }
+    }
+
+    protected sealed override bool TryDequeue(Task task)
+    {
+        lock (_queue)
+        {
+            return _queue.Remove(task);
         }
     }
 }

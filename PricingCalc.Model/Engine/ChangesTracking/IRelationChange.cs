@@ -1,17 +1,14 @@
-﻿using PricingCalc.Model.Engine.Core;
+﻿namespace PricingCalc.Model.Engine.ChangesTracking;
 
-namespace PricingCalc.Model.Engine.ChangesTracking
+public interface IRelationChange<TParent, TChild>
+    where TParent : Entity
+    where TChild : Entity
 {
-    public interface IRelationChange<TParent, TChild>
-        where TParent : Entity
-        where TChild : Entity
-    {
-        RelationAction Action { get; }
+    RelationAction Action { get; }
 
-        TParent Parent { get; }
+    TParent Parent { get; }
 
-        TChild Child { get; }
+    TChild Child { get; }
 
-        IRelationChange<TParent, TChild> Invert();
-    }
+    IRelationChange<TParent, TChild> Invert();
 }

@@ -1,8 +1,7 @@
-﻿namespace PricingCalc.Model.Engine.ChangesTracking
+﻿namespace PricingCalc.Model.Engine.ChangesTracking;
+
+public enum RelationAction
 {
-    public enum RelationAction
-    {
-        Linked,
-        Unlinked
-    }
+    Linked,
+    Unlinked
 }

@@ -1,17 +1,16 @@
-﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations
+﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations;
+
+internal class SqliteMigrator : IMigrator
 {
-    internal class SqliteMigrator : IMigrator
+    private readonly SqliteRepository _repository;
+
+    public SqliteMigrator(SqliteRepository repository)
     {
-        private readonly SqliteRepository _repository;
+        _repository = repository;
+    }
 
-        public SqliteMigrator(SqliteRepository repository)
-        {
-            _repository = repository;
-        }
-
-        public void DropTable(string name)
-        {
-            _repository.ExecuteNonQuery(QueryBuilder.DropTable(name));
-        }
+    public void DropTable(string name)
+    {
+        _repository.ExecuteNonQuery(QueryBuilder.DropTable(name));
     }
 }

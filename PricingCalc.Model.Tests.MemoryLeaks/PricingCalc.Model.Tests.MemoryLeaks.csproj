@@ -3,6 +3,7 @@
     <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
     <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>

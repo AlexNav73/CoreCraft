@@ -1,43 +1,39 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿namespace PricingCalc.Model.Engine.ChangesTracking;
 
-namespace PricingCalc.Model.Engine.ChangesTracking
+internal class WritableModelChanges : ModelChanges, IWritableModelChanges
 {
-    internal class WritableModelChanges : ModelChanges, IWritableModelChanges
+    public WritableModelChanges()
     {
-        public WritableModelChanges()
+    }
+
+    private WritableModelChanges(IList<IChangesFrame> frames)
+        : base(frames)
+    {
+    }
+
+    public T Add<T>(T newChanges) where T : IWritableChangesFrame
+    {
+        var frame = Frames.OfType<T>().SingleOrDefault();
+        if (frame != null)
         {
+            return frame;
         }
 
-        private WritableModelChanges(IList<IChangesFrame> frames)
-            : base(frames)
-        {
-        }
+        Frames.Add(newChanges);
+        return newChanges;
+    }
 
-        public T Add<T>(T newChanges) where T : IWritableChangesFrame
-        {
-            var frame = Frames.OfType<T>().SingleOrDefault();
-            if (frame != null)
-            {
-                return frame;
-            }
+    public IWritableModelChanges Invert()
+    {
+        var frames = Frames.Cast<IWritableChangesFrame>().Select(x => x.Invert()).ToArray();
+        return new WritableModelChanges(frames);
+    }
 
-            Frames.Add(newChanges);
-            return newChanges;
-        }
-
-        public IWritableModelChanges Invert()
+    public void Apply(IModel model)
+    {
+        foreach (var frame in Frames.Cast<IWritableChangesFrame>())
         {
-            var frames = Frames.Cast<IWritableChangesFrame>().Select(x => x.Invert()).ToArray();
-            return new WritableModelChanges(frames);
-        }
-
-        public void Apply(IModel model)
-        {
-            foreach (var frame in Frames.Cast<IWritableChangesFrame>())
-            {
-                frame.Apply(model);
-            }
+            frame.Apply(model);
         }
     }
 }

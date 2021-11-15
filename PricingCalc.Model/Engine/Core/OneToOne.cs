@@ -1,74 +1,71 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Diagnostics;
 
-namespace PricingCalc.Model.Engine.Core
+namespace PricingCalc.Model.Engine.Core;
+
+[DebuggerDisplay("Count = {_relation.Keys.Count}")]
+public class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
+    where TParent : Entity
+    where TChild : Entity
 {
-    [DebuggerDisplay("Count = {_relation.Keys.Count}")]
-    public class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
-        where TParent : Entity
-        where TChild : Entity
+    private readonly IDictionary<TParent, TChild> _relation;
+
+    public OneToOne() : this(new Dictionary<TParent, TChild>())
     {
-        private readonly IDictionary<TParent, TChild> _relation;
+    }
 
-        public OneToOne() : this(new Dictionary<TParent, TChild>())
+    private OneToOne(IDictionary<TParent, TChild> relation)
+    {
+        _relation = relation;
+    }
+
+    public void Add(TParent parent, TChild child)
+    {
+        if (_relation.ContainsKey(parent))
         {
+            throw new InvalidOperationException($"Linking {parent} with {child} has failed");
         }
 
-        private OneToOne(IDictionary<TParent, TChild> relation)
-        {
-            _relation = relation;
-        }
+        _relation.Add(parent, child);
+    }
 
-        public void Add(TParent parent, TChild child)
+    public IEnumerable<TChild> Children(TParent parent)
+    {
+        if (_relation.TryGetValue(parent, out var child))
         {
-            if (_relation.ContainsKey(parent))
-            {
-                throw new InvalidOperationException($"Linking {parent} with {child} has failed");
-            }
-
-            _relation.Add(parent, child);
+            yield return child;
         }
+    }
 
-        public IEnumerable<TChild> Children(TParent parent)
+    public void Remove(TParent parent, TChild child)
+    {
+        if (_relation.TryGetValue(parent, out var c) && c.Equals(child))
         {
-            if (_relation.TryGetValue(parent, out var child))
-            {
-                yield return child;
-            }
+            _relation.Remove(parent);
         }
-
-        public void Remove(TParent parent, TChild child)
+        else
         {
-            if (_relation.TryGetValue(parent, out var c) && c.Equals(child))
-            {
-                _relation.Remove(parent);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Can't remove {parent} - {child} link");
-            }
+            throw new InvalidOperationException($"Can't remove {parent} - {child} link");
         }
+    }
 
-        public void Clear()
-        {
-            _relation.Clear();
-        }
+    public void Clear()
+    {
+        _relation.Clear();
+    }
 
-        public IEnumerator<TParent> GetEnumerator()
-        {
-            return _relation.Keys.GetEnumerator();
-        }
+    public IEnumerator<TParent> GetEnumerator()
+    {
+        return _relation.Keys.GetEnumerator();
+    }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
 
-        public IMapping<TParent, TChild> Copy()
-        {
-            return new OneToOne<TParent, TChild>(new Dictionary<TParent, TChild>(_relation));
-        }
+    public IMapping<TParent, TChild> Copy()
+    {
+        return new OneToOne<TParent, TChild>(new Dictionary<TParent, TChild>(_relation));
     }
 }

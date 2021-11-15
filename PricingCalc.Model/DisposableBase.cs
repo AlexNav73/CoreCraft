@@ -1,46 +1,43 @@
-﻿using System;
+﻿namespace PricingCalc.Model;
 
-namespace PricingCalc.Model
+public abstract class DisposableBase : IDisposable
 {
-    public abstract class DisposableBase : IDisposable
+    private bool _disposed;
+
+    public bool IsDisposed => _disposed;
+
+    protected virtual void DisposeManagedObjects()
     {
-        private bool _disposed;
+    }
 
-        public bool IsDisposed => _disposed;
+    protected virtual void DisposeUnmanagedObjects()
+    {
+    }
 
-        protected virtual void DisposeManagedObjects()
+    ~DisposableBase()
+    {
+        Dispose(false);
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
         {
+            return;
         }
 
-        protected virtual void DisposeUnmanagedObjects()
+        if (disposing)
         {
+            DisposeManagedObjects();
         }
 
-        ~DisposableBase()
-        {
-            Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            if (disposing)
-            {
-                DisposeManagedObjects();
-            }
-
-            DisposeUnmanagedObjects();
-            _disposed = true;
-        }
+        DisposeUnmanagedObjects();
+        _disposed = true;
     }
 }

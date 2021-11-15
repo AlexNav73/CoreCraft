@@ -1,12 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿namespace PricingCalc.Model.Engine;
 
-namespace PricingCalc.Model.Engine
+public interface IJobService
 {
-    public interface IJobService
-    {
-        Task Enqueue(Action job);
+    Task Enqueue(Action job);
 
-        Task RunParallel(Action job);
-    }
+    Task RunParallel(Action job);
 }

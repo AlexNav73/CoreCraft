@@ -1,52 +1,48 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations;
 
-namespace PricingCalc.Model.Storage.Sqlite.Migrations
+internal sealed class MigrationRunner
 {
-    internal sealed class MigrationRunner
+    private readonly IEnumerable<IMigration> _migrations;
+
+    public MigrationRunner(IEnumerable<IMigration> migrations)
     {
-        private readonly IEnumerable<IMigration> _migrations;
+        _migrations = migrations.OrderBy(x => x.Timestamp);
+    }
 
-        public MigrationRunner(IEnumerable<IMigration> migrations)
+    public void Run(SqliteRepository repository)
+    {
+        var pendingMigrations = _migrations;
+        IMigration lastMigration = null;
+
+        var result = repository.GetLatestigration();
+        if (result != null)
         {
-            _migrations = migrations.OrderBy(x => x.Timestamp);
+            pendingMigrations = _migrations.Where(x => x.Timestamp > result.Value.timestamp);
         }
 
-        public void Run(SqliteRepository repository)
+        foreach (var migration in pendingMigrations)
         {
-            var pendingMigrations = _migrations;
-            IMigration lastMigration = null;
+            using var transaction = repository.BeginTransaction();
+            var migrator = new SqliteMigrator(repository);
 
-            var result = repository.GetLatestigration();
-            if (result != null)
-            {
-                pendingMigrations = _migrations.Where(x => x.Timestamp > result.Value.timestamp);
-            }
+            migration.Migrate(migrator);
+            lastMigration = migration;
 
-            foreach (var migration in pendingMigrations)
-            {
-                using var transaction = repository.BeginTransaction();
-                var migrator = new SqliteMigrator(repository);
-
-                migration.Migrate(migrator);
-                lastMigration = migration;
-
-                transaction.Commit();
-            }
-
-            if (lastMigration != null)
-            {
-                repository.UpdateLatestMigration(lastMigration.Timestamp, lastMigration.GetType().Name);
-            }
+            transaction.Commit();
         }
 
-        public void UpdateSaveLatestMigration(SqliteRepository repository)
+        if (lastMigration != null)
         {
-            var lastMigration = _migrations.LastOrDefault();
-            if (lastMigration != null)
-            {
-                repository.UpdateLatestMigration(lastMigration.Timestamp, lastMigration.GetType().Name);
-            }
+            repository.UpdateLatestMigration(lastMigration.Timestamp, lastMigration.GetType().Name);
+        }
+    }
+
+    public void UpdateSaveLatestMigration(SqliteRepository repository)
+    {
+        var lastMigration = _migrations.LastOrDefault();
+        if (lastMigration != null)
+        {
+            repository.UpdateLatestMigration(lastMigration.Timestamp, lastMigration.GetType().Name);
         }
     }
 }

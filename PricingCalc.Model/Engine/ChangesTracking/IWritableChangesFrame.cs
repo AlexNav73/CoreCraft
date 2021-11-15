@@ -1,9 +1,8 @@
-﻿namespace PricingCalc.Model.Engine.ChangesTracking
-{
-    public interface IWritableChangesFrame : IChangesFrame
-    {
-        void Apply(IModel model);
+﻿namespace PricingCalc.Model.Engine.ChangesTracking;
 
-        IWritableChangesFrame Invert();
-    }
+public interface IWritableChangesFrame : IChangesFrame
+{
+    void Apply(IModel model);
+
+    IWritableChangesFrame Invert();
 }

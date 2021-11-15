@@ -1,40 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using PricingCalc.Model.Engine.ChangesTracking;
-using PricingCalc.Model.Engine.Core;
+﻿using PricingCalc.Model.Engine.ChangesTracking;
 
-namespace PricingCalc.Model.Engine
+namespace PricingCalc.Model.Engine;
+
+internal class TrackableSnapshot : Snapshot
 {
-    internal class TrackableSnapshot : Snapshot
+    public TrackableSnapshot(IModel model) : base(model)
     {
-        public TrackableSnapshot(IModel model) : base(model)
+        Changes = new WritableModelChanges();
+    }
+
+    public IWritableModelChanges Changes { get; }
+
+    public override T Shard<T>()
+    {
+        var modelShard = (ITrackableModelShard)base.Shard<T>();
+        var trackable = modelShard.AsTrackable(Changes);
+
+        return (T)trackable;
+    }
+
+    public override IEnumerator<IModelShard> GetEnumerator()
+    {
+        var baseEnumerator = base.GetEnumerator();
+
+        IEnumerable<IModelShard> EnumerateTrackables()
         {
-            Changes = new WritableModelChanges();
-        }
-
-        public IWritableModelChanges Changes { get; }
-
-        public override T Shard<T>()
-        {
-            var modelShard = (ITrackableModelShard)base.Shard<T>();
-            var trackable = modelShard.AsTrackable(Changes);
-
-            return (T)trackable;
-        }
-
-        public override IEnumerator<IModelShard> GetEnumerator()
-        {
-            var baseEnumerator = base.GetEnumerator();
-
-            IEnumerable<IModelShard> EnumerateTrackables()
+            while (baseEnumerator.MoveNext())
             {
-                while (baseEnumerator.MoveNext())
-                {
-                    yield return ((ITrackableModelShard)baseEnumerator.Current).AsTrackable(Changes);
-                }
+                yield return ((ITrackableModelShard)baseEnumerator.Current).AsTrackable(Changes);
             }
-
-            return EnumerateTrackables().GetEnumerator();
         }
+
+        return EnumerateTrackables().GetEnumerator();
     }
 }

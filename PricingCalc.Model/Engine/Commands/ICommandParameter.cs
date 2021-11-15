@@ -1,16 +1,15 @@
-﻿namespace PricingCalc.Model.Engine.Commands
+﻿namespace PricingCalc.Model.Engine.Commands;
+
+public interface ICommandParameter
 {
-    public interface ICommandParameter
-    {
-        string Name { get; }
+    string Name { get; }
 
-        bool IsInitialized { get; set; }
-    }
+    bool IsInitialized { get; set; }
+}
 
-    public interface ICommandParameter<T> : ICommandParameter
-    {
-        T Value { get; set; }
+public interface ICommandParameter<T> : ICommandParameter
+{
+    T Value { get; set; }
 
-        void SetValue(T value);
-    }
+    void SetValue(T value);
 }

@@ -1,9 +1,8 @@
-﻿namespace PricingCalc.Model.Engine.ChangesTracking
+﻿namespace PricingCalc.Model.Engine.ChangesTracking;
+
+public enum CollectionAction
 {
-    public enum CollectionAction
-    {
-        Add,
-        Remove,
-        Modify
-    }
+    Add,
+    Remove,
+    Modify
 }

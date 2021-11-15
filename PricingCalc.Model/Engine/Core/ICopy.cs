@@ -1,7 +1,6 @@
-﻿namespace PricingCalc.Model.Engine.Core
+﻿namespace PricingCalc.Model.Engine.Core;
+
+public interface ICopy<out T>
 {
-    public interface ICopy<out T>
-    {
-        T Copy();
-    }
+    T Copy();
 }

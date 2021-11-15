@@ -1,30 +1,27 @@
-﻿using System.Linq;
-using PricingCalc.Model.Engine;
+﻿using PricingCalc.Model.Engine;
 using PricingCalc.Model.Engine.Commands;
-using PricingCalc.Model.Tests.Infrastructure.Model;
 
-namespace PricingCalc.Model.Tests.Infrastructure.Commands
+namespace PricingCalc.Model.Tests.Infrastructure.Commands;
+
+internal class ModifyAllEntitiesCommand : ModelCommand<FakeModel>
 {
-    internal class ModifyAllEntitiesCommand : ModelCommand<FakeModel>
+    public ModifyAllEntitiesCommand(FakeModel model)
+        : base(model)
     {
-        public ModifyAllEntitiesCommand(FakeModel model)
-            : base(model)
+    }
+
+    protected override void ExecuteInternal(IModel model)
+    {
+        var modelShard = model.Shard<IFakeModelShard>();
+
+        foreach (var entity in modelShard.FirstCollection.ToArray())
         {
+            modelShard.FirstCollection.Modify(entity, p => p with { NonNullableStringProperty = "test2" });
         }
 
-        protected override void ExecuteInternal(IModel model)
+        foreach (var entity in modelShard.SecondCollection.ToArray())
         {
-            var modelShard = model.Shard<IFakeModelShard>();
-
-            foreach (var entity in modelShard.FirstCollection.ToArray())
-            {
-                modelShard.FirstCollection.Modify(entity, p => p with { NonNullableStringProperty = "test2" });
-            }
-
-            foreach (var entity in modelShard.SecondCollection.ToArray())
-            {
-                modelShard.SecondCollection.Modify(entity, p => p with { FloatProperty = 1f });
-            }
+            modelShard.SecondCollection.Modify(entity, p => p with { FloatProperty = 1f });
         }
     }
 }

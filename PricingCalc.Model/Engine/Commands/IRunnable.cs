@@ -1,7 +1,6 @@
-﻿namespace PricingCalc.Model.Engine.Commands
+﻿namespace PricingCalc.Model.Engine.Commands;
+
+internal interface IRunnable
 {
-    internal interface IRunnable
-    {
-        void Run(IModel model);
-    }
+    void Run(IModel model);
 }

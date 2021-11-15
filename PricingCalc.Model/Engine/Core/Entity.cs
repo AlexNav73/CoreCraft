@@ -1,8 +1,5 @@
-﻿using System;
+﻿namespace PricingCalc.Model.Engine.Core;
 
-namespace PricingCalc.Model.Engine.Core
+public abstract record Entity(Guid Id)
 {
-    public abstract record Entity(Guid Id)
-    {
-    }
 }

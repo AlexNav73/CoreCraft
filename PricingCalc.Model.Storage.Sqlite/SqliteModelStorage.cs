@@ -1,67 +1,64 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using PricingCalc.Model.Engine;
+﻿using PricingCalc.Model.Engine;
 using PricingCalc.Model.Engine.ChangesTracking;
 using PricingCalc.Model.Engine.Persistence;
 using PricingCalc.Model.Storage.Sqlite.Migrations;
 
-namespace PricingCalc.Model.Storage.Sqlite
+namespace PricingCalc.Model.Storage.Sqlite;
+
+public sealed class SqliteModelStorage : IStorage
 {
-    public sealed class SqliteModelStorage : IStorage
+    private readonly MigrationRunner _migrationRunner;
+
+    public SqliteModelStorage(IEnumerable<IMigration> migrations)
     {
-        private readonly MigrationRunner _migrationRunner;
+        _migrationRunner = new MigrationRunner(migrations);
+    }
 
-        public SqliteModelStorage(IEnumerable<IMigration> migrations)
+    public void Save(string path, IModel model, IReadOnlyList<IModelChanges> changes)
+    {
+        using var repository = new SqliteRepository(path);
+        using var transaction = repository.BeginTransaction();
+
+        for (var i = 0; i < changes.Count; i++)
         {
-            _migrationRunner = new MigrationRunner(migrations);
-        }
-
-        public void Save(string path, IModel model, IReadOnlyList<IModelChanges> changes)
-        {
-            using var repository = new SqliteRepository(path);
-            using var transaction = repository.BeginTransaction();
-
-            for (var i = 0; i < changes.Count; i++)
-            {
-                foreach (var modelShard in model)
-                {
-                    ((IHaveStorage)modelShard).Storage.Save(path, repository, changes[i]);
-                }
-            }
-
-            transaction.Commit();
-        }
-
-        public void Save(string path, IModel model)
-        {
-            using var repository = new SqliteRepository(path);
-            using var transaction = repository.BeginTransaction();
-
-            _migrationRunner.UpdateSaveLatestMigration(repository);
-
             foreach (var modelShard in model)
             {
-                ((IHaveStorage)modelShard).Storage.Save(path, repository);
+                ((IHaveStorage)modelShard).Storage.Save(path, repository, changes[i]);
             }
-
-            transaction.Commit();
         }
 
-        public void Load(string path, IModel model)
+        transaction.Commit();
+    }
+
+    public void Save(string path, IModel model)
+    {
+        using var repository = new SqliteRepository(path);
+        using var transaction = repository.BeginTransaction();
+
+        _migrationRunner.UpdateSaveLatestMigration(repository);
+
+        foreach (var modelShard in model)
         {
-            if (!File.Exists(path))
-            {
-                return;
-            }
+            ((IHaveStorage)modelShard).Storage.Save(path, repository);
+        }
 
-            using var repository = new SqliteRepository(path);
+        transaction.Commit();
+    }
 
-            _migrationRunner.Run(repository);
+    public void Load(string path, IModel model)
+    {
+        if (!File.Exists(path))
+        {
+            return;
+        }
 
-            foreach (var modelShard in model)
-            {
-                ((IHaveStorage)modelShard).Storage.Load(path, repository);
-            }
+        using var repository = new SqliteRepository(path);
+
+        _migrationRunner.Run(repository);
+
+        foreach (var modelShard in model)
+        {
+            ((IHaveStorage)modelShard).Storage.Load(path, repository);
         }
     }
 }

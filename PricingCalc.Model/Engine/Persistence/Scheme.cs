@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace PricingCalc.Model.Engine.Persistence;
 
-namespace PricingCalc.Model.Engine.Persistence
-{
-    public record Property(string Name, Type Type, bool IsNullable);
+public record Property(string Name, Type Type, bool IsNullable);
 
-    // TODO(#6): Could we use PropertiesBag to generate queries?
-    public record Scheme(IList<Property> Properties);
-}
+// TODO(#6): Could we use PropertiesBag to generate queries?
+public record Scheme(IList<Property> Properties);

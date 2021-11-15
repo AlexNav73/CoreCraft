@@ -1,7 +1,6 @@
-﻿namespace PricingCalc.Model.Engine.Persistence
+﻿namespace PricingCalc.Model.Engine.Persistence;
+
+public interface IHaveStorage
 {
-    public interface IHaveStorage
-    {
-        IModelShardStorage Storage { get; }
-    }
+    IModelShardStorage Storage { get; }
 }

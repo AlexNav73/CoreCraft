@@ -1,11 +1,10 @@
-﻿namespace PricingCalc.Model.Engine.ChangesTracking
+﻿namespace PricingCalc.Model.Engine.ChangesTracking;
+
+public interface IWritableModelChanges : IModelChanges
 {
-    public interface IWritableModelChanges : IModelChanges
-    {
-        T Add<T>(T newChanges) where T : IWritableChangesFrame;
+    T Add<T>(T newChanges) where T : IWritableChangesFrame;
 
-        IWritableModelChanges Invert();
+    IWritableModelChanges Invert();
 
-        void Apply(IModel model);
-    }
+    void Apply(IModel model);
 }

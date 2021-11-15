@@ -1,32 +1,31 @@
 ﻿using System.Diagnostics;
 
-namespace PricingCalc.Model.Engine.Commands
+namespace PricingCalc.Model.Engine.Commands;
+
+[DebuggerDisplay("{Value}")]
+internal class CommandParameter<T> : ICommandParameter<T>
 {
-    [DebuggerDisplay("{Value}")]
-    internal class CommandParameter<T> : ICommandParameter<T>
+    public CommandParameter(string name)
     {
-        public CommandParameter(string name)
-        {
-            Value = default!;
-            IsInitialized = false;
-            Name = name;
-        }
+        Value = default!;
+        IsInitialized = false;
+        Name = name;
+    }
 
-        public string Name { get; }
+    public string Name { get; }
 
-        public T Value { get; set; }
+    public T Value { get; set; }
 
-        public bool IsInitialized { get; set; }
+    public bool IsInitialized { get; set; }
 
-        public void SetValue(T value)
-        {
-            Value = value;
-            IsInitialized = true;
-        }
+    public void SetValue(T value)
+    {
+        Value = value;
+        IsInitialized = true;
+    }
 
-        public override string ToString()
-        {
-            return $"{Name} = '{Value}'";
-        }
+    public override string ToString()
+    {
+        return $"{Name} = '{Value}'";
     }
 }

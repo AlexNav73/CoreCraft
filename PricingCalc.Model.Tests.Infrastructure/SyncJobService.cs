@@ -1,21 +1,18 @@
-﻿using System;
-using System.Threading.Tasks;
-using PricingCalc.Model.Engine;
+﻿using PricingCalc.Model.Engine;
 
-namespace PricingCalc.Model.Tests.Infrastructure
+namespace PricingCalc.Model.Tests.Infrastructure;
+
+public class SyncJobService : IJobService
 {
-    public class SyncJobService : IJobService
+    public Task Enqueue(Action job)
     {
-        public Task Enqueue(Action job)
-        {
-            job();
+        job();
 
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
+    }
 
-        public Task RunParallel(Action job)
-        {
-            throw new NotImplementedException();
-        }
+    public Task RunParallel(Action job)
+    {
+        throw new NotImplementedException();
     }
 }

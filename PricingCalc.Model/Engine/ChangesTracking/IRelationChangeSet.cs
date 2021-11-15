@@ -1,18 +1,14 @@
-﻿using System.Collections.Generic;
-using PricingCalc.Model.Engine.Core;
+﻿namespace PricingCalc.Model.Engine.ChangesTracking;
 
-namespace PricingCalc.Model.Engine.ChangesTracking
+public interface IRelationChangeSet<TParent, TChild> : IEnumerable<IRelationChange<TParent, TChild>>
+    where TParent : Entity
+    where TChild : Entity
 {
-    public interface IRelationChangeSet<TParent, TChild> : IEnumerable<IRelationChange<TParent, TChild>>
-        where TParent : Entity
-        where TChild : Entity
-    {
-        void Add(RelationAction action, TParent parent, TChild child);
+    void Add(RelationAction action, TParent parent, TChild child);
 
-        IRelationChangeSet<TParent, TChild> Invert();
+    IRelationChangeSet<TParent, TChild> Invert();
 
-        void Apply(IRelation<TParent, TChild> relation);
+    void Apply(IRelation<TParent, TChild> relation);
 
-        bool HasChanges();
-    }
+    bool HasChanges();
 }

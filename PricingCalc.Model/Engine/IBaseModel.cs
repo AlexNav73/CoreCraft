@@ -1,9 +1,6 @@
-﻿using System;
+﻿namespace PricingCalc.Model.Engine;
 
-namespace PricingCalc.Model.Engine
+public interface IBaseModel : IModelShardAccessor
 {
-    public interface IBaseModel : IModelShardAccessor
-    {
-        IDisposable Subscribe(Action<ModelChangedEventArgs> onModelChanges);
-    }
+    IDisposable Subscribe(Action<ModelChangedEventArgs> onModelChanges);
 }

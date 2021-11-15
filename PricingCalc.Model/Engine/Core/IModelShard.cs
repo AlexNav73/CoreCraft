@@ -1,6 +1,5 @@
-﻿namespace PricingCalc.Model.Engine.Core
+﻿namespace PricingCalc.Model.Engine.Core;
+
+public interface IModelShard
 {
-    public interface IModelShard
-    {
-    }
 }

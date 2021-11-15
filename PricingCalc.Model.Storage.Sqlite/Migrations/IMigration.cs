@@ -1,9 +1,8 @@
-﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations
-{
-    public interface IMigration
-    {
-        long Timestamp { get; }
+﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations;
 
-        void Migrate(IMigrator migrator);
-    }
+public interface IMigration
+{
+    long Timestamp { get; }
+
+    void Migrate(IMigrator migrator);
 }

@@ -1,7 +1,6 @@
-﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations
+﻿namespace PricingCalc.Model.Storage.Sqlite.Migrations;
+
+public interface IMigrator
 {
-    public interface IMigrator
-    {
-        void DropTable(string name);
-    }
+    void DropTable(string name);
 }
