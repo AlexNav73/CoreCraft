@@ -5,16 +5,19 @@ namespace PricingCalc.Model.Tests.Infrastructure.Commands;
 
 public class AddLotOfEntitiesCommand : ModelCommand<FakeModel>
 {
-    public AddLotOfEntitiesCommand(FakeModel model)
+    private readonly int _count;
+
+    public AddLotOfEntitiesCommand(FakeModel model, int count)
         : base(model)
     {
+        _count = count;
     }
 
     protected override void ExecuteInternal(IModel model)
     {
         var modelShard = model.Shard<IFakeModelShard>();
 
-        for (var i = 0; i < 100; i++)
+        for (var i = 0; i < _count; i++)
         {
             var first = modelShard.FirstCollection.Add(new()
             {

@@ -7,7 +7,7 @@ namespace PricingCalc.Model.Tests.MemoryTests;
 public class MemoryUsageTests
 {
     [Test]
-    public void TotalMemoryConsumptionAfterCommandExecutionTest()
+    public void EntitiesAndPropertiesAreCopiedOnlyWhenModifiedTest()
     {
         var model = new FakeModel(new[]
         {
@@ -17,7 +17,7 @@ public class MemoryUsageTests
 
         var memoryCheckPoint1 = dotMemory.Check();
 
-        var addCommand = new AddLotOfEntitiesCommand(model);
+        var addCommand = new AddLotOfEntitiesCommand(model, 100);
         addCommand.Execute();
         var modifyCommand = new ModifyAllEntitiesCommand(model);
         modifyCommand.Execute();

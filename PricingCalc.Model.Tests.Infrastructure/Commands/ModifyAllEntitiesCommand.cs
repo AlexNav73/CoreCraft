@@ -14,12 +14,12 @@ internal class ModifyAllEntitiesCommand : ModelCommand<FakeModel>
     {
         var modelShard = model.Shard<IFakeModelShard>();
 
-        foreach (var entity in modelShard.FirstCollection.ToArray())
+        foreach (var entity in modelShard.FirstCollection)
         {
             modelShard.FirstCollection.Modify(entity, p => p with { NonNullableStringProperty = "test2" });
         }
 
-        foreach (var entity in modelShard.SecondCollection.ToArray())
+        foreach (var entity in modelShard.SecondCollection)
         {
             modelShard.SecondCollection.Modify(entity, p => p with { FloatProperty = 1f });
         }
