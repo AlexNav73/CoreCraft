@@ -2,7 +2,7 @@
 
 namespace PricingCalc.Model.Tests.Infrastructure;
 
-public class SyncJobService : IJobService
+public class SyncScheduler : IScheduler
 {
     public Task Enqueue(Action job)
     {

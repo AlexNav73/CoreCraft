@@ -5,8 +5,8 @@ namespace PricingCalc.Model.Tests.Infrastructure;
 
 public class FakeModel : BaseModel
 {
-    public FakeModel(IEnumerable<IModelShard> shards, IJobService jobService)
-        : base(shards, jobService)
+    public FakeModel(IEnumerable<IModelShard> shards)
+        : base(shards, new ModelConfiguration() { Scheduler = new SyncScheduler() })
     {
         History = new FakeModelHistory(this);
     }

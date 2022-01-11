@@ -1,6 +1,6 @@
 ﻿namespace PricingCalc.Model.Engine;
 
-public class AsyncJobService : IJobService
+internal class AsyncScheduler : IScheduler
 {
     public Task Enqueue(Action job)
     {

@@ -1,6 +1,6 @@
 ﻿namespace PricingCalc.Model.Engine;
 
-public interface IJobService
+public interface IScheduler
 {
     Task Enqueue(Action job);
 

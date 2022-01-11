@@ -7,16 +7,16 @@ namespace PricingCalc.Model.Engine;
 public abstract class BaseModel : IBaseModel, ICommandRunner
 {
     private readonly View _view;
-    private readonly IJobService _jobService;
+    private readonly IScheduler _scheduler;
     private readonly HashSet<Action<ModelChangedEventArgs>> _subscriptions;
 
     private volatile ModelChangedEventArgs? _currentChanges;
 
-    protected BaseModel(IEnumerable<IModelShard> shards, IJobService jobService)
+    protected BaseModel(IEnumerable<IModelShard> shards, ModelConfiguration configuration)
     {
         _subscriptions = new HashSet<Action<ModelChangedEventArgs>>();
         _view = new View(shards);
-        _jobService = jobService;
+        _scheduler = configuration.Scheduler;
     }
 
     public event EventHandler<ModelChangedEventArgs>? ModelChanged;
@@ -47,7 +47,7 @@ public abstract class BaseModel : IBaseModel, ICommandRunner
 
         try
         {
-            await _jobService.Enqueue(() => runnable.Run(snapshot));
+            await _scheduler.Enqueue(() => runnable.Run(snapshot));
         }
         catch (Exception ex)
         {
@@ -72,7 +72,7 @@ public abstract class BaseModel : IBaseModel, ICommandRunner
         // created when user pressed the Save button
         var copy = _view.CopyModel();
 
-        await _jobService.RunParallel(() => storage.Save(path, copy, changes));
+        await _scheduler.RunParallel(() => storage.Save(path, copy, changes));
     }
 
     public async Task Save(IStorage storage, string path)
@@ -83,7 +83,7 @@ public abstract class BaseModel : IBaseModel, ICommandRunner
         // created when user pressed the Save button
         var copy = _view.CopyModel();
 
-        await _jobService.RunParallel(() => storage.Save(path, copy));
+        await _scheduler.RunParallel(() => storage.Save(path, copy));
     }
 
     public async Task Load(IStorage storage, string path)
@@ -92,7 +92,7 @@ public abstract class BaseModel : IBaseModel, ICommandRunner
 
         try
         {
-            await _jobService.Enqueue(() => storage.Load(path, snapshot));
+            await _scheduler.Enqueue(() => storage.Load(path, snapshot));
         }
         catch (Exception ex)
         {
@@ -116,7 +116,7 @@ public abstract class BaseModel : IBaseModel, ICommandRunner
 
             try
             {
-                await _jobService.Enqueue(() => changes.Apply(snapshot));
+                await _scheduler.Enqueue(() => changes.Apply(snapshot));
             }
             catch (Exception ex)
             {

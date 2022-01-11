@@ -12,8 +12,7 @@ public class MemoryUsageTests
         var model = new FakeModel(new[]
         {
             new FakeModelShard()
-        },
-        new SyncJobService());
+        });
 
         var memoryCheckPoint1 = dotMemory.Check();
 
