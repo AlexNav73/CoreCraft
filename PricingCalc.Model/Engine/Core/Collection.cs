@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace PricingCalc.Model.Engine.Core;
 
 [DebuggerDisplay("Count = {Count}")]
-public class Collection<TEntity, TData> : ICollection<TEntity, TData>
+public class Collection<TEntity, TData> : IMutableCollection<TEntity, TData>
     where TEntity : Entity
     where TData : Properties
 {

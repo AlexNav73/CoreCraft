@@ -15,7 +15,7 @@ public class AddLotOfEntitiesCommand : ModelCommand<FakeModel>
 
     protected override void ExecuteInternal(IModel model)
     {
-        var modelShard = model.Shard<IFakeModelShard>();
+        var modelShard = model.Shard<IMutableFakeModelShard>();
 
         for (var i = 0; i < _count; i++)
         {

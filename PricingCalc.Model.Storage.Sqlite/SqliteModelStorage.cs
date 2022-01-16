@@ -8,10 +8,14 @@ namespace PricingCalc.Model.Storage.Sqlite;
 public sealed class SqliteModelStorage : IStorage
 {
     private readonly MigrationRunner _migrationRunner;
+    private readonly IEnumerable<IModelShardStorage> _storages;
 
-    public SqliteModelStorage(IEnumerable<IMigration> migrations)
+    public SqliteModelStorage(
+        IEnumerable<IMigration> migrations,
+        IEnumerable<IModelShardStorage> storages)
     {
         _migrationRunner = new MigrationRunner(migrations);
+        _storages = storages;
     }
 
     public void Save(string path, IModel model, IReadOnlyList<IModelChanges> changes)
@@ -21,9 +25,9 @@ public sealed class SqliteModelStorage : IStorage
 
         for (var i = 0; i < changes.Count; i++)
         {
-            foreach (var modelShard in model)
+            foreach (var storage in _storages)
             {
-                ((IHaveStorage)modelShard).Storage.Save(path, repository, changes[i]);
+                storage.Save(repository, model, changes[i]);
             }
         }
 
@@ -37,9 +41,9 @@ public sealed class SqliteModelStorage : IStorage
 
         _migrationRunner.UpdateSaveLatestMigration(repository);
 
-        foreach (var modelShard in model)
+        foreach (var storage in _storages)
         {
-            ((IHaveStorage)modelShard).Storage.Save(path, repository);
+            storage.Save(repository, model);
         }
 
         transaction.Commit();
@@ -56,9 +60,9 @@ public sealed class SqliteModelStorage : IStorage
 
         _migrationRunner.Run(repository);
 
-        foreach (var modelShard in model)
+        foreach (var storage in _storages)
         {
-            ((IHaveStorage)modelShard).Storage.Load(path, repository);
+            storage.Load(repository, model);
         }
     }
 }

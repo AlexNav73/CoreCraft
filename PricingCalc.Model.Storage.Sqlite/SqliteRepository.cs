@@ -110,7 +110,7 @@ internal class SqliteRepository : DisposableBase, IRepository
         ExecuteRelationCommand(QueryBuilder.Relations.Delete(name), relations);
     }
 
-    public void Select<TEntity, TData>(string name, ICollection<TEntity, TData> collection, Scheme scheme)
+    public void Select<TEntity, TData>(string name, IMutableCollection<TEntity, TData> collection, Scheme scheme)
         where TEntity : Entity
         where TData : Properties
     {
@@ -137,7 +137,7 @@ internal class SqliteRepository : DisposableBase, IRepository
         }
     }
 
-    public void Select<TParent, TChild>(string name, IRelation<TParent, TChild> relation, IEntityCollection<TParent> parentCollection, IEntityCollection<TChild> childCollection)
+    public void Select<TParent, TChild>(string name, IMutableRelation<TParent, TChild> relation, IEntityCollection<TParent> parentCollection, IEntityCollection<TChild> childCollection)
         where TParent : Entity
         where TChild : Entity
     {

@@ -6,7 +6,9 @@ internal partial class ApplicationModelGenerator
     {
         foreach (var modelShard in shards)
         {
-            DefineModelShardInterface(code, modelShard);
+            DefineModelShardInterface(code, modelShard, false);
+            code.EmptyLine();
+            DefineModelShardInterface(code, modelShard, true);
             code.EmptyLine();
             DefineModelShardClass(code, modelShard);
             code.EmptyLine();
@@ -19,21 +21,23 @@ internal partial class ApplicationModelGenerator
         }
     }
 
-    private void DefineModelShardInterface(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineModelShardInterface(IndentedTextWriter code, ModelShard modelShard, bool isMutable)
     {
+        var mutability = isMutable ? "Mutable" : string.Empty;
+
         code.GeneratedInterfaceAttributes();
-        code.Interface(modelShard.IsInternal, $"I{modelShard.Name}ModelShard", new[] { "IModelShard" }, () =>
+        code.Interface(modelShard.IsInternal, $"I{mutability}{modelShard.Name}ModelShard", new[] { "IModelShard" }, () =>
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine(Property($"I{Type(collection)}", collection.Name, "get;"));
+                code.WriteLine(Property($"I{mutability}{Type(collection)}", collection.Name, "get;"));
             }
 
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine(Property($"I{Type(relation)}", relation.Name, "get;"));
+                code.WriteLine(Property($"I{mutability}{Type(relation)}", relation.Name, "get;"));
             }
         });
     }
@@ -44,17 +48,14 @@ internal partial class ApplicationModelGenerator
         code.Class("sealed", $"{modelShard.Name}ModelShard", new[]
         {
                 $"I{modelShard.Name}ModelShard",
-                $"ICopy<I{modelShard.Name}ModelShard>",
-                "ITrackableModelShard",
-                "IHaveStorage"
+                "ICopy<IModelShard>",
+                $"ITrackableModelShard<IMutable{modelShard.Name}ModelShard>"
             },
         () =>
         {
             DefineCtor(code, modelShard);
             code.EmptyLine();
             ImplementModelShardInterface(code, modelShard);
-            code.EmptyLine();
-            ImplementIHaveStorageInterface(code);
             code.EmptyLine();
             ImplementTrackableInterface(code, modelShard);
             code.EmptyLine();
@@ -76,9 +77,6 @@ internal partial class ApplicationModelGenerator
                 {
                     code.WriteLine($"{relation.Name} = new {Type(relation)}(new {relation.ParentRelationType}<{relation.ParentType}, {relation.ChildType}>(), new {relation.ChildRelationType}<{relation.ChildType}, {relation.ParentType}>());");
                 }
-                code.EmptyLine();
-
-                code.WriteLine($"Storage = new {modelShard.Name}ModelShardStorage(this);");
             });
         }
 
@@ -96,14 +94,9 @@ internal partial class ApplicationModelGenerator
             }
         }
 
-        void ImplementIHaveStorageInterface(IndentedTextWriter code)
-        {
-            code.WriteLine("public IModelShardStorage Storage { get; }");
-        }
-
         void ImplementTrackableInterface(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine($"public IModelShard AsTrackable(IWritableModelChanges modelChanges)");
+            code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsTrackable(IWritableModelChanges modelChanges)");
             code.Block(() =>
             {
                 code.WriteLine($"var frame = modelChanges.Add(new {modelShard.Name}ChangesFrame());");
@@ -113,7 +106,7 @@ internal partial class ApplicationModelGenerator
 
         void ImplementCopyInterface(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine($"public I{modelShard.Name}ModelShard Copy()");
+            code.WriteLine($"public IModelShard Copy()");
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -249,8 +242,8 @@ internal partial class ApplicationModelGenerator
                 code.WriteLine($"var modelShard = model.Shard<I{modelShard.Name}ModelShard>();");
                 code.EmptyLine();
 
-                var operations = modelShard.Relations.Select(x => $"{x.Name}.Apply(modelShard.{x.Name});")
-                    .Union(modelShard.Collections.Select(x => $"{x.Name}.Apply(modelShard.{x.Name});"));
+                var operations = modelShard.Relations.Select(x => $"{x.Name}.Apply((IMutable{Type(x)})modelShard.{x.Name});")
+                    .Union(modelShard.Collections.Select(x => $"{x.Name}.Apply((IMutable{Type(x)})modelShard.{x.Name});"));
 
                 foreach (var op in operations)
                 {
@@ -278,15 +271,13 @@ internal partial class ApplicationModelGenerator
         code.Class("sealed", $"Trackable{modelShard.Name}ModelShard",
             new[]
             {
-                    $"I{modelShard.Name}ModelShard",
-                    "IHaveStorage"
+                $"IMutable{modelShard.Name}ModelShard"
             },
             () =>
             {
                 DefineCtor(code, modelShard);
                 code.EmptyLine();
                 ImplementModelShardInterface(code, modelShard);
-                ImplementIHaveStorageInterface(code);
             });
 
         void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
@@ -304,8 +295,6 @@ internal partial class ApplicationModelGenerator
                 {
                     code.WriteLine($"{relation.Name} = new Trackable{Type(relation)}(frame.{relation.Name}, modelShard.{relation.Name});");
                 }
-
-                code.WriteLine($"Storage = new {modelShard.Name}ModelShardStorage(this);");
             });
         }
 
@@ -313,20 +302,14 @@ internal partial class ApplicationModelGenerator
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public {Property($"I{Type(collection)}", collection.Name)}");
+                code.WriteLine($"public {Property($"IMutable{Type(collection)}", collection.Name)}");
             }
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name)}");
+                code.WriteLine($"public {Property($"IMutable{Type(relation)}", relation.Name)}");
             }
-            code.EmptyLine();
-        }
-
-        void ImplementIHaveStorageInterface(IndentedTextWriter code)
-        {
-            code.WriteLine("public IModelShardStorage Storage { get; }");
         }
     }
 }

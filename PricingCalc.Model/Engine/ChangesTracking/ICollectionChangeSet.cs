@@ -8,7 +8,7 @@ public interface ICollectionChangeSet<TEntity, TData> : IEnumerable<ICollectionC
 
     ICollectionChangeSet<TEntity, TData> Invert();
 
-    void Apply(ICollection<TEntity, TData> collection);
+    void Apply(IMutableCollection<TEntity, TData> collection);
 
     bool HasChanges();
 }

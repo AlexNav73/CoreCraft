@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace PricingCalc.Model.Engine.Core;
 
 [DebuggerDisplay(@"Parent [{_parentToChildRelations}] Children [{_childToParentRelations}]")]
-public class Relation<TParent, TChild> : IRelation<TParent, TChild>
+public class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {

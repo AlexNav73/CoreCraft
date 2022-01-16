@@ -2,40 +2,13 @@
 
 namespace PricingCalc.Model.Engine.Persistence;
 
-public abstract class ModelShardStorage<TShard, TFrame> : IModelShardStorage
-    where TShard : IModelShard
-    where TFrame : class, IChangesFrame
+public abstract class ModelShardStorage : IModelShardStorage
 {
-    protected ModelShardStorage(TShard shard)
-    {
-        Shard = shard;
-    }
+    public abstract void Save(IRepository repository, IModel model, IModelChanges changes);
 
-    protected TShard Shard { get; }
+    public abstract void Save(IRepository repository, IModel model);
 
-    public void Save(string path, IRepository repository, IModelChanges changes)
-    {
-        if (changes.TryGetFrame<TFrame>(out var frame))
-        {
-            SaveInternal(path, repository, frame);
-        }
-    }
-
-    public void Save(string path, IRepository repository)
-    {
-        SaveInternal(path, repository);
-    }
-
-    public void Load(string path, IRepository repository)
-    {
-        LoadInternal(path, repository);
-    }
-
-    protected abstract void SaveInternal(string path, IRepository repository, TFrame changes);
-
-    protected abstract void SaveInternal(string path, IRepository repository);
-
-    protected abstract void LoadInternal(string path, IRepository repository);
+    public abstract void Load(IRepository repository, IModel model);
 
     protected void Save<TEntity, TData>(IRepository repository, string name, ICollectionChangeSet<TEntity, TData> changes, Scheme scheme)
         where TEntity : Entity
@@ -86,7 +59,9 @@ public abstract class ModelShardStorage<TShard, TFrame> : IModelShardStorage
         where TEntity : Entity
         where TData : Properties
     {
-        repository.Insert(name, collection.Select(x => new KeyValuePair<TEntity, TData>(x, collection.Get(x))).ToArray(), scheme);
+        var items = collection.Select(x => new KeyValuePair<TEntity, TData>(x, collection.Get(x))).ToArray();
+
+        repository.Insert(name, items, scheme);
     }
 
     protected void Save<TParent, TChild>(IRepository repository, string name, IRelationChangeSet<TParent, TChild> changes)
@@ -137,7 +112,7 @@ public abstract class ModelShardStorage<TShard, TFrame> : IModelShardStorage
     protected void Load<TEntity, TData>(
         IRepository repository,
         string name,
-        ICollection<TEntity, TData> collection,
+        IMutableCollection<TEntity, TData> collection,
         Scheme scheme)
         where TEntity : Entity
         where TData : Properties
@@ -148,7 +123,7 @@ public abstract class ModelShardStorage<TShard, TFrame> : IModelShardStorage
     protected void Load<TParent, TChild>(
         IRepository repository,
         string name,
-        IRelation<TParent, TChild> relation,
+        IMutableRelation<TParent, TChild> relation,
         IEntityCollection<TParent> parents,
         IEntityCollection<TChild> children)
         where TParent : Entity

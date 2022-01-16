@@ -4,7 +4,7 @@ namespace PricingCalc.Model.Tests;
 
 public class CollectionTests
 {
-    private ICollection<FirstEntity, FirstEntityProperties> _collection;
+    private IMutableCollection<FirstEntity, FirstEntityProperties> _collection;
 
     [SetUp]
     public void Setup()

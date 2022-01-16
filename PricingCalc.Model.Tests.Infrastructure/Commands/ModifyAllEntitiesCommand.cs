@@ -12,7 +12,7 @@ internal class ModifyAllEntitiesCommand : ModelCommand<FakeModel>
 
     protected override void ExecuteInternal(IModel model)
     {
-        var modelShard = model.Shard<IFakeModelShard>();
+        var modelShard = model.Shard<IMutableFakeModelShard>();
 
         foreach (var entity in modelShard.FirstCollection)
         {

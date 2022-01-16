@@ -4,15 +4,5 @@ public interface ICollection<TEntity, TData> : IEntityCollection<TEntity>, ICopy
     where TEntity : Entity
     where TData : Properties
 {
-    TEntity Add(TData data);
-
-    TEntity Add(Guid id, Func<TData, TData> init);
-
-    void Add(TEntity entity, TData data);
-
-    void Modify(TEntity entity, Func<TData, TData> modifier);
-
     TData Get(TEntity entity);
-
-    void Remove(TEntity entity);
 }

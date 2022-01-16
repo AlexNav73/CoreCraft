@@ -32,7 +32,7 @@ public class CollectionChangeSet<TEntity, TData> : ICollectionChangeSet<TEntity,
 
     public bool HasChanges() => _changes.Count > 0;
 
-    public void Apply(ICollection<TEntity, TData> collection)
+    public void Apply(IMutableCollection<TEntity, TData> collection)
     {
         foreach (var change in _changes)
         {

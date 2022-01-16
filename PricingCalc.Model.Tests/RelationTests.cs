@@ -4,7 +4,7 @@ namespace PricingCalc.Model.Tests;
 
 public class RelationTests
 {
-    private IRelation<FirstEntity, SecondEntity> _relation;
+    private IMutableRelation<FirstEntity, SecondEntity> _relation;
     private IMapping<FirstEntity, SecondEntity> _parentMapping;
     private IMapping<SecondEntity, FirstEntity> _childMapping;
 

@@ -1,5 +1,5 @@
 ﻿namespace PricingCalc.Model.Engine;
 
-public interface IModel : IModelShardAccessor, IEnumerable<IModelShard>
+public interface IModel : IModelShardAccessor
 {
 }

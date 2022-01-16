@@ -8,7 +8,7 @@ public interface IRelationChangeSet<TParent, TChild> : IEnumerable<IRelationChan
 
     IRelationChangeSet<TParent, TChild> Invert();
 
-    void Apply(IRelation<TParent, TChild> relation);
+    void Apply(IMutableRelation<TParent, TChild> relation);
 
     bool HasChanges();
 }

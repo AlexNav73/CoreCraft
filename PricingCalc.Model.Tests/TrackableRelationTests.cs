@@ -5,14 +5,14 @@ namespace PricingCalc.Model.Tests;
 
 public class TrackableRelationTests
 {
-    private IRelation<FirstEntity, SecondEntity> _relation;
+    private IMutableRelation<FirstEntity, SecondEntity> _relation;
     private IRelationChangeSet<FirstEntity, SecondEntity> _changes;
-    private IRelation<FirstEntity, SecondEntity> _trackable;
+    private IMutableRelation<FirstEntity, SecondEntity> _trackable;
 
     [SetUp]
     public void Setup()
     {
-        _relation = A.Fake<IRelation<FirstEntity, SecondEntity>>();
+        _relation = A.Fake<IMutableRelation<FirstEntity, SecondEntity>>();
 
         _changes = new RelationChangeSet<FirstEntity, SecondEntity>();
         _trackable = new TrackableRelation<FirstEntity, SecondEntity>(_changes, _relation);

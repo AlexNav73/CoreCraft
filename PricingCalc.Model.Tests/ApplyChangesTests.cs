@@ -5,14 +5,14 @@ namespace PricingCalc.Model.Tests;
 
 public class ApplyChangesTests
 {
-    private ICollection<FirstEntity, FirstEntityProperties> _collection;
-    private IRelation<FirstEntity, SecondEntity> _relation;
+    private IMutableCollection<FirstEntity, FirstEntityProperties> _collection;
+    private IMutableRelation<FirstEntity, SecondEntity> _relation;
 
     [SetUp]
     public void Setup()
     {
-        _collection = A.Fake<ICollection<FirstEntity, FirstEntityProperties>>();
-        _relation = A.Fake<IRelation<FirstEntity, SecondEntity>>();
+        _collection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
+        _relation = A.Fake<IMutableRelation<FirstEntity, SecondEntity>>();
     }
 
     [Test]

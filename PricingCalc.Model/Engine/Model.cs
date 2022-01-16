@@ -1,28 +1,24 @@
-﻿using System.Collections;
+﻿using PricingCalc.Model.Engine.Exceptions;
 
 namespace PricingCalc.Model.Engine;
 
 internal class Model : IModel
 {
-    private readonly IReadOnlyCollection<IModelShard> _shards;
-
     public Model(IEnumerable<IModelShard> shards)
     {
-        _shards = shards.ToArray();
+        Shards = shards.ToArray();
     }
+
+    internal IReadOnlyCollection<IModelShard> Shards;
 
     public T Shard<T>() where T : IModelShard
     {
-        return _shards.OfType<T>().Single();
-    }
+        var shard = Shards.OfType<T>().SingleOrDefault();
+        if (shard == null)
+        {
+            throw new ModelShardNotFoundException(typeof(T).Name);
+        }
 
-    public IEnumerator<IModelShard> GetEnumerator()
-    {
-        return _shards.GetEnumerator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
+        return shard;
     }
 }

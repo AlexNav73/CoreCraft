@@ -1,6 +1,7 @@
 ﻿namespace PricingCalc.Model.Engine.ChangesTracking;
 
-public interface ITrackableModelShard
+public interface ITrackableModelShard<out TShard> : IModelShard
+    where TShard : IModelShard
 {
-    IModelShard AsTrackable(IWritableModelChanges modelChanges);
+    TShard AsTrackable(IWritableModelChanges modelChanges);
 }

@@ -33,7 +33,7 @@ public class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TParent, TC
 
     public bool HasChanges() => _changes.Count > 0;
 
-    public void Apply(IRelation<TParent, TChild> relation)
+    public void Apply(IMutableRelation<TParent, TChild> relation)
     {
         foreach (var change in _changes)
         {

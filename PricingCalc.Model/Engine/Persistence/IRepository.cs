@@ -21,11 +21,11 @@ public interface IRepository
         where TParent : Entity
         where TChild : Entity;
 
-    void Select<TEntity, TData>(string name, ICollection<TEntity, TData> collection, Scheme scheme)
+    void Select<TEntity, TData>(string name, IMutableCollection<TEntity, TData> collection, Scheme scheme)
         where TEntity : Entity
         where TData : Properties;
 
-    void Select<TParent, TChild>(string name, IRelation<TParent, TChild> relation, IEntityCollection<TParent> parentCollection, IEntityCollection<TChild> childCollection)
+    void Select<TParent, TChild>(string name, IMutableRelation<TParent, TChild> relation, IEntityCollection<TParent> parentCollection, IEntityCollection<TChild> childCollection)
         where TParent : Entity
         where TChild : Entity;
 }

@@ -4,19 +4,19 @@ using System.Diagnostics;
 namespace PricingCalc.Model.Engine.ChangesTracking;
 
 [DebuggerDisplay("{_collection}")]
-public class TrackableCollection<TEntity, TData> : ICollection<TEntity, TData>
+public class TrackableCollection<TEntity, TData> : IMutableCollection<TEntity, TData>
     where TEntity : Entity
     where TData : Properties
 {
     private readonly ICollectionChangeSet<TEntity, TData> _changes;
-    private readonly ICollection<TEntity, TData> _collection;
+    private readonly IMutableCollection<TEntity, TData> _collection;
 
     public TrackableCollection(
         ICollectionChangeSet<TEntity, TData> changesCollection,
         ICollection<TEntity, TData> modelCollection)
     {
         _changes = changesCollection;
-        _collection = modelCollection;
+        _collection = (IMutableCollection<TEntity, TData>)modelCollection;
     }
 
     public int Count => _collection.Count;

@@ -5,14 +5,14 @@ namespace PricingCalc.Model.Tests;
 
 public class TrackableCollectionTests
 {
-    private ICollection<FirstEntity, FirstEntityProperties> _collection;
+    private IMutableCollection<FirstEntity, FirstEntityProperties> _collection;
     private ICollectionChangeSet<FirstEntity, FirstEntityProperties> _changes;
-    private ICollection<FirstEntity, FirstEntityProperties> _trackable;
+    private IMutableCollection<FirstEntity, FirstEntityProperties> _trackable;
 
     [SetUp]
     public void Setup()
     {
-        _collection = A.Fake<ICollection<FirstEntity, FirstEntityProperties>>();
+        _collection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
 
         _changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
         _trackable = new TrackableCollection<FirstEntity, FirstEntityProperties>(_changes, _collection);

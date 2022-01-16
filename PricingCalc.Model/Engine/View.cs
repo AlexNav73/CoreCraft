@@ -4,7 +4,7 @@ namespace PricingCalc.Model.Engine;
 
 internal sealed class View
 {
-    private volatile IModel _model;
+    private volatile Model _model;
 
     public View(IEnumerable<IModelShard> shards)
     {
@@ -25,12 +25,12 @@ internal sealed class View
 
     public IModel CopyModel()
     {
-        return new Model(_model.Select(x => ((ICopy<IModelShard>)x).Copy()));
+        return new Model(_model.Shards.Select(x => ((ICopy<IModelShard>)x).Copy()));
     }
 
     public ModelChangeResult ApplySnapshot(Snapshot snapshot, IWritableModelChanges changes)
     {
-        var newModel = new Model(snapshot.GetShardsInternalUnsafe());
+        var newModel = snapshot.ToModel();
         var oldModel = Interlocked.Exchange(ref _model, newModel);
 
         return new ModelChangeResult(oldModel, newModel, changes);

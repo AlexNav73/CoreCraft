@@ -4,18 +4,18 @@ using System.Diagnostics;
 namespace PricingCalc.Model.Engine.ChangesTracking;
 
 [DebuggerDisplay("{_relation}")]
-public class TrackableRelation<TParent, TChild> : IRelation<TParent, TChild>
+public class TrackableRelation<TParent, TChild> : IMutableRelation<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {
     private readonly IRelationChangeSet<TParent, TChild> _changes;
-    private readonly IRelation<TParent, TChild> _relation;
+    private readonly IMutableRelation<TParent, TChild> _relation;
 
     public TrackableRelation(IRelationChangeSet<TParent, TChild> changesCollection,
         IRelation<TParent, TChild> modelRelation)
     {
         _changes = changesCollection;
-        _relation = modelRelation;
+        _relation = (IMutableRelation<TParent, TChild>)modelRelation;
     }
 
     public void Add(TParent parent, TChild child)

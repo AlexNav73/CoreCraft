@@ -4,9 +4,9 @@ namespace PricingCalc.Model.Engine.Persistence;
 
 public interface IModelShardStorage
 {
-    void Save(string path, IRepository repository, IModelChanges changes);
+    void Save(IRepository repository, IModel model, IModelChanges changes);
 
-    void Save(string path, IRepository repository);
+    void Save(IRepository repository, IModel model);
 
-    void Load(string path, IRepository repository);
+    void Load(IRepository repository, IModel model);
 }
