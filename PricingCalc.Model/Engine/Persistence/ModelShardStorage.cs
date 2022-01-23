@@ -124,8 +124,8 @@ public abstract class ModelShardStorage : IModelShardStorage
         IRepository repository,
         string name,
         IMutableRelation<TParent, TChild> relation,
-        IEntityCollection<TParent> parents,
-        IEntityCollection<TChild> children)
+        IEnumerable<TParent> parents,
+        IEnumerable<TChild> children)
         where TParent : Entity
         where TChild : Entity
     {

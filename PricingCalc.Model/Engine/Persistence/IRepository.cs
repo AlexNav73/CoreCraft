@@ -25,7 +25,7 @@ public interface IRepository
         where TEntity : Entity
         where TData : Properties;
 
-    void Select<TParent, TChild>(string name, IMutableRelation<TParent, TChild> relation, IEntityCollection<TParent> parentCollection, IEntityCollection<TChild> childCollection)
+    void Select<TParent, TChild>(string name, IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parentCollection, IEnumerable<TChild> childCollection)
         where TParent : Entity
         where TChild : Entity;
 }

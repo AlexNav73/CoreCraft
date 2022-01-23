@@ -137,7 +137,7 @@ internal class SqliteRepository : DisposableBase, IRepository
         }
     }
 
-    public void Select<TParent, TChild>(string name, IMutableRelation<TParent, TChild> relation, IEntityCollection<TParent> parentCollection, IEntityCollection<TChild> childCollection)
+    public void Select<TParent, TChild>(string name, IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parentCollection, IEnumerable<TChild> childCollection)
         where TParent : Entity
         where TChild : Entity
     {
