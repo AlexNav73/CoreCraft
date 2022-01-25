@@ -13,12 +13,13 @@ internal class Model : IModel
 
     public T Shard<T>() where T : IModelShard
     {
-        var shard = Shards.OfType<T>().SingleOrDefault();
-        if (shard == null)
+        try
         {
-            throw new ModelShardNotFoundException(typeof(T).Name);
+            return Shards.OfType<T>().Single();
         }
-
-        return shard;
+        catch (Exception ex)
+        {
+            throw new ModelShardNotFoundException($"Model shard [{typeof(T).Name}] not found", ex);
+        }
     }
 }

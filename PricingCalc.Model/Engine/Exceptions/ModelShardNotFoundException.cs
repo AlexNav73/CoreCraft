@@ -8,13 +8,13 @@ internal class ModelShardNotFoundException : Exception
     {
     }
 
-    public ModelShardNotFoundException(string? modelShardName)
-        : base($"Model shard [{modelShardName}] not found")
+    public ModelShardNotFoundException(string? message)
+        : base(message)
     {
     }
 
-    public ModelShardNotFoundException(string? modelShardName, Exception? innerException)
-        : base($"Model shard [{modelShardName}] not found", innerException)
+    public ModelShardNotFoundException(string? message, Exception? innerException)
+        : base(message, innerException)
     {
     }
 

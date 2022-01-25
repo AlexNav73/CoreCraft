@@ -25,8 +25,8 @@ internal class SequentialTaskScheduler : TaskScheduler
             {
                 _runningParallelTasks++;
                 // NOTE: In the article about TaskScheduler in the example
-                // UnsafeQueueUserWorkItem is using to speed up queuing task
-                // by skipping of thread restrictions checks. If a thread with
+                // UnsafeQueueUserWorkItem is used to speed up queuing task
+                // by skipping thread restrictions checks. If a thread with
                 // restrictions calls UnsafeQueueUserWorkItem, a new thread will
                 // execute delegate under default restrictions. It is unsafe.
                 // In future, plug-in system could be implemented and using unsafe
