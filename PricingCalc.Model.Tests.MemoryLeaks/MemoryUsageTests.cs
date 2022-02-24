@@ -21,6 +21,8 @@ public class MemoryUsageTests
         var modifyCommand = new ModifyAllEntitiesCommand(model);
         modifyCommand.Execute();
 
+        Assert.That(model.History.UndoStack.Count, Is.EqualTo(2));
+
         dotMemory.Check(mem =>
         {
             var diff = mem.GetDifference(memoryCheckPoint1);
@@ -33,8 +35,6 @@ public class MemoryUsageTests
 
             Assert.That(countOfFirstEntities, Is.EqualTo(200));
             Assert.That(countOfFirstEntitiesProps, Is.EqualTo(200));
-
-            Assert.That(model.History.UndoStack.Count, Is.EqualTo(2));
         });
     }
 }
