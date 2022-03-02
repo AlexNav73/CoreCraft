@@ -22,19 +22,20 @@ public class MemoryUsageTests
         modifyCommand.Execute();
 
         Assert.That(model.History.UndoStack.Count, Is.EqualTo(2));
+        Assert.That(model.Shard<IFakeModelShard>().FirstCollection.Any(), Is.True);
 
         dotMemory.Check(mem =>
         {
             var diff = mem.GetDifference(memoryCheckPoint1);
             var countOfFirstEntities = diff
-                .GetNewObjects(q => q.Type.Is<FirstEntity>())
+                .GetNewObjects(q => q.Namespace.Like("PricingCalc.Model.Tests.Infrastructure.Model.Entities"))
                 .ObjectsCount;
-            var countOfFirstEntitiesProps = diff
-                .GetNewObjects(q => q.Type.Is<FirstEntityProperties>())
-                .ObjectsCount;
+            //var countOfFirstEntitiesProps = diff
+            //    .GetNewObjects(q => q.Type.Is<FirstEntityProperties>())
+            //    .ObjectsCount;
 
             Assert.That(countOfFirstEntities, Is.EqualTo(200), "Wrong number of entities");
-            Assert.That(countOfFirstEntitiesProps, Is.EqualTo(200), "Wrong number of entities properties");
+            //Assert.That(countOfFirstEntitiesProps, Is.EqualTo(200), "Wrong number of entities properties");
         });
     }
 }
