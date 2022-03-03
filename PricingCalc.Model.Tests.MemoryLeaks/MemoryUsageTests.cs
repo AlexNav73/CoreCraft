@@ -35,6 +35,7 @@ public class MemoryUsageTests
             Assert.That(countOfFirstEntitiesProps, Is.EqualTo(200), "Wrong number of entities properties");
         });
 
+        // assertion prevents model from been deleted by GC before dotMemory.Check call
         Assert.That(model.History.UndoStack.Count, Is.EqualTo(2));
     }
 }
