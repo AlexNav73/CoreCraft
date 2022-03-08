@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PricingCalc.Model", "PricingCalc.Model\PricingCalc.Model.csproj", "{58E71AB4-50FE-4D29-92C1-46D6AD01BA1B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PricingCalc.Model.Generators", "PricingCalc.Model.Generators\PricingCalc.Model.Generators.csproj", "{BF7C92E9-5688-4BCA-961F-511B81D2EFF1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PricingCalc.Model.Storage.Sqlite", "PricingCalc.Model.Storage.Sqlite\PricingCalc.Model.Storage.Sqlite.csproj", "{505F7322-7825-4F73-928F-4F65214371B0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PricingCalc.Model.Tests", "PricingCalc.Model.Tests\PricingCalc.Model.Tests.csproj", "{E8FAF33B-3E2C-4FEC-9FFB-0CDB0FD196AB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PricingCalc.Model.Tests.Infrastructure", "PricingCalc.Model.Tests.Infrastructure\PricingCalc.Model.Tests.Infrastructure.csproj", "{6C642C79-679D-4D77-B199-BB148392DA38}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PricingCalc.Model.Tests.MemoryLeaks", "PricingCalc.Model.Tests.MemoryLeaks\PricingCalc.Model.Tests.MemoryLeaks.csproj", "{17095C86-F679-4EA3-9398-7A9100085F05}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{58E71AB4-50FE-4D29-92C1-46D6AD01BA1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58E71AB4-50FE-4D29-92C1-46D6AD01BA1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58E71AB4-50FE-4D29-92C1-46D6AD01BA1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58E71AB4-50FE-4D29-92C1-46D6AD01BA1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF7C92E9-5688-4BCA-961F-511B81D2EFF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF7C92E9-5688-4BCA-961F-511B81D2EFF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF7C92E9-5688-4BCA-961F-511B81D2EFF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF7C92E9-5688-4BCA-961F-511B81D2EFF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{505F7322-7825-4F73-928F-4F65214371B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{505F7322-7825-4F73-928F-4F65214371B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{505F7322-7825-4F73-928F-4F65214371B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{505F7322-7825-4F73-928F-4F65214371B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8FAF33B-3E2C-4FEC-9FFB-0CDB0FD196AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8FAF33B-3E2C-4FEC-9FFB-0CDB0FD196AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8FAF33B-3E2C-4FEC-9FFB-0CDB0FD196AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8FAF33B-3E2C-4FEC-9FFB-0CDB0FD196AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C642C79-679D-4D77-B199-BB148392DA38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C642C79-679D-4D77-B199-BB148392DA38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C642C79-679D-4D77-B199-BB148392DA38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C642C79-679D-4D77-B199-BB148392DA38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17095C86-F679-4EA3-9398-7A9100085F05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17095C86-F679-4EA3-9398-7A9100085F05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17095C86-F679-4EA3-9398-7A9100085F05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17095C86-F679-4EA3-9398-7A9100085F05}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9E61BBAA-E73F-4733-86CA-24FCF8402964}
+	EndGlobalSection
+EndGlobal
