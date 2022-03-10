@@ -15,12 +15,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PricingCalc.Model.Tests.Inf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PricingCalc.Model.Tests.MemoryLeaks", "PricingCalc.Model.Tests.MemoryLeaks\PricingCalc.Model.Tests.MemoryLeaks.csproj", "{17095C86-F679-4EA3-9398-7A9100085F05}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "..\build\_build.csproj", "{B8020E2D-DDCA-48BD-9575-9B5F3B410590}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B8020E2D-DDCA-48BD-9575-9B5F3B410590}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8020E2D-DDCA-48BD-9575-9B5F3B410590}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58E71AB4-50FE-4D29-92C1-46D6AD01BA1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{58E71AB4-50FE-4D29-92C1-46D6AD01BA1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58E71AB4-50FE-4D29-92C1-46D6AD01BA1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
