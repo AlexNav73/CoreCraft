@@ -49,7 +49,7 @@ internal partial class Build : NukeBuild
         .DependsOn(Compile)
         .Executes(() =>
         {
-            var testProject = Solution.GetProject("PricingCalc.Model.Tests.MemoryLeaks");
+            var testProject = Solution.GetProject("Navitski.Crystalized.Model.Tests.MemoryLeaks");
             var framework = testProject.GetTargetFrameworks().Single();
             var assemblyName = testProject.GetProperty("AssemblyName") + ".dll";
             var assemblyPath = testProject.Directory / "bin" / Configuration / framework / assemblyName;
