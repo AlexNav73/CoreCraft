@@ -12,7 +12,7 @@ namespace build;
 [GitHubActions(
     "releasing",
     image: GitHubActionsImage.WindowsLatest,
-    OnPushTags = new[] { "[0-9]+.[0-9]+.[0-9]+" },
+    OnPushTags = new[] { "\"[0-9]+.[0-9]+.[0-9]+\"" },
     PublishArtifacts = false,
     AutoGenerate = true,
     InvokedTargets = new[] { nameof(Publish) })]
