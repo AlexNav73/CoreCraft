@@ -36,3 +36,9 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
       - name: Run './build.cmd Publish'
         run: ./build.cmd Publish
+        env:
+          RegistryApiKey: ${{ secrets.REGISTRY_API_KEY }}
+      - uses: actions/upload-artifact@v1
+        with:
+          name: packages
+          path: packages

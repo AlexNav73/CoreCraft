@@ -1,4 +1,4 @@
-/publish/
+packages/
 **/.vscode/
 **/.vs/
 .nuke/temp/

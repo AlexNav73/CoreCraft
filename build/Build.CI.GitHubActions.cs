@@ -13,9 +13,10 @@ namespace build;
     "releasing",
     image: GitHubActionsImage.WindowsLatest,
     OnPushTags = new[] { "\"[0-9]+.[0-9]+.[0-9]+\"" },
-    PublishArtifacts = false,
+    PublishArtifacts = true,
     AutoGenerate = true,
-    InvokedTargets = new[] { nameof(Publish) })]
+    InvokedTargets = new[] { nameof(Publish) },
+    ImportSecrets = new[] { nameof(RegistryApiKey) })]
 internal partial class Build
 {
 }
