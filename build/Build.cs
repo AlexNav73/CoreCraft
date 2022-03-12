@@ -40,6 +40,7 @@ internal partial class Build : NukeBuild
         .Executes(() =>
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
+            EnsureCleanDirectory(PackagesDirectory);
         });
 
     Target Restore => _ => _
@@ -91,8 +92,6 @@ internal partial class Build : NukeBuild
         .Produces(PackagesDirectory / "*.nupkg")
         .Executes(() =>
         {
-            EnsureCleanDirectory(PackagesDirectory);
-
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model)
                 .Apply(PackSettingsBase)
@@ -109,7 +108,7 @@ internal partial class Build : NukeBuild
                 .AddPackageTags("Model", "Generator", "SourceGenerator", "WPF"));
 
             ReportSummary(_ => _
-                    .AddPair("Packages", PackagesDirectory.GlobFiles("*.nupkg").Count.ToString()));
+                .AddPair("Packages", PackagesDirectory.GlobFiles("*.nupkg").Count.ToString()));
 
             DotNetPackSettings PackSettingsBase(DotNetPackSettings settings) => settings
                 .SetConfiguration(Configuration)
