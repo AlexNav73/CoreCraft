@@ -95,28 +95,30 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model)
                 .Apply(PackSettingsBase)
-                .AddPackageTags("Model", "Generator", "SourceGenerator", "WPF"));
+                .SetVersion(GitVersion.NuGetVersionV2)
+                .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model_Generators)
                 .Apply(PackSettingsBase)
-                .AddPackageTags("Model", "Generator", "SourceGenerator", "WPF"));
+                .SetVersion(GitVersion.NuGetVersionV2)
+                .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
                 .Apply(PackSettingsBase)
                 .SetProject(Solution.Navitski_Crystalized_Model_Storage_Sqlite)
-                .AddPackageTags("Model", "Generator", "SourceGenerator", "WPF"));
+                .SetVersion(GitVersion.NuGetVersionV2)
+                .AddPackageTags("Model", "Domain", "SQLite"));
 
             ReportSummary(_ => _
                 .AddPair("Packages", PackagesDirectory.GlobFiles("*.nupkg").Count.ToString()));
 
             DotNetPackSettings PackSettingsBase(DotNetPackSettings settings) => settings
                 .SetConfiguration(Configuration)
-                    .SetNoRestore(SucceededTargets.Contains(Restore))
+                .SetNoRestore(SucceededTargets.Contains(Restore))
                 .SetNoBuild(SucceededTargets.Contains(Compile))
                 .AddAuthors("Alexandr Navitskiy")
                 .SetRepositoryUrl(GitRepository.HttpsUrl)
-                .SetVersion(GitVersion.NuGetVersionV2)
                 .SetOutputDirectory(PackagesDirectory);
         });
 

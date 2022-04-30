@@ -14,7 +14,7 @@ namespace build;
     image: GitHubActionsImage.WindowsLatest,
     OnPushTags = new[] { "\"[0-9]+.[0-9]+.[0-9]+\"" },
     PublishArtifacts = true,
-    AutoGenerate = true,
+    AutoGenerate = false, // We use additional step to create GitHub release (do not override yaml)
     InvokedTargets = new[] { nameof(Publish) },
     ImportSecrets = new[] { nameof(RegistryApiKey) })]
 internal partial class Build
