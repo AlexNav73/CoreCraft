@@ -2,5 +2,5 @@
 
 internal interface ICommandRunner
 {
-    Task Run(IRunnable runnable);
+    Task Enqueue(IRunnable runnable, CancellationToken token);
 }

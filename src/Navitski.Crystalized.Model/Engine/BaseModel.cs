@@ -1,5 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Commands;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 using Navitski.Crystalized.Model.Engine.Persistence;
 
 namespace Navitski.Crystalized.Model.Engine;
@@ -41,64 +42,31 @@ public abstract class BaseModel : IBaseModel, ICommandRunner
         return new UnsubscribeOnDispose(onModelChanges, _subscriptions);
     }
 
-    async Task ICommandRunner.Run(IRunnable runnable)
+    public async Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
+    {
+        var copy = _view.CopyModel();
+
+        await _scheduler.RunParallel(() => storage.Save(path, copy, changes), token);
+    }
+
+    public async Task Save(IStorage storage, string path, CancellationToken token = default)
+    {
+        var copy = _view.CopyModel();
+
+        await _scheduler.RunParallel(() => storage.Save(path, copy), token);
+    }
+
+    public async Task Load(IStorage storage, string path, CancellationToken token = default)
     {
         var snapshot = _view.CreateTrackableSnapshot();
 
         try
         {
-            await _scheduler.Enqueue(() => runnable.Run(snapshot));
+            await _scheduler.Enqueue(() => storage.Load(path, snapshot), token);
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, "Command execution failed. Command {Command}", runnable.GetType());
-
-            throw;
-        }
-
-        var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
-        if (result.Changes.HasChanges())
-        {
-            NotifySubscribers(result);
-            RaiseEvent(result);
-        }
-    }
-
-    public async Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes)
-    {
-        // Create disconnected copy of model to send it for saving
-        // If some changes would be made to the model while saving,
-        // it wouldn't break saving, because we will save copy of the model
-        // created when user pressed the Save button
-        var copy = _view.CopyModel();
-
-        await _scheduler.RunParallel(() => storage.Save(path, copy, changes));
-    }
-
-    public async Task Save(IStorage storage, string path)
-    {
-        // Create disconnected copy of model to send it for saving
-        // If some changes would be made to the model while saving,
-        // it wouldn't break saving, because we will save copy of the model
-        // created when user pressed the Save button
-        var copy = _view.CopyModel();
-
-        await _scheduler.RunParallel(() => storage.Save(path, copy));
-    }
-
-    public async Task Load(IStorage storage, string path)
-    {
-        var snapshot = _view.CreateTrackableSnapshot();
-
-        try
-        {
-            await _scheduler.Enqueue(() => storage.Load(path, snapshot));
-        }
-        catch (Exception ex)
-        {
-            Log.Warning(ex, "Model loading failed");
-
-            throw;
+            throw new ModelLoadingException("Model loading failed", ex);
         }
 
         var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
@@ -108,7 +76,7 @@ public abstract class BaseModel : IBaseModel, ICommandRunner
         }
     }
 
-    public async Task Apply(IWritableModelChanges changes)
+    public async Task Apply(IWritableModelChanges changes, CancellationToken token = default)
     {
         if (changes.HasChanges())
         {
@@ -116,17 +84,36 @@ public abstract class BaseModel : IBaseModel, ICommandRunner
 
             try
             {
-                await _scheduler.Enqueue(() => changes.Apply(snapshot));
+                await _scheduler.Enqueue(() => changes.Apply(snapshot), token);
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Applying changes has failed");
-
-                throw;
+                throw new ApplyModelChangesException("Applying changes has failed", ex);
             }
 
             var result = _view.ApplySnapshot(snapshot, changes);
             NotifySubscribers(result);
+        }
+    }
+
+    async Task ICommandRunner.Enqueue(IRunnable runnable, CancellationToken token)
+    {
+        var snapshot = _view.CreateTrackableSnapshot();
+
+        try
+        {
+            await _scheduler.Enqueue(() => runnable.Run(snapshot), token);
+        }
+        catch (Exception ex)
+        {
+            throw new CommandInvokationException($"Command execution failed. Command {runnable.GetType()}", ex);
+        }
+
+        var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
+        if (result.Changes.HasChanges())
+        {
+            NotifySubscribers(result);
+            RaiseEvent(result);
         }
     }
 

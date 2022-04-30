@@ -23,6 +23,14 @@ internal sealed class View
         return new Snapshot(_model);
     }
 
+    /// <summary>
+    ///     Creates disconnected copy of model
+    /// </summary>
+    /// <remarks>
+    ///     If some changes would be made to the model while saving,
+    ///     it wouldn't break saving, because we will save copy of the model
+    ///     created when user pressed the Save button
+    /// </remarks>
     public IModel CopyModel()
     {
         return new Model(_model.Shards.Select(x => ((ICopy<IModelShard>)x).Copy()));

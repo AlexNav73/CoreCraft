@@ -9,13 +9,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navitski.Crystalized.Model.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navitski.Crystalized.Model.Storage.Sqlite", "Navitski.Crystalized.Model.Storage.Sqlite\Navitski.Crystalized.Model.Storage.Sqlite.csproj", "{505F7322-7825-4F73-928F-4F65214371B0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navitski.Crystalized.Model.Tests", "Navitski.Crystalized.Model.Tests\Navitski.Crystalized.Model.Tests.csproj", "{E8FAF33B-3E2C-4FEC-9FFB-0CDB0FD196AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navitski.Crystalized.Model.Tests", "Tests\Navitski.Crystalized.Model.Tests\Navitski.Crystalized.Model.Tests.csproj", "{E8FAF33B-3E2C-4FEC-9FFB-0CDB0FD196AB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navitski.Crystalized.Model.Tests.Infrastructure", "Navitski.Crystalized.Model.Tests.Infrastructure\Navitski.Crystalized.Model.Tests.Infrastructure.csproj", "{6C642C79-679D-4D77-B199-BB148392DA38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navitski.Crystalized.Model.Tests.Infrastructure", "Tests\Navitski.Crystalized.Model.Tests.Infrastructure\Navitski.Crystalized.Model.Tests.Infrastructure.csproj", "{6C642C79-679D-4D77-B199-BB148392DA38}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navitski.Crystalized.Model.Tests.MemoryLeaks", "Navitski.Crystalized.Model.Tests.MemoryLeaks\Navitski.Crystalized.Model.Tests.MemoryLeaks.csproj", "{17095C86-F679-4EA3-9398-7A9100085F05}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Navitski.Crystalized.Model.Tests.MemoryLeaks", "Tests\Navitski.Crystalized.Model.Tests.MemoryLeaks\Navitski.Crystalized.Model.Tests.MemoryLeaks.csproj", "{17095C86-F679-4EA3-9398-7A9100085F05}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "..\build\_build.csproj", "{B8020E2D-DDCA-48BD-9575-9B5F3B410590}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{71D017CF-86AF-4968-B44A-17E70B773C6E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +54,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E8FAF33B-3E2C-4FEC-9FFB-0CDB0FD196AB} = {71D017CF-86AF-4968-B44A-17E70B773C6E}
+		{6C642C79-679D-4D77-B199-BB148392DA38} = {71D017CF-86AF-4968-B44A-17E70B773C6E}
+		{17095C86-F679-4EA3-9398-7A9100085F05} = {71D017CF-86AF-4968-B44A-17E70B773C6E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9E61BBAA-E73F-4733-86CA-24FCF8402964}

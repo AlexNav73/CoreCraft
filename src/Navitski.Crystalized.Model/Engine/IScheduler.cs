@@ -2,7 +2,7 @@
 
 public interface IScheduler
 {
-    Task Enqueue(Action job);
+    Task Enqueue(Action job, CancellationToken token);
 
-    Task RunParallel(Action job);
+    Task RunParallel(Action job, CancellationToken token);
 }

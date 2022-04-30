@@ -2,17 +2,17 @@
 
 internal class AsyncScheduler : IScheduler
 {
-    public Task Enqueue(Action job)
+    public Task Enqueue(Action job, CancellationToken token)
     {
         return Task.Factory.StartNew(
             job,
-            CancellationToken.None,
+            token,
             TaskCreationOptions.DenyChildAttach,
             SequentialTaskScheduler.Instance);
     }
 
-    public Task RunParallel(Action job)
+    public Task RunParallel(Action job, CancellationToken token)
     {
-        return Task.Run(job);
+        return Task.Run(job, token);
     }
 }

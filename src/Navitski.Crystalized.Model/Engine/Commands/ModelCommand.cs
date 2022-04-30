@@ -12,17 +12,15 @@ public abstract class ModelCommand<TModel> : IModelCommand, IRunnable
         _parameters = new List<ICommandParameter>();
     }
 
-    public Task Execute()
+    public Task Execute(CancellationToken token = default)
     {
         AssertParameters();
 
-        return _model.Run(this);
+        return _model.Enqueue(this, token);
     }
 
     void IRunnable.Run(IModel model)
     {
-        Log.Information("Running '{Command}' command. Parameters {Parameters}", GetType().Name, _parameters);
-
         ExecuteInternal(model);
     }
 

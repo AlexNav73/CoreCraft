@@ -2,5 +2,5 @@
 
 public interface IModelCommand
 {
-    Task Execute();
+    Task Execute(CancellationToken token = default);
 }
