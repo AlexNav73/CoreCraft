@@ -22,7 +22,7 @@ internal partial class ApplicationModelGenerator
                 var properties = entity.Properties.Select(x => $"new(\"{x.Name}\", typeof({x.Type}), {x.IsNullable.ToString().ToLower()})");
                 var array = string.Join(", ", properties);
 
-                code.WriteLine($"private static readonly Scheme _{ToCamelCase(collection.Name)}Scheme = new(new Property[] {{ {array} }});");
+                code.WriteLine($"public static readonly Scheme {collection.Name}Scheme = new(new Property[] {{ {array} }});");
             }
             code.EmptyLine();
 
@@ -34,7 +34,7 @@ internal partial class ApplicationModelGenerator
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"Save(repository, \"{modelShard.Name}.{collection.Name}\", frame.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
+                        code.WriteLine($"Save(repository, \"{modelShard.Name}.{collection.Name}\", frame.{collection.Name}, {collection.Name}Scheme);");
                     }
                     code.EmptyLine();
 
@@ -54,7 +54,7 @@ internal partial class ApplicationModelGenerator
 
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"Save(repository, \"{modelShard.Name}.{collection.Name}\", shard.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
+                    code.WriteLine($"Save(repository, \"{modelShard.Name}.{collection.Name}\", shard.{collection.Name}, {collection.Name}Scheme);");
                 }
                 code.EmptyLine();
 
@@ -73,7 +73,7 @@ internal partial class ApplicationModelGenerator
 
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"Load(repository, \"{modelShard.Name}.{collection.Name}\", shard.{collection.Name}, _{ToCamelCase(collection.Name)}Scheme);");
+                    code.WriteLine($"Load(repository, \"{modelShard.Name}.{collection.Name}\", shard.{collection.Name}, {collection.Name}Scheme);");
                 }
                 code.EmptyLine();
 

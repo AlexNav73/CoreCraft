@@ -20,34 +20,24 @@ internal class SqliteRepository : DisposableBase, IRepository
         return _connection.BeginTransaction();
     }
 
-    public (long timestamp, string name)? GetLatestigration()
+    public long GetDatabaseVersion()
     {
-        if (Exists("_MigrationHistory"))
-        {
-            var command = _connection.CreateCommand();
-            command.CommandText = QueryBuilder.Migrations.GetLatestMigration;
+        var command = _connection.CreateCommand();
+        command.CommandText = QueryBuilder.Migrations.GetDatabaseVersion;
 
-            using var reader = command.ExecuteReader();
-            if (reader.Read())
-            {
-                return (reader.GetInt64(0), reader.GetString(1));
-            }
+        using var reader = command.ExecuteReader();
+        if (reader.Read())
+        {
+            return reader.GetInt64(0);
         }
 
-        return null;
+        return 0;
     }
 
-    public void UpdateLatestMigration(long timestamp, string name)
+    public void SetDatabaseVersion(long version)
     {
-        ExecuteNonQuery(QueryBuilder.Migrations.CreateMigrationTable);
-        ExecuteNonQuery(QueryBuilder.Migrations.ClearMigrationTable);
-
         var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.Migrations.InsertMigration;
-        var nameParam = command.Parameters.Add("$Timestamp", SqliteType.Integer);
-        nameParam.Value = timestamp;
-        var versionParam = command.Parameters.Add("$Name", SqliteType.Text);
-        versionParam.Value = name;
+        command.CommandText = QueryBuilder.Migrations.SetDatabaseVersion(version);
         command.ExecuteNonQuery();
     }
 
@@ -162,6 +152,20 @@ internal class SqliteRepository : DisposableBase, IRepository
         }
     }
 
+    internal bool Exists(string name)
+    {
+        var command = _connection.CreateCommand();
+        command.CommandText = QueryBuilder.IfTableExists(name);
+
+        using var reader = command.ExecuteReader();
+        if (reader.Read())
+        {
+            return reader.GetBoolean(0);
+        }
+
+        return false;
+    }
+
     private void ExecuteCollectionCommand<TEntity, TData>(string query, IReadOnlyCollection<KeyValuePair<TEntity, TData>> items, Scheme scheme)
         where TEntity : Entity
         where TData : Properties
@@ -242,20 +246,6 @@ internal class SqliteRepository : DisposableBase, IRepository
                 parameters[property.Key].Value = DBNull.Value;
             }
         }
-    }
-
-    private bool Exists(string name)
-    {
-        var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.IfTableExists(name);
-
-        using var reader = command.ExecuteReader();
-        if (reader.Read())
-        {
-            return reader.GetBoolean(0);
-        }
-
-        return false;
     }
 
     protected override void DisposeManagedObjects()

@@ -12,8 +12,6 @@ internal partial class Build : NukeBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    [GitVersion(Framework = "net6.0", NoFetch = true)]
-    readonly GitVersion GitVersion;
     [GitRepository]
     readonly GitRepository GitRepository;
 
@@ -57,9 +55,6 @@ internal partial class Build : NukeBuild
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .SetAssemblyVersion(GitVersion.AssemblySemVer)
-                .SetFileVersion(GitVersion.AssemblySemFileVer)
-                .SetInformationalVersion(GitVersion.InformationalVersion)
                 .EnableNoRestore());
         });
 
@@ -67,7 +62,7 @@ internal partial class Build : NukeBuild
         .DependsOn(Compile)
         .Executes(() =>
         {
-            var testProject = Solution.GetProject("Navitski.Crystalized.Model.Tests.MemoryLeaks");
+            var testProject = Solution.GetProject(Solution.Tests.Navitski_Crystalized_Model_Tests_MemoryLeaks);
             var framework = testProject.GetTargetFrameworks().Single();
             var assemblyName = testProject.GetProperty("AssemblyName") + ".dll";
             var assemblyPath = testProject.Directory / "bin" / Configuration / framework / assemblyName;
@@ -95,19 +90,16 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model)
                 .Apply(PackSettingsBase)
-                .SetVersion(GitVersion.NuGetVersionV2)
                 .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model_Generators)
                 .Apply(PackSettingsBase)
-                .SetVersion(GitVersion.NuGetVersionV2)
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
                 .Apply(PackSettingsBase)
                 .SetProject(Solution.Navitski_Crystalized_Model_Storage_Sqlite)
-                .SetVersion(GitVersion.NuGetVersionV2)
                 .AddPackageTags("Model", "Domain", "SQLite"));
 
             ReportSummary(_ => _
@@ -131,6 +123,7 @@ internal partial class Build : NukeBuild
             DotNetNuGetPush(s => s
                 .SetSource(GitHubRegistrySource)
                 .SetApiKey(RegistryApiKey)
+                .SetSkipDuplicate(true)
                 .CombineWith(PushPackageFiles, (_, p) => _
                     .SetTargetPath(p)));
         });

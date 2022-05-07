@@ -2,7 +2,7 @@
 
 public interface IMigration
 {
-    long Timestamp { get; }
+    long Version { get; }
 
     void Migrate(IMigrator migrator);
 }

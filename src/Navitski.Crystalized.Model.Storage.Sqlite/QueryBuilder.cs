@@ -17,20 +17,9 @@ internal static class QueryBuilder
 
     internal static class Migrations
     {
-        internal const string CreateMigrationTable = @"
-CREATE TABLE IF NOT EXISTS [_MigrationHistory] (
-    [Timestamp] INTEGER NOT NULL UNIQUE,
-    [Name] TEXT NOT NULL UNIQUE,
+        internal static string SetDatabaseVersion(long version) => $"PRAGMA user_version = {version};";
 
-    PRIMARY KEY ([Timestamp])
-);
-";
-
-        internal const string ClearMigrationTable = "DELETE FROM [_MigrationHistory]";
-
-        internal const string InsertMigration = "INSERT INTO [_MigrationHistory] ([Timestamp], [Name]) VALUES ($Timestamp, $Name);";
-
-        internal const string GetLatestMigration = "SELECT [Timestamp], [Name] FROM [_MigrationHistory];";
+        internal const string GetDatabaseVersion = "PRAGMA user_version;";
     }
 
     internal static class Collections

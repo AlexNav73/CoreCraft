@@ -2,12 +2,12 @@
 
 public abstract class Migration : IMigration
 {
-    protected Migration(long timestamp)
+    protected Migration(long version)
     {
-        Timestamp = timestamp;
+        Version = version;
     }
 
-    public long Timestamp { get; }
+    public long Version { get; }
 
     public abstract void Migrate(IMigrator migrator);
 }

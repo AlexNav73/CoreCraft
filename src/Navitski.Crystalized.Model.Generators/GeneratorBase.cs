@@ -43,14 +43,4 @@ public abstract class GeneratorBase : ISourceGenerator
     {
         return string.Join(" ", type, name, "{", accessors, "}").Trim();
     }
-
-    protected static string ToCamelCase(string str)
-    {
-        if (str != string.Empty && char.IsUpper(str[0]))
-        {
-            return char.ToLower(str[0]) + str.Substring(1);
-        }
-
-        return str;
-    }
 }

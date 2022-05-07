@@ -1,4 +1,6 @@
-﻿namespace Navitski.Crystalized.Model.Storage.Sqlite.Migrations;
+﻿using System.Data.Common;
+
+namespace Navitski.Crystalized.Model.Storage.Sqlite.Migrations;
 
 internal sealed class MigrationRunner
 {
@@ -6,34 +8,35 @@ internal sealed class MigrationRunner
 
     public MigrationRunner(IEnumerable<IMigration> migrations)
     {
-        _migrations = migrations.OrderBy(x => x.Timestamp);
+        _migrations = migrations.OrderBy(x => x.Version);
     }
 
     public void Run(SqliteRepository repository)
     {
-        var pendingMigrations = _migrations;
-        IMigration lastMigration = null;
+        var version = repository.GetDatabaseVersion();
 
-        var result = repository.GetLatestigration();
-        if (result != null)
+        foreach (var migration in _migrations.Where(x => x.Version > version))
         {
-            pendingMigrations = _migrations.Where(x => x.Timestamp > result.Value.timestamp);
-        }
+            DbTransaction? transaction = null;
+            try
+            {
+                transaction = repository.BeginTransaction();
+                var migrator = new SqliteMigrator(repository);
 
-        foreach (var migration in pendingMigrations)
-        {
-            using var transaction = repository.BeginTransaction();
-            var migrator = new SqliteMigrator(repository);
+                migration.Migrate(migrator);
+                repository.SetDatabaseVersion(migration.Version);
 
-            migration.Migrate(migrator);
-            lastMigration = migration;
-
-            transaction.Commit();
-        }
-
-        if (lastMigration != null)
-        {
-            repository.UpdateLatestMigration(lastMigration.Timestamp, lastMigration.GetType().Name);
+                transaction?.Commit();
+            }
+            catch (Exception)
+            {
+                transaction?.Rollback();
+                throw;
+            }
+            finally
+            {
+                transaction?.Dispose();
+            }
         }
     }
 
@@ -42,7 +45,7 @@ internal sealed class MigrationRunner
         var lastMigration = _migrations.LastOrDefault();
         if (lastMigration != null)
         {
-            repository.UpdateLatestMigration(lastMigration.Timestamp, lastMigration.GetType().Name);
+            repository.SetDatabaseVersion(lastMigration.Version);
         }
     }
 }
