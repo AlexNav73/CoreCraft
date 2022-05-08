@@ -2,6 +2,7 @@
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Storage.Sqlite.Migrations;
+using System.Data.Common;
 
 namespace Navitski.Crystalized.Model.Storage.Sqlite;
 
@@ -20,33 +21,65 @@ public sealed class SqliteModelStorage : IStorage
 
     public void Save(string path, IModel model, IReadOnlyList<IModelChanges> changes)
     {
-        using var repository = new SqliteRepository(path);
-        using var transaction = repository.BeginTransaction();
+        SqliteRepository? repository = null;
+        DbTransaction? transaction = null;
 
-        for (var i = 0; i < changes.Count; i++)
+        try
         {
-            foreach (var storage in _storages)
-            {
-                storage.Save(repository, model, changes[i]);
-            }
-        }
+            repository = new SqliteRepository(path);
+            transaction = repository.BeginTransaction();
 
-        transaction.Commit();
+            for (var i = 0; i < changes.Count; i++)
+            {
+                foreach (var storage in _storages)
+                {
+                    storage.Save(repository, model, changes[i]);
+                }
+            }
+
+            transaction.Commit();
+        }
+        catch (Exception)
+        {
+            transaction?.Rollback();
+            throw;
+        }
+        finally
+        {
+            transaction?.Dispose();
+            repository?.Dispose();
+        }
     }
 
     public void Save(string path, IModel model)
     {
-        using var repository = new SqliteRepository(path);
-        using var transaction = repository.BeginTransaction();
+        SqliteRepository? repository = null;
+        DbTransaction? transaction = null;
 
-        _migrationRunner.UpdateSaveLatestMigration(repository);
-
-        foreach (var storage in _storages)
+        try
         {
-            storage.Save(repository, model);
-        }
+            repository = new SqliteRepository(path);
+            transaction = repository.BeginTransaction();
 
-        transaction.Commit();
+            _migrationRunner.UpdateDatabaseVersion(repository);
+
+            foreach (var storage in _storages)
+            {
+                storage.Save(repository, model);
+            }
+
+            transaction.Commit();
+        }
+        catch (Exception)
+        {
+            transaction?.Rollback();
+            throw;
+        }
+        finally
+        {
+            transaction?.Dispose();
+            repository?.Dispose();
+        }
     }
 
     public void Load(string path, IModel model)

@@ -40,7 +40,7 @@ internal sealed class MigrationRunner
         }
     }
 
-    public void UpdateSaveLatestMigration(SqliteRepository repository)
+    public void UpdateDatabaseVersion(SqliteRepository repository)
     {
         var lastMigration = _migrations.LastOrDefault();
         if (lastMigration != null)
