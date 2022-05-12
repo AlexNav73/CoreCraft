@@ -7,11 +7,11 @@ namespace Navitski.Crystalized.Model.Storage.Sqlite;
 
 internal class SqliteRepository : DisposableBase, IRepository
 {
-    private readonly SqliteConnection _connection;
+    private SqliteConnection _connection;
 
     public SqliteRepository(string path)
     {
-        _connection = new SqliteConnection($"Filename={path}");
+        _connection = new SqliteConnection($"Data Source={path}");
         _connection.Open();
     }
 
@@ -22,7 +22,7 @@ internal class SqliteRepository : DisposableBase, IRepository
 
     public long GetDatabaseVersion()
     {
-        var command = _connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Migrations.GetDatabaseVersion;
 
         using var reader = command.ExecuteReader();
@@ -36,14 +36,14 @@ internal class SqliteRepository : DisposableBase, IRepository
 
     public void SetDatabaseVersion(long version)
     {
-        var command = _connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Migrations.SetDatabaseVersion(version);
         command.ExecuteNonQuery();
     }
 
     public void ExecuteNonQuery(string commandText)
     {
-        var command = _connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = commandText;
         command.ExecuteNonQuery();
     }
@@ -79,7 +79,7 @@ internal class SqliteRepository : DisposableBase, IRepository
     public void Delete<TEntity>(string name, IReadOnlyCollection<TEntity> entities)
         where TEntity : Entity
     {
-        var command = _connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Collections.Delete(name);
         var parameter = command.CreateParameter();
         parameter.ParameterName = "$Id";
@@ -109,7 +109,7 @@ internal class SqliteRepository : DisposableBase, IRepository
             return;
         }
 
-        var command = _connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Collections.Select(scheme, name);
 
         using var reader = command.ExecuteReader();
@@ -136,7 +136,7 @@ internal class SqliteRepository : DisposableBase, IRepository
             return;
         }
 
-        var command = _connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Relations.Select(name);
 
         using var reader = command.ExecuteReader();
@@ -154,7 +154,7 @@ internal class SqliteRepository : DisposableBase, IRepository
 
     internal bool Exists(string name)
     {
-        var command = _connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.IfTableExists(name);
 
         using var reader = command.ExecuteReader();
@@ -170,7 +170,7 @@ internal class SqliteRepository : DisposableBase, IRepository
         where TEntity : Entity
         where TData : Properties
     {
-        var command = _connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = query;
         var parameters = CreateParameters(command, scheme);
 
@@ -186,7 +186,7 @@ internal class SqliteRepository : DisposableBase, IRepository
         where TParent : Entity
         where TChild : Entity
     {
-        var command = _connection.CreateCommand();
+        using var command = _connection.CreateCommand();
         command.CommandText = query;
 
         var parentParameter = command.CreateParameter();
@@ -252,5 +252,14 @@ internal class SqliteRepository : DisposableBase, IRepository
     {
         _connection.Close();
         _connection.Dispose();
+        _connection = null!;
+
+        // Connections are pooled to speedup creation of the new connections.
+        // In our case we don't need keep closed connections because a database file
+        // could be moved/renamed/deleted afterwards. Opened connection holds a handle
+        // to the file and blocks it so no other process or thread can access it.
+        // Here we drop all connections just to make sure that if we need to do something
+        // with a database file - we won't be blocked
+        SqliteConnection.ClearAllPools();
     }
 }

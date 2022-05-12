@@ -42,18 +42,18 @@ public abstract class BaseModel : IBaseModel, ICommandRunner
         return new UnsubscribeOnDispose(onModelChanges, _subscriptions);
     }
 
-    public async Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
+    public Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
     {
         var copy = _view.CopyModel();
 
-        await _scheduler.RunParallel(() => storage.Save(path, copy, changes), token);
+        return _scheduler.RunParallel(() => storage.Save(path, copy, changes), token);
     }
 
-    public async Task Save(IStorage storage, string path, CancellationToken token = default)
+    public Task Save(IStorage storage, string path, CancellationToken token = default)
     {
         var copy = _view.CopyModel();
 
-        await _scheduler.RunParallel(() => storage.Save(path, copy), token);
+        return _scheduler.RunParallel(() => storage.Save(path, copy), token);
     }
 
     public async Task Load(IStorage storage, string path, CancellationToken token = default)
