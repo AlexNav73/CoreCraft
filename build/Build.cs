@@ -62,10 +62,9 @@ internal partial class Build : NukeBuild
         .DependsOn(Compile)
         .Executes(() =>
         {
-            var testProject = Solution.GetProject(Solution.Tests.Navitski_Crystalized_Model_Tests_MemoryLeaks);
-            var framework = testProject.GetTargetFrameworks().Single();
-            var assemblyName = testProject.GetProperty("AssemblyName") + ".dll";
-            var assemblyPath = testProject.Directory / "bin" / Configuration / framework / assemblyName;
+            var testProject = Solution.Tests.Navitski_Crystalized_Model_Tests_MemoryLeaks;
+            var assemblyName = testProject.Name + ".dll";
+            var assemblyPath = testProject.Directory / "bin" / Configuration / assemblyName;
 
             DotMemoryUnit($"{NUnitTasks.NUnitPath} --propagate-exit-code -- {assemblyPath}");
         });
