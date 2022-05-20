@@ -2,7 +2,7 @@
 
 namespace Navitski.Crystalized.Model.Engine.History;
 
-internal class SaveOnEveryChangeHistory : DisposableBase
+public class SaveOnEveryChangeHistory : DisposableBase
 {
     private readonly BaseModel _model;
     private readonly IStorage _storage;
