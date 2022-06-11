@@ -48,12 +48,12 @@ internal class SqliteRepository : DisposableBase, IRepository
         command.ExecuteNonQuery();
     }
 
-    public void Insert<TEntity, TData>(
+    public void Insert<TEntity, TProperties>(
         string name,
-        IReadOnlyCollection<KeyValuePair<TEntity, TData>> items,
+        IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items,
         Scheme scheme)
         where TEntity : Entity
-        where TData : Properties
+        where TProperties : Properties
     {
         ExecuteNonQuery(QueryBuilder.Collections.CreateTable(scheme, name));
         ExecuteCollectionCommand(QueryBuilder.Collections.Insert(scheme, name), items, scheme);
@@ -69,9 +69,9 @@ internal class SqliteRepository : DisposableBase, IRepository
         ExecuteRelationCommand(QueryBuilder.Relations.Insert(name), relations);
     }
 
-    public void Update<TEntity, TData>(string name, IReadOnlyCollection<KeyValuePair<TEntity, TData>> items, Scheme scheme)
+    public void Update<TEntity, TProperties>(string name, IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items, Scheme scheme)
         where TEntity : Entity
-        where TData : Properties
+        where TProperties : Properties
     {
         ExecuteCollectionCommand(QueryBuilder.Collections.Update(scheme, name), items, scheme);
     }
@@ -100,9 +100,9 @@ internal class SqliteRepository : DisposableBase, IRepository
         ExecuteRelationCommand(QueryBuilder.Relations.Delete(name), relations);
     }
 
-    public void Select<TEntity, TData>(string name, IMutableCollection<TEntity, TData> collection, Scheme scheme)
+    public void Select<TEntity, TProperties>(string name, IMutableCollection<TEntity, TProperties> collection, Scheme scheme)
         where TEntity : Entity
-        where TData : Properties
+        where TProperties : Properties
     {
         if (!Exists(name))
         {
@@ -123,7 +123,7 @@ internal class SqliteRepository : DisposableBase, IRepository
                 bag.Write(scheme.Properties[i].Name, Convert.ChangeType(reader.GetValue(i + 1), scheme.Properties[i].Type));
             }
 
-            collection.Add(id, p => (TData)p.ReadFrom(bag));
+            collection.Add(id, p => (TProperties)p.ReadFrom(bag));
         }
     }
 
@@ -166,9 +166,9 @@ internal class SqliteRepository : DisposableBase, IRepository
         return false;
     }
 
-    private void ExecuteCollectionCommand<TEntity, TData>(string query, IReadOnlyCollection<KeyValuePair<TEntity, TData>> items, Scheme scheme)
+    private void ExecuteCollectionCommand<TEntity, TProperties>(string query, IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items, Scheme scheme)
         where TEntity : Entity
-        where TData : Properties
+        where TProperties : Properties
     {
         using var command = _connection.CreateCommand();
         command.CommandText = query;
@@ -226,9 +226,9 @@ internal class SqliteRepository : DisposableBase, IRepository
         return parameters;
     }
 
-    private static void AssignValuesToParameters<TEntity, TData>(IDictionary<string, SqliteParameter> parameters, TEntity entity, TData data)
+    private static void AssignValuesToParameters<TEntity, TProperties>(IDictionary<string, SqliteParameter> parameters, TEntity entity, TProperties data)
         where TEntity : Entity
-        where TData : Properties
+        where TProperties : Properties
     {
         parameters["Id"].Value = entity.Id;
 

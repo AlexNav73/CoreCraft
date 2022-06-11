@@ -1,4 +1,5 @@
 ﻿using Navitski.Crystalized.Model.Engine.Core;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -34,7 +35,7 @@ public class CollectionTests
 
         Assert.That(_collection.Count, Is.EqualTo(1));
         Assert.That(_collection.Single(), Is.EqualTo(entity));
-        Assert.Throws<InvalidOperationException>(() =>
+        Assert.Throws<DuplicateKeyException>(() =>
         {
             _collection.Add(entity.Id, p => p);
         });

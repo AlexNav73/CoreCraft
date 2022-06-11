@@ -13,12 +13,14 @@ public class AddLotOfEntitiesCommand : ModelCommand<FakeModel>
         _count = count;
     }
 
-    protected override void ExecuteInternal(IModel model)
+    protected override void ExecuteInternal(IModel model, CancellationToken token)
     {
         var modelShard = model.Shard<IMutableFakeModelShard>();
 
         for (var i = 0; i < _count; i++)
         {
+            token.ThrowIfCancellationRequested();
+
             var first = modelShard.FirstCollection.Add(new()
             {
                 NonNullableStringProperty = "test"

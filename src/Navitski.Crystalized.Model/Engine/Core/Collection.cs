@@ -1,73 +1,86 @@
-﻿using System.Collections;
+﻿using Navitski.Crystalized.Model.Engine.Exceptions;
+using System.Collections;
 using System.Diagnostics;
 
 namespace Navitski.Crystalized.Model.Engine.Core;
 
+/// <summary>
+///     A collection of entity-properties pairs when entity is a key, and properties
+///     is a data associated with a given entity
+/// </summary>
+/// <typeparam name="TEntity">An entity type</typeparam>
+/// <typeparam name="TProperties">A type of a properties</typeparam>
 [DebuggerDisplay("Count = {Count}")]
-public class Collection<TEntity, TData> : IMutableCollection<TEntity, TData>
+public class Collection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
     where TEntity : Entity
-    where TData : Properties
+    where TProperties : Properties
 {
-    private readonly IDictionary<Guid, TData> _relation;
+    private readonly IDictionary<Guid, TProperties> _relation;
     private readonly Func<Guid, TEntity> _entityFactory;
-    private readonly Func<TData> _dataFactory;
+    private readonly Func<TProperties> _propsFactory;
 
-    public Collection(Func<Guid, TEntity> entityCreator, Func<TData> dataCreator)
-        : this(new Dictionary<Guid, TData>(), entityCreator, dataCreator)
+    public Collection(Func<Guid, TEntity> entityCreator, Func<TProperties> propsCreator)
+        : this(new Dictionary<Guid, TProperties>(), entityCreator, propsCreator)
     {
     }
 
     private Collection(
-        IDictionary<Guid, TData> relation,
+        IDictionary<Guid, TProperties> relation,
         Func<Guid, TEntity> entityFactory,
-        Func<TData> dataFactory)
+        Func<TProperties> dataFactory)
     {
         _relation = relation;
         _entityFactory = entityFactory;
-        _dataFactory = dataFactory;
+        _propsFactory = dataFactory;
     }
 
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _relation.Count;
 
-    public TEntity Add(TData data)
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Add(TProperties)"/>
+    public TEntity Add(TProperties properties)
     {
         var entity = _entityFactory(Guid.NewGuid());
-        Add(entity, data);
+        Add(entity, properties);
         return entity;
     }
 
-    public TEntity Add(Guid id, Func<TData, TData> init)
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Add(Guid, Func{TProperties, TProperties})"/>
+    public TEntity Add(Guid id, Func<TProperties, TProperties> init)
     {
         var entity = _entityFactory(id);
-        Add(entity, init(_dataFactory()));
+        Add(entity, init(_propsFactory()));
         return entity;
     }
 
-    public void Add(TEntity entity, TData data)
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Add(TEntity, TProperties)"/>
+    public void Add(TEntity entity, TProperties properties)
     {
         if (_relation.ContainsKey(entity.Id))
         {
-            throw new InvalidOperationException($"Entity [{entity}] can't be added to the collection");
+            throw new DuplicateKeyException($"Entity [{entity}] can't be added to the collection");
         }
 
-        _relation.Add(entity.Id, data);
+        _relation.Add(entity.Id, properties);
     }
 
-    public TData Get(TEntity entity)
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Get(TEntity)"/>
+    public TProperties Get(TEntity entity)
     {
-        if (_relation.TryGetValue(entity.Id, out var data))
+        if (_relation.TryGetValue(entity.Id, out var properties))
         {
-            return data;
+            return properties;
         }
 
         throw new KeyNotFoundException($"Collection doesn't contain entity [{entity}]");
     }
 
-    public void Modify(TEntity entity, Func<TData, TData> modifier)
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})"/>
+    public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {
-        if (_relation.TryGetValue(entity.Id, out var data))
+        if (_relation.TryGetValue(entity.Id, out var properties))
         {
-            _relation[entity.Id] = modifier(data);
+            _relation[entity.Id] = modifier(properties);
         }
         else
         {
@@ -75,6 +88,7 @@ public class Collection<TEntity, TData> : IMutableCollection<TEntity, TData>
         }
     }
 
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Remove(TEntity)"/>
     public void Remove(TEntity entity)
     {
         if (_relation.ContainsKey(entity.Id))
@@ -87,19 +101,22 @@ public class Collection<TEntity, TData> : IMutableCollection<TEntity, TData>
         }
     }
 
-    public ICollection<TEntity, TData> Copy()
+    /// <inheritdoc cref="ICopy{T}.Copy"/>
+    public ICollection<TEntity, TProperties> Copy()
     {
-        return new Collection<TEntity, TData>(
-            new Dictionary<Guid, TData>(_relation),
+        return new Collection<TEntity, TProperties>(
+            new Dictionary<Guid, TProperties>(_relation),
             _entityFactory,
-            _dataFactory);
+            _propsFactory);
     }
 
+    /// <inheritdoc />
     public IEnumerator<TEntity> GetEnumerator()
     {
         return _relation.Keys.Select(_entityFactory).GetEnumerator();
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();

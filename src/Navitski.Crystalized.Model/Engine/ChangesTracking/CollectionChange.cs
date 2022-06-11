@@ -2,20 +2,13 @@
 
 namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
+/// <inheritdoc cref="ICollectionChange{TEntity, TProperties}"/>
 [DebuggerDisplay("Action = {Action}")]
-internal class CollectionChange<TEntity, TData> : ICollectionChange<TEntity, TData>
+internal class CollectionChange<TEntity, TProperties> : ICollectionChange<TEntity, TProperties>
     where TEntity : Entity
-    where TData : Properties
+    where TProperties : Properties
 {
-    public CollectionAction Action { get; }
-
-    public TEntity Entity { get; }
-
-    public TData? OldData { get; }
-
-    public TData? NewData { get; }
-
-    public CollectionChange(CollectionAction action, TEntity entity, TData? oldData, TData? newData)
+    public CollectionChange(CollectionAction action, TEntity entity, TProperties? oldData, TProperties? newData)
     {
         Action = action;
         Entity = entity;
@@ -23,9 +16,22 @@ internal class CollectionChange<TEntity, TData> : ICollectionChange<TEntity, TDa
         NewData = newData;
     }
 
-    public ICollectionChange<TEntity, TData> Invert()
+    /// <inheritdoc />
+    public CollectionAction Action { get; }
+
+    /// <inheritdoc />
+    public TEntity Entity { get; }
+
+    /// <inheritdoc />
+    public TProperties? OldData { get; }
+
+    /// <inheritdoc />
+    public TProperties? NewData { get; }
+
+    /// <inheritdoc />
+    public ICollectionChange<TEntity, TProperties> Invert()
     {
-        return new CollectionChange<TEntity, TData>(InvertAction(Action), Entity, NewData, OldData);
+        return new CollectionChange<TEntity, TProperties>(InvertAction(Action), Entity, NewData, OldData);
     }
 
     private static CollectionAction InvertAction(CollectionAction action)

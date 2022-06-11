@@ -1,4 +1,5 @@
 ﻿using Navitski.Crystalized.Model.Engine.Core;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -28,7 +29,7 @@ public class MappingsTests
 
         mapping.Add(firstEntity, secondEntity);
 
-        Assert.Throws<InvalidOperationException>(() => mapping.Add(firstEntity, thirdEntity));
+        Assert.Throws<DuplicatedRelationException>(() => mapping.Add(firstEntity, thirdEntity));
     }
 
     [Test]
@@ -108,7 +109,7 @@ public class MappingsTests
         var firstEntity = new FirstEntity();
         var secondEntity = new SecondEntity();
 
-        Assert.Throws<InvalidOperationException>(() => mapping.Remove(firstEntity, secondEntity));
+        Assert.Throws<MissingRelationException>(() => mapping.Remove(firstEntity, secondEntity));
     }
 
     [Test]
@@ -122,7 +123,7 @@ public class MappingsTests
 
         mapping.Add(firstEntity, secondEntity);
 
-        Assert.Throws<InvalidOperationException>(() => mapping.Remove(thirdEntity, secondEntity));
+        Assert.Throws<MissingRelationException>(() => mapping.Remove(thirdEntity, secondEntity));
     }
 
     [Test]
@@ -164,7 +165,7 @@ public class MappingsTests
         var firstEntity = new FirstEntity();
         var secondEntity = new SecondEntity();
 
-        Assert.Throws<InvalidOperationException>(() => mapping.Remove(firstEntity, secondEntity));
+        Assert.Throws<MissingRelationException>(() => mapping.Remove(firstEntity, secondEntity));
     }
 
     [Test]
@@ -178,7 +179,7 @@ public class MappingsTests
 
         mapping.Add(firstEntity, secondEntity);
 
-        Assert.Throws<InvalidOperationException>(() => mapping.Remove(thirdEntity, secondEntity));
+        Assert.Throws<MissingRelationException>(() => mapping.Remove(thirdEntity, secondEntity));
     }
 
     [Test]

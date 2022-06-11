@@ -10,7 +10,7 @@ internal class ModifyAllEntitiesCommand : ModelCommand<FakeModel>
     {
     }
 
-    protected override void ExecuteInternal(IModel model)
+    protected override void ExecuteInternal(IModel model, CancellationToken token)
     {
         var modelShard = model.Shard<IMutableFakeModelShard>();
 

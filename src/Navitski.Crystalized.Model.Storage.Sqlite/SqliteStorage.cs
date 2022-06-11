@@ -6,12 +6,15 @@ using System.Data.Common;
 
 namespace Navitski.Crystalized.Model.Storage.Sqlite;
 
-public sealed class SqliteModelStorage : IStorage
+/// <summary>
+///     A SQLite storage implementation for the domain model
+/// </summary>
+public sealed class SqliteStorage : IStorage
 {
     private readonly MigrationRunner _migrationRunner;
     private readonly IEnumerable<IModelShardStorage> _storages;
 
-    public SqliteModelStorage(
+    public SqliteStorage(
         IEnumerable<IMigration> migrations,
         IEnumerable<IModelShardStorage> storages)
     {
@@ -19,7 +22,8 @@ public sealed class SqliteModelStorage : IStorage
         _storages = storages;
     }
 
-    public void Save(string path, IModel model, IReadOnlyList<IModelChanges> changes)
+    /// <inheritdoc cref="IStorage.Migrate(string, IModel, IReadOnlyList{IModelChanges})"/>
+    public void Migrate(string path, IModel model, IReadOnlyList<IModelChanges> changes)
     {
         SqliteRepository? repository = null;
         DbTransaction? transaction = null;
@@ -33,7 +37,7 @@ public sealed class SqliteModelStorage : IStorage
             {
                 foreach (var storage in _storages)
                 {
-                    storage.Save(repository, model, changes[i]);
+                    storage.Migrate(repository, model, changes[i]);
                 }
             }
 
@@ -51,6 +55,7 @@ public sealed class SqliteModelStorage : IStorage
         }
     }
 
+    /// <inheritdoc cref="IStorage.Save(string, IModel)"/>
     public void Save(string path, IModel model)
     {
         SqliteRepository? repository = null;
@@ -82,6 +87,7 @@ public sealed class SqliteModelStorage : IStorage
         }
     }
 
+    /// <inheritdoc cref="IStorage.Load(string, IModel)"/>
     public void Load(string path, IModel model)
     {
         if (!File.Exists(path))

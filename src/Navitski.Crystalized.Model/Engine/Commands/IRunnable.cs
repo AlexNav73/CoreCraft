@@ -2,5 +2,5 @@
 
 internal interface IRunnable
 {
-    void Run(IModel model);
+    void Run(IModel model, CancellationToken token);
 }

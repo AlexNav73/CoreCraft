@@ -3,36 +3,41 @@ using System.Diagnostics;
 
 namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
+/// <inheritdoc cref="ICollectionChangeSet{TEntity, TProperties}"/>
 [DebuggerDisplay("HasChanges = {HasChanges()}")]
-public class CollectionChangeSet<TEntity, TData> : ICollectionChangeSet<TEntity, TData>
+public class CollectionChangeSet<TEntity, TProperties> : ICollectionChangeSet<TEntity, TProperties>
     where TEntity : Entity
-    where TData : Properties
+    where TProperties : Properties
 {
-    private readonly IList<ICollectionChange<TEntity, TData>> _changes;
+    private readonly IList<ICollectionChange<TEntity, TProperties>> _changes;
 
-    public CollectionChangeSet() : this(new List<ICollectionChange<TEntity, TData>>())
+    public CollectionChangeSet() : this(new List<ICollectionChange<TEntity, TProperties>>())
     {
     }
 
-    private CollectionChangeSet(IList<ICollectionChange<TEntity, TData>> changes)
+    private CollectionChangeSet(IList<ICollectionChange<TEntity, TProperties>> changes)
     {
         _changes = changes;
     }
 
-    public void Add(CollectionAction action, TEntity entity, TData? oldData, TData? newData)
+    /// <inheritdoc />
+    public void Add(CollectionAction action, TEntity entity, TProperties? oldData, TProperties? newData)
     {
-        _changes.Add(new CollectionChange<TEntity, TData>(action, entity, oldData, newData));
+        _changes.Add(new CollectionChange<TEntity, TProperties>(action, entity, oldData, newData));
     }
 
-    public ICollectionChangeSet<TEntity, TData> Invert()
+    /// <inheritdoc />
+    public ICollectionChangeSet<TEntity, TProperties> Invert()
     {
         var inverted = _changes.Reverse().Select(x => x.Invert()).ToList();
-        return new CollectionChangeSet<TEntity, TData>(inverted);
+        return new CollectionChangeSet<TEntity, TProperties>(inverted);
     }
 
+    /// <inheritdoc />
     public bool HasChanges() => _changes.Count > 0;
 
-    public void Apply(IMutableCollection<TEntity, TData> collection)
+    /// <inheritdoc />
+    public void Apply(IMutableCollection<TEntity, TProperties> collection)
     {
         foreach (var change in _changes)
         {
@@ -50,20 +55,22 @@ public class CollectionChangeSet<TEntity, TData> : ICollectionChangeSet<TEntity,
                         var bag = new PropertiesBag();
                         change.NewData!.WriteTo(bag);
 
-                        return (TData)d.ReadFrom(bag);
+                        return (TProperties)d.ReadFrom(bag);
                     });
                     break;
                 default:
-                    break;
+                    throw new NotSupportedException($"An action [{change.Action}] is not supported.");
             }
         }
     }
 
-    public IEnumerator<ICollectionChange<TEntity, TData>> GetEnumerator()
+    /// <inheritdoc />
+    public IEnumerator<ICollectionChange<TEntity, TProperties>> GetEnumerator()
     {
         return _changes.GetEnumerator();
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator()
     {
         return _changes.GetEnumerator();

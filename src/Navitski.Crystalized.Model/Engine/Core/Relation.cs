@@ -3,6 +3,7 @@ using System.Diagnostics;
 
 namespace Navitski.Crystalized.Model.Engine.Core;
 
+/// <inheritdoc cref="IRelation{TParent, TChild}"/>
 [DebuggerDisplay(@"Parent [{_parentToChildRelations}] Children [{_childToParentRelations}]")]
 public class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
     where TParent : Entity
@@ -19,28 +20,33 @@ public class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
         _childToParentRelations = childToParentRelation;
     }
 
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Add(TParent, TChild)"/>
     public void Add(TParent parent, TChild child)
     {
         _parentToChildRelations.Add(parent, child);
         _childToParentRelations.Add(child, parent);
     }
 
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Children(TParent)"/>
     public IEnumerable<TChild> Children(TParent parent)
     {
         return _parentToChildRelations.Children(parent);
     }
 
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Parents(TChild)"/>
     public IEnumerable<TParent> Parents(TChild child)
     {
         return _childToParentRelations.Children(child);
     }
 
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Remove(TParent, TChild)"/>
     public void Remove(TParent parent, TChild child)
     {
         _parentToChildRelations.Remove(parent, child);
         _childToParentRelations.Remove(child, parent);
     }
 
+    /// <inheritdoc cref="ICopy{T}.Copy"/>
     public IRelation<TParent, TChild> Copy()
     {
         return new Relation<TParent, TChild>(
@@ -48,11 +54,13 @@ public class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
             _childToParentRelations.Copy());
     }
 
+    /// <inheritdoc />
     public IEnumerator<TParent> GetEnumerator()
     {
         return _parentToChildRelations.GetEnumerator();
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();

@@ -1,5 +1,8 @@
 ﻿namespace Navitski.Crystalized.Model;
 
+/// <summary>
+///     Base implementation of Disposable pattern
+/// </summary>
 public abstract class DisposableBase : IDisposable
 {
     private bool _disposed;

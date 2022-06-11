@@ -3,7 +3,7 @@ using Navitski.Crystalized.Model.Engine.Core;
 
 namespace Navitski.Crystalized.Model.Tests.Infrastructure;
 
-public class FakeModel : BaseModel
+public class FakeModel : DomainModel
 {
     public FakeModel(IEnumerable<IModelShard> shards)
         : base(shards, new ModelConfiguration() { Scheduler = new SyncScheduler() })

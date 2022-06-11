@@ -2,17 +2,12 @@
 
 namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
+/// <inheritdoc cref="IRelationChange{TParent, TChild}"/>
 [DebuggerDisplay("Action = {Action}")]
 public class RelationChange<TParent, TChild> : IRelationChange<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {
-    public RelationAction Action { get; }
-
-    public TParent Parent { get; }
-
-    public TChild Child { get; }
-
     public RelationChange(RelationAction action, TParent parent, TChild child)
     {
         Action = action;
@@ -20,6 +15,16 @@ public class RelationChange<TParent, TChild> : IRelationChange<TParent, TChild>
         Child = child;
     }
 
+    /// <inheritdoc />
+    public RelationAction Action { get; }
+
+    /// <inheritdoc />
+    public TParent Parent { get; }
+
+    /// <inheritdoc />
+    public TChild Child { get; }
+
+    /// <inheritdoc />
     public IRelationChange<TParent, TChild> Invert()
     {
         return new RelationChange<TParent, TChild>(InvertAction(Action), Parent, Child);

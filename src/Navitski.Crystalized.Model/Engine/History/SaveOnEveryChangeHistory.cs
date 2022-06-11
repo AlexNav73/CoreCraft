@@ -2,13 +2,22 @@
 
 namespace Navitski.Crystalized.Model.Engine.History;
 
+/// <summary>
+///     A history which will save all changes happened with the model immediately.
+/// </summary>
+/// <remarks>
+///     Each time model changes, a new change is sent to the history.
+///     Current implementation of a history immediately saves the new change.
+///     It is automatically subscribes to the model changes and receives
+///     them without any additional work to do.
+/// </remarks>
 public class SaveOnEveryChangeHistory : DisposableBase
 {
-    private readonly BaseModel _model;
+    private readonly DomainModel _model;
     private readonly IStorage _storage;
     private readonly string _path;
 
-    public SaveOnEveryChangeHistory(BaseModel model, IStorage storage, string path)
+    public SaveOnEveryChangeHistory(DomainModel model, IStorage storage, string path)
     {
         _model = model;
         _storage = storage;
@@ -17,6 +26,9 @@ public class SaveOnEveryChangeHistory : DisposableBase
         _model.ModelChanged += OnModelChanged;
     }
 
+    /// <summary>
+    ///     Loads the model
+    /// </summary>
     public async Task Load()
     {
         await _model.Load(_storage, _path);

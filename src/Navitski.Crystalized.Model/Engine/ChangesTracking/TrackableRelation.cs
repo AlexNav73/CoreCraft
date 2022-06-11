@@ -3,6 +3,7 @@ using System.Diagnostics;
 
 namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
+/// <inheritdoc cref="IMutableRelation{TParent, TChild}"/>
 [DebuggerDisplay("{_relation}")]
 public class TrackableRelation<TParent, TChild> : IMutableRelation<TParent, TChild>
     where TParent : Entity
@@ -18,33 +19,39 @@ public class TrackableRelation<TParent, TChild> : IMutableRelation<TParent, TChi
         _relation = (IMutableRelation<TParent, TChild>)modelRelation;
     }
 
+    /// <inheritdoc />
     public void Add(TParent parent, TChild child)
     {
         _relation.Add(parent, child);
         _changes.Add(RelationAction.Linked, parent, child);
     }
 
+    /// <inheritdoc />
     public void Remove(TParent parent, TChild child)
     {
         _relation.Remove(parent, child);
         _changes.Add(RelationAction.Unlinked, parent, child);
     }
 
+    /// <inheritdoc />
     public IEnumerable<TChild> Children(TParent parent)
     {
         return _relation.Children(parent);
     }
 
+    /// <inheritdoc />
     public IEnumerable<TParent> Parents(TChild child)
     {
         return _relation.Parents(child);
     }
 
+    /// <inheritdoc />
     public IEnumerator<TParent> GetEnumerator()
     {
         return _relation.GetEnumerator();
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();

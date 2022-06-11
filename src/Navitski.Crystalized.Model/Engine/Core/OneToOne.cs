@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Navitski.Crystalized.Model.Engine.Exceptions;
+using System.Collections;
 using System.Diagnostics;
 
 namespace Navitski.Crystalized.Model.Engine.Core;
@@ -19,16 +20,18 @@ public class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
         _relation = relation;
     }
 
+    /// <inheritdoc cref="IMapping{TParent, TChild}.Add(TParent, TChild)"/>
     public void Add(TParent parent, TChild child)
     {
         if (_relation.ContainsKey(parent))
         {
-            throw new InvalidOperationException($"Linking {parent} with {child} has failed");
+            throw new DuplicatedRelationException($"Linking {parent} with {child} has failed");
         }
 
         _relation.Add(parent, child);
     }
 
+    /// <inheritdoc cref="IMapping{TParent, TChild}.Children(TParent)"/>
     public IEnumerable<TChild> Children(TParent parent)
     {
         if (_relation.TryGetValue(parent, out var child))
@@ -37,6 +40,7 @@ public class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
         }
     }
 
+    /// <inheritdoc cref="IMapping{TParent, TChild}.Remove(TParent, TChild)"/>
     public void Remove(TParent parent, TChild child)
     {
         if (_relation.TryGetValue(parent, out var c) && c.Equals(child))
@@ -45,27 +49,31 @@ public class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
         }
         else
         {
-            throw new InvalidOperationException($"Can't remove {parent} - {child} link");
+            throw new MissingRelationException($"Can't remove {parent} - {child} link");
         }
     }
 
+    /// <inheritdoc cref="IMapping{TParent, TChild}.Clear"/>
     public void Clear()
     {
         _relation.Clear();
     }
 
+    /// <inheritdoc cref="ICopy{T}.Copy"/>
+    public IMapping<TParent, TChild> Copy()
+    {
+        return new OneToOne<TParent, TChild>(new Dictionary<TParent, TChild>(_relation));
+    }
+
+    /// <inheritdoc />
     public IEnumerator<TParent> GetEnumerator()
     {
         return _relation.Keys.GetEnumerator();
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    public IMapping<TParent, TChild> Copy()
-    {
-        return new OneToOne<TParent, TChild>(new Dictionary<TParent, TChild>(_relation));
     }
 }

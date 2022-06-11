@@ -99,7 +99,7 @@ internal partial class ApplicationModelGenerator
             code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsTrackable(IWritableModelChanges modelChanges)");
             code.Block(() =>
             {
-                code.WriteLine($"var frame = modelChanges.Add(new {modelShard.Name}ChangesFrame());");
+                code.WriteLine($"var frame = modelChanges.Register(new {modelShard.Name}ChangesFrame());");
                 code.WriteLine($"return new Trackable{modelShard.Name}ModelShard(this, frame);");
             });
         }

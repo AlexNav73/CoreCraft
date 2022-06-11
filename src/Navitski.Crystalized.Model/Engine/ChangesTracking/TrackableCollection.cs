@@ -3,82 +3,93 @@ using System.Diagnostics;
 
 namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
+/// <inheritdoc cref="IMutableCollection{TEntity, TProperties}"/>
 [DebuggerDisplay("{_collection}")]
-public class TrackableCollection<TEntity, TData> : IMutableCollection<TEntity, TData>
+public class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
     where TEntity : Entity
-    where TData : Properties
+    where TProperties : Properties
 {
-    private readonly ICollectionChangeSet<TEntity, TData> _changes;
-    private readonly IMutableCollection<TEntity, TData> _collection;
+    private readonly ICollectionChangeSet<TEntity, TProperties> _changes;
+    private readonly IMutableCollection<TEntity, TProperties> _collection;
 
     public TrackableCollection(
-        ICollectionChangeSet<TEntity, TData> changesCollection,
-        ICollection<TEntity, TData> modelCollection)
+        ICollectionChangeSet<TEntity, TProperties> changesCollection,
+        ICollection<TEntity, TProperties> modelCollection)
     {
         _changes = changesCollection;
-        _collection = (IMutableCollection<TEntity, TData>)modelCollection;
+        _collection = (IMutableCollection<TEntity, TProperties>)modelCollection;
     }
 
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _collection.Count;
 
-    public TEntity Add(TData data)
+    /// <inheritdoc />
+    public TEntity Add(TProperties properties)
     {
-        var entity = _collection.Add(data);
-        _changes.Add(CollectionAction.Add, entity, default, data);
+        var entity = _collection.Add(properties);
+        _changes.Add(CollectionAction.Add, entity, default, properties);
         return entity;
     }
 
-    public TEntity Add(Guid id, Func<TData, TData> init)
+    /// <inheritdoc />
+    public TEntity Add(Guid id, Func<TProperties, TProperties> init)
     {
         var entity = _collection.Add(id, init);
-        var data = _collection.Get(entity);
+        var properties = _collection.Get(entity);
 
-        _changes.Add(CollectionAction.Add, entity, default, data);
+        _changes.Add(CollectionAction.Add, entity, default, properties);
 
         return entity;
     }
 
-    public void Add(TEntity entity, TData data)
+    /// <inheritdoc />
+    public void Add(TEntity entity, TProperties properties)
     {
-        _collection.Add(entity, data);
-        _changes.Add(CollectionAction.Add, entity, default, data);
+        _collection.Add(entity, properties);
+        _changes.Add(CollectionAction.Add, entity, default, properties);
     }
 
-    public TData Get(TEntity entity)
+    /// <inheritdoc />
+    public TProperties Get(TEntity entity)
     {
         return _collection.Get(entity);
     }
 
-    public void Modify(TEntity entity, Func<TData, TData> modifier)
+    /// <inheritdoc />
+    public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {
-        var oldData = _collection.Get(entity);
+        var oldProps = _collection.Get(entity);
         _collection.Modify(entity, modifier);
-        var newData = _collection.Get(entity);
+        var newProps = _collection.Get(entity);
 
-        if (!oldData.Equals(newData))
+        if (!oldProps.Equals(newProps))
         {
-            _changes.Add(CollectionAction.Modify, entity, oldData, newData);
+            _changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
         }
     }
 
+    /// <inheritdoc />
     public void Remove(TEntity entity)
     {
-        var data = _collection.Get(entity);
-        _changes.Add(CollectionAction.Remove, entity, data, default);
+        var properties = _collection.Get(entity);
+        _changes.Add(CollectionAction.Remove, entity, properties, default);
         _collection.Remove(entity);
     }
 
+    /// <inheritdoc />
     public IEnumerator<TEntity> GetEnumerator()
     {
         return _collection.GetEnumerator();
     }
 
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
     }
 
-    public ICollection<TEntity, TData> Copy()
+    /// <inheritdoc />
+    public ICollection<TEntity, TProperties> Copy()
     {
         throw new InvalidOperationException("Collection can't be copied because it is attached to changes tracking system");
     }

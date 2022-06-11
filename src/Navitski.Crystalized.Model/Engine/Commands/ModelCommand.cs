@@ -1,7 +1,8 @@
 ﻿namespace Navitski.Crystalized.Model.Engine.Commands;
 
+/// <inheritdoc cref="IModelCommand"/>
 public abstract class ModelCommand<TModel> : IModelCommand, IRunnable
-    where TModel : IBaseModel
+    where TModel : IDomainModel
 {
     private readonly ICommandRunner _model;
     private readonly IList<ICommandParameter> _parameters;
@@ -19,12 +20,12 @@ public abstract class ModelCommand<TModel> : IModelCommand, IRunnable
         return _model.Enqueue(this, token);
     }
 
-    void IRunnable.Run(IModel model)
+    void IRunnable.Run(IModel model, CancellationToken token)
     {
-        ExecuteInternal(model);
+        ExecuteInternal(model, token);
     }
 
-    protected abstract void ExecuteInternal(IModel model);
+    protected abstract void ExecuteInternal(IModel model, CancellationToken token);
 
     protected ICommandParameter<T> Parameter<T>(string name)
     {
