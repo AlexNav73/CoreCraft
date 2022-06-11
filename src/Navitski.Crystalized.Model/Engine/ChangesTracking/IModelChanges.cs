@@ -28,6 +28,6 @@ public interface IModelChanges
     /// <summary>
     ///     If there were some changes
     /// </summary>
-    /// <returns></returns>
+    /// <returns>True - if model has changes</returns>
     bool HasChanges();
 }

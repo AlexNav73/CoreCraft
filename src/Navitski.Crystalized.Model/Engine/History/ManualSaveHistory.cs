@@ -48,21 +48,17 @@ public sealed class ManualSaveHistory : DisposableBase
         if (changes.Any())
         {
             await _model.Save(_storage, path, changes);
-        }
-        else
-        {
-            return;
-        }
 
-        // TODO(#8): saving operation executes in thread pool
-        // and launched by 'async void' methods. If two
-        // sequential savings happened, clearing of the stacks
-        // can cause data race (just after first save we will clear stack
-        // with new changes, made after first save started).
-        _undoStack.Clear();
-        _redoStack.Clear();
+            // TODO(#8): saving operation executes in thread pool
+            // and launched by 'async void' methods. If two
+            // sequential savings happened, clearing of the stacks
+            // can cause data race (just after first save we will clear stack
+            // with new changes, made after first save started).
+            _undoStack.Clear();
+            _redoStack.Clear();
 
-        Changed?.Invoke(this, EventArgs.Empty);
+            Changed?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     /// <summary>

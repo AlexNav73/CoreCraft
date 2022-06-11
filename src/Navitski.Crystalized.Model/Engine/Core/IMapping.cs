@@ -12,8 +12,8 @@
 ///     the instance of <see cref="Relation{TParent, TChild}"/> is constructed. Mappings should not
 ///     be used in the user code.
 /// </remarks>
-/// <typeparam name="TParent"></typeparam>
-/// <typeparam name="TChild"></typeparam>
+/// <typeparam name="TParent">A type of parent entity</typeparam>
+/// <typeparam name="TChild">A type of child entity</typeparam>
 public interface IMapping<TParent, TChild> : IEnumerable<TParent>, ICopy<IMapping<TParent, TChild>>
     where TParent : Entity
     where TChild : Entity
