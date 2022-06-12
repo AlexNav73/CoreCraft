@@ -5,13 +5,13 @@
 /// </summary>
 public class ModelConfiguration
 {
-    public ModelConfiguration()
+    public ModelConfiguration(IScheduler? scheduler = null)
     {
-        Scheduler = new AsyncScheduler();
+        Scheduler = scheduler ?? new AsyncScheduler();
     }
 
     /// <summary>
     ///     Scheduler
     /// </summary>
-    public IScheduler Scheduler { get; init; }
+    public IScheduler Scheduler { get; }
 }

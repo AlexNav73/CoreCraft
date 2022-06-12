@@ -9,7 +9,7 @@ internal class CommandParameter<T> : ICommandParameter<T>
 
     public CommandParameter(string name)
     {
-        _value = default!;
+        _value = default;
 
         IsInitialized = false;
         Name = name;

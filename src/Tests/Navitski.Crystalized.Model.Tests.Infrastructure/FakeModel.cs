@@ -6,7 +6,7 @@ namespace Navitski.Crystalized.Model.Tests.Infrastructure;
 public class FakeModel : DomainModel
 {
     public FakeModel(IEnumerable<IModelShard> shards)
-        : base(shards, new ModelConfiguration() { Scheduler = new SyncScheduler() })
+        : base(shards, new ModelConfiguration(scheduler: new SyncScheduler()))
     {
         History = new FakeModelHistory(this);
     }
