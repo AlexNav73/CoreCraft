@@ -20,7 +20,7 @@ internal class CommandParameter<T> : ICommandParameter<T>
     public T Value
     {
         get => _value ?? throw new InvalidOperationException("Command parameter is not initialized");
-        set
+        private set
         {
             _value = value;
             IsInitialized = true;
@@ -28,6 +28,11 @@ internal class CommandParameter<T> : ICommandParameter<T>
     }
 
     public bool IsInitialized { get; set; }
+
+    public void Set(T value)
+    {
+        Value = value;
+    }
 
     public override string ToString()
     {

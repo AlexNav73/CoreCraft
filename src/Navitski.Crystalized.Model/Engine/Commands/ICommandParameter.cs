@@ -25,5 +25,11 @@ public interface ICommandParameter<T> : ICommandParameter
     /// <summary>
     ///     A value
     /// </summary>
-    T Value { get; set; }
+    T Value { get; }
+
+    /// <summary>
+    ///     Sets a parameter value
+    /// </summary>
+    /// <param name="value">A new parameter value</param>
+    void Set(T value);
 }
