@@ -2,14 +2,14 @@
 
 internal class ModelChanges : IModelChanges
 {
-    protected readonly IDictionary<Type, IChangesFrame> Frames;
+    protected readonly IList<IChangesFrame> Frames;
 
     public ModelChanges()
-        : this(new Dictionary<Type, IChangesFrame>())
+        : this(new List<IChangesFrame>())
     {
     }
 
-    protected ModelChanges(IDictionary<Type, IChangesFrame> frames)
+    protected ModelChanges(IList<IChangesFrame> frames)
     {
         Frames = frames;
     }
@@ -17,18 +17,13 @@ internal class ModelChanges : IModelChanges
     public bool TryGetFrame<T>(out T? frame)
         where T : class, IChangesFrame
     {
-        if (Frames.TryGetValue(typeof(T), out var f))
-        {
-            frame = (T)f;
-            return true;
-        }
+        frame = Frames.OfType<T>().SingleOrDefault();
 
-        frame = null;
-        return false;
+        return frame != null;
     }
 
     public bool HasChanges()
     {
-        return Frames.Values.Any(x => x.HasChanges());
+        return Frames.Any(x => x.HasChanges());
     }
 }

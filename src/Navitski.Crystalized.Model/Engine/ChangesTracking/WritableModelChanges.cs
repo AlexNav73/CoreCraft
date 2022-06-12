@@ -1,6 +1,4 @@
-﻿using Navitski.Crystalized.Model.Engine.Exceptions;
-
-namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
+﻿namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 /// <inheritdoc cref="IWritableModelChanges"/>
 internal sealed class WritableModelChanges : ModelChanges, IWritableModelChanges
@@ -9,7 +7,7 @@ internal sealed class WritableModelChanges : ModelChanges, IWritableModelChanges
     {
     }
 
-    private WritableModelChanges(IDictionary<Type, IChangesFrame> frames)
+    private WritableModelChanges(IList<IChangesFrame> frames)
         : base(frames)
     {
     }
@@ -17,21 +15,20 @@ internal sealed class WritableModelChanges : ModelChanges, IWritableModelChanges
     /// <inheritdoc />
     public T Register<T>(T changesFrame) where T : class, IWritableChangesFrame
     {
-        if (Frames.ContainsKey(typeof(T)))
+        var frame = Frames.OfType<T>().SingleOrDefault();
+        if (frame != null)
         {
-            throw new ChangesFrameRegistrationException($"The changes frame [{changesFrame.GetType().Name}] already registered");
+            return frame;
         }
 
-        Frames.Add(typeof(T), changesFrame);
+        Frames.Add(changesFrame);
         return changesFrame;
     }
 
     /// <inheritdoc />
     public IWritableModelChanges Invert()
     {
-        var frames = Frames
-            .Select(x => (type: x.Key, frame: ((IWritableChangesFrame)x.Value).Invert()))
-            .ToDictionary(k => k.type, v => (IChangesFrame)v.frame);
+        var frames = Frames.Cast<IWritableChangesFrame>().Select(x => x.Invert()).ToArray();
 
         return new WritableModelChanges(frames);
     }
@@ -39,7 +36,7 @@ internal sealed class WritableModelChanges : ModelChanges, IWritableModelChanges
     /// <inheritdoc />
     public void Apply(IModel model)
     {
-        foreach (var frame in Frames.Values.Cast<IWritableChangesFrame>())
+        foreach (var frame in Frames.Cast<IWritableChangesFrame>())
         {
             frame.Apply(model);
         }

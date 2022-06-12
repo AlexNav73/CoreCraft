@@ -19,7 +19,6 @@ public interface IWritableModelChanges : IModelChanges
     /// <typeparam name="T">A concrete type of a changes frame</typeparam>
     /// <param name="changesFrame">An instance of a empty change frame</param>
     /// <returns>A writable part of a changes frame</returns>
-    /// <exception cref="Exceptions.ChangesFrameRegistrationException">Throws when a changes frame already has been registered</exception>
     T Register<T>(T changesFrame) where T : class, IWritableChangesFrame;
 
     /// <summary>
