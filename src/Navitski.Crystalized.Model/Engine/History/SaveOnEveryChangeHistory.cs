@@ -17,6 +17,9 @@ public class SaveOnEveryChangeHistory : DisposableBase
     private readonly IStorage _storage;
     private readonly string _path;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public SaveOnEveryChangeHistory(DomainModel model, IStorage storage, string path)
     {
         _model = model;
@@ -44,6 +47,7 @@ public class SaveOnEveryChangeHistory : DisposableBase
         await _model.Save(_storage, _path, new[] { args.Changes });
     }
 
+    /// <inheritdoc/>
     protected override void DisposeManagedObjects()
     {
         _model.ModelChanged -= OnModelChanged;

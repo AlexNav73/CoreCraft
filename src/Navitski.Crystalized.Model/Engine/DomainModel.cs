@@ -16,6 +16,9 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
 
     private volatile ModelChangedEventArgs? _currentChanges;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     protected DomainModel(IEnumerable<IModelShard> shards, ModelConfiguration configuration)
     {
         _subscriptions = new HashSet<Action<ModelChangedEventArgs>>();

@@ -11,6 +11,9 @@ public class CollectionChangeSet<TEntity, TProperties> : ICollectionChangeSet<TE
 {
     private readonly IList<ICollectionChange<TEntity, TProperties>> _changes;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public CollectionChangeSet() : this(new List<ICollectionChange<TEntity, TProperties>>())
     {
     }

@@ -12,6 +12,9 @@ public class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEnt
     private readonly ICollectionChangeSet<TEntity, TProperties> _changes;
     private readonly IMutableCollection<TEntity, TProperties> _collection;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public TrackableCollection(
         ICollectionChangeSet<TEntity, TProperties> changesCollection,
         ICollection<TEntity, TProperties> modelCollection)

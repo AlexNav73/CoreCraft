@@ -24,6 +24,9 @@ public sealed class ManualSaveHistory : DisposableBase
     private readonly Stack<IWritableModelChanges> _undoStack;
     private readonly Stack<IWritableModelChanges> _redoStack;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public ManualSaveHistory(DomainModel model, IStorage storage)
     {
         _model = model;
@@ -35,6 +38,9 @@ public sealed class ManualSaveHistory : DisposableBase
         _model.ModelChanged += OnModelChanged;
     }
 
+    /// <summary>
+    ///     Raised when history has changed
+    /// </summary>
     public event EventHandler? Changed;
 
     /// <summary>
@@ -134,6 +140,7 @@ public sealed class ManualSaveHistory : DisposableBase
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <inheritdoc/>
     protected override void DisposeManagedObjects()
     {
         _model.ModelChanged -= OnModelChanged;

@@ -27,7 +27,7 @@ public interface IRelation<TParent, TChild> : IEnumerable<TParent>, ICopy<IRelat
     /// <summary>
     ///     Retrieves all parent entities for a given child entity
     /// </summary>
-    /// <param name="parent">A child entity</param>
+    /// <param name="child">A child entity</param>
     /// <returns>A collection of parent entities</returns>
     IEnumerable<TParent> Parents(TChild child);
 }

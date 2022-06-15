@@ -16,6 +16,9 @@ public class OneToMany<TParent, TChild> : IMapping<TParent, TChild>
 {
     private readonly IDictionary<TParent, HashSet<TChild>> _relation;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public OneToMany() : this(new Dictionary<TParent, HashSet<TChild>>())
     {
     }

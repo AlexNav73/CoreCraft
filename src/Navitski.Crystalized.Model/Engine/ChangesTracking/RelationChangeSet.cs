@@ -11,6 +11,9 @@ public class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TParent, TC
 {
     private readonly IList<IRelationChange<TParent, TChild>> _changes;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public RelationChangeSet()
         : this(new List<IRelationChange<TParent, TChild>>())
     {

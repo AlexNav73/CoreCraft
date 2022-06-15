@@ -5,6 +5,9 @@
 /// </summary>
 public class ModelConfiguration
 {
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public ModelConfiguration(IScheduler? scheduler = null)
     {
         Scheduler = scheduler ?? new AsyncScheduler();

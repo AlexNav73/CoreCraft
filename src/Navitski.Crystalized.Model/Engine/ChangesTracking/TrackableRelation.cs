@@ -12,6 +12,9 @@ public class TrackableRelation<TParent, TChild> : IMutableRelation<TParent, TChi
     private readonly IRelationChangeSet<TParent, TChild> _changes;
     private readonly IMutableRelation<TParent, TChild> _relation;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public TrackableRelation(IRelationChangeSet<TParent, TChild> changesCollection,
         IRelation<TParent, TChild> modelRelation)
     {
@@ -57,6 +60,7 @@ public class TrackableRelation<TParent, TChild> : IMutableRelation<TParent, TChi
         return GetEnumerator();
     }
 
+    /// <inheritdoc/>
     public IRelation<TParent, TChild> Copy()
     {
         throw new InvalidOperationException("Relation can't be copied because it is attached to changes tracking system");

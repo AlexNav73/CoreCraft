@@ -4,6 +4,11 @@ using System.Diagnostics;
 
 namespace Navitski.Crystalized.Model.Engine.Core;
 
+/// <summary>
+///     Describes One-To-One relationships between entities. For more information see <see cref="IMapping{TParent, TChild}"/>
+/// </summary>
+/// <typeparam name="TParent">A parent entity type</typeparam>
+/// <typeparam name="TChild">A child entity type</typeparam>
 [DebuggerDisplay("Count = {_relation.Keys.Count}")]
 public class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
     where TParent : Entity
@@ -11,6 +16,9 @@ public class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
 {
     private readonly IDictionary<TParent, TChild> _relation;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public OneToOne() : this(new Dictionary<TParent, TChild>())
     {
     }

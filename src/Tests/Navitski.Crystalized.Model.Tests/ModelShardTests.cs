@@ -66,7 +66,7 @@ public class ModelShardTests
         Assert.That(copy, Is.Not.Null);
         Assert.That(copy, Is.TypeOf<FakeModelShard>());
         Assert.IsFalse(ReferenceEquals(shard, copy));
-        Assert.That(copy.FirstCollection.First(), Is.EqualTo(first));
+        Assert.That(copy!.FirstCollection.First(), Is.EqualTo(first));
         Assert.That(copy.SecondCollection.First(), Is.EqualTo(second));
         Assert.That(copy.OneToOneRelation.Children(first!), Is.EqualTo(new[] { second }));
         Assert.That(copy.OneToOneRelation.Parents(second!), Is.EqualTo(new[] { first }));

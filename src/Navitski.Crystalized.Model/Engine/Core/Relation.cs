@@ -12,6 +12,9 @@ public class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
     private readonly IMapping<TParent, TChild> _parentToChildRelations;
     private readonly IMapping<TChild, TParent> _childToParentRelations;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public Relation(
         IMapping<TParent, TChild> parentToChildRelation,
         IMapping<TChild, TParent> childToParentRelation)

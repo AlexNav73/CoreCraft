@@ -7,12 +7,16 @@ public abstract class ModelCommand<TModel> : IModelCommand, IRunnable
     private readonly ICommandRunner _model;
     private readonly IList<ICommandParameter> _parameters;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     protected ModelCommand(TModel model)
     {
         _model = (ICommandRunner)model;
         _parameters = new List<ICommandParameter>();
     }
 
+    /// <inheritdoc />
     public Task Execute(CancellationToken token = default)
     {
         AssertParameters();
@@ -25,8 +29,19 @@ public abstract class ModelCommand<TModel> : IModelCommand, IRunnable
         ExecuteInternal(model, token);
     }
 
+    /// <summary>
+    ///     Command business logic
+    /// </summary>
+    /// <param name="model">Mutable model</param>
+    /// <param name="token">Cancellation token</param>
     protected abstract void ExecuteInternal(IModel model, CancellationToken token);
 
+    /// <summary>
+    ///     Command parameter factory method
+    /// </summary>
+    /// <typeparam name="T">A type of parameter value</typeparam>
+    /// <param name="name">Name of parameter</param>
+    /// <returns>Wrapper for a parameter value</returns>
     protected ICommandParameter<T> Parameter<T>(string name)
     {
         var parameter = new CommandParameter<T>(name);

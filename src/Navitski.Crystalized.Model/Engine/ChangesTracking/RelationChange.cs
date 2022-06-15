@@ -8,6 +8,9 @@ public class RelationChange<TParent, TChild> : IRelationChange<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public RelationChange(RelationAction action, TParent parent, TChild child)
     {
         Action = action;

@@ -5,7 +5,7 @@ namespace Navitski.Crystalized.Model.Tests;
 
 public class CollectionTests
 {
-    private IMutableCollection<FirstEntity, FirstEntityProperties> _collection;
+    private IMutableCollection<FirstEntity, FirstEntityProperties>? _collection;
 
     [SetUp]
     public void Setup()
@@ -16,7 +16,7 @@ public class CollectionTests
     [Test]
     public void CreateEntityTest()
     {
-        Assert.That(_collection.Count, Is.EqualTo(0));
+        Assert.That(_collection!.Count, Is.EqualTo(0));
 
         var firstEntityId = Guid.NewGuid();
         var entity = _collection.Add(firstEntityId, p => p);
@@ -29,7 +29,7 @@ public class CollectionTests
     [Test]
     public void AddExistingEntityToCollectionTest()
     {
-        Assert.That(_collection.Count, Is.EqualTo(0));
+        Assert.That(_collection!.Count, Is.EqualTo(0));
 
         var entity = _collection.Add(new());
 
@@ -44,7 +44,7 @@ public class CollectionTests
     [Test]
     public void RemoveEntitiyFromCollectionTest()
     {
-        var entity = _collection.Add(new());
+        var entity = _collection!.Add(new());
 
         Assert.That(_collection.Count, Is.EqualTo(1));
 
@@ -56,7 +56,7 @@ public class CollectionTests
     [Test]
     public void RemoveNotExistingEntityTest()
     {
-        _collection.Add(new());
+        _collection!.Add(new());
 
         Assert.That(_collection.Count, Is.EqualTo(1));
         Assert.Throws<KeyNotFoundException>(() => _collection.Remove(new FirstEntity()));
@@ -65,7 +65,7 @@ public class CollectionTests
     [Test]
     public void RemoveFromEmptyCollectionTest()
     {
-        Assert.That(_collection.Count, Is.EqualTo(0));
+        Assert.That(_collection!.Count, Is.EqualTo(0));
         Assert.Throws<KeyNotFoundException>(() => _collection.Remove(new FirstEntity()));
     }
 
@@ -73,7 +73,7 @@ public class CollectionTests
     public void GetPropertiesByEntityTest()
     {
         var value = "test";
-        var entity = _collection.Add(new() { NonNullableStringProperty = value });
+        var entity = _collection!.Add(new() { NonNullableStringProperty = value });
 
         Assert.That(_collection.Count, Is.EqualTo(1));
 
@@ -86,7 +86,7 @@ public class CollectionTests
     [Test]
     public void GetWithInvalidEntityTest()
     {
-        var entity = _collection.Add(new());
+        var entity = _collection!.Add(new());
 
         Assert.That(_collection.Count, Is.EqualTo(1));
 
@@ -99,7 +99,7 @@ public class CollectionTests
     [Test]
     public void GetFromEmptyCollectionTest()
     {
-        Assert.That(_collection.Count, Is.EqualTo(0));
+        Assert.That(_collection!.Count, Is.EqualTo(0));
         Assert.Throws<KeyNotFoundException>(() => _collection.Get(new FirstEntity()));
     }
 
@@ -109,7 +109,7 @@ public class CollectionTests
         var value = "test";
         var newValue = "new value";
 
-        var entity = _collection.Add(new() { NonNullableStringProperty = value });
+        var entity = _collection!.Add(new() { NonNullableStringProperty = value });
 
         var properties = _collection.Get(entity);
         Assert.That(properties.NonNullableStringProperty, Is.EqualTo(value));
@@ -124,7 +124,7 @@ public class CollectionTests
     [Test]
     public void ModifyNotExistingEntityTest()
     {
-        Assert.That(_collection.Count, Is.EqualTo(0));
+        Assert.That(_collection!.Count, Is.EqualTo(0));
         Assert.Throws<KeyNotFoundException>(() =>
             _collection.Modify(new FirstEntity(), p => p with { NullableStringProperty = "test" }));
     }
@@ -133,7 +133,7 @@ public class CollectionTests
     public void CopyCollectionTest()
     {
         var value = "test";
-        var entity = _collection.Add(new() { NonNullableStringProperty = value });
+        var entity = _collection!.Add(new() { NonNullableStringProperty = value });
 
         var copy = _collection.Copy();
         var copiedEntity = _collection.Single();

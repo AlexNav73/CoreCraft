@@ -19,6 +19,9 @@ public class Collection<TEntity, TProperties> : IMutableCollection<TEntity, TPro
     private readonly Func<Guid, TEntity> _entityFactory;
     private readonly Func<TProperties> _propsFactory;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public Collection(Func<Guid, TEntity> entityCreator, Func<TProperties> propsCreator)
         : this(new Dictionary<Guid, TProperties>(), entityCreator, propsCreator)
     {

@@ -14,6 +14,9 @@ public sealed class SqliteStorage : IStorage
     private readonly MigrationRunner _migrationRunner;
     private readonly IEnumerable<IModelShardStorage> _storages;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public SqliteStorage(
         IEnumerable<IMigration> migrations,
         IEnumerable<IModelShardStorage> storages)

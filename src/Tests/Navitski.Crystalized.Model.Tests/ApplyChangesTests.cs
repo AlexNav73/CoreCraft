@@ -5,8 +5,8 @@ namespace Navitski.Crystalized.Model.Tests;
 
 public class ApplyChangesTests
 {
-    private IMutableCollection<FirstEntity, FirstEntityProperties> _collection;
-    private IMutableRelation<FirstEntity, SecondEntity> _relation;
+    private IMutableCollection<FirstEntity, FirstEntityProperties>? _collection;
+    private IMutableRelation<FirstEntity, SecondEntity>? _relation;
 
     [SetUp]
     public void Setup()
@@ -24,9 +24,9 @@ public class ApplyChangesTests
 
         changes.Add(CollectionAction.Add, entity, null, props);
 
-        changes.Apply(_collection);
+        changes.Apply(_collection!);
 
-        A.CallTo(() => _collection.Add(entity, props)).MustHaveHappened();
+        A.CallTo(() => _collection!.Add(entity, props)).MustHaveHappened();
     }
 
     [Test]
@@ -38,9 +38,9 @@ public class ApplyChangesTests
 
         changes.Add(CollectionAction.Remove, entity, props, null);
 
-        changes.Apply(_collection);
+        changes.Apply(_collection!);
 
-        A.CallTo(() => _collection.Remove(entity)).MustHaveHappened();
+        A.CallTo(() => _collection!.Remove(entity)).MustHaveHappened();
     }
 
     [Test]
@@ -53,9 +53,9 @@ public class ApplyChangesTests
 
         changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
 
-        changes.Apply(_collection);
+        changes.Apply(_collection!);
 
-        A.CallTo(() => _collection.Modify(entity, A<Func<FirstEntityProperties, FirstEntityProperties>>.Ignored))
+        A.CallTo(() => _collection!.Modify(entity, A<Func<FirstEntityProperties, FirstEntityProperties>>.Ignored))
             .MustHaveHappened();
     }
 
@@ -68,9 +68,9 @@ public class ApplyChangesTests
 
         changes.Add(RelationAction.Linked, parent, child);
 
-        changes.Apply(_relation);
+        changes.Apply(_relation!);
 
-        A.CallTo(() => _relation.Add(parent, child)).MustHaveHappened();
+        A.CallTo(() => _relation!.Add(parent, child)).MustHaveHappened();
     }
 
     [Test]
@@ -82,8 +82,8 @@ public class ApplyChangesTests
 
         changes.Add(RelationAction.Unlinked, parent, child);
 
-        changes.Apply(_relation);
+        changes.Apply(_relation!);
 
-        A.CallTo(() => _relation.Remove(parent, child)).MustHaveHappened();
+        A.CallTo(() => _relation!.Remove(parent, child)).MustHaveHappened();
     }
 }

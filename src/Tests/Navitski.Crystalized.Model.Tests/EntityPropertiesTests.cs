@@ -27,8 +27,8 @@ public class EntityPropertiesTests
         var value = "abc";
 
         bag.Write(nameof(FirstEntityProperties.NonNullableStringProperty), value);
-        bag.Write<string>(nameof(FirstEntityProperties.NullableStringProperty), null);
-        bag.Write<string>(nameof(FirstEntityProperties.NullableStringWithDefaultValueProperty), null);
+        bag.Write<string>(nameof(FirstEntityProperties.NullableStringProperty), null!);
+        bag.Write<string>(nameof(FirstEntityProperties.NullableStringWithDefaultValueProperty), null!);
 
         props = (FirstEntityProperties)props.ReadFrom(bag);
 

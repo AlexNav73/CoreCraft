@@ -6,7 +6,7 @@ internal class TrackableSnapshot : Snapshot
 {
     public TrackableSnapshot(Model model) : base(model)
     {
-        Changes = new WritableModelChanges();
+        Changes = new ModelChanges();
     }
 
     public IWritableModelChanges Changes { get; }
