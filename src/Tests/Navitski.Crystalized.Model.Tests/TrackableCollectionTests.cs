@@ -1,5 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
+using System.Collections;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -30,6 +31,59 @@ public class TrackableCollectionTests
         Assert.That(change.Entity, Is.Not.Null);
         Assert.That(change.NewData, Is.Not.Null);
         Assert.That(change.OldData, Is.Null);
+    }
+
+    [Test]
+    public void TrackableAddGuidInitToCollectionTest()
+    {
+        var entityId = Guid.NewGuid();
+        A.CallTo(() => _collection!.Add(entityId, A<Func<FirstEntityProperties, FirstEntityProperties>>.Ignored)).Returns(new FirstEntity(entityId));
+        
+        _trackable!.Add(entityId, props => props);
+        var change = _changes!.Single();
+
+        A.CallTo(() => _collection!.Add(entityId, A<Func<FirstEntityProperties, FirstEntityProperties>>.Ignored)).MustHaveHappened();
+        A.CallTo(() => _collection!.Get(A<FirstEntity>.Ignored)).MustHaveHappened();
+        
+        Assert.That(_changes!.HasChanges(), Is.True);
+        Assert.That(change.Action, Is.EqualTo(CollectionAction.Add));
+        Assert.That(change.Entity.Id, Is.EqualTo(entityId));
+        Assert.That(change.NewData, Is.Not.Null);
+        Assert.That(change.OldData, Is.Null);
+    }
+
+    [Test]
+    public void TrackableAddEntityAndPropertyToCollectionTest()
+    {
+        var entity = new FirstEntity();
+        var props = new FirstEntityProperties();
+        _trackable!.Add(entity, props);
+        var change = _changes!.Single();
+
+        A.CallTo(() => _collection!.Add(entity, A<FirstEntityProperties>.Ignored)).MustHaveHappened();
+
+        Assert.That(_changes!.HasChanges(), Is.True);
+        Assert.That(change.Action, Is.EqualTo(CollectionAction.Add));
+        Assert.That(change.Entity, Is.EqualTo(entity));
+        Assert.That(change.NewData, Is.EqualTo(props));
+        Assert.That(change.OldData, Is.Null);
+    }
+
+    [Test]
+    public void TrackableCollectionCountTest()
+    {
+        A.CallTo(() => _collection!.Count).Returns(1);
+
+        Assert.That(_trackable!.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void TrackableCollectionGetTest()
+    {
+        var props = new FirstEntityProperties();
+        A.CallTo(() => _collection!.Get(A<FirstEntity>.Ignored)).Returns(props);
+
+        Assert.That(_trackable!.Get(new FirstEntity()), Is.EqualTo(props));
     }
 
     [Test]
@@ -69,5 +123,27 @@ public class TrackableCollectionTests
         Assert.That(change.Entity, Is.Not.Null);
         Assert.That(change.NewData, Is.Not.Null);
         Assert.That(change.OldData, Is.Not.Null);
+    }
+
+    [Test]
+    public void TrackableCollectionCopyTest()
+    {
+        Assert.Throws<InvalidOperationException>(() => _trackable!.Copy());
+    }
+
+    [Test]
+    public void TrackableCollectionGetEnumeratorTest()
+    {
+        var enumerator = _trackable!.GetEnumerator();
+
+        A.CallTo(() => _collection!.GetEnumerator()).MustHaveHappened();
+    }
+
+    [Test]
+    public void TrackableCollectionGetEnumerator2Test()
+    {
+        var enumerator = ((IEnumerable)_trackable!).GetEnumerator();
+
+        A.CallTo(() => _collection!.GetEnumerator()).MustHaveHappened();
     }
 }

@@ -1,5 +1,8 @@
-﻿namespace Navitski.Crystalized.Model.Engine;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Navitski.Crystalized.Model.Engine;
+
+[ExcludeFromCodeCoverage]
 internal class SequentialTaskScheduler : TaskScheduler
 {
     public static readonly SequentialTaskScheduler Instance = new SequentialTaskScheduler();

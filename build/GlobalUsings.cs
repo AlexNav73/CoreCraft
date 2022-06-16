@@ -14,3 +14,4 @@ global using static Nuke.Common.IO.PathConstruction;
 global using static Nuke.Common.Tools.DotMemoryUnit.DotMemoryUnitTasks;
 global using static Nuke.Common.Tools.DotNet.DotNetTasks;
 global using static Nuke.Common.Tools.Git.GitTasks;
+global using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;

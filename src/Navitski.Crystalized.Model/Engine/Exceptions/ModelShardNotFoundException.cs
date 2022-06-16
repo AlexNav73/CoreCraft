@@ -1,10 +1,12 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
 
 namespace Navitski.Crystalized.Model.Engine.Exceptions;
 
 /// <summary>
 ///     The exception occurred when retrieving model shard by the wrong type
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class ModelShardNotFoundException : Exception
 {
     /// <summary>

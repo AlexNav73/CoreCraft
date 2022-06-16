@@ -1,10 +1,12 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
 
 namespace Navitski.Crystalized.Model.Engine.Exceptions;
 
 /// <summary>
 ///     The exception occurred while inserting data with an existing key
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class DuplicateKeyException : Exception
 {
     /// <summary>

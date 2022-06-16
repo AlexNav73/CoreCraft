@@ -7,14 +7,14 @@ namespace build;
     GitHubActionsImage.WindowsLatest,
     OnPullRequestBranches = new[] { "master", "release/*" },
     PublishArtifacts = false,
-    AutoGenerate = true,
+    AutoGenerate = false,
     InvokedTargets = new[] { nameof(RunTests) })]
 [GitHubActions(
     "releasing",
     image: GitHubActionsImage.WindowsLatest,
     OnPushBranches = new[] { "master" },
     PublishArtifacts = true,
-    AutoGenerate = true,
+    AutoGenerate = false,
     InvokedTargets = new[] { nameof(Publish) },
     ImportSecrets = new[] { nameof(RegistryApiKey) })]
 internal partial class Build

@@ -1,4 +1,6 @@
 using Nuke.Common.CI.GitHubActions;
+using Nuke.Common.Tools.ReportGenerator;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,6 +26,7 @@ internal partial class Build : NukeBuild
 
     static AbsolutePath SourceDirectory => RootDirectory / "src";
     static AbsolutePath PackagesDirectory => RootDirectory / "packages";
+    static AbsolutePath CoverageDirectory = RootDirectory / "coverage";
 
     [CI]
     readonly GitHubActions GitHubActions;
@@ -69,9 +72,36 @@ internal partial class Build : NukeBuild
             DotMemoryUnit($"{NUnitTasks.NUnitPath} --propagate-exit-code -- {assemblyPath}");
         });
 
+    Target Coverage => _ => _
+        .Executes(() =>
+        {
+            EnsureCleanDirectory(CoverageDirectory);
+
+            DotNetTest(s => s
+                .SetProjectFile(Solution)
+                .SetConfiguration(Configuration)
+                .AddProperty("CollectCoverage", true)
+                .AddProperty("CoverletOutputFormat", "cobertura")
+                .AddProperty("CoverletOutput", CoverageDirectory + "\\")
+                .AddProperty("ExcludeByAttribute", "Obsolete")
+                .AddProperty("Exclude", $"[{Solution.Tests.Navitski_Crystalized_Model_Tests_Infrastructure.Name}]*"));
+
+            if (IsLocalBuild)
+            {
+                var reportDirectory = RootDirectory / "coveragereport";
+                EnsureCleanDirectory(reportDirectory);
+
+                ReportGenerator(s => s
+                    .SetFramework("net6.0")
+                    .SetReports(CoverageDirectory.GlobFiles("*.cobertura.xml").Select(x => x.ToString()))
+                    .SetTargetDirectory(reportDirectory)
+                    .SetReportTypes(ReportTypes.Html));
+            }
+        });
+
     Target RunTests => _ => _
         .DependsOn(Compile)
-        .Triggers(RunMemoryTests)
+        .Triggers(RunMemoryTests, Coverage)
         .Executes(() =>
         {
             DotNetTest(s => s
@@ -82,7 +112,7 @@ internal partial class Build : NukeBuild
         });
 
     Target Pack => _ => _
-        .DependsOn(Compile)
+        .DependsOn(RunTests)
         .Produces(PackagesDirectory / "*.nupkg")
         .Executes(() =>
         {

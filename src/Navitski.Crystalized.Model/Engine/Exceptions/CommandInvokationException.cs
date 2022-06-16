@@ -1,10 +1,12 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Serialization;
 
 namespace Navitski.Crystalized.Model.Engine.Exceptions;
 
 /// <summary>
 ///     The exception occurred while invoking a command
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class CommandInvokationException : Exception
 {
     /// <summary>

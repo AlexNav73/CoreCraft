@@ -1,8 +1,11 @@
-﻿namespace Navitski.Crystalized.Model.Engine;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Navitski.Crystalized.Model.Engine;
 
 /// <summary>
 ///     Schedules jobs synchronously
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class SyncScheduler : IScheduler
 {
     /// <summary>

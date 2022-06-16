@@ -1,4 +1,6 @@
 packages/
+coverage/
+coveragereport/
 **/.vscode/
 **/.vs/
 .nuke/temp/
