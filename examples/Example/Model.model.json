@@ -1,0 +1,80 @@
+﻿{
+  "shards": [
+    {
+      "name": "Example",
+      "entities": [
+        {
+          "name": "FirstEntity",
+          "properties": [
+            {
+              "name": "StringProperty",
+              "type": "string",
+              "defaultValue": "string.Empty"
+            },
+            {
+              "name": "IntegerProperty",
+              "type": "int",
+            }
+          ]
+        },
+        {
+          "name": "SecondEntity",
+          "properties": [
+            {
+              "name": "BoolProperty",
+              "type": "bool"
+            },
+            {
+              "name": "DoubleProperty",
+              "type": "double"
+            },
+            {
+              "name": "FloatProperty",
+              "type": "float"
+            }
+          ]
+        }
+      ],
+      "collections": [
+        {
+          "name": "FirstCollection",
+          "type": "FirstEntity"
+        },
+        {
+          "name": "SecondCollection",
+          "type": "SecondEntity"
+        }
+      ],
+      "relations": [
+        {
+          "name": "OneToOneRelation",
+          "parentType": "FirstEntity",
+          "childType": "SecondEntity",
+          "parentRelationType": "OneToOne",
+          "childRelationType": "OneToOne"
+        },
+        {
+          "name": "OneToManyRelation",
+          "parentType": "FirstEntity",
+          "childType": "SecondEntity",
+          "parentRelationType": "OneToMany",
+          "childRelationType": "OneToOne"
+        },
+        {
+          "name": "ManyToOneRelation",
+          "parentType": "FirstEntity",
+          "childType": "SecondEntity",
+          "parentRelationType": "OneToOne",
+          "childRelationType": "OneToMany"
+        },
+        {
+          "name": "ManyToManyRelation",
+          "parentType": "FirstEntity",
+          "childType": "SecondEntity",
+          "parentRelationType": "OneToMany",
+          "childRelationType": "OneToMany"
+        }
+      ]
+    }
+  ]
+}
