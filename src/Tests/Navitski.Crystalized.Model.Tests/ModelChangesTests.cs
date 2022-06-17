@@ -55,7 +55,7 @@ public class ModelChangesTests
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
         var value = "test";
-        var model = new Engine.Model(new[] { new FakeModelShard() });
+        var model = new Engine.Core.Model(new[] { new FakeModelShard() });
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = value });
         changesFrame.Apply(model);

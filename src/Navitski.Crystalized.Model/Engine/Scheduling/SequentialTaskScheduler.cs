@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Navitski.Crystalized.Model.Engine;
+namespace Navitski.Crystalized.Model.Engine.Scheduling;
 
 [ExcludeFromCodeCoverage]
 internal class SequentialTaskScheduler : TaskScheduler

@@ -8,7 +8,7 @@ public class ModelTests
     [Test]
     public void GetShardByTypeThrowsExceptionTest()
     {
-        var model = new Engine.Model(Array.Empty<IModelShard>());
+        var model = new Engine.Core.Model(Array.Empty<IModelShard>());
 
         Assert.Throws<ModelShardNotFoundException>(() => model.Shard<IFakeModelShard>());
     }

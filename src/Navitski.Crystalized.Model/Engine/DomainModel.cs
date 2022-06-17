@@ -2,6 +2,7 @@
 using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Exceptions;
 using Navitski.Crystalized.Model.Engine.Persistence;
+using Navitski.Crystalized.Model.Engine.Scheduling;
 
 namespace Navitski.Crystalized.Model.Engine;
 
@@ -19,17 +20,19 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
     /// <summary>
     ///     Ctor
     /// </summary>
-    protected DomainModel(IEnumerable<IModelShard> shards, ModelConfiguration configuration)
+    protected DomainModel(IEnumerable<IModelShard> shards, IScheduler scheduler)
     {
         _subscriptions = new HashSet<Action<ModelChangedEventArgs>>();
         _view = new View(shards);
-        _scheduler = configuration.Scheduler;
+        _scheduler = scheduler;
     }
 
     /// <summary>
     ///     Raised after all subscribers handled changes
     /// </summary>
-    public event EventHandler<ModelChangedEventArgs>? ModelChanged;
+    protected virtual void OnModelChanged(ModelChangedEventArgs args)
+    {
+    }
 
     /// <inheritdoc cref="IModelShardAccessor.Shard{T}"/>
     public T Shard<T>() where T : IModelShard
@@ -40,11 +43,12 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
     /// <inheritdoc cref="IDomainModel.Subscribe(Action{ModelChangedEventArgs})"/>
     public IDisposable Subscribe(Action<ModelChangedEventArgs> onModelChanges)
     {
-        if (!_subscriptions.Contains(onModelChanges))
+        if (_subscriptions.Contains(onModelChanges))
         {
-            _subscriptions.Add(onModelChanges);
+            throw new SubscriptionAlreadyExistsException("Subscription already exists");
         }
 
+        _subscriptions.Add(onModelChanges);
         if (_currentChanges != null)
         {
             onModelChanges(_currentChanges);
@@ -61,7 +65,7 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
     /// <param name="changes">A list of changes</param>
     /// <param name="token">Cancellation token</param>
     /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
-    public Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
+    protected Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
     {
         var copy = _view.CopyModel();
 
@@ -82,7 +86,7 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
     /// <param name="path">A path to a file</param>
     /// <param name="token">Cancellation token</param>
     /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
-    public Task Save(IStorage storage, string path, CancellationToken token = default)
+    protected Task Save(IStorage storage, string path, CancellationToken token = default)
     {
         var copy = _view.CopyModel();
 
@@ -103,7 +107,7 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
     /// <param name="path">A path to a file</param>
     /// <param name="token">Cancellation token</param>
     /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model</exception>
-    public async Task Load(IStorage storage, string path, CancellationToken token = default)
+    protected async Task Load(IStorage storage, string path, CancellationToken token = default)
     {
         var snapshot = _view.CreateTrackableSnapshot();
 
@@ -131,7 +135,7 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
     /// <param name="changes">Changes to apply</param>
     /// <param name="token">Cancellation token</param>
     /// <exception cref="ApplyModelChangesException">Throws when an error occurred while applying changes to the model</exception>
-    public async Task Apply(IWritableModelChanges changes, CancellationToken token = default)
+    protected async Task Apply(IWritableModelChanges changes, CancellationToken token = default)
     {
         if (changes.HasChanges())
         {
@@ -172,7 +176,7 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
             var eventArgs = CreateModelChangesEventArgs(result);
             
             NotifySubscribers(eventArgs);
-            RaiseEvent(eventArgs);
+            OnModelChanged(eventArgs);
         }
     }
 
@@ -187,11 +191,6 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         }
 
         _currentChanges = null;
-    }
-
-    private void RaiseEvent(ModelChangedEventArgs eventArgs)
-    {
-        ModelChanged?.Invoke(this, eventArgs);
     }
 
     private static ModelChangedEventArgs CreateModelChangesEventArgs(ModelChangeResult result)

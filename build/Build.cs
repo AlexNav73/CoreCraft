@@ -58,7 +58,7 @@ internal partial class Build : NukeBuild
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .EnableNoRestore());
+                .SetNoRestore(SucceededTargets.Contains(Restore)));
         });
 
     Target RunMemoryTests => _ => _
@@ -72,7 +72,9 @@ internal partial class Build : NukeBuild
             DotMemoryUnit($"{NUnitTasks.NUnitPath} --propagate-exit-code -- {assemblyPath}");
         });
 
-    Target Coverage => _ => _
+    Target RunTests => _ => _
+        .DependsOn(Compile)
+        .Triggers(RunMemoryTests, Coverage)
         .Executes(() =>
         {
             EnsureCleanDirectory(CoverageDirectory);
@@ -80,35 +82,30 @@ internal partial class Build : NukeBuild
             DotNetTest(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
+                .SetNoBuild(SucceededTargets.Contains(Compile))
+                .SetNoRestore(SucceededTargets.Contains(Restore))
                 .AddProperty("CollectCoverage", true)
-                .AddProperty("CoverletOutputFormat", "cobertura")
+                .AddProperty("CoverletOutputFormat", "\\\"cobertura,json\\\"")
                 .AddProperty("CoverletOutput", CoverageDirectory + "\\")
-                .AddProperty("ExcludeByAttribute", "Obsolete")
-                .AddProperty("Exclude", $"[{Solution.Tests.Navitski_Crystalized_Model_Tests_Infrastructure.Name}]*"));
-
-            if (IsLocalBuild)
-            {
-                var reportDirectory = RootDirectory / "coveragereport";
-                EnsureCleanDirectory(reportDirectory);
-
-                ReportGenerator(s => s
-                    .SetFramework("net6.0")
-                    .SetReports(CoverageDirectory.GlobFiles("*.cobertura.xml").Select(x => x.ToString()))
-                    .SetTargetDirectory(reportDirectory)
-                    .SetReportTypes(ReportTypes.Html));
-            }
+                .AddProperty("ExcludeByAttribute", "\\\"Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute\\\"")
+                .AddProperty("Exclude", $"[{Solution.Tests.Navitski_Crystalized_Model_Tests_Infrastructure.Name}]*")
+                .AddProperty("MergeWith", CoverageDirectory / "coverage.json")
+                .SetProcessArgumentConfigurator(c => c.Add("-m:1")));
         });
 
-    Target RunTests => _ => _
-        .DependsOn(Compile)
-        .Triggers(RunMemoryTests, Coverage)
+    Target Coverage => _ => _
+        .DependsOn(RunTests)
+        .OnlyWhenStatic(() => IsLocalBuild)
         .Executes(() =>
         {
-            DotNetTest(s => s
-                .SetProjectFile(Solution)
-                .SetConfiguration(Configuration)
-                .EnableNoBuild()
-                .EnableNoRestore());
+            var reportDirectory = RootDirectory / "coveragereport";
+            EnsureCleanDirectory(reportDirectory);
+
+            ReportGenerator(s => s
+                .SetFramework("net6.0")
+                .SetReports(CoverageDirectory.GlobFiles("*.cobertura.xml").Select(x => x.ToString()))
+                .SetTargetDirectory(reportDirectory)
+                .SetReportTypes(ReportTypes.Html));
         });
 
     Target Pack => _ => _

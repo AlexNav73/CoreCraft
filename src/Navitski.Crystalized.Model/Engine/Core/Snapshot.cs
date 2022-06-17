@@ -1,4 +1,4 @@
-﻿namespace Navitski.Crystalized.Model.Engine;
+﻿namespace Navitski.Crystalized.Model.Engine.Core;
 
 internal class Snapshot : IModel
 {

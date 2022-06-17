@@ -1,6 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 
-namespace Navitski.Crystalized.Model.Engine;
+namespace Navitski.Crystalized.Model.Engine.Core;
 
 /// <summary>
 ///     A model changes args passed to the subscribers of the model

@@ -36,6 +36,6 @@ public class MemoryUsageTests
         });
 
         // assertion prevents model from been deleted by GC before dotMemory.Check call
-        Assert.That(model.History.UndoStack.Count, Is.EqualTo(2));
+        Assert.That(model.UndoStack.Count, Is.EqualTo(2));
     }
 }

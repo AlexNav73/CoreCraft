@@ -1,6 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 
-namespace Navitski.Crystalized.Model.Engine;
+namespace Navitski.Crystalized.Model.Engine.Core;
 
 internal sealed class View
 {

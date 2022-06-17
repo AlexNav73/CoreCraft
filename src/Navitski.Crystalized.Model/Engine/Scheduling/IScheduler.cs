@@ -1,4 +1,4 @@
-﻿namespace Navitski.Crystalized.Model.Engine;
+﻿namespace Navitski.Crystalized.Model.Engine.Scheduling;
 
 /// <summary>
 ///     A scheduler is a logic which decides how to schedule jobs (for example synchronously or asynchronously)
@@ -28,11 +28,11 @@ public interface IScheduler
 
     /// <summary>
     ///     Runs the job in parallel to the execution of jobs,
-    ///     scheduled by <see cref="IScheduler.Enqueue(Action, CancellationToken)"/> method
+    ///     scheduled by <see cref="Enqueue(Action, CancellationToken)"/> method
     /// </summary>
     /// <remarks>
     ///     This method is used for jobs which don't break consistency of the model
-    ///     if they will run in parallel to the jobs scheduled by <see cref="IScheduler.Enqueue(Action, CancellationToken)"/> method
+    ///     if they will run in parallel to the jobs scheduled by <see cref="Enqueue(Action, CancellationToken)"/> method
     /// </remarks>
     /// <param name="job">A job to run</param>
     /// <param name="token">Cancellation token</param>

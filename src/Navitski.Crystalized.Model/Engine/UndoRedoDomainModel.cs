@@ -1,25 +1,14 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Exceptions;
 using Navitski.Crystalized.Model.Engine.Persistence;
+using Navitski.Crystalized.Model.Engine.Scheduling;
 
-namespace Navitski.Crystalized.Model.Engine.History;
+namespace Navitski.Crystalized.Model.Engine;
 
 /// <summary>
-///     A history which can track all changes happened with the model.
+///     A domain model which can track all changes happened and provides undo/redo support.
 /// </summary>
-/// <remarks>
-///     Each time model changes, a new change is written to the history.
-///     Current implementation of a history supports undo/redo stacks and
-///     save/load of the model. History is automatically subscribes to the model
-///     changes and receives them without any additional work to do. Each time
-///     history receive new changes, it writes them to the undo stack. This
-///     changes can be popped from the undo stack, inverted and applied to the model
-///     reverting the model to the previous version. Next, this changes are placed
-///     to the redo stack and can be redone.
-/// </remarks>
-public sealed class ManualSaveHistory : DisposableBase
+public class UndoRedoDomainModel : DomainModel
 {
-    private readonly DomainModel _model;
     private readonly IStorage _storage;
     private readonly Stack<IWritableModelChanges> _undoStack;
     private readonly Stack<IWritableModelChanges> _redoStack;
@@ -27,15 +16,16 @@ public sealed class ManualSaveHistory : DisposableBase
     /// <summary>
     ///     Ctor
     /// </summary>
-    public ManualSaveHistory(DomainModel model, IStorage storage)
+    public UndoRedoDomainModel(
+        IEnumerable<IModelShard> modelShards,
+        IScheduler scheduler,
+        IStorage storage)
+        : base(modelShards, scheduler)
     {
-        _model = model;
         _storage = storage;
 
         _undoStack = new Stack<IWritableModelChanges>();
         _redoStack = new Stack<IWritableModelChanges>();
-
-        _model.ModelChanged += OnModelChanged;
     }
 
     /// <summary>
@@ -53,7 +43,7 @@ public sealed class ManualSaveHistory : DisposableBase
 
         if (changes.Any())
         {
-            await _model.Save(_storage, path, changes);
+            await Save(_storage, path, changes);
 
             // TODO(#8): saving operation executes in thread pool
             // and launched by 'async void' methods. If two
@@ -73,7 +63,7 @@ public sealed class ManualSaveHistory : DisposableBase
     /// <param name="path">A path to a file</param>
     public async Task SaveAs(string path)
     {
-        await _model.Save(_storage, path);
+        await Save(_storage, path);
 
         // TODO(#8): saving operation executes in thread pool
         // and launched by 'async void' methods. If two
@@ -92,7 +82,7 @@ public sealed class ManualSaveHistory : DisposableBase
     /// <param name="path">A path to a file</param>
     public async Task Load(string path)
     {
-        await _model.Load(_storage, path);
+        await Load(_storage, path);
     }
 
     /// <summary>
@@ -104,7 +94,7 @@ public sealed class ManualSaveHistory : DisposableBase
         {
             var changes = _undoStack.Pop();
             _redoStack.Push(changes);
-            await _model.Apply(changes.Invert());
+            await Apply(changes.Invert());
 
             Changed?.Invoke(this, EventArgs.Empty);
         }
@@ -119,7 +109,7 @@ public sealed class ManualSaveHistory : DisposableBase
         {
             var changes = _redoStack.Pop();
             _undoStack.Push(changes);
-            await _model.Apply(changes);
+            await Apply(changes);
 
             Changed?.Invoke(this, EventArgs.Empty);
         }
@@ -134,15 +124,10 @@ public sealed class ManualSaveHistory : DisposableBase
         return _undoStack.Count > 0;
     }
 
-    private void OnModelChanged(object? sender, ModelChangedEventArgs args)
+    /// <inheritdoc/>
+    protected override void OnModelChanged(ModelChangedEventArgs args)
     {
         _undoStack.Push((IWritableModelChanges)args.Changes);
         Changed?.Invoke(this, EventArgs.Empty);
-    }
-
-    /// <inheritdoc/>
-    protected override void DisposeManagedObjects()
-    {
-        _model.ModelChanged -= OnModelChanged;
     }
 }

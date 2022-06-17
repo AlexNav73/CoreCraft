@@ -1,6 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.Exceptions;
 
-namespace Navitski.Crystalized.Model.Engine;
+namespace Navitski.Crystalized.Model.Engine.Core;
 
 internal class Model : IModel
 {

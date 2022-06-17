@@ -1,10 +1,8 @@
-﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-
-namespace Navitski.Crystalized.Model.Engine;
+﻿namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 internal class TrackableSnapshot : Snapshot
 {
-    public TrackableSnapshot(Model model) : base(model)
+    public TrackableSnapshot(Core.Model model) : base(model)
     {
         Changes = new ModelChanges();
     }

@@ -1,4 +1,4 @@
-﻿namespace Navitski.Crystalized.Model.Engine;
+﻿namespace Navitski.Crystalized.Model.Engine.Core;
 
 /// <summary>
 ///     A collection of model shards
