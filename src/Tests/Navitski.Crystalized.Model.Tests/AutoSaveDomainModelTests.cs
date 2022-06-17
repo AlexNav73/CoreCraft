@@ -24,7 +24,7 @@ public class AutoSaveDomainModelTests
 
         command.Execute();
 
-        A.CallTo(() => storage.Migrate(path, A<IModel>.Ignored, A<IReadOnlyList<IModelChanges>>.Ignored))
+        A.CallTo(() => storage.Migrate(path, A<IModel>.Ignored, A<IEnumerable<IModelChanges>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 }

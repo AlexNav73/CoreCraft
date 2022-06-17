@@ -58,7 +58,7 @@ public class DomainModelTests
     public void SaveChangesThrowsExceptionTest()
     {
         var storage = A.Fake<IStorage>();
-        A.CallTo(() => storage.Migrate(A<string>.Ignored, A<IModel>.Ignored, A<IReadOnlyList<IModelChanges>>.Ignored))
+        A.CallTo(() => storage.Migrate(A<string>.Ignored, A<IModel>.Ignored, A<IEnumerable<IModelChanges>>.Ignored))
             .Throws<InvalidOperationException>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
         
@@ -95,7 +95,7 @@ public class DomainModelTests
             _storage = storage;
         }
 
-        public async Task Save(string path, IReadOnlyList<IModelChanges> changes)
+        public async Task Save(string path, IEnumerable<IModelChanges> changes)
         {
             await Save(_storage, path, changes);
         }

@@ -28,8 +28,8 @@ public sealed class SqliteStorage : IStorage
         _sqliteRepositoryFactory = sqliteRepositoryFactory;
     }
 
-    /// <inheritdoc cref="IStorage.Migrate(string, IModel, IReadOnlyList{IModelChanges})"/>
-    public void Migrate(string path, IModel model, IReadOnlyList<IModelChanges> changes)
+    /// <inheritdoc cref="IStorage.Migrate(string, IModel, IEnumerable{IModelChanges})"/>
+    public void Migrate(string path, IModel model, IEnumerable<IModelChanges> changes)
     {
         ISqliteRepository? repository = null;
         IDbTransaction? transaction = null;
@@ -39,11 +39,11 @@ public sealed class SqliteStorage : IStorage
             repository = _sqliteRepositoryFactory.Create(path);
             transaction = repository.BeginTransaction();
 
-            for (var i = 0; i < changes.Count; i++)
+            foreach (var change in changes)
             {
                 foreach (var storage in _storages)
                 {
-                    storage.Migrate(repository, model, changes[i]);
+                    storage.Migrate(repository, model, change);
                 }
             }
 
