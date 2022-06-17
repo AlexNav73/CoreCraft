@@ -2,9 +2,9 @@
 
 internal class SqliteMigrator : IMigrator
 {
-    private readonly SqliteRepository _repository;
+    private readonly ISqliteRepository _repository;
 
-    public SqliteMigrator(SqliteRepository repository)
+    public SqliteMigrator(ISqliteRepository repository)
     {
         _repository = repository;
     }

@@ -1,11 +1,11 @@
-﻿using System.Data.Common;
+﻿using System.Data;
 using Microsoft.Data.Sqlite;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
 
 namespace Navitski.Crystalized.Model.Storage.Sqlite;
 
-internal class SqliteRepository : DisposableBase, IRepository
+internal class SqliteRepository : DisposableBase, ISqliteRepository
 {
     private SqliteConnection _connection;
 
@@ -15,7 +15,7 @@ internal class SqliteRepository : DisposableBase, IRepository
         _connection.Open();
     }
 
-    public DbTransaction BeginTransaction()
+    public IDbTransaction BeginTransaction()
     {
         return _connection.BeginTransaction();
     }
@@ -41,10 +41,10 @@ internal class SqliteRepository : DisposableBase, IRepository
         command.ExecuteNonQuery();
     }
 
-    public void ExecuteNonQuery(string commandText)
+    public void ExecuteNonQuery(string query)
     {
         using var command = _connection.CreateCommand();
-        command.CommandText = commandText;
+        command.CommandText = query;
         command.ExecuteNonQuery();
     }
 

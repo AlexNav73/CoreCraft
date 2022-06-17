@@ -1,23 +1,23 @@
-﻿using System.Data.Common;
+﻿using System.Data;
 
 namespace Navitski.Crystalized.Model.Storage.Sqlite.Migrations;
 
 internal sealed class MigrationRunner
 {
-    private readonly IEnumerable<IMigration> _migrations;
+    private readonly IReadOnlyList<IMigration> _migrations;
 
     public MigrationRunner(IEnumerable<IMigration> migrations)
     {
-        _migrations = migrations.OrderBy(x => x.Version);
+        _migrations = migrations.OrderBy(x => x.Version).ToArray();
     }
 
-    public void Run(SqliteRepository repository)
+    public void Run(ISqliteRepository repository)
     {
         var version = repository.GetDatabaseVersion();
 
         foreach (var migration in _migrations.Where(x => x.Version > version))
         {
-            DbTransaction? transaction = null;
+            IDbTransaction? transaction = null;
             try
             {
                 transaction = repository.BeginTransaction();
@@ -40,11 +40,11 @@ internal sealed class MigrationRunner
         }
     }
 
-    public void UpdateDatabaseVersion(SqliteRepository repository)
+    public void UpdateDatabaseVersion(ISqliteRepository repository)
     {
-        var lastMigration = _migrations.LastOrDefault();
-        if (lastMigration != null)
+        if (_migrations.Any())
         {
+            var lastMigration = _migrations[_migrations.Count - 1];
             repository.SetDatabaseVersion(lastMigration.Version);
         }
     }

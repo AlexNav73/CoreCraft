@@ -1,8 +1,8 @@
-﻿using Navitski.Crystalized.Model.Engine;
-using Navitski.Crystalized.Model.Engine.ChangesTracking;
+﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Storage.Sqlite.Migrations;
-using System.Data.Common;
+using System.Data;
 
 namespace Navitski.Crystalized.Model.Storage.Sqlite;
 
@@ -13,27 +13,30 @@ public sealed class SqliteStorage : IStorage
 {
     private readonly MigrationRunner _migrationRunner;
     private readonly IEnumerable<IModelShardStorage> _storages;
+    private readonly ISqliteRepositoryFactory _sqliteRepositoryFactory;
 
     /// <summary>
     ///     Ctor
     /// </summary>
     public SqliteStorage(
         IEnumerable<IMigration> migrations,
-        IEnumerable<IModelShardStorage> storages)
+        IEnumerable<IModelShardStorage> storages,
+        ISqliteRepositoryFactory sqliteRepositoryFactory)
     {
         _migrationRunner = new MigrationRunner(migrations);
         _storages = storages;
+        _sqliteRepositoryFactory = sqliteRepositoryFactory;
     }
 
     /// <inheritdoc cref="IStorage.Migrate(string, IModel, IReadOnlyList{IModelChanges})"/>
     public void Migrate(string path, IModel model, IReadOnlyList<IModelChanges> changes)
     {
-        SqliteRepository? repository = null;
-        DbTransaction? transaction = null;
+        ISqliteRepository? repository = null;
+        IDbTransaction? transaction = null;
 
         try
         {
-            repository = new SqliteRepository(path);
+            repository = _sqliteRepositoryFactory.Create(path);
             transaction = repository.BeginTransaction();
 
             for (var i = 0; i < changes.Count; i++)
@@ -61,12 +64,12 @@ public sealed class SqliteStorage : IStorage
     /// <inheritdoc cref="IStorage.Save(string, IModel)"/>
     public void Save(string path, IModel model)
     {
-        SqliteRepository? repository = null;
-        DbTransaction? transaction = null;
+        ISqliteRepository? repository = null;
+        IDbTransaction? transaction = null;
 
         try
         {
-            repository = new SqliteRepository(path);
+            repository = _sqliteRepositoryFactory.Create(path);
             transaction = repository.BeginTransaction();
 
             _migrationRunner.UpdateDatabaseVersion(repository);
@@ -93,12 +96,7 @@ public sealed class SqliteStorage : IStorage
     /// <inheritdoc cref="IStorage.Load(string, IModel)"/>
     public void Load(string path, IModel model)
     {
-        if (!File.Exists(path))
-        {
-            return;
-        }
-
-        using var repository = new SqliteRepository(path);
+        using var repository = _sqliteRepositoryFactory.Create(path);
 
         _migrationRunner.Run(repository);
 
