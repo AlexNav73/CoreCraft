@@ -22,7 +22,7 @@ public interface IModelChanges
     /// <typeparam name="T">Expected type of <see cref="IChangesFrame"/></typeparam>
     /// <param name="frame">An instance of a changes frame with a specific type</param>
     /// <returns>True - if changes frame is found and matches the given type</returns>
-    bool TryGetFrame<T>(out T? frame)
+    bool TryGetFrame<T>(out T frame)
         where T : class, IChangesFrame;
 
     /// <summary>

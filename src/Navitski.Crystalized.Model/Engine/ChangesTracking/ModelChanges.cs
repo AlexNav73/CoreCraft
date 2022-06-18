@@ -15,10 +15,10 @@ internal sealed class ModelChanges : IWritableModelChanges
     }
 
     /// <inheritdoc />
-    public bool TryGetFrame<T>(out T? frame)
+    public bool TryGetFrame<T>(out T frame)
         where T : class, IChangesFrame
     {
-        frame = _frames.OfType<T>().SingleOrDefault();
+        frame = _frames.OfType<T>().SingleOrDefault()!;
 
         return frame != null;
     }
