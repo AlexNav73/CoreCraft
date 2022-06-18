@@ -116,16 +116,19 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model)
                 .Apply(PackSettingsBase)
+                .SetDescription("A core library to build cross-platform, highly customizable domain models")
                 .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model_Generators)
                 .Apply(PackSettingsBase)
+                .SetDescription("Roslyn Source Generators for generating domain models using 'Navitski.Crystalized.Model' library")
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
-                .Apply(PackSettingsBase)
                 .SetProject(Solution.Navitski_Crystalized_Model_Storage_Sqlite)
+                .Apply(PackSettingsBase)
+                .SetDescription("SQLite storage implementation for 'Navitski.Crystalized.Model' library")
                 .AddPackageTags("Model", "Domain", "SQLite"));
 
             ReportSummary(_ => _
@@ -135,9 +138,14 @@ internal partial class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .SetNoRestore(SucceededTargets.Contains(Restore))
                 .SetNoBuild(SucceededTargets.Contains(Compile))
-                .AddAuthors("Alexandr Navitskiy")
+                .AddAuthors("Aliaksandr Navitski")
+                .SetCopyright("Copyright (c) Aliaksandr Navitski 2022.")
+                .SetPackageProjectUrl(GitRepository.HttpsUrl)
                 .SetRepositoryUrl(GitRepository.HttpsUrl)
-                .SetOutputDirectory(PackagesDirectory);
+                .SetOutputDirectory(PackagesDirectory)
+                .SetRepositoryType("git")
+                .EnablePackageRequireLicenseAcceptance()
+                .SetPackageLicenseUrl("https://github.com/AlexNav73/Navitski.Crystalized/blob/master/LICENSE.md");
         });
 
     Target Publish => _ => _

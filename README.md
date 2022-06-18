@@ -3,7 +3,7 @@
 
 ## 📖 About
 
-`Navitski.Crystalized` is a set of cross-platform libraries which helps to build your own domain model. Think of it as a in-memory database which provides some interesting features like: precise diffing, undo/redo support, persisting to the file (for now only SQLite database is supported), changes notifications and code generation!
+`Navitski.Crystalized` is a set of cross-platform libraries which helps in building of your own domain model. Think of it as a in-memory database which provides some interesting features like: precise diffing, undo/redo support, persisting to the file (for now only SQLite database is supported), changes notifications and code generation!
 
 Using the simple json configuration, the `Navitski.Crystalized.Model.Generators` can generate a new domain model for you with all entities, relations, persistence infrastructure and changes handling. All you need to do is start implementing your business logic everything else will be generated for you. `Navitski.Crystalized.Model.Generators` is using brand new Roslyn Source Generators and targeting _.NET Standart 2.0_, so it can be used in old .NET Framework applications.
 
