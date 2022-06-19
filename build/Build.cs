@@ -144,8 +144,7 @@ internal partial class Build : NukeBuild
                 .SetRepositoryUrl(GitRepository.HttpsUrl)
                 .SetOutputDirectory(PackagesDirectory)
                 .SetRepositoryType("git")
-                .EnablePackageRequireLicenseAcceptance()
-                .SetPackageLicenseUrl("https://github.com/AlexNav73/Navitski.Crystalized/blob/master/LICENSE.md");
+                .EnablePackageRequireLicenseAcceptance();
         });
 
     Target Publish => _ => _
