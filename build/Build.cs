@@ -116,7 +116,7 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model)
                 .Apply(PackSettingsBase)
-                .SetDescription("A core library to build cross-platform, highly customizable domain models")
+                .SetDescription("A core library to build cross-platform and highly customizable domain models")
                 .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
