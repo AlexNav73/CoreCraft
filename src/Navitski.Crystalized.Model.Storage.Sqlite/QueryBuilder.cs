@@ -45,9 +45,17 @@ internal static class QueryBuilder
             var builder = new StringBuilder();
 
             builder.AppendFormat("INSERT INTO [{0}] ([Id], ", name)
+#if NET5_0_OR_GREATER
                 .AppendJoin(", ", scheme.Properties.Select(x => $"[{x.Name}]"))
+#else
+                .Append(string.Join(", ", scheme.Properties.Select(x => $"[{x.Name}]")))
+#endif
                 .Append(") VALUES ($Id, ")
+#if NET5_0_OR_GREATER
                 .AppendJoin(", ", scheme.Properties.Select(x => $"${x.Name}"))
+#else
+                .Append(string.Join(", ", scheme.Properties.Select(x => $"${x.Name}")))
+#endif
                 .Append(");");
 
             return builder.ToString();
@@ -58,7 +66,11 @@ internal static class QueryBuilder
             var builder = new StringBuilder();
 
             builder.AppendFormat("UPDATE [{0}] SET ", name)
+#if NET5_0_OR_GREATER
                 .AppendJoin(", ", scheme.Properties.Select(x => $"[{x.Name}] = ${x.Name}"))
+#else
+                .Append(string.Join(", ", scheme.Properties.Select(x => $"[{x.Name}] = ${x.Name}")))
+#endif
                 .Append(" WHERE [Id] = $Id;");
 
             return builder.ToString();
@@ -74,7 +86,11 @@ internal static class QueryBuilder
             var builder = new StringBuilder();
 
             builder.Append("SELECT [Id], ")
+#if NET5_0_OR_GREATER
                 .AppendJoin(", ", scheme.Properties.Select(x => $"[{x.Name}]"))
+#else
+                .Append(string.Join(", ", scheme.Properties.Select(x => $"[{x.Name}]")))
+#endif
                 .AppendFormat(" FROM [{0}];", name);
 
             return builder.ToString();
