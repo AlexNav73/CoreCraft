@@ -1,7 +1,10 @@
 ﻿using Navitski.Crystalized.Model.Engine;
 using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Core;
+using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
+using Navitski.Crystalized.Model.Storage.Sqlite;
+using Navitski.Crystalized.Model.Storage.Sqlite.Migrations;
 
 namespace Example;
 
@@ -30,6 +33,7 @@ class Program
             deleteCommand.Entity.Set(entity);
             deleteCommand.Execute();
         }
+        model.Save("test.db");
     }
 
     private static void OnModelChanged(ModelChangedEventArgs args)
@@ -49,9 +53,25 @@ class Program
 
 class MyModel : DomainModel
 {
+    private readonly IStorage _storage;
+
     public MyModel(IEnumerable<IModelShard> shards)
         : base(shards, new SyncScheduler())
     {
+        _storage = new SqliteStorage(
+            Array.Empty<IMigration>(),
+            new[] { new Model.ExampleModelShardStorage() },
+            new SqliteRepositoryFactory());
+    }
+
+    public void Save(string path)
+    {
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        Save(_storage, path);
     }
 }
 

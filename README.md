@@ -145,7 +145,10 @@ private static void OnModelChanged(ModelChangedEventArgs args)
 
 When we setup everything, we can execute our command:
 ```cs
-new MyAddCommand(model).Execute();
+using (model.Subscribe(OnModelChanged))
+{
+    new MyAddCommand(model).Execute();
+}
 ```
 
 The result of the execution will be printed on the console:
@@ -153,4 +156,73 @@ The result of the execution will be printed on the console:
 Entity [MyEntity { Id = 262485ee-3426-4da6-96d5-f65976e7fe9e }] has been Added.
    Old data:
    New data: MyEntityProperties { MyProperty = test }
+```
+
+### Store data in the SQLite database
+
+To store model data in the SQLite database, the `Navitski.Crystalized.Model.Storage.Sqlite` package can be used.
+
+```
+dotnet add package Navitski.Crystalized.Model.Storage.Sqlite
+```
+
+When we have added this package we can then implement a save method for the model class:
+
+```cs
+// the "DomainModel" base class provides couple of methods to save and load data.
+class MyModel : DomainModel
+{
+    // "IStorage" interface comes from "Navitski.Crystalized.Model" package
+    // and everybody can implement it co store data in a suitable way.
+    // Out-of-the-box only SQLite is supported.
+    private readonly IStorage _storage;
+
+    public MyModel(IEnumerable<IModelShard> shards)
+        : base(shards, new SyncScheduler())
+    {
+        _storage = new SqliteStorage(
+            // To create a SQLite storage, we need to provide a collection
+            // of migrations (each database store the latest version so it will
+            // execute only those migrations that are needed).
+            Array.Empty<IMigration>(),
+            // Also, we need to provide model shard storages which are generated
+            // automatically for each shard. Storages know, how to store a specific
+            // model shard.
+            new[] { new Model.ExampleModelShardStorage() },
+            // Repository factory is needed to create a new repository instance
+            // when we have a path to the file
+            new SqliteRepositoryFactory());
+    }
+
+    public void Save(string path)
+    {
+        // base Save method writes all the data to the file.
+        // We don't want to corrupt the data so we delete the old
+        // file before we save all the data again 
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        // in these case, we call base Save method to save whole
+        // data to the file. If we want to save only changes, then we need
+        // to call another Save overload which accepts a collection of IModelChanges.
+        Save(_storage, path);
+    }
+}
+```
+
+Now, we are ready to save our model.
+
+```cs
+var model = new MyModel(new[]
+{
+    new Model.ExampleModelShard()
+});
+using (model.Subscribe(OnModelChanged))
+{
+    // executing some commands ...
+}
+// save all data to the file
+model.Save("test.db");
 ```
