@@ -12,7 +12,7 @@
 ///     be red from the properties bag, but converting the property value to a specific type
 ///     should be done manually (for example using <see cref="Convert.ChangeType(object?, Type)"/>).
 /// </remarks>
-public interface IPropertiesBag : IEnumerable<KeyValuePair<string, object>>
+public interface IPropertiesBag : IEnumerable<KeyValuePair<string, object?>>
 {
     /// <summary>
     ///     Writes a property name - value pair to the bag.

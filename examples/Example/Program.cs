@@ -1,4 +1,5 @@
 ﻿using Navitski.Crystalized.Model.Engine;
+using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
@@ -10,30 +11,50 @@ namespace Example;
 
 class Program
 {
+    private const string Path = "test.db";
+
     public static void Main()
     {
+        if (File.Exists(Path))
+        {
+            File.Delete(Path);
+        }
+
         var model = new MyModel(new[]
         {
             new Model.ExampleModelShard()
         });
         using (model.Subscribe(OnModelChanged))
         {
-            var addCommand = new MyAddCommand(model);
-            addCommand.Count.Set(2);
+            var addCommand = new DelegateCommand(model, shard =>
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    var first = shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
+                    var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5 });
+
+                    shard.OneToOneRelation.Add(first, second);
+                }
+            });
             addCommand.Execute();
 
             var shard = model.Shard<Model.IExampleModelShard>();
-            var entity = shard.FirstCollection.First();
 
-            var modifyCommand = new MyModifyCommand(model);
-            modifyCommand.Entity.Set(entity);
+            var modifyCommand = new DelegateCommand(model, shard =>
+            {
+                var entity = shard.FirstCollection.First();
+
+                shard.FirstCollection.Modify(entity, props => props with { StringProperty = "modified 1" });
+                shard.FirstCollection.Modify(entity, props => props with { IntegerProperty = "modified 2".GetHashCode() });
+                shard.FirstCollection.Modify(entity, props => props with { StringProperty = "modified 3", IntegerProperty = "modified 3".GetHashCode() });
+            });
             modifyCommand.Execute();
 
-            var deleteCommand = new MyDeleteCommand(model);
-            deleteCommand.Entity.Set(entity);
+            var deleteCommand = new DelegateCommand(model, shard => shard.FirstCollection.Remove(shard.FirstCollection.Last()));
             deleteCommand.Execute();
         }
-        model.Save("test.db");
+
+        model.Save(Path);
     }
 
     private static void OnModelChanged(ModelChangedEventArgs args)
@@ -54,6 +75,7 @@ class Program
 class MyModel : DomainModel
 {
     private readonly IStorage _storage;
+    private readonly IList<IModelChanges> _changes;
 
     public MyModel(IEnumerable<IModelShard> shards)
         : base(shards, new SyncScheduler())
@@ -62,9 +84,10 @@ class MyModel : DomainModel
             Array.Empty<IMigration>(),
             new[] { new Model.ExampleModelShardStorage() },
             new SqliteRepositoryFactory());
+        _changes = new List<IModelChanges>();
     }
 
-    public void Save(string path)
+    public void SaveAs(string path)
     {
         if (File.Exists(path))
         {
@@ -73,64 +96,31 @@ class MyModel : DomainModel
 
         Save(_storage, path);
     }
-}
 
-class MyAddCommand : ModelCommand<MyModel>
-{
-    public MyAddCommand(MyModel model)
-        : base(model)
+    public void Save(string path)
     {
-        Count = Parameter<int>(nameof(Count));
+        Save(_storage, path, _changes);
+        _changes.Clear();
     }
 
-    public ICommandParameter<int> Count { get; }
-
-    protected override void ExecuteInternal(IModel model, CancellationToken token)
+    protected override void OnModelChanged(ModelChangedEventArgs args)
     {
-        var shard = model.Shard<Model.IMutableExampleModelShard>();
-
-        for (int i = 0; i < Count.Value; i++)
-        {
-            var first = shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
-            var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5 });
-
-            shard.OneToOneRelation.Add(first, second);
-        }
+        _changes.Add(args.Changes);
     }
 }
 
-class MyModifyCommand : ModelCommand<MyModel>
+class DelegateCommand : ModelCommand<MyModel>
 {
-    public MyModifyCommand(MyModel model)
+    private readonly Action<Model.IMutableExampleModelShard> _action;
+
+    public DelegateCommand(MyModel model, Action<Model.IMutableExampleModelShard> action)
         : base(model)
     {
-        Entity = Parameter<Model.Entities.FirstEntity>(nameof(Entity));
+        _action = action;
     }
-
-    public ICommandParameter<Model.Entities.FirstEntity> Entity { get; }
 
     protected override void ExecuteInternal(IModel model, CancellationToken token)
     {
-        var shard = model.Shard<Model.IMutableExampleModelShard>();
-
-        shard.FirstCollection.Modify(Entity.Value, props => props with { StringProperty = "modified" });
-    }
-}
-
-class MyDeleteCommand : ModelCommand<MyModel>
-{
-    public MyDeleteCommand(MyModel model)
-        : base(model)
-    {
-        Entity = Parameter<Model.Entities.FirstEntity>(nameof(Entity));
-    }
-
-    public ICommandParameter<Model.Entities.FirstEntity> Entity { get; }
-
-    protected override void ExecuteInternal(IModel model, CancellationToken token)
-    {
-        var shard = model.Shard<Model.IMutableExampleModelShard>();
-
-        shard.FirstCollection.Remove(Entity.Value);
+        _action(model.Shard<Model.IMutableExampleModelShard>());
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Microsoft.Data.Sqlite;
+using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
 
@@ -69,11 +70,43 @@ internal class SqliteRepository : DisposableBase, ISqliteRepository
         ExecuteRelationCommand(QueryBuilder.Relations.Insert(name), relations);
     }
 
-    public void Update<TEntity, TProperties>(string name, IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items, Scheme scheme)
+    public void Update<TEntity, TProperties>(string name, IReadOnlyCollection<ICollectionChange<TEntity, TProperties>> changes, Scheme scheme)
         where TEntity : Entity
         where TProperties : Properties
     {
-        ExecuteCollectionCommand(QueryBuilder.Collections.Update(scheme, name), items, scheme);
+        var commandsCache = new Dictionary<int, SqliteCommand>();
+
+        foreach (var change in changes)
+        {
+            var modifiedProperties = CreatePropertiesBagForChanges(change);
+            var commandKey = CreateCommandKey(modifiedProperties.Select(x => x.Key));
+
+            SqliteCommand command;
+            if (commandsCache.TryGetValue(commandKey, out var cachedCommand))
+            {
+                command = cachedCommand;
+            }
+            else
+            {
+                command = _connection.CreateCommand();
+
+                var properties = scheme.Properties.Where(p => modifiedProperties.ContainsProp(p.Name)).ToArray();
+                command.CommandText = QueryBuilder.Collections.Update(properties, name);
+
+                CreateParameters(command, properties);
+
+                commandsCache.Add(commandKey, command);
+            }
+
+            AssignValuesToParameters(command, change.Entity.Id, modifiedProperties);
+
+            command.ExecuteNonQuery();
+        }
+
+        foreach (var command in commandsCache.Values)
+        {
+            command.Dispose();
+        }
     }
 
     public void Delete<TEntity>(string name, IReadOnlyCollection<TEntity> entities)
@@ -172,11 +205,14 @@ internal class SqliteRepository : DisposableBase, ISqliteRepository
     {
         using var command = _connection.CreateCommand();
         command.CommandText = query;
-        var parameters = CreateParameters(command, scheme);
+        CreateParameters(command, scheme.Properties);
 
         foreach (var pair in items)
         {
-            AssignValuesToParameters(parameters, pair.Key, pair.Value);
+            var bag = new PropertiesBag();
+            pair.Value.WriteTo(bag);
+
+            AssignValuesToParameters(command, pair.Key.Id, bag);
 
             command.ExecuteNonQuery();
         }
@@ -205,46 +241,66 @@ internal class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    private static IDictionary<string, SqliteParameter> CreateParameters(SqliteCommand command, Scheme scheme)
+    private static void CreateParameters(SqliteCommand command, IReadOnlyList<Property> properties)
     {
-        var parameters = new Dictionary<string, SqliteParameter>();
-
         var idParameter = command.CreateParameter();
         idParameter.ParameterName = "$Id";
-        parameters.Add("Id", idParameter);
         command.Parameters.Add(idParameter);
 
-        for (var i = 0; i < scheme.Properties.Count; i++)
+        for (var i = 0; i < properties.Count; i++)
         {
             var parameter = command.CreateParameter();
-            parameter.ParameterName = $"${scheme.Properties[i].Name}";
-            parameter.IsNullable = scheme.Properties[i].IsNullable;
-            parameters.Add(scheme.Properties[i].Name, parameter);
+            parameter.ParameterName = $"${properties[i].Name}";
+            parameter.IsNullable = properties[i].IsNullable;
             command.Parameters.Add(parameter);
         }
-
-        return parameters;
     }
 
-    private static void AssignValuesToParameters<TEntity, TProperties>(IDictionary<string, SqliteParameter> parameters, TEntity entity, TProperties data)
+    private int CreateCommandKey(IEnumerable<string> strings)
+    {
+        unchecked // Overflow is fine, just wrap
+        {
+            int hash = 17;
+            foreach (var str in strings)
+            {
+                hash = hash * 23 + str.GetHashCode();
+            }
+            return hash;
+        }
+    }
+
+    private static PropertiesBag CreatePropertiesBagForChanges<TEntity, TProperties>(ICollectionChange<TEntity, TProperties> change)
         where TEntity : Entity
         where TProperties : Properties
     {
-        parameters["Id"].Value = entity.Id;
+        var oldProperties = new PropertiesBag();
+        change.OldData!.WriteTo(oldProperties);
+        var newProperties = new PropertiesBag();
+        change.NewData!.WriteTo(newProperties);
+        var diff = oldProperties.Diff(newProperties);
 
-        var bag = new PropertiesBag();
-        data.WriteTo(bag);
+        return diff;
+    }
+
+    private static void AssignValuesToParameters(SqliteCommand command, Guid id, PropertiesBag bag)
+    {
+        SetParameterValue(command, "Id", id);
 
         foreach (var property in bag)
         {
-            if (property.Value != null)
-            {
-                parameters[property.Key].Value = property.Value;
-            }
-            else
-            {
-                parameters[property.Key].Value = DBNull.Value;
-            }
+            SetParameterValue(command, property.Key, property.Value);
+        }
+    }
+
+    private static void SetParameterValue(SqliteCommand command, string parameter, object? value)
+    {
+        if (value != null)
+        {
+            command.Parameters[$"${parameter}"].Value = value;
+        }
+        else
+        {
+            command.Parameters[$"${parameter}"].Value = DBNull.Value;
         }
     }
 

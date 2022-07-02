@@ -79,7 +79,7 @@ public class ModelShardStorageTests
 
         A.CallTo(() => _repository!.Update(
             A<string>.Ignored,
-            A<IReadOnlyCollection<KeyValuePair<FirstEntity, FirstEntityProperties>>>.Ignored,
+            A<IReadOnlyCollection<ICollectionChange<FirstEntity, FirstEntityProperties>>>.Ignored,
             A<Scheme>.Ignored))
             .MustHaveHappenedOnceExactly();
     }

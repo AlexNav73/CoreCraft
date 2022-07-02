@@ -61,15 +61,15 @@ internal static class QueryBuilder
             return builder.ToString();
         }
 
-        internal static string Update(Scheme scheme, string name)
+        internal static string Update(IEnumerable<Property> properties, string name)
         {
             var builder = new StringBuilder();
 
             builder.AppendFormat("UPDATE [{0}] SET ", name)
 #if NET5_0_OR_GREATER
-                .AppendJoin(", ", scheme.Properties.Select(x => $"[{x.Name}] = ${x.Name}"))
+                .AppendJoin(", ", properties.Select(x => $"[{x.Name}] = ${x.Name}"))
 #else
-                .Append(string.Join(", ", scheme.Properties.Select(x => $"[{x.Name}] = ${x.Name}")))
+                .Append(string.Join(", ", properties.Select(x => $"[{x.Name}] = ${x.Name}")))
 #endif
                 .Append(" WHERE [Id] = $Id;");
 

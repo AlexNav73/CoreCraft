@@ -33,7 +33,7 @@ public abstract class ModelShardStorage : IModelShardStorage
         }
 
         var added = new List<KeyValuePair<TEntity, TProperties>>();
-        var modified = new List<KeyValuePair<TEntity, TProperties>>();
+        var modified = new List<ICollectionChange<TEntity, TProperties>>();
         var removed = new List<TEntity>();
 
         foreach (var change in changes)
@@ -45,7 +45,7 @@ public abstract class ModelShardStorage : IModelShardStorage
                     break;
 
                 case CollectionAction.Modify:
-                    modified.Add(new KeyValuePair<TEntity, TProperties>(change.Entity, change.NewData!));
+                    modified.Add(change);
                     break;
 
                 case CollectionAction.Remove:

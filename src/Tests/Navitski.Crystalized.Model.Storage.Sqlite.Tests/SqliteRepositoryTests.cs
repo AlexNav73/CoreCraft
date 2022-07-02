@@ -1,3 +1,5 @@
+using Navitski.Crystalized.Model.Engine.ChangesTracking;
+
 namespace Navitski.Crystalized.Model.Storage.Sqlite.Tests;
 
 public class SqliteRepositoryTests
@@ -85,9 +87,9 @@ public class SqliteRepositoryTests
             FakeModelShardStorage.FirstCollectionScheme);
         repository.Update(
             table,
-            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            new List<ICollectionChange<FirstEntity, FirstEntityProperties>>()
             {
-                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(id), new FirstEntityProperties() with { NonNullableStringProperty = value2 })
+                new CollectionChange<FirstEntity, FirstEntityProperties>(CollectionAction.Modify, new(id), new(), new FirstEntityProperties() with { NonNullableStringProperty = value2 })
             },
             FakeModelShardStorage.FirstCollectionScheme);
 

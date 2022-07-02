@@ -1,4 +1,6 @@
-﻿namespace Navitski.Crystalized.Model.Engine.Persistence;
+﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+
+namespace Navitski.Crystalized.Model.Engine.Persistence;
 
 /// <summary>
 ///     An abstraction over some physical storage of the model data.
@@ -41,9 +43,9 @@ public interface IRepository
     /// <typeparam name="TEntity">A type of an entity</typeparam>
     /// <typeparam name="TProperties">A type of properties</typeparam>
     /// <param name="name">A collection name</param>
-    /// <param name="items">Items of the collection</param>
+    /// <param name="changes">A collection of changes</param>
     /// <param name="scheme">A scheme of the property type</param>
-    void Update<TEntity, TProperties>(string name, IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items, Scheme scheme)
+    void Update<TEntity, TProperties>(string name, IReadOnlyCollection<ICollectionChange<TEntity, TProperties>> changes, Scheme scheme)
         where TEntity : Entity
         where TProperties : Properties;
 

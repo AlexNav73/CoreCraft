@@ -18,4 +18,4 @@ public record Property(string Name, Type Type, bool IsNullable);
 /// <param name="Properties">A description of each property</param>
 // TODO(#6): Could we use PropertiesBag to generate queries?
 [ExcludeFromCodeCoverage]
-public record Scheme(IList<Property> Properties);
+public record Scheme(IReadOnlyList<Property> Properties);
