@@ -1,4 +1,6 @@
-﻿using Navitski.Crystalized.Model.Engine.Core;
+﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Core;
+using Navitski.Crystalized.Model.Engine.Subscription;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -7,9 +9,9 @@ public class UnsubscribeOnDisposeTests
     [Test]
     public void UnsubscribeHappendsTest()
     {
-        var method = (ModelChangedEventArgs args) => { };
-        var subscriptions = new HashSet<Action<ModelChangedEventArgs>>() { method };
-        var subscription = new UnsubscribeOnDispose(method, subscriptions);
+        var method = (Message<IModelChanges> args) => { };
+        var subscriptions = new HashSet<Action<Message<IModelChanges>>>() { method };
+        var subscription = new UnsubscribeOnDispose<Message<IModelChanges>>(method, subscriptions);
 
         Assert.That(subscriptions, Has.Member(method));
 

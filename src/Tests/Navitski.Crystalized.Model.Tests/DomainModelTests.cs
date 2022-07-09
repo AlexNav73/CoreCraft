@@ -5,6 +5,7 @@ using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Exceptions;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
+using Navitski.Crystalized.Model.Engine.Subscription;
 using Navitski.Crystalized.Model.Tests.Infrastructure.Commands;
 
 namespace Navitski.Crystalized.Model.Tests;
@@ -16,7 +17,7 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(Array.Empty<IModelShard>(), storage);
-        Action<ModelChangedEventArgs> handler = args => { };
+        Action<Message<IModelChanges>> handler = args => { };
 
         var subscription = model.Subscribe(handler);
 
@@ -31,7 +32,7 @@ public class DomainModelTests
         model.Subscribe(args =>
         {
             var subscriptionCalledImmidiately = false;
-            Action<ModelChangedEventArgs> handler = args => subscriptionCalledImmidiately = true;
+            Action<Message<IModelChanges>> handler = args => subscriptionCalledImmidiately = true;
 
             var subscription = model.Subscribe(handler);
 
@@ -48,7 +49,7 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
-        Action<ModelChangedEventArgs> handler = args => { };
+        Action<Message<IModelChanges>> handler = args => { };
         model.Subscribe(handler);
 
         Assert.Throws<SubscriptionAlreadyExistsException>(() => model.Subscribe(handler));

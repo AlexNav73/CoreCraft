@@ -3,6 +3,7 @@ using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Exceptions;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
+using Navitski.Crystalized.Model.Engine.Subscription;
 
 namespace Navitski.Crystalized.Model.Engine;
 
@@ -13,24 +14,24 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
 {
     private readonly View _view;
     private readonly IScheduler _scheduler;
-    private readonly HashSet<Action<ModelChangedEventArgs>> _subscriptions;
+    private readonly ModelSubscriber _root;
 
-    private volatile ModelChangedEventArgs? _currentChanges;
+    private volatile Message<IModelChanges>? _currentChanges;
 
     /// <summary>
     ///     Ctor
     /// </summary>
     protected DomainModel(IEnumerable<IModelShard> shards, IScheduler scheduler)
     {
-        _subscriptions = new HashSet<Action<ModelChangedEventArgs>>();
         _view = new View(shards);
         _scheduler = scheduler;
+        _root = new ModelSubscriber();
     }
 
     /// <summary>
     ///     Raised after all subscribers handled changes
     /// </summary>
-    protected virtual void OnModelChanged(ModelChangedEventArgs args)
+    protected virtual void OnModelChanged(Message<IModelChanges> message)
     {
     }
 
@@ -40,21 +41,38 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         return _view.UnsafeModel.Shard<T>();
     }
 
-    /// <inheritdoc cref="IDomainModel.Subscribe(Action{ModelChangedEventArgs})"/>
-    public IDisposable Subscribe(Action<ModelChangedEventArgs> onModelChanges)
+    /// <inheritdoc cref="IDomainModel.Subscribe(Action{Message{IModelChanges}})"/>
+    public IDisposable Subscribe(Action<Message<IModelChanges>> onModelChanges)
     {
-        if (_subscriptions.Contains(onModelChanges))
-        {
-            throw new SubscriptionAlreadyExistsException("Subscription already exists");
-        }
-
-        _subscriptions.Add(onModelChanges);
+        var subscription = _root.Subscribe(onModelChanges);
         if (_currentChanges != null)
         {
             onModelChanges(_currentChanges);
         }
 
-        return new UnsubscribeOnDispose(onModelChanges, _subscriptions);
+        return subscription;
+    }
+
+    /// <summary>
+    ///     Provides a precise subscription mode to subscribe to a specific part of the model
+    /// </summary>
+    /// <param name="builder">A subscription builder</param>
+    public IDisposable Subscribe(Func<IModelSubscriber, IDisposable> builder)
+    {
+        var subscription = builder(_root);
+
+        if (_currentChanges != null)
+        {
+            var message = new Message<IModelChanges>(_currentChanges.OldModel, _currentChanges.NewModel, _currentChanges.Changes);
+            var tempSubscriber = new ModelSubscriber();
+
+            using (builder(tempSubscriber))
+            {
+                tempSubscriber.Push(message);
+            }
+        }
+
+        return subscription;
     }
 
     /// <summary>
@@ -123,7 +141,7 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
         if (result.Changes.HasChanges())
         {
-            var eventArgs = CreateModelChangesEventArgs(result);
+            var eventArgs = CreateModelChangesMessage(result);
 
             NotifySubscribers(eventArgs);
         }
@@ -151,7 +169,7 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
             }
 
             var result = _view.ApplySnapshot(snapshot, changes);
-            var eventArgs = CreateModelChangesEventArgs(result);
+            var eventArgs = CreateModelChangesMessage(result);
 
             NotifySubscribers(eventArgs);
         }
@@ -173,28 +191,24 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
         if (result.Changes.HasChanges())
         {
-            var eventArgs = CreateModelChangesEventArgs(result);
+            var eventArgs = CreateModelChangesMessage(result);
             
             NotifySubscribers(eventArgs);
             OnModelChanged(eventArgs);
         }
     }
 
-    private void NotifySubscribers(ModelChangedEventArgs eventArgs)
+    private void NotifySubscribers(Message<IModelChanges> message)
     {
-        _currentChanges = eventArgs;
+        _currentChanges = message;
 
-        var observers = _subscriptions.ToArray();
-        foreach (var observer in observers)
-        {
-            observer(_currentChanges);
-        }
+        _root.Push(message);
 
         _currentChanges = null;
     }
 
-    private static ModelChangedEventArgs CreateModelChangesEventArgs(ModelChangeResult result)
+    private static Message<IModelChanges> CreateModelChangesMessage(ModelChangeResult result)
     {
-        return new ModelChangedEventArgs(result.OldModel, result.NewModel, result.Changes);
+        return new Message<IModelChanges>(result.OldModel, result.NewModel, result.Changes);
     }
 }

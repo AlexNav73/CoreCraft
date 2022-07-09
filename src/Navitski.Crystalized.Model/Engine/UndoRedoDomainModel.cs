@@ -1,6 +1,7 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
+using Navitski.Crystalized.Model.Engine.Subscription;
 
 namespace Navitski.Crystalized.Model.Engine;
 
@@ -125,9 +126,9 @@ public class UndoRedoDomainModel : DomainModel
     }
 
     /// <inheritdoc/>
-    protected override void OnModelChanged(ModelChangedEventArgs args)
+    protected override void OnModelChanged(Message<IModelChanges> message)
     {
-        _undoStack.Push((IWritableModelChanges)args.Changes);
+        _undoStack.Push((IWritableModelChanges)message.Changes);
         Changed?.Invoke(this, EventArgs.Empty);
     }
 }

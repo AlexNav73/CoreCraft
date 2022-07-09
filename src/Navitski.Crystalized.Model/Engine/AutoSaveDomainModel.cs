@@ -1,5 +1,7 @@
-﻿using Navitski.Crystalized.Model.Engine.Persistence;
+﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
+using Navitski.Crystalized.Model.Engine.Subscription;
 
 namespace Navitski.Crystalized.Model.Engine;
 
@@ -34,13 +36,13 @@ public class AutoSaveDomainModel : DomainModel
     }
 
     /// <inheritdoc/>
-    protected override async void OnModelChanged(ModelChangedEventArgs args)
+    protected override async void OnModelChanged(Message<IModelChanges> message)
     {
         // TODO(#10): Saving performed in the thread pool's thread and if some
         // sequential changes come, saving order of thees changes is unpredictable.
         // Currently, changes' frequency is low and every change have enough time
         // for saving. In future, changes could be more frequent and it is necessary
         // to queue changes for saving or batch them in one big change
-        await Save(_storage, _path, new[] { args.Changes });
+        await Save(_storage, _path, new[] { message.Changes });
     }
 }

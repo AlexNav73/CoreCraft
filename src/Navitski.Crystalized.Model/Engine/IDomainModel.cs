@@ -1,4 +1,7 @@
-﻿namespace Navitski.Crystalized.Model.Engine;
+﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Subscription;
+
+namespace Navitski.Crystalized.Model.Engine;
 
 /// <summary>
 ///     A base interface for a domain model implementation
@@ -10,5 +13,5 @@ public interface IDomainModel : IModelShardAccessor
     /// </summary>
     /// <param name="onModelChanges">A subscriber</param>
     /// <returns>Subscription</returns>
-    IDisposable Subscribe(Action<ModelChangedEventArgs> onModelChanges);
+    IDisposable Subscribe(Action<Message<IModelChanges>> onModelChanges);
 }

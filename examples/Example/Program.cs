@@ -1,9 +1,12 @@
-﻿using Navitski.Crystalized.Model.Engine;
+﻿using Example.Model;
+using Example.Model.Entities;
+using Navitski.Crystalized.Model.Engine;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
+using Navitski.Crystalized.Model.Engine.Subscription;
 using Navitski.Crystalized.Model.Storage.Sqlite;
 using Navitski.Crystalized.Model.Storage.Sqlite.Migrations;
 
@@ -20,11 +23,9 @@ class Program
             File.Delete(Path);
         }
 
-        var model = new MyModel(new[]
-        {
-            new Model.ExampleModelShard()
-        });
-        using (model.Subscribe(OnModelChanged))
+        var model = new MyModel(new[] { new ExampleModelShard() });
+
+        using (model.Subscribe(x => x.To<IExampleChangesFrame>().With(x => x.FirstCollection).Subscribe(OnFirstCollectionChanged)))
         {
             var addCommand = new DelegateCommand(model, shard =>
             {
@@ -38,7 +39,7 @@ class Program
             });
             addCommand.Execute();
 
-            var shard = model.Shard<Model.IExampleModelShard>();
+            var shard = model.Shard<IExampleModelShard>();
 
             var modifyCommand = new DelegateCommand(model, shard =>
             {
@@ -57,17 +58,14 @@ class Program
         model.Save(Path);
     }
 
-    private static void OnModelChanged(ModelChangedEventArgs args)
+    private static void OnFirstCollectionChanged(Message<ICollectionChangeSet<FirstEntity, FirstEntityProperties>> message)
     {
-        if (args.Changes.TryGetFrame<Model.IExampleChangesFrame>(out var frame))
+        foreach (var change in message!.Changes)
         {
-            foreach(var change in frame!.FirstCollection)
-            {
-                Console.WriteLine($"Entity [{change.Entity}] has been {change.Action}ed.");
-                Console.WriteLine($"   Old data: {change.OldData}");
-                Console.WriteLine($"   New data: {change.NewData}");
-                Console.WriteLine();
-            }
+            Console.WriteLine($"Entity [{change.Entity}] has been {change.Action}ed.");
+            Console.WriteLine($"   Old data: {change.OldData}");
+            Console.WriteLine($"   New data: {change.NewData}");
+            Console.WriteLine();
         }
     }
 }
@@ -82,7 +80,7 @@ class MyModel : DomainModel
     {
         _storage = new SqliteStorage(
             Array.Empty<IMigration>(),
-            new[] { new Model.ExampleModelShardStorage() },
+            new[] { new ExampleModelShardStorage() },
             new SqliteRepositoryFactory());
         _changes = new List<IModelChanges>();
     }
@@ -103,7 +101,7 @@ class MyModel : DomainModel
         _changes.Clear();
     }
 
-    protected override void OnModelChanged(ModelChangedEventArgs args)
+    protected override void OnModelChanged(Message<IModelChanges> args)
     {
         _changes.Add(args.Changes);
     }
@@ -111,9 +109,9 @@ class MyModel : DomainModel
 
 class DelegateCommand : ModelCommand<MyModel>
 {
-    private readonly Action<Model.IMutableExampleModelShard> _action;
+    private readonly Action<IMutableExampleModelShard> _action;
 
-    public DelegateCommand(MyModel model, Action<Model.IMutableExampleModelShard> action)
+    public DelegateCommand(MyModel model, Action<IMutableExampleModelShard> action)
         : base(model)
     {
         _action = action;
@@ -121,6 +119,6 @@ class DelegateCommand : ModelCommand<MyModel>
 
     protected override void ExecuteInternal(IModel model, CancellationToken token)
     {
-        _action(model.Shard<Model.IMutableExampleModelShard>());
+        _action(model.Shard<IMutableExampleModelShard>());
     }
 }
