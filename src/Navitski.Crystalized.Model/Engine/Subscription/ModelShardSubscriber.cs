@@ -31,7 +31,7 @@ internal class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>
             return subscriber;
         }
 
-        throw new InvalidPropertySubscriptionException("accessor should contain only property access");
+        throw new InvalidPropertySubscriptionException("Accessor should contain only property access");
     }
 
     public IRelationSubscriber<TParent, TChild> With<TParent, TChild>(Expression<Func<T, IRelationChangeSet<TParent, TChild>>> accessor)
@@ -51,7 +51,7 @@ internal class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>
             return subscriber;
         }
 
-        throw new InvalidPropertySubscriptionException("accessor should contain only property access");
+        throw new InvalidPropertySubscriptionException("Accessor should contain only property access");
     }
 
     public void Push(Message<IModelChanges> message)

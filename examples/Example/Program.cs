@@ -25,7 +25,7 @@ class Program
 
         var model = new MyModel(new[] { new ExampleModelShard() });
 
-        using (model.Subscribe(x => x.To<IExampleChangesFrame>().With(x => x.FirstCollection).Subscribe(OnFirstCollectionChanged)))
+        using (model.Subscribe(x => x.To<IExampleChangesFrame>().With(y => y.FirstCollection).Subscribe(OnFirstCollectionChanged)))
         {
             var addCommand = new DelegateCommand(model, shard =>
             {
@@ -60,7 +60,7 @@ class Program
 
     private static void OnFirstCollectionChanged(Message<ICollectionChangeSet<FirstEntity, FirstEntityProperties>> message)
     {
-        foreach (var change in message!.Changes)
+        foreach (var change in message.Changes)
         {
             Console.WriteLine($"Entity [{change.Entity}] has been {change.Action}ed.");
             Console.WriteLine($"   Old data: {change.OldData}");

@@ -45,6 +45,7 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
     public IDisposable Subscribe(Action<Message<IModelChanges>> onModelChanges)
     {
         var subscription = _root.Subscribe(onModelChanges);
+
         if (_currentChanges != null)
         {
             onModelChanges(_currentChanges);
@@ -53,22 +54,19 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         return subscription;
     }
 
-    /// <summary>
-    ///     Provides a precise subscription mode to subscribe to a specific part of the model
-    /// </summary>
-    /// <param name="builder">A subscription builder</param>
+
+    /// <inheritdoc cref="IDomainModel.Subscribe(Func{IModelSubscriber, IDisposable})"/>
     public IDisposable Subscribe(Func<IModelSubscriber, IDisposable> builder)
     {
         var subscription = builder(_root);
 
         if (_currentChanges != null)
         {
-            var message = new Message<IModelChanges>(_currentChanges.OldModel, _currentChanges.NewModel, _currentChanges.Changes);
             var tempSubscriber = new ModelSubscriber();
 
             using (builder(tempSubscriber))
             {
-                tempSubscriber.Push(message);
+                tempSubscriber.Push(_currentChanges);
             }
         }
 

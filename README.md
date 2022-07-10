@@ -120,11 +120,11 @@ using (model.Subscribe(OnModelChanged))
     // command should be executed here ...
 }
 
-private static void OnModelChanged(ModelChangedEventArgs args)
+private static void OnModelChanged(Message<IModelChanges> message)
 {
     // here we request changes related to the `MyApp` shard.
     // all this interfaces will be generated automatically for you
-    if (args.Changes.TryGetFrame<Model.IMyAppChangesFrame>(out var frame))
+    if (args.Changes.TryGetFrame<Model.IMyAppChangesFrame>(out var frame) && frame.HasChanges())
     {
         // IMyAppChangesFrame have the same structure as a IMyAppModelShard
         // but instead of ICollection type of MyEntitiesCollection it will
@@ -139,6 +139,28 @@ private static void OnModelChanged(ModelChangedEventArgs args)
             Console.WriteLine($"   Old data: {change.OldData}");
             Console.WriteLine($"   New data: {change.NewData}");
         }
+    }
+}
+```
+
+It is also possible to subscribe to specific changes like model shard changes or collection/relation changes
+
+```cs
+using (model.Subscribe(x => x.To<Model.IMyAppChangesFrame>().With(y => y.MyEntitiesCollection).Subscribe(OnModelChanged)))
+{
+    // command should be executed here ...
+}
+
+private static void OnModelChanged(Message<ICollectionChangeSet<MyEntity, MyEntityProperties>> message)
+{
+    foreach(var change in message.Changes)
+    {
+        // here we just print what was changed in the domain model
+        // if an entity hasn't changed - the MyEntitiesCollection will
+        // not have a record for this entity
+        Console.WriteLine($"Entity [{change.Entity}] has been {change.Action}ed.");
+        Console.WriteLine($"   Old data: {change.OldData}");
+        Console.WriteLine($"   New data: {change.NewData}");
     }
 }
 ```
@@ -215,10 +237,7 @@ class MyModel : DomainModel
 Now, we are ready to save our model.
 
 ```cs
-var model = new MyModel(new[]
-{
-    new Model.ExampleModelShard()
-});
+var model = new MyModel(new[] { /* ... */ });
 using (model.Subscribe(OnModelChanged))
 {
     // executing some commands ...

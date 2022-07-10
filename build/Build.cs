@@ -63,6 +63,7 @@ internal partial class Build : NukeBuild
 
     Target RunMemoryTests => _ => _
         .DependsOn(Compile)
+        .Before(Pack, Coverage)
         .Executes(() =>
         {
             var testProject = Solution.Tests.Navitski_Crystalized_Model_Tests_MemoryLeaks;

@@ -25,6 +25,18 @@ public class DomainModelTests
     }
 
     [Test]
+    public void SubscribeToModelShardWhenCurrentChangesAreNullTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var model = new TestDomainModel(Array.Empty<IModelShard>(), storage);
+        Action<Message<IFakeChangesFrame>> handler = args => { };
+
+        var subscription = model.Subscribe(x => x.To<IFakeChangesFrame>().Subscribe(handler));
+
+        Assert.That(subscription, Is.Not.Null);
+    }
+
+    [Test]
     public void SubscribeWhenHandlingChangesTest()
     {
         var storage = A.Fake<IStorage>();
@@ -42,6 +54,42 @@ public class DomainModelTests
         var command = CreateCommand(model);
 
         command.Execute();
+    }
+
+    [Test]
+    public void SubscribeToModelShardWhenHandlingChangesTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        model.Subscribe(x => x.To<IFakeChangesFrame>().Subscribe(args =>
+        {
+            var subscriptionCalledImmidiately = false;
+            Action<Message<IFakeChangesFrame>> handler = args => subscriptionCalledImmidiately = true;
+
+            var subscription = model.Subscribe(x => x.To<IFakeChangesFrame>().Subscribe(handler));
+
+            Assert.That(subscription, Is.Not.Null);
+            Assert.That(subscriptionCalledImmidiately, Is.True);
+        }));
+        var command = CreateCommand(model);
+
+        command.Execute();
+    }
+
+    [Test]
+    public void ReceiveModelChangesAfterCommandExecutionTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var changesReceived = false;
+        var model = new TestDomainModel(
+            new[] { new FakeModelShard() },
+            storage,
+            m => changesReceived = true);
+        var command = CreateCommand(model);
+
+        command.Execute();
+
+        Assert.That(changesReceived, Is.True);
     }
 
     [Test]
@@ -89,11 +137,16 @@ public class DomainModelTests
     private class TestDomainModel : DomainModel
     {
         private readonly IStorage _storage;
+        private readonly Action<Message<IModelChanges>>? _onModelChanged;
 
-        public TestDomainModel(IEnumerable<IModelShard> shards, IStorage storage)
+        public TestDomainModel(
+            IEnumerable<IModelShard> shards,
+            IStorage storage,
+            Action<Message<IModelChanges>>? onModelChanged = null)
             : base(shards, new SyncScheduler())
         {
             _storage = storage;
+            _onModelChanged = onModelChanged;
         }
 
         public async Task Save(string path, IEnumerable<IModelChanges> changes)
@@ -104,6 +157,11 @@ public class DomainModelTests
         public async Task Save(string path)
         {
             await Save(_storage, path);
+        }
+
+        protected override void OnModelChanged(Message<IModelChanges> message)
+        {
+            _onModelChanged?.Invoke(message);
         }
     }
 }

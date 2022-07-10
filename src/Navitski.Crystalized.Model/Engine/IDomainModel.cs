@@ -14,4 +14,11 @@ public interface IDomainModel : IModelShardAccessor
     /// <param name="onModelChanges">A subscriber</param>
     /// <returns>Subscription</returns>
     IDisposable Subscribe(Action<Message<IModelChanges>> onModelChanges);
+
+    /// <summary>
+    ///     Provides a precise subscription mode to subscribe to a specific part of the model
+    /// </summary>
+    /// <param name="builder">A subscription builder</param>
+    /// <returns>Subscription</returns>
+    IDisposable Subscribe(Func<IModelSubscriber, IDisposable> builder);
 }

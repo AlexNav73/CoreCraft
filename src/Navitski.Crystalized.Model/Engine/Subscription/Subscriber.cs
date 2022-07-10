@@ -4,30 +4,30 @@ namespace Navitski.Crystalized.Model.Engine.Subscription;
 
 internal abstract class Subscriber<T>
 {
-    private readonly HashSet<Action<Message<T>>> _subscriptions;
+    private readonly HashSet<Action<Message<T>>> _handlers;
 
     public Subscriber()
     {
-        _subscriptions = new HashSet<Action<Message<T>>>();
+        _handlers = new HashSet<Action<Message<T>>>();
     }
 
     public IDisposable Subscribe(Action<Message<T>> onModelChanges)
     {
-        if (_subscriptions.Contains(onModelChanges))
+        if (_handlers.Contains(onModelChanges))
         {
             throw new SubscriptionAlreadyExistsException("Subscription already exists");
         }
 
-        _subscriptions.Add(onModelChanges);
+        _handlers.Add(onModelChanges);
 
-        return new UnsubscribeOnDispose<Message<T>>(onModelChanges, _subscriptions);
+        return new UnsubscribeOnDispose<Message<T>>(onModelChanges, _handlers);
     }
 
     protected void Notify(Message<T> message)
     {
-        foreach (var subscription in _subscriptions)
+        foreach (var handler in _handlers)
         {
-            subscription(message);
+            handler(message);
         }
     }
 }

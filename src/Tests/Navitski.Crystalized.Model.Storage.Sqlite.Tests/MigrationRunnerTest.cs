@@ -28,4 +28,26 @@ internal class MigrationRunnerTest
         Assert.That(repository.Exists(table), Is.False);
         Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(1));
     }
+
+    [Test]
+    public void RunFailsOnApplyingTransactionTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+        var runner = new MigrationRunner(new[] { new FailingMigration() });
+
+        Assert.Throws<NotImplementedException>(() => runner.Run(repository));
+    }
+
+    private class FailingMigration : Migration
+    {
+        public FailingMigration()
+            : base(1)
+        {
+        }
+
+        public override void Migrate(IMigrator migrator)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
