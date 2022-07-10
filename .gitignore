@@ -1,11 +1,14 @@
 packages/
 coverage/
 coveragereport/
+examples/Example/
 **/.vscode/
 **/.vs/
 .nuke/temp/
 *.props
 *.targets
+*.user
+*.log
 
 # Build results
 [Dd]ebug/
