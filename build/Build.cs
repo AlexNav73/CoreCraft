@@ -6,7 +6,6 @@ using System.Linq;
 
 namespace build;
 
-[CheckBuildProjectConfigurations]
 internal partial class Build : NukeBuild
 {
     public static int Main() => Execute<Build>(x => x.Publish);
@@ -32,7 +31,7 @@ internal partial class Build : NukeBuild
     readonly GitHubActions GitHubActions;
 
     string GitHubRegistrySource => GitHubActions != null
-        ? $"https://nuget.pkg.github.com/{GitHubActions.RepositoryOwner}/index.json"
+        ? "https://api.nuget.org/v3/index.json"
         : null;
     IEnumerable<AbsolutePath> PushPackageFiles => PackagesDirectory.GlobFiles("*.nupkg");
 
