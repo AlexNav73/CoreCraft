@@ -19,12 +19,14 @@ internal sealed class CollectionSubscriber<TChangesFrame, TEntity, TProperties> 
 
     public void Publish(Change<TChangesFrame> change)
     {
-        var collectionChangeSet = _accessor(change.Hunk);
+        var (oldModel, newModel, hunk) = change;
+
+        var collectionChangeSet = _accessor(hunk);
         if (collectionChangeSet.HasChanges())
         {
             var msg = new Change<ICollectionChangeSet<TEntity, TProperties>>(
-                change.OldModel,
-                change.NewModel,
+                oldModel,
+                newModel,
                 collectionChangeSet);
 
             Publish(msg);

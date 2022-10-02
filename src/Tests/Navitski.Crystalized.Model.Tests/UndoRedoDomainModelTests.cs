@@ -37,6 +37,35 @@ public class UndoRedoDomainModelTests
     }
 
     [Test]
+    public void UndoStackHasOneChangeTest()
+    {
+        var scheduler = new SyncScheduler();
+        var storage = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var command = CreateAddCommand(model);
+
+        command.Execute();
+
+        Assert.That(model.UndoStack.Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void UndoStackIsEmptyAfterUndoExecutedTest()
+    {
+        var scheduler = new SyncScheduler();
+        var storage = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var command = CreateAddCommand(model);
+
+        command.Execute();
+
+        model.Undo();
+
+        Assert.That(model.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(model.RedoStack.Count, Is.EqualTo(1));
+    }
+
+    [Test]
     public void RedoStackMustBeDroppedWhenNewChangesHappenedTest()
     {
         var scheduler = new SyncScheduler();

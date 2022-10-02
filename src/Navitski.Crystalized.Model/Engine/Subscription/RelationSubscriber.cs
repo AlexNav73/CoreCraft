@@ -19,10 +19,12 @@ internal sealed class RelationSubscriber<TChangesFrame, TParent, TChild> :
 
     public void Publish(Change<TChangesFrame> change)
     {
-        var relationChangeSet = _accessor(change.Hunk);
+        var (oldModel, newModel, hunk) = change;
+
+        var relationChangeSet = _accessor(hunk);
         if (relationChangeSet.HasChanges())
         {
-            var msg = new Change<IRelationChangeSet<TParent, TChild>>(change.OldModel, change.NewModel, relationChangeSet);
+            var msg = new Change<IRelationChangeSet<TParent, TChild>>(oldModel, newModel, relationChangeSet);
 
             Publish(msg);
         }

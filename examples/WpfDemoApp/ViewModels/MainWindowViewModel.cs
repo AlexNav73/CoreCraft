@@ -66,17 +66,19 @@ internal partial class MainWindowViewModel : ObservableObject
 
     private void OnItemChanged(Change<ICollectionChangeSet<ToDoItem, ToDoItemProperties>> change)
     {
-        foreach (var c in change.Hunk.Where(x => x.Action == CollectionAction.Add))
+        var (_, _, hunk) = change;
+
+        foreach (var c in hunk.Where(x => x.Action == CollectionAction.Add))
         {
             Items.Add(new ItemViewModel(c.Entity, c.NewData!, _model));
         }
 
-        foreach (var c in change.Hunk.Where(x => x.Action == CollectionAction.Remove))
+        foreach (var c in hunk.Where(x => x.Action == CollectionAction.Remove))
         {
             Items.Remove(Items.Single(x => x.Item == c.Entity));
         }
 
-        foreach (var c in change.Hunk.Where(x => x.Action == CollectionAction.Modify))
+        foreach (var c in hunk.Where(x => x.Action == CollectionAction.Modify))
         {
             Items.Single(x => x.Item == c.Entity).Name = c.NewData!.Name;
         }
