@@ -3,7 +3,7 @@
 namespace Navitski.Crystalized.Model.Engine.Scheduling;
 
 [ExcludeFromCodeCoverage]
-internal class SequentialTaskScheduler : TaskScheduler
+internal sealed class SequentialTaskScheduler : TaskScheduler
 {
     public static readonly SequentialTaskScheduler Instance = new SequentialTaskScheduler();
 

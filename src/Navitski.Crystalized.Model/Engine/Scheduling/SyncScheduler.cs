@@ -6,7 +6,7 @@ namespace Navitski.Crystalized.Model.Engine.Scheduling;
 ///     Schedules jobs synchronously
 /// </summary>
 [ExcludeFromCodeCoverage]
-public class SyncScheduler : IScheduler
+public sealed class SyncScheduler : IScheduler
 {
     /// <summary>
     ///     Immediately starts the job

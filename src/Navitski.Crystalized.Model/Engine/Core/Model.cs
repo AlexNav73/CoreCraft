@@ -2,7 +2,7 @@
 
 namespace Navitski.Crystalized.Model.Engine.Core;
 
-internal class Model : IModel
+internal sealed class Model : IModel
 {
     public Model(IEnumerable<IModelShard> shards)
     {

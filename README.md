@@ -120,24 +120,24 @@ using (model.Subscribe(OnModelChanged))
     // command should be executed here ...
 }
 
-private static void OnModelChanged(Message<IModelChanges> message)
+private static void OnModelChanged(Change<IModelChanges> change)
 {
     // here we request changes related to the `MyApp` shard.
     // all this interfaces will be generated automatically for you
-    if (args.Changes.TryGetFrame<Model.IMyAppChangesFrame>(out var frame) && frame.HasChanges())
+    if (change.Hunk.TryGetFrame<Model.IMyAppChangesFrame>(out var frame) && frame.HasChanges())
     {
         // IMyAppChangesFrame have the same structure as a IMyAppModelShard
         // but instead of ICollection type of MyEntitiesCollection it will
         // have ICollectionChangeSet which contains an action performed,
         // entity, old and new properties 
-        foreach(var change in frame.MyEntitiesCollection)
+        foreach(var cc in frame.MyEntitiesCollection)
         {
             // here we just print what was changed in the domain model
             // if an entity hasn't changed - the MyEntitiesCollection will
             // not have a record for this entity
-            Console.WriteLine($"Entity [{change.Entity}] has been {change.Action}ed.");
-            Console.WriteLine($"   Old data: {change.OldData}");
-            Console.WriteLine($"   New data: {change.NewData}");
+            Console.WriteLine($"Entity [{cc.Entity}] has been {cc.Action}ed.");
+            Console.WriteLine($"   Old data: {cc.OldData}");
+            Console.WriteLine($"   New data: {cc.NewData}");
         }
     }
 }
@@ -146,21 +146,21 @@ private static void OnModelChanged(Message<IModelChanges> message)
 It is also possible to subscribe to specific changes like model shard changes or collection/relation changes
 
 ```cs
-using (model.Subscribe(x => x.To<Model.IMyAppChangesFrame>().With(y => y.MyEntitiesCollection).Subscribe(OnModelChanged)))
+using (model.SubscribeTo<Model.IMyAppChangesFrame>(x => x.With(y => y.MyEntitiesCollection).By(OnModelChanged)))
 {
     // command should be executed here ...
 }
 
-private static void OnModelChanged(Message<ICollectionChangeSet<MyEntity, MyEntityProperties>> message)
+private static void OnModelChanged(Change<ICollectionChangeSet<MyEntity, MyEntityProperties>> change)
 {
-    foreach(var change in message.Changes)
+    foreach(var c in change.Hunk)
     {
         // here we just print what was changed in the domain model
         // if an entity hasn't changed - the MyEntitiesCollection will
         // not have a record for this entity
-        Console.WriteLine($"Entity [{change.Entity}] has been {change.Action}ed.");
-        Console.WriteLine($"   Old data: {change.OldData}");
-        Console.WriteLine($"   New data: {change.NewData}");
+        Console.WriteLine($"Entity [{c.Entity}] has been {c.Action}ed.");
+        Console.WriteLine($"   Old data: {c.OldData}");
+        Console.WriteLine($"   New data: {c.NewData}");
     }
 }
 ```

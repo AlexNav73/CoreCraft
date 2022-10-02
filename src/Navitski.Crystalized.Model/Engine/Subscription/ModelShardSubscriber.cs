@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Navitski.Crystalized.Model.Engine.Subscription;
 
-internal class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>, ISubscription<IModelChanges>
+internal sealed class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>, ISubscription<IModelChanges>
     where T : class, IChangesFrame
 {
     private readonly IDictionary<string, ISubscription<T>> _subscriptions;
@@ -54,17 +54,17 @@ internal class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>
         throw new InvalidPropertySubscriptionException("Accessor should contain only property access");
     }
 
-    public void Push(Message<IModelChanges> message)
+    public void Publish(Change<IModelChanges> change)
     {
-        if (message.Changes.TryGetFrame<T>(out var frame) && frame.HasChanges())
+        if (change.Hunk.TryGetFrame<T>(out var frame) && frame.HasChanges())
         {
-            var msg = new Message<T>(message.OldModel, message.NewModel, frame);
+            var msg = new Change<T>(change.OldModel, change.NewModel, frame);
 
-            Notify(msg);
+            Publish(msg);
 
             foreach (var subscription in _subscriptions.Values)
             {
-                subscription.Push(msg);
+                subscription.Publish(msg);
             }
         }
     }

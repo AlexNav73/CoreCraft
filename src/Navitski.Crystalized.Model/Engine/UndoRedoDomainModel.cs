@@ -30,9 +30,19 @@ public class UndoRedoDomainModel : DomainModel
     }
 
     /// <summary>
-    ///     Raised when history has changed
+    ///     Raised when model has changed
     /// </summary>
     public event EventHandler? Changed;
+
+    /// <summary>
+    ///     Undo stack of model changes
+    /// </summary>
+    public IReadOnlyCollection<IModelChanges> UndoStack => _undoStack;
+
+    /// <summary>
+    ///     Redo stack of model changes
+    /// </summary>
+    public IReadOnlyCollection<IModelChanges> RedoStack => _redoStack;
 
     /// <summary>
     ///     Saves changes happened since the last save operation
@@ -126,9 +136,11 @@ public class UndoRedoDomainModel : DomainModel
     }
 
     /// <inheritdoc/>
-    protected override void OnModelChanged(Message<IModelChanges> message)
+    protected override void OnModelChanged(Change<IModelChanges> change)
     {
-        _undoStack.Push((IWritableModelChanges)message.Changes);
+        _undoStack.Push((IWritableModelChanges)change.Hunk);
+        _redoStack.Clear();
+
         Changed?.Invoke(this, EventArgs.Empty);
     }
 }

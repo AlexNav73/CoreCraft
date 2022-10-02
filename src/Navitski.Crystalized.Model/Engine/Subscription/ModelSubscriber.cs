@@ -2,7 +2,7 @@
 
 namespace Navitski.Crystalized.Model.Engine.Subscription;
 
-internal class ModelSubscriber : Subscriber<IModelChanges>, IModelSubscriber, ISubscription<IModelChanges>
+internal sealed class ModelSubscriber : Subscriber<IModelChanges>
 {
     private readonly IDictionary<Type, ISubscription<IModelChanges>> _modelShardSubscriptions;
 
@@ -11,7 +11,7 @@ internal class ModelSubscriber : Subscriber<IModelChanges>, IModelSubscriber, IS
         _modelShardSubscriptions = new Dictionary<Type, ISubscription<IModelChanges>>();
     }
 
-    public IModelShardSubscriber<T> To<T>() where T : class, IChangesFrame
+    public IModelShardSubscriber<T> GetOrCreateSubscriberFor<T>() where T : class, IChangesFrame
     {
         if (_modelShardSubscriptions.TryGetValue(typeof(T), out var subs))
         {
@@ -24,13 +24,13 @@ internal class ModelSubscriber : Subscriber<IModelChanges>, IModelSubscriber, IS
         return subscriber;
     }
 
-    public void Push(Message<IModelChanges> message)
+    public override void Publish(Change<IModelChanges> change)
     {
-        Notify(message);
+        base.Publish(change);
 
         foreach (var subscription in _modelShardSubscriptions.Values)
         {
-            subscription.Push(message);
+            subscription.Publish(change);
         }
     }
 }

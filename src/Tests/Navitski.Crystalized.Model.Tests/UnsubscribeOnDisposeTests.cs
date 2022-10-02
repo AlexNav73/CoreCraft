@@ -9,9 +9,9 @@ public class UnsubscribeOnDisposeTests
     [Test]
     public void UnsubscribeHappendsTest()
     {
-        var method = (Message<IModelChanges> args) => { };
-        var subscriptions = new HashSet<Action<Message<IModelChanges>>>() { method };
-        var subscription = new UnsubscribeOnDispose<Message<IModelChanges>>(method, subscriptions);
+        var method = (Change<IModelChanges> args) => { };
+        var subscriptions = new HashSet<Action<Change<IModelChanges>>>() { method };
+        var subscription = new UnsubscribeOnDispose<Change<IModelChanges>>(method, subscriptions);
 
         Assert.That(subscriptions, Has.Member(method));
 

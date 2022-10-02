@@ -5,7 +5,7 @@ namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 /// <inheritdoc cref="ICollectionChangeSet{TEntity, TProperties}"/>
 [DebuggerDisplay("HasChanges = {HasChanges()}")]
-public class CollectionChangeSet<TEntity, TProperties> : ICollectionChangeSet<TEntity, TProperties>
+public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChangeSet<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties
 {

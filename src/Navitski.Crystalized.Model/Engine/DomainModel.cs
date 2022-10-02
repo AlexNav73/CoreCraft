@@ -14,9 +14,9 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
 {
     private readonly View _view;
     private readonly IScheduler _scheduler;
-    private readonly ModelSubscriber _root;
+    private readonly ModelSubscriber _modelSubscriber;
 
-    private volatile Message<IModelChanges>? _currentChanges;
+    private volatile Change<IModelChanges>? _currentChanges;
 
     /// <summary>
     ///     Ctor
@@ -25,13 +25,13 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
     {
         _view = new View(shards);
         _scheduler = scheduler;
-        _root = new ModelSubscriber();
+        _modelSubscriber = new ModelSubscriber();
     }
 
     /// <summary>
     ///     Raised after all subscribers handled changes
     /// </summary>
-    protected virtual void OnModelChanged(Message<IModelChanges> message)
+    protected virtual void OnModelChanged(Change<IModelChanges> change)
     {
     }
 
@@ -41,10 +41,10 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         return _view.UnsafeModel.Shard<T>();
     }
 
-    /// <inheritdoc cref="IDomainModel.Subscribe(Action{Message{IModelChanges}})"/>
-    public IDisposable Subscribe(Action<Message<IModelChanges>> onModelChanges)
+    /// <inheritdoc cref="IDomainModel.Subscribe(Action{Change{IModelChanges}})"/>
+    public IDisposable Subscribe(Action<Change<IModelChanges>> onModelChanges)
     {
-        var subscription = _root.Subscribe(onModelChanges);
+        var subscription = _modelSubscriber.By(onModelChanges);
 
         if (_currentChanges != null)
         {
@@ -55,18 +55,19 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
     }
 
 
-    /// <inheritdoc cref="IDomainModel.Subscribe(Func{IModelSubscriber, IDisposable})"/>
-    public IDisposable Subscribe(Func<IModelSubscriber, IDisposable> builder)
+    /// <inheritdoc cref="IDomainModel.SubscribeTo{T}(Func{IModelShardSubscriber{T}, IDisposable})"/>
+    public IDisposable SubscribeTo<T>(Func<IModelShardSubscriber<T>, IDisposable> builder)
+         where T : class, IChangesFrame
     {
-        var subscription = builder(_root);
+        var subscription = builder(_modelSubscriber.GetOrCreateSubscriberFor<T>());
 
         if (_currentChanges != null)
         {
             var tempSubscriber = new ModelSubscriber();
 
-            using (builder(tempSubscriber))
+            using (builder(tempSubscriber.GetOrCreateSubscriberFor<T>()))
             {
-                tempSubscriber.Push(_currentChanges);
+                tempSubscriber.Publish(_currentChanges);
             }
         }
 
@@ -196,17 +197,17 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         }
     }
 
-    private void NotifySubscribers(Message<IModelChanges> message)
+    private void NotifySubscribers(Change<IModelChanges> change)
     {
-        _currentChanges = message;
+        _currentChanges = change;
 
-        _root.Push(message);
+        _modelSubscriber.Publish(change);
 
         _currentChanges = null;
     }
 
-    private static Message<IModelChanges> CreateModelChangesMessage(ModelChangeResult result)
+    private static Change<IModelChanges> CreateModelChangesMessage(ModelChangeResult result)
     {
-        return new Message<IModelChanges>(result.OldModel, result.NewModel, result.Changes);
+        return new Change<IModelChanges>(result.OldModel, result.NewModel, result.Changes);
     }
 }

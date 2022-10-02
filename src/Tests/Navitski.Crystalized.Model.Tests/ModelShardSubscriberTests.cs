@@ -76,9 +76,9 @@ internal class ModelShardSubscriberTests
         IModelChanges modelChanges = CreateFakeModelChanges();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.Subscribe(m => subscriptionWasCalled = true);
+        var subscription = subscriber.By(m => subscriptionWasCalled = true);
 
-        subscriber.Push(new Message<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
         Assert.That(subscription, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.True);
@@ -91,9 +91,9 @@ internal class ModelShardSubscriberTests
         IModelChanges modelChanges = CreateFakeModelChanges(frameHasChanges: false);
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.Subscribe(m => subscriptionWasCalled = true);
+        var subscription = subscriber.By(m => subscriptionWasCalled = true);
 
-        subscriber.Push(new Message<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
         Assert.That(subscription, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.False);
@@ -106,9 +106,9 @@ internal class ModelShardSubscriberTests
         IModelChanges modelChanges = CreateFakeModelChanges(hasChangesFrame: false);
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.Subscribe(m => subscriptionWasCalled = true);
+        var subscription = subscriber.By(m => subscriptionWasCalled = true);
 
-        subscriber.Push(new Message<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
         Assert.That(subscription, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.False);
@@ -120,7 +120,7 @@ internal class ModelShardSubscriberTests
         var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.With(x => x.FirstCollection).Subscribe(m => subscriptionWasCalled = true);
+        var subscription = subscriber.With(x => x.FirstCollection).By(m => subscriptionWasCalled = true);
         var fakeCollectionChanges = A.Fake<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>();
         var frame = A.Fake<IFakeChangesFrame>();
         var modelChanges = CreateFakeModelChanges(frame);
@@ -129,7 +129,7 @@ internal class ModelShardSubscriberTests
         A.CallTo(() => frame.HasChanges()).Returns(true);
         A.CallTo(() => frame.FirstCollection).Returns(fakeCollectionChanges);
 
-        subscriber.Push(new Message<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
         Assert.That(subscription, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.True);
@@ -141,7 +141,7 @@ internal class ModelShardSubscriberTests
         var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.With(x => x.OneToOneRelation).Subscribe(m => subscriptionWasCalled = true);
+        var subscription = subscriber.With(x => x.OneToOneRelation).By(m => subscriptionWasCalled = true);
         var fakeRelationChanges = A.Fake<IRelationChangeSet<FirstEntity, SecondEntity>>();
         var frame = A.Fake<IFakeChangesFrame>();
         var modelChanges = CreateFakeModelChanges(frame);
@@ -150,7 +150,7 @@ internal class ModelShardSubscriberTests
         A.CallTo(() => frame.HasChanges()).Returns(true);
         A.CallTo(() => frame.OneToOneRelation).Returns(fakeRelationChanges);
 
-        subscriber.Push(new Message<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
         Assert.That(subscription, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.True);

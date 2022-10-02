@@ -5,7 +5,7 @@ namespace Navitski.Crystalized.Model.Engine.Core;
 
 /// <inheritdoc cref="IRelation{TParent, TChild}"/>
 [DebuggerDisplay(@"Parent [{_parentToChildRelations}] Children [{_childToParentRelations}]")]
-public class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
+public sealed class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {

@@ -25,7 +25,7 @@ class Program
 
         var model = new MyModel(new[] { new ExampleModelShard() });
 
-        using (model.Subscribe(x => x.To<IExampleChangesFrame>().With(y => y.FirstCollection).Subscribe(OnFirstCollectionChanged)))
+        using (model.SubscribeTo<IExampleChangesFrame>(x => x.With(y => y.FirstCollection).By(OnFirstCollectionChanged)))
         {
             var addCommand = new DelegateCommand(model, shard =>
             {
@@ -58,13 +58,13 @@ class Program
         model.Save(Path);
     }
 
-    private static void OnFirstCollectionChanged(Message<ICollectionChangeSet<FirstEntity, FirstEntityProperties>> message)
+    private static void OnFirstCollectionChanged(Change<ICollectionChangeSet<FirstEntity, FirstEntityProperties>> change)
     {
-        foreach (var change in message.Changes)
+        foreach (var c in change.Hunk)
         {
-            Console.WriteLine($"Entity [{change.Entity}] has been {change.Action}ed.");
-            Console.WriteLine($"   Old data: {change.OldData}");
-            Console.WriteLine($"   New data: {change.NewData}");
+            Console.WriteLine($"Entity [{c.Entity}] has been {c.Action}ed.");
+            Console.WriteLine($"   Old data: {c.OldData}");
+            Console.WriteLine($"   New data: {c.NewData}");
             Console.WriteLine();
         }
     }
@@ -101,9 +101,9 @@ class MyModel : DomainModel
         _changes.Clear();
     }
 
-    protected override void OnModelChanged(Message<IModelChanges> args)
+    protected override void OnModelChanged(Change<IModelChanges> change)
     {
-        _changes.Add(args.Changes);
+        _changes.Add(change.Hunk);
     }
 }
 

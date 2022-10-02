@@ -11,7 +11,7 @@ namespace Navitski.Crystalized.Model.Engine.Core;
 /// <typeparam name="TEntity">An entity type</typeparam>
 /// <typeparam name="TProperties">A type of a properties</typeparam>
 [DebuggerDisplay("Count = {Count}")]
-public class Collection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
+public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties
 {

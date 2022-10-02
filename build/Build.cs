@@ -30,7 +30,7 @@ internal partial class Build : NukeBuild
     [CI]
     readonly GitHubActions GitHubActions;
 
-    string GitHubRegistrySource => GitHubActions != null
+    string NugetOrgRegistry => GitHubActions != null
         ? "https://api.nuget.org/v3/index.json"
         : null;
     IEnumerable<AbsolutePath> PushPackageFiles => PackagesDirectory.GlobFiles("*.nupkg");
@@ -154,7 +154,7 @@ internal partial class Build : NukeBuild
         .Executes(() =>
         {
             DotNetNuGetPush(s => s
-                .SetSource(GitHubRegistrySource)
+                .SetSource(NugetOrgRegistry)
                 .SetApiKey(RegistryApiKey)
                 .SetSkipDuplicate(true)
                 .CombineWith(PushPackageFiles, (_, p) => _

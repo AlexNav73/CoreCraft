@@ -4,7 +4,7 @@ namespace Navitski.Crystalized.Model.Storage.Sqlite;
 
 /// <inheritdoc cref="ISqliteRepositoryFactory"/>
 [ExcludeFromCodeCoverage]
-public class SqliteRepositoryFactory : ISqliteRepositoryFactory
+public sealed class SqliteRepositoryFactory : ISqliteRepositoryFactory
 {
     /// <inheritdoc cref="ISqliteRepositoryFactory.Create(string)"/>
     public ISqliteRepository Create(string path)

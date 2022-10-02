@@ -2,4 +2,4 @@
 
 namespace Navitski.Crystalized.Model.Engine.Core;
 
-internal record ModelChangeResult(IModel OldModel, IModel NewModel, IWritableModelChanges Changes);
+internal sealed record ModelChangeResult(IModel OldModel, IModel NewModel, IWritableModelChanges Changes);

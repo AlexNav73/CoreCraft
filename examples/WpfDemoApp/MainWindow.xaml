@@ -1,0 +1,100 @@
+﻿<mah:MetroWindow x:Class="WpfDemoApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        mc:Ignorable="d"
+        Title="WpfDemoApp" Height="450" Width="800">
+
+    <mah:MetroWindow.Resources>
+        <DataTemplate x:Key="ItemDataTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <TextBox Grid.Column="0"
+                         Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         VerticalAlignment="Center"
+                         Style="{StaticResource MahApps.Styles.TextBox}" />
+                <Button Grid.Column="1"
+                        Style="{StaticResource MahApps.Styles.Button.Square}"
+                        Command="{Binding RemoveCommand}"
+                        HorizontalAlignment="Right">
+                    <iconPacks:BootstrapIcons Kind="JournalMinus" />
+                </Button>
+            </Grid>
+        </DataTemplate>
+    </mah:MetroWindow.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Column="0"
+                      Grid.RowSpan="3"
+                      HorizontalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Logs}" />
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="0"
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0 10 0 10">
+            <Button Command="{Binding UndoCommand}"
+                    Style="{StaticResource MahApps.Styles.Button.Square}"
+                    Padding="5"
+                    Margin="0 0 10 0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Undo"
+                               VerticalAlignment="Center"
+                               Margin="0 0 10 0" />
+                    <iconPacks:BootstrapIcons Kind="ArrowLeftShort" />
+                </StackPanel>
+            </Button>
+            <Button Command="{Binding RedoCommand}"
+                    Style="{StaticResource MahApps.Styles.Button.Square}"
+                    Padding="5">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Redo"
+                               VerticalAlignment="Center"
+                               Margin="0 0 10 0" />
+                    <iconPacks:BootstrapIcons Kind="ArrowRightShort" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+        <ListBox Grid.Row="1"
+                 Grid.Column="1"
+                 ItemsSource="{Binding Items}"
+                 Style="{StaticResource MahApps.Styles.ListBox}"
+                 ItemTemplate="{StaticResource ItemDataTemplate}" />
+        <StackPanel Grid.Row="2"
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0 10 0 10">
+            <TextBox Text="{Binding NewItemName}"
+                     Style="{StaticResource MahApps.Styles.TextBox}"
+                     MinWidth="200"
+                     Margin="0 0 10 0"/>
+            <Button Command="{Binding AddCommand}"
+                    Style="{StaticResource MahApps.Styles.Button.Square}"
+                    Padding="5">
+                <iconPacks:BootstrapIcons Kind="Plus" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</mah:MetroWindow>

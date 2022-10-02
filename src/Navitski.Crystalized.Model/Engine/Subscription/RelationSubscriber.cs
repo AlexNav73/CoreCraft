@@ -2,7 +2,7 @@
 
 namespace Navitski.Crystalized.Model.Engine.Subscription;
 
-internal class RelationSubscriber<TChangesFrame, TParent, TChild> :
+internal sealed class RelationSubscriber<TChangesFrame, TParent, TChild> :
     Subscriber<IRelationChangeSet<TParent, TChild>>,
     IRelationSubscriber<TParent, TChild>,
     ISubscription<TChangesFrame>
@@ -17,14 +17,14 @@ internal class RelationSubscriber<TChangesFrame, TParent, TChild> :
         _accessor = accessor;
     }
 
-    public void Push(Message<TChangesFrame> message)
+    public void Publish(Change<TChangesFrame> change)
     {
-        var relationChangeSet = _accessor(message.Changes);
+        var relationChangeSet = _accessor(change.Hunk);
         if (relationChangeSet.HasChanges())
         {
-            var msg = new Message<IRelationChangeSet<TParent, TChild>>(message.OldModel, message.NewModel, relationChangeSet);
+            var msg = new Change<IRelationChangeSet<TParent, TChild>>(change.OldModel, change.NewModel, relationChangeSet);
 
-            Notify(msg);
+            Publish(msg);
         }
     }
 }

@@ -20,7 +20,14 @@ internal partial class ApplicationModelGenerator : GeneratorBase
             if (file.Path.EndsWith(ModelFileExtension))
             {
                 var fileName = Path.GetFileName(file.Path);
-                var modelScheme = serializer.Deserialize<ModelScheme>(new JsonTextReader(new StringReader(File.ReadAllText(file.Path))));
+
+                ModelScheme modelScheme = null;
+
+                using (var fileStream = File.OpenText(file.Path))
+                using (var reader = new JsonTextReader(fileStream))
+                {
+                    modelScheme = serializer.Deserialize<ModelScheme>(reader);
+                }
 
                 using (var writer = new StringWriter())
                 using (var code = new IndentedTextWriter(writer, "    "))

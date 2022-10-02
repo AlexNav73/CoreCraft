@@ -11,7 +11,7 @@ internal class ModelSubscriberTests
     {
         var subscriber = new ModelSubscriber();
 
-        var shardSubscriber = subscriber.To<IFakeChangesFrame>();
+        var shardSubscriber = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>();
 
         Assert.That(shardSubscriber, Is.Not.Null);
     }
@@ -21,8 +21,8 @@ internal class ModelSubscriberTests
     {
         var subscriber = new ModelSubscriber();
 
-        var shardSubscriber1 = subscriber.To<IFakeChangesFrame>();
-        var shardSubscriber2 = subscriber.To<IFakeChangesFrame>();
+        var shardSubscriber1 = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>();
+        var shardSubscriber2 = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>();
 
         Assert.That(shardSubscriber1, Is.Not.Null);
         Assert.That(shardSubscriber2, Is.Not.Null);
@@ -30,26 +30,26 @@ internal class ModelSubscriberTests
     }
 
     [Test]
-    public void PushChangesWillNotifySubscriptionsTest()
+    public void PublishChangesWillNotifySubscriptionsTest()
     {
         var subscriber = new ModelSubscriber();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.Subscribe(m => subscriptionWasCalled = true);
+        var subscription = subscriber.By(m => subscriptionWasCalled = true);
 
-        subscriber.Push(new Message<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), A.Fake<IModelChanges>()));
+        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), A.Fake<IModelChanges>()));
 
         Assert.That(subscription, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.True);
     }
 
     [Test]
-    public void PushChangesWillNotifyModelShardSubscriptionsTest()
+    public void PublishChangesWillNotifyModelShardSubscriptionsTest()
     {
         var subscriber = new ModelSubscriber();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.To<IFakeChangesFrame>().Subscribe(m => subscriptionWasCalled = true);
+        var subscription = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>().By(m => subscriptionWasCalled = true);
         var modelChanges = A.Fake<IModelChanges>();
         IFakeChangesFrame? ignore = null;
         var frame = A.Fake<IFakeChangesFrame>();
@@ -59,7 +59,7 @@ internal class ModelSubscriberTests
             .Returns(true)
             .AssignsOutAndRefParameters(frame);
 
-        subscriber.Push(new Message<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
         Assert.That(subscription, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.True);

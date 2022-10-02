@@ -1,6 +1,6 @@
 ﻿namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
-internal class TrackableSnapshot : Snapshot
+internal sealed class TrackableSnapshot : Snapshot
 {
     public TrackableSnapshot(Core.Model model) : base(model)
     {

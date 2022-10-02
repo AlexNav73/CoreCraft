@@ -13,12 +13,13 @@ public interface IDomainModel : IModelShardAccessor
     /// </summary>
     /// <param name="onModelChanges">A subscriber</param>
     /// <returns>Subscription</returns>
-    IDisposable Subscribe(Action<Message<IModelChanges>> onModelChanges);
+    IDisposable Subscribe(Action<Change<IModelChanges>> onModelChanges);
 
     /// <summary>
     ///     Provides a precise subscription mode to subscribe to a specific part of the model
     /// </summary>
     /// <param name="builder">A subscription builder</param>
     /// <returns>Subscription</returns>
-    IDisposable Subscribe(Func<IModelSubscriber, IDisposable> builder);
+    IDisposable SubscribeTo<T>(Func<IModelShardSubscriber<T>, IDisposable> builder)
+         where T : class, IChangesFrame;
 }

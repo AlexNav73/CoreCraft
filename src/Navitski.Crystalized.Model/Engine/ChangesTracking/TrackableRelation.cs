@@ -5,7 +5,7 @@ namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 /// <inheritdoc cref="IMutableRelation{TParent, TChild}"/>
 [DebuggerDisplay("{_relation}")]
-public class TrackableRelation<TParent, TChild> : IMutableRelation<TParent, TChild>
+public sealed class TrackableRelation<TParent, TChild> : IMutableRelation<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {

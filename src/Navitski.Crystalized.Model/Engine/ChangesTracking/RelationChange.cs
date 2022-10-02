@@ -4,7 +4,7 @@ namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 /// <inheritdoc cref="IRelationChange{TParent, TChild}"/>
 [DebuggerDisplay("Action = {Action}")]
-public class RelationChange<TParent, TChild> : IRelationChange<TParent, TChild>
+public sealed class RelationChange<TParent, TChild> : IRelationChange<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {

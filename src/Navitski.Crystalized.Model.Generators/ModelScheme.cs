@@ -1,12 +1,12 @@
 ﻿namespace Navitski.Crystalized.Model.Generators;
 
-internal record ModelScheme(IEnumerable<ModelShard> Shards);
+internal sealed record ModelScheme(IEnumerable<ModelShard> Shards);
 
-internal record ModelShard
+internal sealed record ModelShard
 {
     public string Name { get; init; }
 
-    public bool IsInternal { get; init; }
+    public Visibility Visibility { get; init; }
 
     public IEnumerable<Entity> Entities { get; init; }
 
@@ -15,9 +15,9 @@ internal record ModelShard
     public IEnumerable<Relation> Relations { get; init; }
 }
 
-internal record Collection(string Name, string Type);
+internal sealed record Collection(string Name, string Type);
 
-internal record Relation
+internal sealed record Relation
 {
     public string Name { get; init; }
 
@@ -25,11 +25,23 @@ internal record Relation
 
     public string ChildType { get; init; }
 
-    public string ParentRelationType { get; init; }
+    public RelationType ParentRelationType { get; init; }
 
-    public string ChildRelationType { get; init; }
+    public RelationType ChildRelationType { get; init; }
 }
 
-internal record Entity(string Name, IEnumerable<Property> Properties);
+internal enum Visibility
+{
+    Internal,
+    Public
+}
 
-internal record Property(string Name, string Type, bool IsNullable, string DefaultValue);
+internal enum RelationType
+{
+    OneToOne,
+    OneToMany
+}
+
+internal sealed record Entity(string Name, IEnumerable<Property> Properties);
+
+internal sealed record Property(string Name, string Type, bool IsNullable, string DefaultValue);

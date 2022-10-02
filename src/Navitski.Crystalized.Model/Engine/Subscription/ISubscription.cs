@@ -2,5 +2,5 @@
 
 internal interface ISubscription<T>
 {
-    void Push(Message<T> message);
+    void Publish(Change<T> change);
 }

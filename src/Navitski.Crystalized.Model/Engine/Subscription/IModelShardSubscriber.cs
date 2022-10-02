@@ -7,7 +7,7 @@ namespace Navitski.Crystalized.Model.Engine.Subscription;
 ///     Provides a way to subscribe to model shard changes
 /// </summary>
 /// <typeparam name="T">A changes frame of the given model shard</typeparam>
-public interface IModelShardSubscriber<T>
+public interface IModelShardSubscriber<T> : ISubscriber<T>
     where T : class, IChangesFrame
 {
     /// <summary>
@@ -31,11 +31,4 @@ public interface IModelShardSubscriber<T>
     IRelationSubscriber<TParent, TChild> With<TParent, TChild>(Expression<Func<T, IRelationChangeSet<TParent, TChild>>> accessor)
         where TParent : Entity
         where TChild : Entity;
-
-    /// <summary>
-    ///     Subscribes to a model shard changes
-    /// </summary>
-    /// <param name="onModelShardChanged">A model shard changes handler</param>
-    /// <returns>Subscription</returns>
-    IDisposable Subscribe(Action<Message<T>> onModelShardChanged);
 }

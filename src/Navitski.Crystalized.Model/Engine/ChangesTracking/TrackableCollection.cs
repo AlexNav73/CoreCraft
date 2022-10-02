@@ -5,7 +5,7 @@ namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}"/>
 [DebuggerDisplay("{_collection}")]
-public class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
+public sealed class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties
 {

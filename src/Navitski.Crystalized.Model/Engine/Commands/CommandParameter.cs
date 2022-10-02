@@ -3,7 +3,7 @@
 namespace Navitski.Crystalized.Model.Engine.Commands;
 
 [DebuggerDisplay("{Value}")]
-internal class CommandParameter<T> : ICommandParameter<T>
+internal sealed class CommandParameter<T> : ICommandParameter<T>
 {
     private T? _value;
 

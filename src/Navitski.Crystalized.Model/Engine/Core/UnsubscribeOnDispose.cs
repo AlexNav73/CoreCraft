@@ -1,6 +1,6 @@
 ﻿namespace Navitski.Crystalized.Model.Engine.Core;
 
-internal class UnsubscribeOnDispose<T> : DisposableBase
+internal sealed class UnsubscribeOnDispose<T> : DisposableBase
 {
     private readonly HashSet<Action<T>> _subscriptions;
     private readonly Action<T> _onModelChanges;

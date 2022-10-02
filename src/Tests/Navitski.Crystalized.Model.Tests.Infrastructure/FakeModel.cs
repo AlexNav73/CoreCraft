@@ -18,9 +18,9 @@ public class FakeModel : DomainModel
 
     public Stack<IWritableModelChanges> UndoStack { get; }
 
-    protected override void OnModelChanged(Message<IModelChanges> args)
+    protected override void OnModelChanged(Change<IModelChanges> args)
     {
-        UndoStack.Push((IWritableModelChanges)args.Changes);
+        UndoStack.Push((IWritableModelChanges)args.Hunk);
         Changed?.Invoke(this, EventArgs.Empty);
     }
 }

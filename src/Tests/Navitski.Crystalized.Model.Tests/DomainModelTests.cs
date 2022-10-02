@@ -17,7 +17,7 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(Array.Empty<IModelShard>(), storage);
-        Action<Message<IModelChanges>> handler = args => { };
+        Action<Change<IModelChanges>> handler = args => { };
 
         var subscription = model.Subscribe(handler);
 
@@ -29,9 +29,9 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(Array.Empty<IModelShard>(), storage);
-        Action<Message<IFakeChangesFrame>> handler = args => { };
+        Action<Change<IFakeChangesFrame>> handler = args => { };
 
-        var subscription = model.Subscribe(x => x.To<IFakeChangesFrame>().Subscribe(handler));
+        var subscription = model.SubscribeTo<IFakeChangesFrame>(x => x.By(handler));
 
         Assert.That(subscription, Is.Not.Null);
     }
@@ -44,7 +44,7 @@ public class DomainModelTests
         model.Subscribe(args =>
         {
             var subscriptionCalledImmidiately = false;
-            Action<Message<IModelChanges>> handler = args => subscriptionCalledImmidiately = true;
+            Action<Change<IModelChanges>> handler = args => subscriptionCalledImmidiately = true;
 
             var subscription = model.Subscribe(handler);
 
@@ -61,12 +61,12 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
-        model.Subscribe(x => x.To<IFakeChangesFrame>().Subscribe(args =>
+        model.SubscribeTo<IFakeChangesFrame>(x => x.By(args =>
         {
             var subscriptionCalledImmidiately = false;
-            Action<Message<IFakeChangesFrame>> handler = args => subscriptionCalledImmidiately = true;
+            Action<Change<IFakeChangesFrame>> handler = args => subscriptionCalledImmidiately = true;
 
-            var subscription = model.Subscribe(x => x.To<IFakeChangesFrame>().Subscribe(handler));
+            var subscription = model.SubscribeTo<IFakeChangesFrame>(x => x.By(handler));
 
             Assert.That(subscription, Is.Not.Null);
             Assert.That(subscriptionCalledImmidiately, Is.True);
@@ -97,7 +97,7 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
-        Action<Message<IModelChanges>> handler = args => { };
+        Action<Change<IModelChanges>> handler = args => { };
         model.Subscribe(handler);
 
         Assert.Throws<SubscriptionAlreadyExistsException>(() => model.Subscribe(handler));
@@ -137,12 +137,12 @@ public class DomainModelTests
     private class TestDomainModel : DomainModel
     {
         private readonly IStorage _storage;
-        private readonly Action<Message<IModelChanges>>? _onModelChanged;
+        private readonly Action<Change<IModelChanges>>? _onModelChanged;
 
         public TestDomainModel(
             IEnumerable<IModelShard> shards,
             IStorage storage,
-            Action<Message<IModelChanges>>? onModelChanged = null)
+            Action<Change<IModelChanges>>? onModelChanged = null)
             : base(shards, new SyncScheduler())
         {
             _storage = storage;
@@ -159,9 +159,9 @@ public class DomainModelTests
             await Save(_storage, path);
         }
 
-        protected override void OnModelChanged(Message<IModelChanges> message)
+        protected override void OnModelChanged(Change<IModelChanges> change)
         {
-            _onModelChanged?.Invoke(message);
+            _onModelChanged?.Invoke(change);
         }
     }
 }

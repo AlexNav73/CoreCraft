@@ -10,7 +10,7 @@ namespace Navitski.Crystalized.Model.Engine.Core;
 /// <typeparam name="TParent">A parent entity type</typeparam>
 /// <typeparam name="TChild">A child entity type</typeparam>
 [DebuggerDisplay("Count = {_relation.Keys.Count}")]
-public class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
+public sealed class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {
