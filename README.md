@@ -94,11 +94,9 @@ var model = new MyModel(new[]
 When our first domain model created, we can start implementing commands. Commands are used to group related modifications in one single change (SQRS pattern). **All modifications can be made only inside a command**.
 
 ```cs
-class MyAddCommand : ModelCommand<MyModel>
+class MyAddCommand : ICommand
 {
-    public MyAddCommand(MyModel model) : base(model) { }
-
-    protected override void ExecuteInternal(IModel model, CancellationToken token)
+    public void Execute(IModel model, CancellationToken token)
     {
         // for each shard two interfaces will be generated
         // IMyAppModelShard and IMutableMyAppModelShard
@@ -169,7 +167,7 @@ When we setup everything, we can execute our command:
 ```cs
 using (model.Subscribe(OnModelChanged))
 {
-    new MyAddCommand(model).Execute();
+    model.Run(new MyAddCommand());
 }
 ```
 

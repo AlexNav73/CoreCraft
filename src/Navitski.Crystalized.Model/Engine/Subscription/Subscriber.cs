@@ -25,7 +25,7 @@ internal abstract class Subscriber<T> : ISubscriber<T>, ISubscription<T>
 
     public virtual void Publish(Change<T> change)
     {
-        foreach (var handler in _handlers)
+        foreach (var handler in _handlers.ToArray())
         {
             handler(change);
         }

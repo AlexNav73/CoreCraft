@@ -64,7 +64,7 @@ internal sealed class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscr
 
             Publish(msg);
 
-            foreach (var subscription in _subscriptions.Values)
+            foreach (var subscription in _subscriptions.Values.ToArray())
             {
                 subscription.Publish(msg);
             }

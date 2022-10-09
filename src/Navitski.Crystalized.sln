@@ -25,7 +25,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{D7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example", "..\examples\Example\Example.csproj", "{8D8641B6-6F1A-4598-987E-0B0E31DFB2C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfDemoApp", "..\examples\WpfDemoApp\WpfDemoApp.csproj", "{E7F5B270-200E-4A04-8E8A-59EA27FC6F30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfDemoApp", "..\examples\WpfDemoApp\WpfDemoApp.csproj", "{E7F5B270-200E-4A04-8E8A-59EA27FC6F30}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{060C6186-840C-43EE-9D16-2B80A2EF7C85}"
+	ProjectSection(SolutionItems) = preProject
+		..\.editorconfig = ..\.editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

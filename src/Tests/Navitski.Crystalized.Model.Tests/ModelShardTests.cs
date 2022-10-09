@@ -1,6 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Core;
-using Navitski.Crystalized.Model.Tests.Infrastructure.Commands;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -42,20 +42,19 @@ public class ModelShardTests
     }
 
     [Test]
-    public void CopyModelShardTest()
+    public async Task CopyModelShardTest()
     {
         var stringValue = "test";
         var intValue = 42;
         var model = new FakeModel(new[] { new FakeModelShard() });
         FirstEntity? first = null;
         SecondEntity? second = null;
-        new DelegateCommand<FakeModel>(model, m =>
+        await model.Run<IMutableFakeModelShard>((shard, _) =>
         {
-            var shard = m.Shard<IMutableFakeModelShard>();
             first = shard.FirstCollection.Add(new() { NonNullableStringProperty = stringValue });
             second = shard.SecondCollection.Add(new() { IntProperty = intValue });
             shard.OneToOneRelation.Add(first, second);
-        }).Execute();
+        });
 
         var shard = model.Shard<IFakeModelShard>();
         var firstProperies = shard.FirstCollection.Get(first!);

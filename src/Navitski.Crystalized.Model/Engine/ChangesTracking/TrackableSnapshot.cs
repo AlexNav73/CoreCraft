@@ -2,7 +2,8 @@
 
 internal sealed class TrackableSnapshot : Snapshot
 {
-    public TrackableSnapshot(Core.Model model) : base(model)
+    public TrackableSnapshot(Core.Model model)
+        : base(model)
     {
         Changes = new ModelChanges();
     }

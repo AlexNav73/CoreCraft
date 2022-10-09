@@ -11,7 +11,6 @@ using System.Text;
 using System.Threading.Tasks;
 using WpfDemoApp.Model;
 using WpfDemoApp.Model.Entities;
-using WpfDemoApp.ModelCommands;
 using WpfDemoApp.ViewModels;
 
 namespace WpfDemoApp;
@@ -40,13 +39,12 @@ internal partial class MainWindowViewModel : ObservableObject
     public ObservableCollection<string> Logs { get; }
 
     [RelayCommand]
-    private void Add()
+    private async Task Add()
     {
         if (NewItemName != null)
         {
-            var command = new AddItemModelCommand(_model);
-            command.Name.Set(NewItemName);
-            command.Execute();
+            await _model.Run<IMutableToDoModelShard>(
+                (shard, _) => shard.Items.Add(new() { Name = NewItemName }));
 
             NewItemName = null;
         }

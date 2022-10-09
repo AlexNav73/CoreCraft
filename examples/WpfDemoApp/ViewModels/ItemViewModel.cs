@@ -1,8 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Navitski.Crystalized.Model.Engine;
+using System.Threading.Tasks;
+using WpfDemoApp.Model;
 using WpfDemoApp.Model.Entities;
-using WpfDemoApp.ModelCommands;
 
 namespace WpfDemoApp.ViewModels;
 
@@ -25,17 +26,13 @@ internal partial class ItemViewModel : ObservableObject
 
     partial void OnNameChanged(string value)
     {
-        var command = new ModifyItemModelCommand(_model);
-        command.Entity.Set(Item);
-        command.NewName.Set(value);
-        command.Execute();
+        _model.Run<IMutableToDoModelShard>(
+            (shard, _) => shard.Items.Modify(Item, p => p with { Name = value }));
     }
 
     [RelayCommand]
-    private void Remove()
+    private async Task Remove()
     {
-        var command = new RemoveItemModelCommand(_model);
-        command.Entity.Set(Item);
-        command.Execute();
+        await _model.Run<IMutableToDoModelShard>((shard, _) => shard.Items.Remove(Item));
     }
 }

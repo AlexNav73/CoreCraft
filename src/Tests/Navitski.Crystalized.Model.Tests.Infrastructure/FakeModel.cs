@@ -21,6 +21,7 @@ public class FakeModel : DomainModel
     protected override void OnModelChanged(Change<IModelChanges> change)
     {
         UndoStack.Push((IWritableModelChanges)change.Hunk);
+
         Changed?.Invoke(this, EventArgs.Empty);
     }
 }

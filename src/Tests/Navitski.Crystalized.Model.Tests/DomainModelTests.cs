@@ -1,12 +1,10 @@
 ﻿using Navitski.Crystalized.Model.Engine;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Exceptions;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
 using Navitski.Crystalized.Model.Engine.Subscription;
-using Navitski.Crystalized.Model.Tests.Infrastructure.Commands;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -37,7 +35,7 @@ public class DomainModelTests
     }
 
     [Test]
-    public void SubscribeWhenHandlingChangesTest()
+    public async Task SubscribeWhenHandlingChangesTest()
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
@@ -51,13 +49,12 @@ public class DomainModelTests
             Assert.That(subscription, Is.Not.Null);
             Assert.That(subscriptionCalledImmidiately, Is.True);
         });
-        var command = CreateCommand(model);
 
-        command.Execute();
+        await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
     }
 
     [Test]
-    public void SubscribeToModelShardWhenHandlingChangesTest()
+    public async Task SubscribeToModelShardWhenHandlingChangesTest()
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
@@ -71,13 +68,12 @@ public class DomainModelTests
             Assert.That(subscription, Is.Not.Null);
             Assert.That(subscriptionCalledImmidiately, Is.True);
         }));
-        var command = CreateCommand(model);
 
-        command.Execute();
+        await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
     }
 
     [Test]
-    public void ReceiveModelChangesAfterCommandExecutionTest()
+    public async Task ReceiveModelChangesAfterCommandExecutionTest()
     {
         var storage = A.Fake<IStorage>();
         var changesReceived = false;
@@ -85,9 +81,8 @@ public class DomainModelTests
             new[] { new FakeModelShard() },
             storage,
             m => changesReceived = true);
-        var command = CreateCommand(model);
 
-        command.Execute();
+        await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
 
         Assert.That(changesReceived, Is.True);
     }
@@ -123,15 +118,6 @@ public class DomainModelTests
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
         Assert.ThrowsAsync<ModelSaveException>(() => model.Save(""));
-    }
-
-    private ModelCommand<TestDomainModel> CreateCommand(TestDomainModel model)
-    {
-        return new DelegateCommand<TestDomainModel>(model, m =>
-        {
-            var shard = m.Shard<IMutableFakeModelShard>();
-            shard.FirstCollection.Add(new());
-        });
     }
 
     private class TestDomainModel : DomainModel

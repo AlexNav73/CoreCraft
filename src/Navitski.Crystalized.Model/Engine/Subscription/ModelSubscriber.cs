@@ -28,7 +28,7 @@ internal sealed class ModelSubscriber : Subscriber<IModelChanges>
     {
         base.Publish(change);
 
-        foreach (var subscription in _modelShardSubscriptions.Values)
+        foreach (var subscription in _modelShardSubscriptions.Values.ToArray())
         {
             subscription.Publish(change);
         }

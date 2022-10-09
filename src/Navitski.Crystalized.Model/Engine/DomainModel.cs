@@ -10,7 +10,7 @@ namespace Navitski.Crystalized.Model.Engine;
 /// <summary>
 ///     A base class for model implementation
 /// </summary>
-public abstract class DomainModel : IDomainModel, ICommandRunner
+public abstract class DomainModel : IDomainModel
 {
     private readonly View _view;
     private readonly IScheduler _scheduler;
@@ -54,7 +54,6 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         return subscription;
     }
 
-
     /// <inheritdoc cref="IDomainModel.SubscribeTo{T}(Func{IModelShardSubscriber{T}, IDisposable})"/>
     public IDisposable SubscribeTo<T>(Func<IModelShardSubscriber<T>, IDisposable> builder)
          where T : class, IChangesFrame
@@ -72,6 +71,43 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         }
 
         return subscription;
+    }
+
+    /// <inheritdoc cref="IDomainModel.Run{T}(Action{T, CancellationToken}, CancellationToken)"/>
+    public async Task Run<T>(Action<T, CancellationToken> command, CancellationToken token = default)
+        where T : IModelShard
+    {
+        await Run((m, t) => command(m.Shard<T>(), t), token);
+    }
+
+    /// <inheritdoc cref="IDomainModel.Run(Action{IModel, CancellationToken}, CancellationToken)"/>
+    public async Task Run(Action<IModel, CancellationToken> command, CancellationToken token = default)
+    {
+        var snapshot = _view.CreateTrackableSnapshot();
+
+        try
+        {
+            await _scheduler.Enqueue(() => command(snapshot, token), token);
+        }
+        catch (Exception ex)
+        {
+            throw new CommandInvokationException($"Command execution failed. Command {command.GetType()}", ex);
+        }
+
+        var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
+        if (result.Changes.HasChanges())
+        {
+            var eventArgs = CreateModelChangesMessage(result);
+
+            NotifySubscribers(eventArgs);
+            OnModelChanged(eventArgs);
+        }
+    }
+
+    /// <inheritdoc cref="IDomainModel.Run(ICommand, CancellationToken)"/>
+    public async Task Run(ICommand command, CancellationToken token = default)
+    {
+        await Run(command.Execute, token);
     }
 
     /// <summary>
@@ -171,29 +207,6 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
             var eventArgs = CreateModelChangesMessage(result);
 
             NotifySubscribers(eventArgs);
-        }
-    }
-
-    async Task ICommandRunner.Enqueue(IRunnable runnable, CancellationToken token)
-    {
-        var snapshot = _view.CreateTrackableSnapshot();
-
-        try
-        {
-            await _scheduler.Enqueue(() => runnable.Run(snapshot, token), token);
-        }
-        catch (Exception ex)
-        {
-            throw new CommandInvokationException($"Command execution failed. Command {runnable.GetType()}", ex);
-        }
-
-        var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
-        if (result.Changes.HasChanges())
-        {
-            var eventArgs = CreateModelChangesMessage(result);
-            
-            NotifySubscribers(eventArgs);
-            OnModelChanged(eventArgs);
         }
     }
 

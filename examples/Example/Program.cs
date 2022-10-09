@@ -2,7 +2,6 @@
 using Example.Model.Entities;
 using Navitski.Crystalized.Model.Engine;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
@@ -16,7 +15,7 @@ class Program
 {
     private const string Path = "test.db";
 
-    public static void Main()
+    public static async Task Main()
     {
         if (File.Exists(Path))
         {
@@ -27,7 +26,7 @@ class Program
 
         using (model.SubscribeTo<IExampleChangesFrame>(x => x.With(y => y.FirstCollection).By(OnFirstCollectionChanged)))
         {
-            var addCommand = new DelegateCommand(model, shard =>
+            await model.Run<IMutableExampleModelShard>((shard, _) =>
             {
                 for (int i = 0; i < 2; i++)
                 {
@@ -37,11 +36,10 @@ class Program
                     shard.OneToOneRelation.Add(first, second);
                 }
             });
-            addCommand.Execute();
 
             var shard = model.Shard<IExampleModelShard>();
 
-            var modifyCommand = new DelegateCommand(model, shard =>
+            await model.Run<IMutableExampleModelShard>((shard, _) =>
             {
                 var entity = shard.FirstCollection.First();
 
@@ -49,13 +47,24 @@ class Program
                 shard.FirstCollection.Modify(entity, props => props with { IntegerProperty = "modified 2".GetHashCode() });
                 shard.FirstCollection.Modify(entity, props => props with { StringProperty = "modified 3", IntegerProperty = "modified 3".GetHashCode() });
             });
-            modifyCommand.Execute();
 
-            var deleteCommand = new DelegateCommand(model, shard => shard.FirstCollection.Remove(shard.FirstCollection.Last()));
-            deleteCommand.Execute();
+            await model.Run<IMutableExampleModelShard>((shard, _) =>
+            {
+                var entity = shard.FirstCollection.Last();
+                shard.FirstCollection.Remove(entity);
+                shard.OneToOneRelation.Remove(entity, shard.OneToOneRelation.Children(entity).Single());
+            });
         }
 
         model.Save(Path);
+
+        model = new MyModel(new[] { new ExampleModelShard() });
+        using (model.SubscribeTo<IExampleChangesFrame>(x => x.With(y => y.FirstCollection).By(OnFirstCollectionChanged)))
+        {
+            Console.WriteLine("======================== Loaded ========================");
+
+            await model.Load(Path);
+        }
     }
 
     private static void OnFirstCollectionChanged(Change<ICollectionChangeSet<FirstEntity, FirstEntityProperties>> change)
@@ -85,40 +94,19 @@ class MyModel : DomainModel
         _changes = new List<IModelChanges>();
     }
 
-    public void SaveAs(string path)
-    {
-        if (File.Exists(path))
-        {
-            File.Delete(path);
-        }
-
-        Save(_storage, path);
-    }
-
     public void Save(string path)
     {
         Save(_storage, path, _changes);
         _changes.Clear();
     }
 
+    public async Task Load(string path)
+    {
+        await Load(_storage, path);
+    }
+
     protected override void OnModelChanged(Change<IModelChanges> change)
     {
         _changes.Add(change.Hunk);
-    }
-}
-
-class DelegateCommand : ModelCommand<MyModel>
-{
-    private readonly Action<IMutableExampleModelShard> _action;
-
-    public DelegateCommand(MyModel model, Action<IMutableExampleModelShard> action)
-        : base(model)
-    {
-        _action = action;
-    }
-
-    protected override void ExecuteInternal(IModel model, CancellationToken token)
-    {
-        _action(model.Shard<IMutableExampleModelShard>());
     }
 }

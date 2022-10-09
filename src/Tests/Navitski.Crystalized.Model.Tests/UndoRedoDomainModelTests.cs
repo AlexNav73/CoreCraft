@@ -1,117 +1,96 @@
 ﻿using Navitski.Crystalized.Model.Engine;
-using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
-using Navitski.Crystalized.Model.Tests.Infrastructure.Commands;
 
 namespace Navitski.Crystalized.Model.Tests;
 
 public class UndoRedoDomainModelTests
 {
     [Test]
-    public void HasChangesTest()
+    public async Task HasChangesTest()
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
         var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
-        var command = CreateAddCommand(model);
 
-        command.Execute();
+        await ExecuteAddCommand(model);
 
         Assert.That(model.HasChanges(), Is.True);
     }
 
     [Test]
-    public void ChangedEventRaisedTest()
+    public async Task ChangedEventRaisedTest()
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
         var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
         var changedEventOccurred = false;
         model.Changed += (s, e) => changedEventOccurred = true;
-        var command = CreateAddCommand(model);
 
-        command.Execute();
+        await ExecuteAddCommand(model);
 
         Assert.That(changedEventOccurred, Is.True);
     }
 
     [Test]
-    public void UndoStackHasOneChangeTest()
+    public async Task UndoStackHasOneChangeTest()
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
         var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
-        var command = CreateAddCommand(model);
 
-        command.Execute();
+        await ExecuteAddCommand(model);
 
         Assert.That(model.UndoStack.Count, Is.EqualTo(1));
     }
 
     [Test]
-    public void UndoStackIsEmptyAfterUndoExecutedTest()
+    public async Task UndoStackIsEmptyAfterUndoExecutedTest()
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
         var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
-        var command = CreateAddCommand(model);
 
-        command.Execute();
+        await ExecuteAddCommand(model);
 
-        model.Undo();
+        await model.Undo();
 
         Assert.That(model.UndoStack.Count, Is.EqualTo(0));
         Assert.That(model.RedoStack.Count, Is.EqualTo(1));
     }
 
     [Test]
-    public void RedoStackMustBeDroppedWhenNewChangesHappenedTest()
+    public async Task RedoStackMustBeDroppedWhenNewChangesHappenedTest()
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
         var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
-        var addCommand = CreateAddCommand(model);
 
-        addCommand.Execute();
+        await ExecuteAddCommand(model);
 
         var entity = model.Shard<IFakeModelShard>().FirstCollection.Single();
-        var removeCommand = CreateRemoveCommand(model, entity);
-        var modifyCommand = CreateModifyCommand(model, entity, "test");
 
-        modifyCommand.Execute();
+        await ExecuteModifyCommand(model, entity, "test");
 
         model.Undo().GetAwaiter().GetResult();
 
-        removeCommand.Execute();
+        await ExecuteRemoveCommand(model, entity);
 
         Assert.DoesNotThrow(() => model.Redo().GetAwaiter().GetResult());
     }
 
-    private ModelCommand<UndoRedoDomainModel> CreateAddCommand(UndoRedoDomainModel model)
+    private static async Task ExecuteAddCommand(IDomainModel model)
     {
-        return new DelegateCommand<UndoRedoDomainModel>(model, m =>
-        {
-            var shard = m.Shard<IMutableFakeModelShard>();
-            shard.FirstCollection.Add(new());
-        });
+        await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
     }
 
-    private ModelCommand<UndoRedoDomainModel> CreateRemoveCommand(UndoRedoDomainModel model, FirstEntity entity)
+    private static async Task ExecuteRemoveCommand(IDomainModel model, FirstEntity entity)
     {
-        return new DelegateCommand<UndoRedoDomainModel>(model, m =>
-        {
-            var shard = m.Shard<IMutableFakeModelShard>();
-            shard.FirstCollection.Remove(entity);
-        });
+        await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Remove(entity));
     }
 
-    private ModelCommand<UndoRedoDomainModel> CreateModifyCommand(UndoRedoDomainModel model, FirstEntity entity, string value)
+    private static async Task ExecuteModifyCommand(IDomainModel model, FirstEntity entity, string value)
     {
-        return new DelegateCommand<UndoRedoDomainModel>(model, m =>
-        {
-            var shard = m.Shard<IMutableFakeModelShard>();
-            shard.FirstCollection.Modify(entity, p => p with { NullableStringProperty = value });
-        });
+        await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Modify(entity, p => p with { NullableStringProperty = value }));
     }
 }
