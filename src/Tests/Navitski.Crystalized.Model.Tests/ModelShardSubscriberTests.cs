@@ -30,6 +30,7 @@ internal class ModelShardSubscriberTests
         Assert.That(ReferenceEquals(collectionSubscriber1, collectionSubscriber2), Is.True);
     }
 
+#if NETSTANDARD2_0_OR_GREATER
     [Test]
     public void CallOfWithCollectionWillThrowOnInvalidExpressionTest()
     {
@@ -37,6 +38,7 @@ internal class ModelShardSubscriberTests
 
         Assert.Throws<InvalidPropertySubscriptionException>(() => subscriber.With(x => new CollectionChangeSet<FirstEntity, FirstEntityProperties>()));
     }
+#endif
 
     [Test]
     public void FirstCallOfWithRelationWillCreateNewSubscriberTest()
@@ -61,6 +63,7 @@ internal class ModelShardSubscriberTests
         Assert.That(ReferenceEquals(relationSubscriber1, relationSubscriber2), Is.True);
     }
 
+#if NETSTANDARD2_0_OR_GREATER
     [Test]
     public void CallOfWithRelationWillThrowOnInvalidExpressionTest()
     {
@@ -68,6 +71,7 @@ internal class ModelShardSubscriberTests
 
         Assert.Throws<InvalidPropertySubscriptionException>(() => subscriber.With(x => new RelationChangeSet<FirstEntity, SecondEntity>()));
     }
+#endif
 
     [Test]
     public void PushChangesWillNotifySubscriptionsTest()

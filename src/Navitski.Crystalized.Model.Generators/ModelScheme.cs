@@ -15,7 +15,7 @@ internal sealed record ModelShard
     public IEnumerable<Relation> Relations { get; init; }
 }
 
-internal sealed record Collection(string Name, string Type);
+internal sealed record Collection(string Name, string EntityType);
 
 internal sealed record Relation
 {

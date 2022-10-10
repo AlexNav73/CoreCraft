@@ -8,9 +8,9 @@ public abstract class GeneratorBase : ISourceGenerator
 {
     private static readonly DiagnosticDescriptor _descriptor = new DiagnosticDescriptor(
 #pragma warning disable RS2008 // Enable analyzer release tracking
-            id: "AMG001",
+        id: "AMG001",
 #pragma warning restore RS2008 // Enable analyzer release tracking
-            title: "Exception occurred during generator execution",
+        title: "Exception occurred during generator execution",
         messageFormat: "Message: {0} StackTrace: {1}",
         category: "AMG",
         defaultSeverity: DiagnosticSeverity.Error,

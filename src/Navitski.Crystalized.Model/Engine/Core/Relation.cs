@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 namespace Navitski.Crystalized.Model.Engine.Core;
 

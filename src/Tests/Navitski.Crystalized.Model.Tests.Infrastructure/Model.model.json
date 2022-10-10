@@ -49,11 +49,11 @@
       "collections": [
         {
           "name": "FirstCollection",
-          "type": "FirstEntity"
+          "entityType": "FirstEntity"
         },
         {
           "name": "SecondCollection",
-          "type": "SecondEntity"
+          "entityType": "SecondEntity"
         }
       ],
       "relations": [

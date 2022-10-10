@@ -63,7 +63,7 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = new {Type(collection)}(id => new {collection.Type}(id), () => new {collection.Type}Properties());");
+                    code.WriteLine($"{collection.Name} = new {Type(collection)}(id => new {collection.EntityType}(id), () => new {collection.EntityType}Properties());");
                 }
                 code.EmptyLine();
 

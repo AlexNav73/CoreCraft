@@ -17,7 +17,7 @@
       "collections": [
         {
           "name": "Items",
-          "type": "ToDoItem"
+          "entityType": "ToDoItem"
         }
       ],
       "relations": [

@@ -29,6 +29,11 @@ internal partial class ApplicationModelGenerator : GeneratorBase
                     modelScheme = serializer.Deserialize<ModelScheme>(reader);
                 }
 
+                if (modelScheme == null)
+                {
+                    throw new InvalidOperationException($"Failed to deserialize model file [{file.Path}]");
+                }
+
                 using (var writer = new StringWriter())
                 using (var code = new IndentedTextWriter(writer, "    "))
                 {
@@ -71,11 +76,11 @@ internal partial class ApplicationModelGenerator : GeneratorBase
         return Property(prop.IsNullable ? $"{prop.Type}?" : prop.Type, prop.Name, accessors);
     }
 
-    private static string Type(Collection collection) => $"Collection<{collection.Type}, {PropertiesType(collection.Type)}>";
+    private static string Type(Collection collection) => $"Collection<{collection.EntityType}, {PropertiesType(collection.EntityType)}>";
 
     private static string Type(Relation relation) => $"Relation<{relation.ParentType}, {relation.ChildType}>";
 
-    private static string ChangesType(Collection collection) => $"CollectionChangeSet<{collection.Type}, {PropertiesType(collection.Type)}>";
+    private static string ChangesType(Collection collection) => $"CollectionChangeSet<{collection.EntityType}, {PropertiesType(collection.EntityType)}>";
 
     private static string ChangesType(Relation relation) => $"RelationChangeSet<{relation.ParentType}, {relation.ChildType}>";
 
