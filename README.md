@@ -55,7 +55,7 @@ The content of the `Model.model.json` should include shards (sub-databases), ent
       "collections": [
         {
           "name": "MyEntitiesCollection",
-          "type": "MyEntity"
+          "entityType": "MyEntity"
         }
       ],
       "relations": []
