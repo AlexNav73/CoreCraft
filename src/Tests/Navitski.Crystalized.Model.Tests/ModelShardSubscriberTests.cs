@@ -1,6 +1,8 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
+#if NETCOREAPP3_1 || NET48_OR_GREATER
 using Navitski.Crystalized.Model.Engine.Exceptions;
+#endif
 using Navitski.Crystalized.Model.Engine.Subscription;
 
 namespace Navitski.Crystalized.Model.Tests;
@@ -30,7 +32,7 @@ internal class ModelShardSubscriberTests
         Assert.That(ReferenceEquals(collectionSubscriber1, collectionSubscriber2), Is.True);
     }
 
-#if NETSTANDARD2_0_OR_GREATER
+#if NETCOREAPP3_1 || NET48_OR_GREATER
     [Test]
     public void CallOfWithCollectionWillThrowOnInvalidExpressionTest()
     {
@@ -63,7 +65,7 @@ internal class ModelShardSubscriberTests
         Assert.That(ReferenceEquals(relationSubscriber1, relationSubscriber2), Is.True);
     }
 
-#if NETSTANDARD2_0_OR_GREATER
+#if NETCOREAPP3_1 || NET48_OR_GREATER
     [Test]
     public void CallOfWithRelationWillThrowOnInvalidExpressionTest()
     {

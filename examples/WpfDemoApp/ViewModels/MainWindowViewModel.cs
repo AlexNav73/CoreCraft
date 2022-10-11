@@ -107,13 +107,13 @@ internal partial class MainWindowViewModel : ObservableObject
             builder.AppendLine();
             builder.Append(change.Entity);
 
-            if (change.Action == CollectionAction.Add || change.Action == CollectionAction.Modify)
+            if (change is { Action: CollectionAction.Add or CollectionAction.Modify })
             {
                 builder.AppendLine();
                 builder.Append(change.NewData);
             }
 
-            if (change.Action == CollectionAction.Remove || change.Action == CollectionAction.Modify)
+            if (change is { Action: CollectionAction.Remove or CollectionAction.Modify })
             {
                 builder.AppendLine();
                 builder.Append(change.OldData);
