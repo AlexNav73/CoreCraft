@@ -20,11 +20,12 @@ internal partial class ApplicationModelGenerator : GeneratorBase
             if (file.Path.EndsWith(ModelFileExtension))
             {
                 var fileName = Path.GetFileName(file.Path);
+                var additionalFileContent = file.GetText(context.CancellationToken).ToString();
 
                 ModelScheme modelScheme = null;
 
-                using (var fileStream = File.OpenText(file.Path))
-                using (var reader = new JsonTextReader(fileStream))
+                using (var stringStream = new StringReader(additionalFileContent))
+                using (var reader = new JsonTextReader(stringStream))
                 {
                     modelScheme = serializer.Deserialize<ModelScheme>(reader);
                 }
