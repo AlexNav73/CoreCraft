@@ -20,7 +20,10 @@ namespace MyCode
 }
 ";
 
-        protected async Task Run([CallerMemberName] string methodName = "", params string[] files)
+        protected async Task Run(
+            [CallerMemberName] string methodName = "",
+            Action<GeneratorDriverRunResult?>? verification = null,
+            params string[] files)
         {
             var compilation = CreateCompilation(EmptyProgram);
 
@@ -34,6 +37,8 @@ namespace MyCode
             driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var _, out var _);
 
             var runResult = driver.GetRunResult();
+
+            verification?.Invoke(runResult);
 
             foreach (var tree in runResult.GeneratedTrees)
             {
