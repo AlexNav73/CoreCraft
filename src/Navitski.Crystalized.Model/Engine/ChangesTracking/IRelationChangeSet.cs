@@ -10,7 +10,7 @@
 ///     All change sets are combined in a single <see cref="IChangesFrame"/> which can
 ///     be queried for a specific change by an entity. Changes can be inverted to produce
 ///     "undo" changes which can revert relation to the state, before modification.
-///     When needed, change sets can be applied to the collection or relation to migrate it
+///     When needed, change sets can be applied to the collection or relation to update it
 ///     to the newer version
 /// </remarks>
 public interface IRelationChangeSet<TParent, TChild> : IEnumerable<IRelationChange<TParent, TChild>>

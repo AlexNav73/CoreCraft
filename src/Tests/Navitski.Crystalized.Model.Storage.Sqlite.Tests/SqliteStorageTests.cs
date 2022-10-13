@@ -24,11 +24,11 @@ public class SqliteStorageTests
     }
 
     [Test]
-    public void MigrateTransactionCreatedSuccessfulyAndCommitedTest()
+    public void UpdateTransactionCreatedSuccessfulyAndCommitedTest()
     {
         var storage = new SqliteStorage(Array.Empty<IMigration>(), Array.Empty<IModelShardStorage>(), _factory!);
 
-        storage.Migrate("", A.Fake<IModel>(), Array.Empty<IModelChanges>());
+        storage.Update("", A.Fake<IModel>(), Array.Empty<IModelChanges>());
 
         A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _transaction!.Commit()).MustHaveHappenedOnceExactly();
@@ -36,15 +36,15 @@ public class SqliteStorageTests
     }
 
     [Test]
-    public void MigrateTransactionRollbackOnExceptionTest()
+    public void UpdateTransactionRollbackOnExceptionTest()
     {
         var shardStorage = A.Fake<IModelShardStorage>();
-        A.CallTo(() => shardStorage.Migrate(A<IRepository>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
+        A.CallTo(() => shardStorage.Update(A<IRepository>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
             .Throws<InvalidOperationException>();
 
         var storage = new SqliteStorage(Array.Empty<IMigration>(), new[] { shardStorage }, _factory!);
 
-        Assert.Throws<InvalidOperationException>(() => storage.Migrate("", A.Fake<IModel>(), new[] { A.Fake<IModelChanges>() }));
+        Assert.Throws<InvalidOperationException>(() => storage.Update("", A.Fake<IModel>(), new[] { A.Fake<IModelChanges>() }));
 
         A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _transaction!.Commit()).MustNotHaveHappened();
@@ -52,14 +52,14 @@ public class SqliteStorageTests
     }
 
     [Test]
-    public void MigrateIsCalledOnModelShardStorageTest()
+    public void UpdateIsCalledOnModelShardStorageTest()
     {
         var shardStorage = A.Fake<IModelShardStorage>();
         var storage = new SqliteStorage(Array.Empty<IMigration>(), new[] { shardStorage }, _factory!);
 
-        storage.Migrate("", A.Fake<IModel>(), new[] { A.Fake<IModelChanges>() });
+        storage.Update("", A.Fake<IModel>(), new[] { A.Fake<IModelChanges>() });
 
-        A.CallTo(() => shardStorage.Migrate(A<IRepository>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
+        A.CallTo(() => shardStorage.Update(A<IRepository>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 

@@ -21,6 +21,7 @@ internal partial class ApplicationModelGenerator
             DefineEntityType(code, entity);
             code.EmptyLine();
             DefineEntityPropertiesClass(code, entity);
+            code.EmptyLine();
         }
     }
 

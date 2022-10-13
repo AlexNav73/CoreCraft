@@ -18,7 +18,7 @@ public class AutoSaveDomainModelTests
 
         await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
 
-        A.CallTo(() => storage.Migrate(path, A<IModel>.Ignored, A<IEnumerable<IModelChanges>>.Ignored))
+        A.CallTo(() => storage.Update(path, A<IModel>.Ignored, A<IEnumerable<IModelChanges>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 }

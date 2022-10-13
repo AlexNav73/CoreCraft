@@ -205,17 +205,17 @@ namespace compilation.Model
         public static readonly Scheme FirstCollectionScheme = new(new Property[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
         public static readonly Scheme SecondCollectionScheme = new(new Property[] { new("IntProperty", typeof(int), false), new("BoolProperty", typeof(bool), false), new("DoubleProperty", typeof(double), false), new("FloatProperty", typeof(float), false) });
 
-        public override void Migrate(IRepository repository, IModel model, IModelChanges changes)
+        public override void Update(IRepository repository, IModel model, IModelChanges changes)
         {
             if (changes.TryGetFrame<IFakeChangesFrame>(out var frame))
             {
-                Migrate(repository, "Fake.FirstCollection", frame.FirstCollection, FirstCollectionScheme);
-                Migrate(repository, "Fake.SecondCollection", frame.SecondCollection, SecondCollectionScheme);
+                Update(repository, "Fake.FirstCollection", frame.FirstCollection, FirstCollectionScheme);
+                Update(repository, "Fake.SecondCollection", frame.SecondCollection, SecondCollectionScheme);
 
-                Migrate(repository, "Fake.OneToOneRelation", frame.OneToOneRelation);
-                Migrate(repository, "Fake.OneToManyRelation", frame.OneToManyRelation);
-                Migrate(repository, "Fake.ManyToOneRelation", frame.ManyToOneRelation);
-                Migrate(repository, "Fake.ManyToManyRelation", frame.ManyToManyRelation);
+                Update(repository, "Fake.OneToOneRelation", frame.OneToOneRelation);
+                Update(repository, "Fake.OneToManyRelation", frame.OneToManyRelation);
+                Update(repository, "Fake.ManyToOneRelation", frame.ManyToOneRelation);
+                Update(repository, "Fake.ManyToManyRelation", frame.ManyToManyRelation);
             }
         }
 
@@ -298,6 +298,7 @@ namespace compilation.Model.Entities
         }
 
     }
+
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -346,5 +347,6 @@ namespace compilation.Model.Entities
         }
 
     }
+
 
 }

@@ -26,7 +26,7 @@ internal partial class ApplicationModelGenerator
             }
             code.EmptyLine();
 
-            code.WriteLine("public override void Migrate(IRepository repository, IModel model, IModelChanges changes)");
+            code.WriteLine("public override void Update(IRepository repository, IModel model, IModelChanges changes)");
             code.Block(() =>
             {
                 code.WriteLine($"if (changes.TryGetFrame<I{modelShard.Name}ChangesFrame>(out var frame))");
@@ -34,13 +34,13 @@ internal partial class ApplicationModelGenerator
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"Migrate(repository, \"{modelShard.Name}.{collection.Name}\", frame.{collection.Name}, {collection.Name}Scheme);");
+                        code.WriteLine($"Update(repository, \"{modelShard.Name}.{collection.Name}\", frame.{collection.Name}, {collection.Name}Scheme);");
                     }
                     code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"Migrate(repository, \"{modelShard.Name}.{relation.Name}\", frame.{relation.Name});");
+                        code.WriteLine($"Update(repository, \"{modelShard.Name}.{relation.Name}\", frame.{relation.Name});");
                     }
                 });
             });

@@ -124,7 +124,7 @@ public abstract class DomainModel : IDomainModel
 
         try
         {
-            return _scheduler.RunParallel(() => storage.Migrate(path, copy, changes), token);
+            return _scheduler.RunParallel(() => storage.Update(path, copy, changes), token);
         }
         catch (Exception ex)
         {
