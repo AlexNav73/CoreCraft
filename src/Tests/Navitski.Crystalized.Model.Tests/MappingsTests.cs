@@ -183,6 +183,20 @@ public class MappingsTests
     }
 
     [Test]
+    public void OneToOneContainsTest()
+    {
+        var mapping = new OneToOne<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        mapping.Add(firstEntity, secondEntity);
+
+        Assert.That(mapping.Contains(firstEntity), Is.True);
+        Assert.That(mapping.Contains(new()), Is.False);
+    }
+
+    [Test]
     public void OneToOneCopyTest()
     {
         var mapping = new OneToOne<FirstEntity, SecondEntity>();
@@ -196,6 +210,22 @@ public class MappingsTests
 
         Assert.That(ReferenceEquals(mapping, copy), Is.False);
         Assert.That(copy.Children(firstEntity), Is.EquivalentTo(mapping.Children(firstEntity)));
+    }
+
+    [Test]
+    public void OneToManyContainsTest()
+    {
+        var mapping = new OneToMany<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+        var thirdEntity = new SecondEntity();
+
+        mapping.Add(firstEntity, secondEntity);
+        mapping.Add(firstEntity, thirdEntity);
+
+        Assert.That(mapping.Contains(firstEntity), Is.True);
+        Assert.That(mapping.Contains(new()), Is.False);
     }
 
     [Test]

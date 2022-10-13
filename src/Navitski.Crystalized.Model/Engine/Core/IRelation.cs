@@ -18,6 +18,20 @@ public interface IRelation<TParent, TChild> : IEnumerable<TParent>, ICopy<IRelat
     where TChild : Entity
 {
     /// <summary>
+    ///     Tests if a relation contains an entity
+    /// </summary>
+    /// <param name="entity">An entity to test</param>
+    /// <returns>True - if relation contains parent entity</returns>
+    bool Contains(TParent entity);
+
+    /// <summary>
+    ///     Tests if a relation contains an entity
+    /// </summary>
+    /// <param name="entity">An entity to test</param>
+    /// <returns>True - if relation contains child entity</returns>
+    bool Contains(TChild entity);
+
+    /// <summary>
     ///     Retrieves all children entities for a given parent entity
     /// </summary>
     /// <param name="parent">A parent entity</param>

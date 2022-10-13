@@ -43,6 +43,45 @@ public class RelationTests
     }
 
     [Test]
+    public void RelationContainsParentTest()
+    {
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        _relation!.Contains(firstEntity);
+
+        A.CallTo(() => _parentMapping!.Contains(firstEntity)).MustHaveHappened();
+        A.CallTo(() => _childMapping!.Contains(secondEntity)).MustNotHaveHappened();
+    }
+
+    [Test]
+    public void RelationContainsChildTest()
+    {
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        _relation!.Contains(secondEntity);
+
+        A.CallTo(() => _parentMapping!.Contains(firstEntity)).MustNotHaveHappened();
+        A.CallTo(() => _childMapping!.Contains(secondEntity)).MustHaveHappened();
+    }
+
+    [Test]
+    public void NotMockedRelationContainsTest()
+    {
+        var relation = new Relation<FirstEntity, SecondEntity>(new OneToOne<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        relation.Add(firstEntity, secondEntity);
+
+        Assert.That(relation.Contains(firstEntity), Is.True);
+        Assert.That(relation.Contains(secondEntity), Is.True);
+        Assert.That(relation.Contains(new FirstEntity()), Is.False);
+        Assert.That(relation.Contains(new SecondEntity()), Is.False);
+    }
+
+    [Test]
     public void RelationGetChildrenTest()
     {
         var firstEntity = new FirstEntity();

@@ -47,6 +47,26 @@ public class TrackableRelationTests
     }
 
     [Test]
+    public void TrackableRelationContainsParentTest()
+    {
+        var first = new FirstEntity();
+
+        _trackable!.Contains(first);
+
+        A.CallTo(() => _relation!.Contains(A<FirstEntity>.Ignored)).MustHaveHappened();
+    }
+
+    [Test]
+    public void TrackableRelationContainsChildTest()
+    {
+        var second = new SecondEntity();
+
+        _trackable!.Contains(second);
+
+        A.CallTo(() => _relation!.Contains(A<SecondEntity>.Ignored)).MustHaveHappened();
+    }
+
+    [Test]
     public void TrackableRelationParentsTest()
     {
         var second = new SecondEntity();

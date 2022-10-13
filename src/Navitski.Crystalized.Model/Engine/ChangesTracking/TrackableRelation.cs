@@ -37,6 +37,18 @@ public sealed class TrackableRelation<TParent, TChild> : IMutableRelation<TParen
     }
 
     /// <inheritdoc />
+    public bool Contains(TParent entity)
+    {
+        return _relation.Contains(entity);
+    }
+
+    /// <inheritdoc />
+    public bool Contains(TChild entity)
+    {
+        return _relation.Contains(entity);
+    }
+
+    /// <inheritdoc />
     public IEnumerable<TChild> Children(TParent parent)
     {
         return _relation.Children(parent);
