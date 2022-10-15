@@ -27,7 +27,7 @@ namespace MyCode
         {
             var compilation = CreateCompilation(EmptyProgram);
 
-            var generator = new ApplicationModelGenerator();
+            var generator = new ApplicationModelGenerator().AsSourceGenerator();
             var additionalFiles = files
                 .Select(x => (file: x, content: File.ReadAllText(@$"./TestFiles/{x}")))
                 .Select(x => new InMemoryAdditionalText(x.file, x.content))

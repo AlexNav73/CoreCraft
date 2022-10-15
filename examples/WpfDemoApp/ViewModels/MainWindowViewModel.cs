@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 using Navitski.Crystalized.Model.Engine;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Subscription;
@@ -60,6 +61,28 @@ internal partial class MainWindowViewModel : ObservableObject
     private async Task Redo()
     {
         await _model.Redo();
+    }
+
+    [RelayCommand]
+    private async Task Save()
+    {
+        var saveFileDialog = new SaveFileDialog();
+
+        if (saveFileDialog.ShowDialog() == true)
+        {
+            await _model.Save(saveFileDialog.FileName);
+        }
+    }
+
+    [RelayCommand]
+    private async Task Open()
+    {
+        var openFileDialog = new OpenFileDialog();
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            await _model.Load(openFileDialog.FileName);
+        }
     }
 
     private void OnItemChanged(Change<ICollectionChangeSet<ToDoItem, ToDoItemProperties>> change)
