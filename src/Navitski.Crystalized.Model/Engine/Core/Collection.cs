@@ -79,6 +79,12 @@ public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntit
         throw new KeyNotFoundException($"Collection doesn't contain entity [{entity}]");
     }
 
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Contains(TEntity)"/>
+    public bool Contains(TEntity entity)
+    {
+        return _relation.ContainsKey(entity.Id);
+    }
+
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})"/>
     public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {

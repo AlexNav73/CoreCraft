@@ -87,6 +87,16 @@ public class TrackableCollectionTests
     }
 
     [Test]
+    public void TrackableCollectionContainsTest()
+    {
+        var entity = new FirstEntity();
+        
+        _collection!.Contains(entity);
+
+        A.CallTo(() => _collection!.Contains(entity)).MustHaveHappened();
+    }
+
+    [Test]
     public void TrackableRemoveFromCollectionTest()
     {
         A.CallTo(() => _collection!.Get(A<FirstEntity>.Ignored)).Returns(new FirstEntityProperties());

@@ -21,4 +21,11 @@ public interface ICollection<TEntity, TProperties> : IEnumerable<TEntity>, ICopy
     /// <returns>Properties for a given entities</returns>
     /// <exception cref="KeyNotFoundException">Throws when an entity is not present in the collection</exception>
     TProperties Get(TEntity entity);
+
+    /// <summary>
+    ///     Tests if a collection contains an entity
+    /// </summary>
+    /// <param name="entity">An entity to check</param>
+    /// <returns>True - if a collection contains an entity</returns>
+    bool Contains(TEntity entity);
 }

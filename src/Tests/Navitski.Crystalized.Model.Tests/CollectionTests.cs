@@ -105,6 +105,22 @@ public class CollectionTests
     }
 
     [Test]
+    public void ContainsByEntityTest()
+    {
+        var entity = _collection!.Add(new());
+
+        Assert.That(_collection!.Contains(entity), Is.True);
+    }
+
+    [Test]
+    public void ContainsByInvalidEntityTest()
+    {
+        var entity = new FirstEntity();
+
+        Assert.That(_collection!.Contains(entity), Is.False);
+    }
+
+    [Test]
     public void ModifyPropertiesTest()
     {
         var value = "test";

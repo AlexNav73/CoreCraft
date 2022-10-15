@@ -22,59 +22,59 @@ public sealed class TrackableRelation<TParent, TChild> : IMutableRelation<TParen
         _relation = (IMutableRelation<TParent, TChild>)modelRelation;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Add(TParent, TChild)" />
     public void Add(TParent parent, TChild child)
     {
         _relation.Add(parent, child);
         _changes.Add(RelationAction.Linked, parent, child);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Remove(TParent, TChild)" />
     public void Remove(TParent parent, TChild child)
     {
         _relation.Remove(parent, child);
         _changes.Add(RelationAction.Unlinked, parent, child);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TParent)" />
     public bool Contains(TParent entity)
     {
         return _relation.Contains(entity);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TChild)" />
     public bool Contains(TChild entity)
     {
         return _relation.Contains(entity);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Children(TParent)" />
     public IEnumerable<TChild> Children(TParent parent)
     {
         return _relation.Children(parent);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Parents(TChild)" />
     public IEnumerable<TParent> Parents(TChild child)
     {
         return _relation.Parents(child);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="ICopy{T}.Copy" />
+    public IRelation<TParent, TChild> Copy()
+    {
+        throw new InvalidOperationException("Relation can't be copied because it is attached to changes tracking system");
+    }
+
+    /// <inheritdoc cref="IEnumerable{T}.GetEnumerator" />
     public IEnumerator<TParent> GetEnumerator()
     {
         return _relation.GetEnumerator();
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IEnumerable.GetEnumerator" />
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    /// <inheritdoc/>
-    public IRelation<TParent, TChild> Copy()
-    {
-        throw new InvalidOperationException("Relation can't be copied because it is attached to changes tracking system");
     }
 }
