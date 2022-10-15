@@ -3,14 +3,9 @@ using Navitski.Crystalized.Model.Engine.Core;
 
 namespace Navitski.Crystalized.Model.Tests.Infrastructure.Commands;
 
-internal class ModifyAllEntitiesCommand : ModelCommand<FakeModel>
+internal class ModifyAllEntitiesCommand : ICommand
 {
-    public ModifyAllEntitiesCommand(FakeModel model)
-        : base(model)
-    {
-    }
-
-    protected override void ExecuteInternal(IModel model, CancellationToken token)
+    public void Execute(IModel model, CancellationToken token = default)
     {
         var modelShard = model.Shard<IMutableFakeModelShard>();
 

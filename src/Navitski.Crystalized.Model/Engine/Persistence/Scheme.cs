@@ -9,7 +9,7 @@ namespace Navitski.Crystalized.Model.Engine.Persistence;
 /// <param name="Type">Type of a property</param>
 /// <param name="IsNullable">Nullability of a value</param>
 [ExcludeFromCodeCoverage]
-public record Property(string Name, Type Type, bool IsNullable);
+public sealed record Property(string Name, Type Type, bool IsNullable);
 
 /// <summary>
 ///     A scheme of the entity properties type. This is used instead of reflection
@@ -18,4 +18,4 @@ public record Property(string Name, Type Type, bool IsNullable);
 /// <param name="Properties">A description of each property</param>
 // TODO(#6): Could we use PropertiesBag to generate queries?
 [ExcludeFromCodeCoverage]
-public record Scheme(IReadOnlyList<Property> Properties);
+public sealed record Scheme(IReadOnlyList<Property> Properties);

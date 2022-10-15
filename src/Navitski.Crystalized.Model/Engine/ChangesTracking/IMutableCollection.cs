@@ -1,11 +1,11 @@
-﻿namespace Navitski.Crystalized.Model.Engine.Core;
+﻿namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 /// <summary>
 ///     An mutable counterpart of a <see cref="ICollection{TEntity, TProperties}"/> interface
 /// </summary>
 /// <remarks>
-///     When a <see cref="Commands.IModelCommand"/> executes it receives a mutable model.
-///     When a <see cref="Commands.IModelCommand"/> finishes, model notifies all it's subscribers
+///     When a <see cref="Commands.ICommand"/> executes it receives a mutable model.
+///     When a <see cref="Commands.ICommand"/> finishes, model notifies all it's subscribers
 ///     that model has been changed and passes a new and old model to the subscriber. When subscriber
 ///     receives models it can only read them, because all modifications must happen inside the commands
 ///     to keep track of changes. Only commands can provide an access to a mutable model shard.

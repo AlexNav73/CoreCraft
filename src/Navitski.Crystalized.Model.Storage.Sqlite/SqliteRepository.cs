@@ -6,7 +6,7 @@ using Navitski.Crystalized.Model.Engine.Persistence;
 
 namespace Navitski.Crystalized.Model.Storage.Sqlite;
 
-internal class SqliteRepository : DisposableBase, ISqliteRepository
+internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 {
     private SqliteConnection _connection;
 
@@ -277,7 +277,7 @@ internal class SqliteRepository : DisposableBase, ISqliteRepository
         change.OldData!.WriteTo(oldProperties);
         var newProperties = new PropertiesBag();
         change.NewData!.WriteTo(newProperties);
-        var diff = oldProperties.Diff(newProperties);
+        var diff = oldProperties.Compare(newProperties);
 
         return diff;
     }

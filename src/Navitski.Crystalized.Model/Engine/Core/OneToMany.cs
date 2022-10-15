@@ -10,7 +10,7 @@ namespace Navitski.Crystalized.Model.Engine.Core;
 /// <typeparam name="TParent">A parent entity type</typeparam>
 /// <typeparam name="TChild">A child entity type</typeparam>
 [DebuggerDisplay("Count = {_relation.Keys.Count}")]
-public class OneToMany<TParent, TChild> : IMapping<TParent, TChild>
+public sealed class OneToMany<TParent, TChild> : IMapping<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {
@@ -67,6 +67,12 @@ public class OneToMany<TParent, TChild> : IMapping<TParent, TChild>
         }
     }
 
+    /// <inheritdoc cref="IMapping{TParent, TChild}.Contains(TParent)"/>
+    public bool Contains(TParent parent)
+    {
+        return _relation.ContainsKey(parent);
+    }
+
     /// <inheritdoc cref="IMapping{TParent, TChild}.Children(TParent)"/>
     public IEnumerable<TChild> Children(TParent parent)
     {
@@ -76,12 +82,6 @@ public class OneToMany<TParent, TChild> : IMapping<TParent, TChild>
         }
 
         return Array.Empty<TChild>();
-    }
-
-    /// <inheritdoc cref="IMapping{TParent, TChild}.Clear"/>
-    public void Clear()
-    {
-        _relation.Clear();
     }
 
     /// <inheritdoc cref="ICopy{T}.Copy"/>

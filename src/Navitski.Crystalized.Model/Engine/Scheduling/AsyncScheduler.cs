@@ -6,7 +6,7 @@ namespace Navitski.Crystalized.Model.Engine.Scheduling;
 ///     Schedules jobs asynchronously
 /// </summary>
 [ExcludeFromCodeCoverage]
-public class AsyncScheduler : IScheduler
+public sealed class AsyncScheduler : IScheduler
 {
     /// <summary>
     ///     Enqueues join into the common processing queue.

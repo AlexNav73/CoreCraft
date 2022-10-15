@@ -13,12 +13,12 @@ namespace Navitski.Crystalized.Model.Engine.Persistence;
 public interface IStorage
 {
     /// <summary>
-    ///     Migrates existing stored data by applying new changes to them
+    ///     Updates existing stored data by applying new changes to them
     /// </summary>
     /// <param name="path">A path to the file</param>
     /// <param name="model">A model with all the changes applied</param>
     /// <param name="changes">A collection of model changes</param>
-    void Migrate(string path, IModel model, IEnumerable<IModelChanges> changes);
+    void Update(string path, IModel model, IEnumerable<IModelChanges> changes);
 
     /// <summary>
     ///     Saves the whole model

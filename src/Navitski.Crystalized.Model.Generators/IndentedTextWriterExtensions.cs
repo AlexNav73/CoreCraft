@@ -37,9 +37,9 @@ internal static class IndentedTextWriterExtensions
         }
     }
 
-    public static void Interface(this IndentedTextWriter code, bool isInternal, string name, string[] bases, Action body)
+    public static void Interface(this IndentedTextWriter code, Visibility visibility, string name, string[] bases, Action body)
     {
-        code.WriteLine($"{Visibility(isInternal)} interface {name} : {string.Join(", ", bases)}");
+        code.WriteLine($"{Visibility(visibility)} interface {name} : {string.Join(", ", bases)}");
         code.Block(() =>
         {
             body();
@@ -96,8 +96,13 @@ internal static class IndentedTextWriterExtensions
         code.WriteLine("[global::System.Diagnostics.DebuggerNonUserCodeAttribute()]");
     }
 
-    private static string Visibility(bool isInternal)
+    private static string Visibility(Visibility visibility)
     {
-        return isInternal ? "internal" : "public";
+        return visibility switch
+        {
+            Generators.Visibility.Internal => "internal",
+            Generators.Visibility.Public => "public",
+            _ => throw new NotSupportedException($"ModelShard visibility [{visibility}] is not supported")
+        };
     }
 }

@@ -1,4 +1,5 @@
-﻿using Navitski.Crystalized.Model.Engine.Exceptions;
+﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 using System.Collections;
 using System.Diagnostics;
 
@@ -11,7 +12,7 @@ namespace Navitski.Crystalized.Model.Engine.Core;
 /// <typeparam name="TEntity">An entity type</typeparam>
 /// <typeparam name="TProperties">A type of a properties</typeparam>
 [DebuggerDisplay("Count = {Count}")]
-public class Collection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
+public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties
 {
@@ -76,6 +77,12 @@ public class Collection<TEntity, TProperties> : IMutableCollection<TEntity, TPro
         }
 
         throw new KeyNotFoundException($"Collection doesn't contain entity [{entity}]");
+    }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Contains(TEntity)"/>
+    public bool Contains(TEntity entity)
+    {
+        return _relation.ContainsKey(entity.Id);
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})"/>

@@ -5,7 +5,7 @@ namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}"/>
 [DebuggerDisplay("{_collection}")]
-public class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
+public sealed class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties
 {
@@ -26,7 +26,7 @@ public class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEnt
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _collection.Count;
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Add(TProperties)"/>
     public TEntity Add(TProperties properties)
     {
         var entity = _collection.Add(properties);
@@ -34,7 +34,7 @@ public class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEnt
         return entity;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Add(Guid, Func{TProperties, TProperties})" />
     public TEntity Add(Guid id, Func<TProperties, TProperties> init)
     {
         var entity = _collection.Add(id, init);
@@ -45,20 +45,26 @@ public class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEnt
         return entity;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Add(TEntity, TProperties)" />
     public void Add(TEntity entity, TProperties properties)
     {
         _collection.Add(entity, properties);
         _changes.Add(CollectionAction.Add, entity, default, properties);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Get(TEntity)" />
     public TProperties Get(TEntity entity)
     {
         return _collection.Get(entity);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Contains(TEntity)" />
+    public bool Contains(TEntity entity)
+    {
+        return _collection.Contains(entity);
+    }
+
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})" />
     public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {
         var oldProps = _collection.Get(entity);
@@ -71,7 +77,7 @@ public class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEnt
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Remove(TEntity)" />
     public void Remove(TEntity entity)
     {
         var properties = _collection.Get(entity);
@@ -79,21 +85,21 @@ public class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEnt
         _collection.Remove(entity);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="ICopy{T}.Copy" />
+    public ICollection<TEntity, TProperties> Copy()
+    {
+        throw new InvalidOperationException("Collection can't be copied because it is attached to changes tracking system");
+    }
+
+    /// <inheritdoc cref="IEnumerable{T}.GetEnumerator" />
     public IEnumerator<TEntity> GetEnumerator()
     {
         return _collection.GetEnumerator();
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IEnumerable.GetEnumerator" />
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    /// <inheritdoc />
-    public ICollection<TEntity, TProperties> Copy()
-    {
-        throw new InvalidOperationException("Collection can't be copied because it is attached to changes tracking system");
     }
 }

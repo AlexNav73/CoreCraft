@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if NETSTANDARD2_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 
 namespace Navitski.Crystalized.Model.Engine.Exceptions;
@@ -34,3 +35,4 @@ public class InvalidPropertySubscriptionException : Exception
     {
     }
 }
+#endif

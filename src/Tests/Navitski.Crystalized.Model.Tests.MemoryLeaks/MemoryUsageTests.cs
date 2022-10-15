@@ -7,7 +7,7 @@ namespace Navitski.Crystalized.Model.Tests.MemoryTests;
 public class MemoryUsageTests
 {
     [Test]
-    public void EntitiesAndPropertiesAreCopiedOnlyWhenModifiedTest()
+    public async Task EntitiesAndPropertiesAreCopiedOnlyWhenModifiedTest()
     {
         var model = new FakeModel(new[]
         {
@@ -16,10 +16,8 @@ public class MemoryUsageTests
 
         var memoryCheckPoint1 = dotMemory.Check();
 
-        var addCommand = new AddLotOfEntitiesCommand(model, 100);
-        addCommand.Execute();
-        var modifyCommand = new ModifyAllEntitiesCommand(model);
-        modifyCommand.Execute();
+        await model.Run(new AddLotOfEntitiesCommand(100));
+        await model.Run(new ModifyAllEntitiesCommand());
 
         dotMemory.Check(mem =>
         {

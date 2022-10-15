@@ -1,5 +1,4 @@
-﻿using Navitski.Crystalized.Model.Engine;
-using Navitski.Crystalized.Model.Engine.ChangesTracking;
+﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
 
@@ -16,7 +15,7 @@ public class ModelShardStorageTests
     }
 
     [Test]
-    public void MigrateWithoutChangesTest()
+    public void UpdateWithoutChangesTest()
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
@@ -24,7 +23,7 @@ public class ModelShardStorageTests
         var changesFrame = A.Fake<IWritableChangesFrame>(c => c.Implements<IFakeChangesFrame>());
         modelChanges.Register(changesFrame);
 
-        storage.Migrate(_repository!, model, modelChanges);
+        storage.Update(_repository!, model, modelChanges);
 
         A.CallTo(() => ((IFakeChangesFrame)changesFrame).FirstCollection.HasChanges()).MustHaveHappenedOnceExactly();
         A.CallTo(() => ((IFakeChangesFrame)changesFrame).SecondCollection.HasChanges()).MustHaveHappenedOnceExactly();
@@ -35,14 +34,14 @@ public class ModelShardStorageTests
     }
 
     [Test]
-    public void MigrateCollectionAddChangeTest()
+    public void UpdateCollectionAddChangeTest()
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         SetupModelChanges(modelChanges, CollectionAction.Add, null, new());
 
-        storage.Migrate(_repository!, model, modelChanges);
+        storage.Update(_repository!, model, modelChanges);
 
         A.CallTo(() => _repository!.Insert(
             A<string>.Ignored,
@@ -52,14 +51,14 @@ public class ModelShardStorageTests
     }
 
     [Test]
-    public void MigratCollectionRemoveChangeTest()
+    public void UpdateCollectionRemoveChangeTest()
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         SetupModelChanges(modelChanges, CollectionAction.Remove, new(), null);
 
-        storage.Migrate(_repository!, model, modelChanges);
+        storage.Update(_repository!, model, modelChanges);
 
         A.CallTo(() => _repository!.Delete(
             A<string>.Ignored,
@@ -68,14 +67,14 @@ public class ModelShardStorageTests
     }
 
     [Test]
-    public void MigrateCollectionModifyChangeTest()
+    public void UpdateCollectionModifyChangeTest()
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         SetupModelChanges(modelChanges, CollectionAction.Modify, new(), new());
 
-        storage.Migrate(_repository!, model, modelChanges);
+        storage.Update(_repository!, model, modelChanges);
 
         A.CallTo(() => _repository!.Update(
             A<string>.Ignored,
@@ -85,14 +84,14 @@ public class ModelShardStorageTests
     }
 
     [Test]
-    public void MigrateRelationLinkChangeTest()
+    public void UpdateRelationLinkChangeTest()
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         SetupModelChanges(modelChanges, RelationAction.Linked);
 
-        storage.Migrate(_repository!, model, modelChanges);
+        storage.Update(_repository!, model, modelChanges);
 
         A.CallTo(() => _repository!.Insert(
             A<string>.Ignored,
@@ -101,14 +100,14 @@ public class ModelShardStorageTests
     }
 
     [Test]
-    public void MigratRelationUnlinkChangeTest()
+    public void UpdateRelationUnlinkChangeTest()
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         SetupModelChanges(modelChanges, RelationAction.Unlinked);
 
-        storage.Migrate(_repository!, model, modelChanges);
+        storage.Update(_repository!, model, modelChanges);
 
         A.CallTo(() => _repository!.Delete(
             A<string>.Ignored,

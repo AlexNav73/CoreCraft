@@ -10,13 +10,13 @@ namespace Navitski.Crystalized.Model.Engine;
 /// <summary>
 ///     A base class for model implementation
 /// </summary>
-public abstract class DomainModel : IDomainModel, ICommandRunner
+public abstract class DomainModel : IDomainModel
 {
     private readonly View _view;
     private readonly IScheduler _scheduler;
-    private readonly ModelSubscriber _root;
+    private readonly ModelSubscriber _modelSubscriber;
 
-    private volatile Message<IModelChanges>? _currentChanges;
+    private volatile Change<IModelChanges>? _currentChanges;
 
     /// <summary>
     ///     Ctor
@@ -25,13 +25,13 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
     {
         _view = new View(shards);
         _scheduler = scheduler;
-        _root = new ModelSubscriber();
+        _modelSubscriber = new ModelSubscriber();
     }
 
     /// <summary>
     ///     Raised after all subscribers handled changes
     /// </summary>
-    protected virtual void OnModelChanged(Message<IModelChanges> message)
+    protected virtual void OnModelChanged(Change<IModelChanges> change)
     {
     }
 
@@ -41,10 +41,10 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         return _view.UnsafeModel.Shard<T>();
     }
 
-    /// <inheritdoc cref="IDomainModel.Subscribe(Action{Message{IModelChanges}})"/>
-    public IDisposable Subscribe(Action<Message<IModelChanges>> onModelChanges)
+    /// <inheritdoc cref="IDomainModel.Subscribe(Action{Change{IModelChanges}})"/>
+    public IDisposable Subscribe(Action<Change<IModelChanges>> onModelChanges)
     {
-        var subscription = _root.Subscribe(onModelChanges);
+        var subscription = _modelSubscriber.By(onModelChanges);
 
         if (_currentChanges != null)
         {
@@ -54,23 +54,60 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         return subscription;
     }
 
-
-    /// <inheritdoc cref="IDomainModel.Subscribe(Func{IModelSubscriber, IDisposable})"/>
-    public IDisposable Subscribe(Func<IModelSubscriber, IDisposable> builder)
+    /// <inheritdoc cref="IDomainModel.SubscribeTo{T}(Func{IModelShardSubscriber{T}, IDisposable})"/>
+    public IDisposable SubscribeTo<T>(Func<IModelShardSubscriber<T>, IDisposable> builder)
+         where T : class, IChangesFrame
     {
-        var subscription = builder(_root);
+        var subscription = builder(_modelSubscriber.GetOrCreateSubscriberFor<T>());
 
         if (_currentChanges != null)
         {
             var tempSubscriber = new ModelSubscriber();
 
-            using (builder(tempSubscriber))
+            using (builder(tempSubscriber.GetOrCreateSubscriberFor<T>()))
             {
-                tempSubscriber.Push(_currentChanges);
+                tempSubscriber.Publish(_currentChanges);
             }
         }
 
         return subscription;
+    }
+
+    /// <inheritdoc cref="IDomainModel.Run{T}(Action{T, CancellationToken}, CancellationToken)"/>
+    public async Task Run<T>(Action<T, CancellationToken> command, CancellationToken token = default)
+        where T : IModelShard
+    {
+        await Run((m, t) => command(m.Shard<T>(), t), token);
+    }
+
+    /// <inheritdoc cref="IDomainModel.Run(Action{IModel, CancellationToken}, CancellationToken)"/>
+    public async Task Run(Action<IModel, CancellationToken> command, CancellationToken token = default)
+    {
+        var snapshot = _view.CreateTrackableSnapshot();
+
+        try
+        {
+            await _scheduler.Enqueue(() => command(snapshot, token), token);
+        }
+        catch (Exception ex)
+        {
+            throw new CommandInvokationException($"Command execution failed. Command {command.GetType()}", ex);
+        }
+
+        var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
+        if (result.Changes.HasChanges())
+        {
+            var eventArgs = CreateModelChangesMessage(result);
+
+            NotifySubscribers(eventArgs);
+            OnModelChanged(eventArgs);
+        }
+    }
+
+    /// <inheritdoc cref="IDomainModel.Run(ICommand, CancellationToken)"/>
+    public async Task Run(ICommand command, CancellationToken token = default)
+    {
+        await Run(command.Execute, token);
     }
 
     /// <summary>
@@ -87,7 +124,7 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
 
         try
         {
-            return _scheduler.RunParallel(() => storage.Migrate(path, copy, changes), token);
+            return _scheduler.RunParallel(() => storage.Update(path, copy, changes), token);
         }
         catch (Exception ex)
         {
@@ -173,40 +210,17 @@ public abstract class DomainModel : IDomainModel, ICommandRunner
         }
     }
 
-    async Task ICommandRunner.Enqueue(IRunnable runnable, CancellationToken token)
+    private void NotifySubscribers(Change<IModelChanges> change)
     {
-        var snapshot = _view.CreateTrackableSnapshot();
+        _currentChanges = change;
 
-        try
-        {
-            await _scheduler.Enqueue(() => runnable.Run(snapshot, token), token);
-        }
-        catch (Exception ex)
-        {
-            throw new CommandInvokationException($"Command execution failed. Command {runnable.GetType()}", ex);
-        }
-
-        var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
-        if (result.Changes.HasChanges())
-        {
-            var eventArgs = CreateModelChangesMessage(result);
-            
-            NotifySubscribers(eventArgs);
-            OnModelChanged(eventArgs);
-        }
-    }
-
-    private void NotifySubscribers(Message<IModelChanges> message)
-    {
-        _currentChanges = message;
-
-        _root.Push(message);
+        _modelSubscriber.Publish(change);
 
         _currentChanges = null;
     }
 
-    private static Message<IModelChanges> CreateModelChangesMessage(ModelChangeResult result)
+    private static Change<IModelChanges> CreateModelChangesMessage(ModelChangeResult result)
     {
-        return new Message<IModelChanges>(result.OldModel, result.NewModel, result.Changes);
+        return new Change<IModelChanges>(result.OldModel, result.NewModel, result.Changes);
     }
 }

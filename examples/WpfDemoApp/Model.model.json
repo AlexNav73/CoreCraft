@@ -1,0 +1,27 @@
+﻿{
+  "shards": [
+    {
+      "name": "ToDo",
+      "entities": [
+        {
+          "name": "ToDoItem",
+          "properties": [
+            {
+              "name": "Name",
+              "type": "string",
+              "defaultValue": "string.Empty"
+            }
+          ]
+        }
+      ],
+      "collections": [
+        {
+          "name": "Items",
+          "entityType": "ToDoItem"
+        }
+      ],
+      "relations": [
+      ]
+    }
+  ]
+}

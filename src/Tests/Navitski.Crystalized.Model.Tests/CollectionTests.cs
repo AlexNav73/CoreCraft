@@ -1,4 +1,5 @@
-﻿using Navitski.Crystalized.Model.Engine.Core;
+﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Exceptions;
 
 namespace Navitski.Crystalized.Model.Tests;
@@ -101,6 +102,22 @@ public class CollectionTests
     {
         Assert.That(_collection!.Count, Is.EqualTo(0));
         Assert.Throws<KeyNotFoundException>(() => _collection.Get(new FirstEntity()));
+    }
+
+    [Test]
+    public void ContainsByEntityTest()
+    {
+        var entity = _collection!.Add(new());
+
+        Assert.That(_collection!.Contains(entity), Is.True);
+    }
+
+    [Test]
+    public void ContainsByInvalidEntityTest()
+    {
+        var entity = new FirstEntity();
+
+        Assert.That(_collection!.Contains(entity), Is.False);
     }
 
     [Test]

@@ -25,7 +25,7 @@ public sealed class PropertiesBag : IPropertiesBag
     /// </summary>
     /// <param name="newProperies">A bag with new properties</param>
     /// <returns>A new bag with properties which were modified</returns>
-    public PropertiesBag Diff(PropertiesBag newProperies)
+    public PropertiesBag Compare(PropertiesBag newProperies)
     {
         var result = new PropertiesBag();
 

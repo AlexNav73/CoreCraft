@@ -1,5 +1,4 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Core;
 using System.Collections;
 
 namespace Navitski.Crystalized.Model.Tests;
@@ -45,6 +44,26 @@ public class TrackableRelationTests
         Assert.That(_changes.Single().Action, Is.EqualTo(RelationAction.Unlinked));
         Assert.That(_changes.Single().Parent, Is.EqualTo(first));
         Assert.That(_changes.Single().Child, Is.EqualTo(second));
+    }
+
+    [Test]
+    public void TrackableRelationContainsParentTest()
+    {
+        var first = new FirstEntity();
+
+        _trackable!.Contains(first);
+
+        A.CallTo(() => _relation!.Contains(A<FirstEntity>.Ignored)).MustHaveHappened();
+    }
+
+    [Test]
+    public void TrackableRelationContainsChildTest()
+    {
+        var second = new SecondEntity();
+
+        _trackable!.Contains(second);
+
+        A.CallTo(() => _relation!.Contains(A<SecondEntity>.Ignored)).MustHaveHappened();
     }
 
     [Test]

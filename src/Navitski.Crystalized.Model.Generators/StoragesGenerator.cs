@@ -18,7 +18,7 @@ internal partial class ApplicationModelGenerator
         {
             foreach (var collection in modelShard.Collections)
             {
-                var entity = modelShard.Entities.Single(x => x.Name == collection.Type);
+                var entity = modelShard.Entities.Single(x => x.Name == collection.EntityType);
                 var properties = entity.Properties.Select(x => $"new(\"{x.Name}\", typeof({x.Type}), {x.IsNullable.ToString().ToLower()})");
                 var array = string.Join(", ", properties);
 
@@ -26,7 +26,7 @@ internal partial class ApplicationModelGenerator
             }
             code.EmptyLine();
 
-            code.WriteLine("public override void Migrate(IRepository repository, IModel model, IModelChanges changes)");
+            code.WriteLine("public override void Update(IRepository repository, IModel model, IModelChanges changes)");
             code.Block(() =>
             {
                 code.WriteLine($"if (changes.TryGetFrame<I{modelShard.Name}ChangesFrame>(out var frame))");
@@ -34,13 +34,13 @@ internal partial class ApplicationModelGenerator
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"Migrate(repository, \"{modelShard.Name}.{collection.Name}\", frame.{collection.Name}, {collection.Name}Scheme);");
+                        code.WriteLine($"Update(repository, \"{modelShard.Name}.{collection.Name}\", frame.{collection.Name}, {collection.Name}Scheme);");
                     }
                     code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"Migrate(repository, \"{modelShard.Name}.{relation.Name}\", frame.{relation.Name});");
+                        code.WriteLine($"Update(repository, \"{modelShard.Name}.{relation.Name}\", frame.{relation.Name});");
                     }
                 });
             });
@@ -79,8 +79,8 @@ internal partial class ApplicationModelGenerator
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    var parentCollection = modelShard.Collections.Single(x => x.Type == relation.ParentType).Name;
-                    var childCollection = modelShard.Collections.Single(x => x.Type == relation.ChildType).Name;
+                    var parentCollection = modelShard.Collections.Single(x => x.EntityType == relation.ParentType).Name;
+                    var childCollection = modelShard.Collections.Single(x => x.EntityType == relation.ChildType).Name;
 
                     code.WriteLine($"Load(repository, \"{modelShard.Name}.{relation.Name}\", shard.{relation.Name}, shard.{parentCollection}, shard.{childCollection});");
                 }

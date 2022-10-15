@@ -1,10 +1,14 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+#if NETSTANDARD2_0_OR_GREATER
 using Navitski.Crystalized.Model.Engine.Exceptions;
 using System.Linq.Expressions;
+#elif NET5_0_OR_GREATER
+using System.Runtime.CompilerServices;
+#endif
 
 namespace Navitski.Crystalized.Model.Engine.Subscription;
 
-internal class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>, ISubscription<IModelChanges>
+internal sealed class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>, ISubscription<IModelChanges>
     where T : class, IChangesFrame
 {
     private readonly IDictionary<string, ISubscription<T>> _subscriptions;
@@ -14,7 +18,44 @@ internal class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>
         _subscriptions = new Dictionary<string, ISubscription<T>>();
     }
 
-    public ICollectionSubscriber<TEntity, TProperties> With<TEntity, TProperties>(Expression<Func<T, ICollectionChangeSet<TEntity, TProperties>>> accessor)
+#if NET5_0_OR_GREATER
+    public ICollectionSubscriber<TEntity, TProperties> With<TEntity, TProperties>(
+        Func<T, ICollectionChangeSet<TEntity, TProperties>> accessor,
+        [CallerArgumentExpression("accessor")] string expression = "")
+        where TEntity : Entity
+        where TProperties : Properties
+    {
+        if (_subscriptions.TryGetValue(expression, out var subs))
+        {
+            return (ICollectionSubscriber<TEntity, TProperties>)subs;
+        }
+
+        var subscriber = new CollectionSubscriber<T, TEntity, TProperties>(accessor);
+        _subscriptions.Add(expression, subscriber);
+
+        return subscriber;
+    }
+
+    public IRelationSubscriber<TParent, TChild> With<TParent, TChild>(
+        Func<T, IRelationChangeSet<TParent, TChild>> accessor,
+        [CallerArgumentExpression("accessor")] string expression = "")
+        where TParent : Entity
+        where TChild : Entity
+    {
+        if (_subscriptions.TryGetValue(expression, out var subs))
+        {
+            return (IRelationSubscriber<TParent, TChild>)subs;
+        }
+
+        var subscriber = new RelationSubscriber<T, TParent, TChild>(accessor);
+        _subscriptions.Add(expression, subscriber);
+
+        return subscriber;
+    }
+
+#elif NETSTANDARD2_0_OR_GREATER
+    public ICollectionSubscriber<TEntity, TProperties> With<TEntity, TProperties>(
+        Expression<Func<T, ICollectionChangeSet<TEntity, TProperties>>> accessor)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -34,7 +75,8 @@ internal class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>
         throw new InvalidPropertySubscriptionException("Accessor should contain only property access");
     }
 
-    public IRelationSubscriber<TParent, TChild> With<TParent, TChild>(Expression<Func<T, IRelationChangeSet<TParent, TChild>>> accessor)
+    public IRelationSubscriber<TParent, TChild> With<TParent, TChild>(
+        Expression<Func<T, IRelationChangeSet<TParent, TChild>>> accessor)
         where TParent : Entity
         where TChild : Entity
     {
@@ -53,18 +95,21 @@ internal class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>
 
         throw new InvalidPropertySubscriptionException("Accessor should contain only property access");
     }
+#endif
 
-    public void Push(Message<IModelChanges> message)
+    public void Publish(Change<IModelChanges> change)
     {
-        if (message.Changes.TryGetFrame<T>(out var frame) && frame.HasChanges())
+        var (oldModel, newModel, hunk) = change;
+
+        if (hunk.TryGetFrame<T>(out var frame) && frame.HasChanges())
         {
-            var msg = new Message<T>(message.OldModel, message.NewModel, frame);
+            var msg = new Change<T>(oldModel, newModel, frame);
 
-            Notify(msg);
+            Publish(msg);
 
-            foreach (var subscription in _subscriptions.Values)
+            foreach (var subscription in _subscriptions.Values.ToArray())
             {
-                subscription.Push(msg);
+                subscription.Publish(msg);
             }
         }
     }

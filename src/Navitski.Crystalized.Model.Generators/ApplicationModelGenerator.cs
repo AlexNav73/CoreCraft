@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 
@@ -7,44 +8,50 @@ namespace Navitski.Crystalized.Model.Generators;
 [Generator]
 internal partial class ApplicationModelGenerator : GeneratorBase
 {
-    private const string ModelFileExtension = ".model.json";
-
-    protected override void ExecuteInternal(GeneratorExecutionContext context)
+    protected override void ExecuteInternal(
+        SourceProductionContext context,
+        string assemblyName,
+        ImmutableArray<(string name, string content)> files)
     {
-        var compilation = (CSharpCompilation)context.Compilation;
         var options = new JsonSerializerSettings();
         var serializer = JsonSerializer.Create(options);
 
-        foreach (var file in context.AdditionalFiles)
+        foreach (var file in files)
         {
-            if (file.Path.EndsWith(ModelFileExtension))
+            ModelScheme modelScheme = null;
+
+            using (var stringStream = new StringReader(file.content))
+            using (var reader = new JsonTextReader(stringStream))
             {
-                var fileName = Path.GetFileName(file.Path);
-                var modelScheme = serializer.Deserialize<ModelScheme>(new JsonTextReader(new StringReader(File.ReadAllText(file.Path))));
+                modelScheme = serializer.Deserialize<ModelScheme>(reader);
+            }
 
-                using (var writer = new StringWriter())
-                using (var code = new IndentedTextWriter(writer, "    "))
-                {
-                    code.Preambula();
-                    Generate(compilation, code, modelScheme);
+            if (modelScheme == null)
+            {
+                throw new InvalidOperationException($"Failed to deserialize model file [{file.name}]");
+            }
 
-                    var generatedFileName = fileName.Replace(ModelFileExtension, "");
-                    AddSourceFile(context, generatedFileName, writer.ToString());
-                }
+            using (var writer = new StringWriter())
+            using (var code = new IndentedTextWriter(writer, "    "))
+            {
+                code.Preambula();
+                Generate(assemblyName, code, modelScheme);
+
+                AddSourceFile(context, file.name, writer.ToString());
             }
         }
     }
 
-    private void Generate(CSharpCompilation compilation, IndentedTextWriter code, ModelScheme modelScheme)
+    private void Generate(string assemblyName, IndentedTextWriter code, ModelScheme modelScheme)
     {
-        code.WriteLine($"namespace {compilation.AssemblyName}.Model");
+        code.WriteLine($"namespace {assemblyName}.Model");
         code.Block(() =>
         {
             code.WriteLine("using Navitski.Crystalized.Model.Engine;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.Core;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.ChangesTracking;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.Persistence;");
-            code.WriteLine($"using {compilation.AssemblyName}.Model.Entities;");
+            code.WriteLine($"using {assemblyName}.Model.Entities;");
             code.EmptyLine();
 
             GenerateModelShards(code, modelScheme.Shards);
@@ -52,7 +59,7 @@ internal partial class ApplicationModelGenerator : GeneratorBase
         });
         code.EmptyLine();
 
-        code.WriteLine($"namespace {compilation.AssemblyName}.Model.Entities");
+        code.WriteLine($"namespace {assemblyName}.Model.Entities");
         code.Block(() =>
         {
             GenerateEntities(code, modelScheme.Shards);
@@ -64,11 +71,11 @@ internal partial class ApplicationModelGenerator : GeneratorBase
         return Property(prop.IsNullable ? $"{prop.Type}?" : prop.Type, prop.Name, accessors);
     }
 
-    private static string Type(Collection collection) => $"Collection<{collection.Type}, {PropertiesType(collection.Type)}>";
+    private static string Type(Collection collection) => $"Collection<{collection.EntityType}, {PropertiesType(collection.EntityType)}>";
 
     private static string Type(Relation relation) => $"Relation<{relation.ParentType}, {relation.ChildType}>";
 
-    private static string ChangesType(Collection collection) => $"CollectionChangeSet<{collection.Type}, {PropertiesType(collection.Type)}>";
+    private static string ChangesType(Collection collection) => $"CollectionChangeSet<{collection.EntityType}, {PropertiesType(collection.EntityType)}>";
 
     private static string ChangesType(Relation relation) => $"RelationChangeSet<{relation.ParentType}, {relation.ChildType}>";
 

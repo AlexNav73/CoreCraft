@@ -4,7 +4,7 @@ namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 /// <inheritdoc cref="ICollectionChange{TEntity, TProperties}"/>
 [DebuggerDisplay("Action = {Action}")]
-internal class CollectionChange<TEntity, TProperties> : ICollectionChange<TEntity, TProperties>
+internal sealed class CollectionChange<TEntity, TProperties> : ICollectionChange<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties
 {

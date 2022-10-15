@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 namespace Navitski.Crystalized.Model.Engine.Core;
 
 /// <inheritdoc cref="IRelation{TParent, TChild}"/>
 [DebuggerDisplay(@"Parent [{_parentToChildRelations}] Children [{_childToParentRelations}]")]
-public class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
+public sealed class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {
@@ -28,6 +29,18 @@ public class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
     {
         _parentToChildRelations.Add(parent, child);
         _childToParentRelations.Add(child, parent);
+    }
+
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TParent)"/>
+    public bool Contains(TParent entity)
+    {
+        return _parentToChildRelations.Contains(entity);
+    }
+
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TChild)"/>
+    public bool Contains(TChild entity)
+    {
+        return _childToParentRelations.Contains(entity);
     }
 
     /// <inheritdoc cref="IRelation{TParent, TChild}.Children(TParent)"/>

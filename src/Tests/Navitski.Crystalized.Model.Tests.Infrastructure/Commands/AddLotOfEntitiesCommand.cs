@@ -3,17 +3,16 @@ using Navitski.Crystalized.Model.Engine.Core;
 
 namespace Navitski.Crystalized.Model.Tests.Infrastructure.Commands;
 
-public class AddLotOfEntitiesCommand : ModelCommand<FakeModel>
+public class AddLotOfEntitiesCommand : ICommand
 {
     private readonly int _count;
 
-    public AddLotOfEntitiesCommand(FakeModel model, int count)
-        : base(model)
+    public AddLotOfEntitiesCommand(int count)
     {
         _count = count;
     }
 
-    protected override void ExecuteInternal(IModel model, CancellationToken token)
+    public void Execute(IModel model, CancellationToken token)
     {
         var modelShard = model.Shard<IMutableFakeModelShard>();
 

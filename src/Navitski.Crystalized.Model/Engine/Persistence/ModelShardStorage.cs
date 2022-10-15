@@ -5,8 +5,8 @@ namespace Navitski.Crystalized.Model.Engine.Persistence;
 /// <inheritdoc cref="IModelShardStorage"/>
 public abstract class ModelShardStorage : IModelShardStorage
 {
-    /// <inheritdoc cref="IModelShardStorage.Migrate(IRepository, IModel, IModelChanges)"/>
-    public abstract void Migrate(IRepository repository, IModel model, IModelChanges changes);
+    /// <inheritdoc cref="IModelShardStorage.Update(IRepository, IModel, IModelChanges)"/>
+    public abstract void Update(IRepository repository, IModel model, IModelChanges changes);
 
     /// <inheritdoc cref="IModelShardStorage.Save(IRepository, IModel)"/>
     public abstract void Save(IRepository repository, IModel model);
@@ -15,7 +15,7 @@ public abstract class ModelShardStorage : IModelShardStorage
     public abstract void Load(IRepository repository, IModel model);
 
     /// <summary>
-    ///     Call this method for a specific collection of a model shard to migrate data
+    ///     Call this method for a specific collection of a model shard to update data
     /// </summary>
     /// <typeparam name="TEntity">A type of an entity</typeparam>
     /// <typeparam name="TProperties">A type of properties</typeparam>
@@ -23,7 +23,7 @@ public abstract class ModelShardStorage : IModelShardStorage
     /// <param name="name">A collection name</param>
     /// <param name="changes">Changes to apply</param>
     /// <param name="scheme">Scheme of properties</param>
-    protected void Migrate<TEntity, TProperties>(IRepository repository, string name, ICollectionChangeSet<TEntity, TProperties> changes, Scheme scheme)
+    protected void Update<TEntity, TProperties>(IRepository repository, string name, ICollectionChangeSet<TEntity, TProperties> changes, Scheme scheme)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -87,14 +87,14 @@ public abstract class ModelShardStorage : IModelShardStorage
     }
 
     /// <summary>
-    ///     Call this method for a specific relation of a model shard to migrate data
+    ///     Call this method for a specific relation of a model shard to update data
     /// </summary>
     /// <typeparam name="TParent">A type of a parent entity</typeparam>
     /// <typeparam name="TChild">A type of a child entity</typeparam>
     /// <param name="repository">A repository</param>
     /// <param name="name">A relation name</param>
     /// <param name="changes">Changes to apply</param>
-    protected void Migrate<TParent, TChild>(IRepository repository, string name, IRelationChangeSet<TParent, TChild> changes)
+    protected void Update<TParent, TChild>(IRepository repository, string name, IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
