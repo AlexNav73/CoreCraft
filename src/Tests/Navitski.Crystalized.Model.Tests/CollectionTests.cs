@@ -164,4 +164,17 @@ public class CollectionTests
 
         Assert.That(props, Is.EqualTo(copiedProps));
     }
+
+    [Test]
+    public void PairsCollectionTest()
+    {
+        var property = new FirstEntityProperties();
+        var entity = _collection!.Add(property);
+
+        var pairs = _collection.Pairs().ToArray();
+
+        Assert.That(pairs.Length, Is.EqualTo(1));
+        Assert.That(pairs[0].entity, Is.EqualTo(entity));
+        Assert.That(pairs[0].properties, Is.EqualTo(property));
+    }
 }

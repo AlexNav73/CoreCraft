@@ -16,7 +16,7 @@ public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntit
     where TEntity : Entity
     where TProperties : Properties
 {
-    private readonly IDictionary<Guid, TProperties> _relation;
+    private readonly IDictionary<TEntity, TProperties> _relation;
     private readonly Func<Guid, TEntity> _entityFactory;
     private readonly Func<TProperties> _propsFactory;
 
@@ -24,12 +24,12 @@ public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntit
     ///     Ctor
     /// </summary>
     public Collection(Func<Guid, TEntity> entityCreator, Func<TProperties> propsCreator)
-        : this(new Dictionary<Guid, TProperties>(), entityCreator, propsCreator)
+        : this(new Dictionary<TEntity, TProperties>(), entityCreator, propsCreator)
     {
     }
 
     private Collection(
-        IDictionary<Guid, TProperties> relation,
+        IDictionary<TEntity, TProperties> relation,
         Func<Guid, TEntity> entityFactory,
         Func<TProperties> dataFactory)
     {
@@ -60,18 +60,18 @@ public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntit
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Add(TEntity, TProperties)"/>
     public void Add(TEntity entity, TProperties properties)
     {
-        if (_relation.ContainsKey(entity.Id))
+        if (_relation.ContainsKey(entity))
         {
             throw new DuplicateKeyException($"Entity [{entity}] can't be added to the collection");
         }
 
-        _relation.Add(entity.Id, properties);
+        _relation.Add(entity, properties);
     }
 
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Get(TEntity)"/>
     public TProperties Get(TEntity entity)
     {
-        if (_relation.TryGetValue(entity.Id, out var properties))
+        if (_relation.TryGetValue(entity, out var properties))
         {
             return properties;
         }
@@ -82,15 +82,15 @@ public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntit
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Contains(TEntity)"/>
     public bool Contains(TEntity entity)
     {
-        return _relation.ContainsKey(entity.Id);
+        return _relation.ContainsKey(entity);
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})"/>
     public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {
-        if (_relation.TryGetValue(entity.Id, out var properties))
+        if (_relation.TryGetValue(entity, out var properties))
         {
-            _relation[entity.Id] = modifier(properties);
+            _relation[entity] = modifier(properties);
         }
         else
         {
@@ -101,9 +101,9 @@ public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntit
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Remove(TEntity)"/>
     public void Remove(TEntity entity)
     {
-        if (_relation.ContainsKey(entity.Id))
+        if (_relation.ContainsKey(entity))
         {
-            _relation.Remove(entity.Id);
+            _relation.Remove(entity);
         }
         else
         {
@@ -115,7 +115,7 @@ public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntit
     public ICollection<TEntity, TProperties> Copy()
     {
         return new Collection<TEntity, TProperties>(
-            new Dictionary<Guid, TProperties>(_relation),
+            new Dictionary<TEntity, TProperties>(_relation),
             _entityFactory,
             _propsFactory);
     }
@@ -123,12 +123,21 @@ public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntit
     /// <inheritdoc />
     public IEnumerator<TEntity> GetEnumerator()
     {
-        return _relation.Keys.Select(_entityFactory).GetEnumerator();
+        return _relation.Keys.GetEnumerator();
     }
 
     /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs()" />
+    public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
+    {
+        foreach (var pair in _relation)
+        {
+            yield return (pair.Key, pair.Value);
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Core;
 using System.Collections;
 
 namespace Navitski.Crystalized.Model.Tests;
@@ -155,5 +154,13 @@ public class TrackableCollectionTests
         var enumerator = ((IEnumerable)_trackable!).GetEnumerator();
 
         A.CallTo(() => _collection!.GetEnumerator()).MustHaveHappened();
+    }
+
+    [Test]
+    public void TrackableCollectionPairsEnumeratorTest()
+    {
+        var enumerator = _trackable!.Pairs();
+
+        A.CallTo(() => _collection!.Pairs()).MustHaveHappened();
     }
 }
