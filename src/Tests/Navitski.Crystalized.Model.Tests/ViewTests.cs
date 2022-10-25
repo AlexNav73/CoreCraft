@@ -1,5 +1,4 @@
-﻿using Navitski.Crystalized.Model.Engine;
-using Navitski.Crystalized.Model.Engine.Core;
+﻿using Navitski.Crystalized.Model.Engine.Core;
 
 namespace Navitski.Crystalized.Model.Tests;
 

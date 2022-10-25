@@ -102,4 +102,10 @@ public sealed class TrackableCollection<TEntity, TProperties> : IMutableCollecti
     {
         return GetEnumerator();
     }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs" />
+    public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
+    {
+        return _collection.Pairs();
+    }
 }

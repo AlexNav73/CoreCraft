@@ -28,4 +28,10 @@ public interface ICollection<TEntity, TProperties> : IEnumerable<TEntity>, ICopy
     /// <param name="entity">An entity to check</param>
     /// <returns>True - if a collection contains an entity</returns>
     bool Contains(TEntity entity);
+
+    /// <summary>
+    ///     Returns an iterator over entity-property pairs
+    /// </summary>
+    /// <returns>An iterator over entity-property pairs</returns>
+    IEnumerable<(TEntity entity, TProperties properties)> Pairs();
 }
