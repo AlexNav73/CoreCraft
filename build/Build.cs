@@ -1,4 +1,4 @@
-using Nuke.Common.CI.GitHubActions;
+﻿using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Tools.ReportGenerator;
 using System;
 using System.Collections.Generic;
@@ -91,6 +91,14 @@ internal partial class Build : NukeBuild
                 .AddProperty("Exclude", $"[{Solution.Tests.Navitski_Crystalized_Model_Tests_Infrastructure.Name}]*")
                 .AddProperty("MergeWith", CoverageDirectory / "coverage.json")
                 .SetProcessArgumentConfigurator(c => c.Add("-m:1")));
+        });
+
+    Target Perf => _ => _
+        .Executes(() =>
+        {
+            DotNetRun(s => s
+                .SetProjectFile(Solution.Tests.Navitski_Crystalized_Model_Perf)
+                .SetConfiguration(Configuration.Release));
         });
 
     Target Coverage => _ => _
