@@ -91,7 +91,7 @@ var model = new MyModel(new[]
 });
 ```
 
-When our first domain model created, we can start implementing commands. Commands are used to group related modifications in one single change (SQRS pattern). **All modifications can be made only inside a command**.
+When our first domain model created, we can start implementing commands. Commands are used to group related modifications in one single change (CQRS pattern). **All modifications can be made only inside a command**.
 
 ```cs
 class MyAddCommand : ICommand

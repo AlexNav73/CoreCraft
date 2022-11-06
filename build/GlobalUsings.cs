@@ -1,6 +1,5 @@
 ﻿global using Nuke.Common;
 global using Nuke.Common.CI;
-global using Nuke.Common.Execution;
 global using Nuke.Common.Git;
 global using Nuke.Common.IO;
 global using Nuke.Common.ProjectModel;
@@ -13,5 +12,4 @@ global using static Nuke.Common.IO.FileSystemTasks;
 global using static Nuke.Common.IO.PathConstruction;
 global using static Nuke.Common.Tools.DotMemoryUnit.DotMemoryUnitTasks;
 global using static Nuke.Common.Tools.DotNet.DotNetTasks;
-global using static Nuke.Common.Tools.Git.GitTasks;
 global using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
