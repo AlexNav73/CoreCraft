@@ -14,7 +14,8 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
     /// <summary>
     ///     Ctor
     /// </summary>
-    public CollectionChangeSet() : this(new List<ICollectionChange<TEntity, TProperties>>())
+    public CollectionChangeSet()
+        : this(new List<ICollectionChange<TEntity, TProperties>>())
     {
     }
 
@@ -26,6 +27,40 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
     /// <inheritdoc />
     public void Add(CollectionAction action, TEntity entity, TProperties? oldData, TProperties? newData)
     {
+        for (var i = _changes.Count - 1; i >= 0; i--)
+        {
+            var change = _changes[i];
+            if (change.Entity == entity)
+            {
+                if ((change.Action == CollectionAction.Add || change.Action == CollectionAction.Modify) && action == CollectionAction.Modify)
+                {
+                    _changes[i] = new CollectionChange<TEntity, TProperties>(change.Action, change.Entity, change.OldData, newData);
+                }
+                else if (change.Action == CollectionAction.Add && action == CollectionAction.Remove)
+                {
+                    _changes.RemoveAt(i);
+                }
+                else if ((change.Action == CollectionAction.Add || change.Action == CollectionAction.Modify) && action == CollectionAction.Add)
+                {
+                    throw new InvalidOperationException($"Can't add an entity [{entity}], because it already has been added");
+                }
+                else if (change.Action == CollectionAction.Remove && action == CollectionAction.Add)
+                {
+                    _changes[i] = new CollectionChange<TEntity, TProperties>(CollectionAction.Modify, change.Entity, change.OldData, newData);
+                }
+                else if (change.Action == CollectionAction.Remove && action == CollectionAction.Modify)
+                {
+                    throw new InvalidOperationException($"Can't modify an entity [{entity}], because it already has been removed");
+                }
+                else if (change.Action == CollectionAction.Remove && action == CollectionAction.Remove)
+                {
+                    throw new InvalidOperationException($"Can't remove an entity [{entity}], because it already has been removed");
+                }
+
+                return;
+            }
+        }
+
         _changes.Add(new CollectionChange<TEntity, TProperties>(action, entity, oldData, newData));
     }
 

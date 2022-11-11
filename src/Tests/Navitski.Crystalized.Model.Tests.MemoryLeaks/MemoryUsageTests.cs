@@ -1,7 +1,7 @@
 ﻿using Navitski.Crystalized.Model.Tests.Infrastructure;
 using Navitski.Crystalized.Model.Tests.Infrastructure.Commands;
 
-namespace Navitski.Crystalized.Model.Tests.MemoryTests;
+namespace Navitski.Crystalized.Model.Tests.MemoryLeaks;
 
 [DotMemoryUnit(FailIfRunWithoutSupport = false)]
 public class MemoryUsageTests
@@ -29,7 +29,7 @@ public class MemoryUsageTests
                 .GetNewObjects(q => q.Type.Is<FirstEntityProperties>())
                 .ObjectsCount;
 
-            Assert.That(countOfFirstEntities, Is.EqualTo(200), "Wrong number of entities");
+            Assert.That(countOfFirstEntities, Is.EqualTo(100), "Wrong number of entities");
             Assert.That(countOfFirstEntitiesProps, Is.EqualTo(200), "Wrong number of entities properties");
         });
 

@@ -27,6 +27,32 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     /// <inheritdoc />
     public void Add(RelationAction action, TParent parent, TChild child)
     {
+        for (var i = _changes.Count - 1; i >= 0; i--)
+        {
+            var change = _changes[i];
+            if (change.Parent == parent && change.Child == child)
+            {
+                if (change.Action == RelationAction.Linked && action == RelationAction.Linked)
+                {
+                    throw new InvalidOperationException($"Can't link [{parent}] and [{child}], because they already have been linked");
+                }
+                else if (change.Action == RelationAction.Unlinked && action == RelationAction.Unlinked)
+                {
+                    throw new InvalidOperationException($"Can't unlink [{parent}] and [{child}], because they already have been unlinked");
+                }
+                else if (change.Action == RelationAction.Linked && action == RelationAction.Unlinked)
+                {
+                    _changes.RemoveAt(i);
+                }
+                else if (change.Action == RelationAction.Unlinked && action == RelationAction.Linked)
+                {
+                    _changes[i] = new RelationChange<TParent, TChild>(action, parent, child);
+                }
+
+                return;
+            }
+        }
+
         _changes.Add(new RelationChange<TParent, TChild>(action, parent, child));
     }
 
