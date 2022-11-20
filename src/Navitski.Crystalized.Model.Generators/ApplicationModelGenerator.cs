@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 
 namespace Navitski.Crystalized.Model.Generators;
@@ -35,23 +34,23 @@ internal partial class ApplicationModelGenerator : GeneratorBase
             using (var code = new IndentedTextWriter(writer, "    "))
             {
                 code.Preambula();
-                Generate(assemblyName, code, modelScheme);
+                Generate(assemblyName, file.name, code, modelScheme);
 
                 AddSourceFile(context, file.name, writer.ToString());
             }
         }
     }
 
-    private void Generate(string assemblyName, IndentedTextWriter code, ModelScheme modelScheme)
+    private void Generate(string assemblyName, string modelName, IndentedTextWriter code, ModelScheme modelScheme)
     {
-        code.WriteLine($"namespace {assemblyName}.Model");
+        code.WriteLine($"namespace {assemblyName}.{modelName}");
         code.Block(() =>
         {
             code.WriteLine("using Navitski.Crystalized.Model.Engine;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.Core;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.ChangesTracking;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.Persistence;");
-            code.WriteLine($"using {assemblyName}.Model.Entities;");
+            code.WriteLine($"using {assemblyName}.{modelName}.Entities;");
             code.EmptyLine();
 
             GenerateModelShards(code, modelScheme.Shards);
@@ -59,7 +58,7 @@ internal partial class ApplicationModelGenerator : GeneratorBase
         });
         code.EmptyLine();
 
-        code.WriteLine($"namespace {assemblyName}.Model.Entities");
+        code.WriteLine($"namespace {assemblyName}.{modelName}.Entities");
         code.Block(() =>
         {
             GenerateEntities(code, modelScheme.Shards);

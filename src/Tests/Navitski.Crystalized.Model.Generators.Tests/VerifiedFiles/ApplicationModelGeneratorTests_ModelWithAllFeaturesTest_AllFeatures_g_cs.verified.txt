@@ -10,13 +10,13 @@
 
 #nullable enable
 
-namespace compilation.Model
+namespace compilation.AllFeatures
 {
     using Navitski.Crystalized.Model.Engine;
     using Navitski.Crystalized.Model.Engine.Core;
     using Navitski.Crystalized.Model.Engine.ChangesTracking;
     using Navitski.Crystalized.Model.Engine.Persistence;
-    using compilation.Model.Entities;
+    using compilation.AllFeatures.Entities;
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -248,7 +248,7 @@ namespace compilation.Model
 
 }
 
-namespace compilation.Model.Entities
+namespace compilation.AllFeatures.Entities
 {
     using Navitski.Crystalized.Model.Engine.Core;
 
