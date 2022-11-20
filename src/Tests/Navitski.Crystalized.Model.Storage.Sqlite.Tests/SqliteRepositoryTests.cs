@@ -1,4 +1,4 @@
-using Navitski.Crystalized.Model.Engine.ChangesTracking;
+﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 namespace Navitski.Crystalized.Model.Storage.Sqlite.Tests;
 
@@ -13,6 +13,18 @@ public class SqliteRepositoryTests
         var version = repository.GetDatabaseVersion();
 
         Assert.That(version, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void LoggingTest()
+    {
+        string? query = null;
+        using var repository = new SqliteRepository(":memory:", sql => query = sql);
+
+        repository.SetDatabaseVersion(1);
+        var version = repository.GetDatabaseVersion();
+
+        Assert.That(query, Is.EqualTo("PRAGMA user_version;"));
     }
 
     [Test]

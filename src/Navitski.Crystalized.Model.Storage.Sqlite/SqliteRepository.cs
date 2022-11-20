@@ -263,17 +263,14 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
     {
         if (_loggingAction != null)
         {
-            Task.Run(() =>
+            var builder = new StringBuilder(command.CommandText);
+
+            for (var i = 0; i < command.Parameters.Count; i++)
             {
-                var builder = new StringBuilder(command.CommandText);
+                builder.Replace(command.Parameters[i].ParameterName, command.Parameters[i].Value?.ToString());
+            }
 
-                for (var i = 0; i < command.Parameters.Count; i++)
-                {
-                    builder.Replace(command.Parameters[i].ParameterName, command.Parameters[i].Value?.ToString());
-                }
-
-                _loggingAction(builder.ToString());
-            });
+            _loggingAction(builder.ToString());
         }
     }
 

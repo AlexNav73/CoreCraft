@@ -69,6 +69,27 @@ public class ModelChangesTests
     }
 
     [Test]
+    public void MigrateTest()
+    {
+        var modelChanges = new ModelChanges();
+        var changesFrame = modelChanges.Register(new FakeChangesFrame());
+        var entity = new FirstEntity();
+        var props = new FirstEntityProperties();
+
+        changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = "test" });
+
+        var modelChanges2 = new ModelChanges();
+        var changesFrame2 = modelChanges2.Register(new FakeChangesFrame());
+        var props2 = new FirstEntityProperties();
+
+        changesFrame2.FirstCollection.Add(CollectionAction.Remove, entity, props2, props2 with { NonNullableStringProperty = "test" });
+
+        var merged = modelChanges.Merge(modelChanges2);
+
+        Assert.That(merged.HasChanges(), Is.False);
+    }
+
+    [Test]
     public void HasChangesTest()
     {
         var modelChanges = new ModelChanges();
