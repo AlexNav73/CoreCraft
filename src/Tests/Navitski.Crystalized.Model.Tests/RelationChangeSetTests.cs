@@ -58,4 +58,21 @@ public class RelationChangeSetTests
         Assert.That(change.Parent, Is.EqualTo(parent));
         Assert.That(change.Child, Is.EqualTo(child));
     }
+
+    [Test]
+    public void MergeRelationChangeSetTest()
+    {
+        var changes1 = new RelationChangeSet<FirstEntity, SecondEntity>();
+        var changes2 = new RelationChangeSet<FirstEntity, SecondEntity>();
+        var parent = new FirstEntity();
+        var child = new SecondEntity();
+
+        changes1.Add(RelationAction.Linked, parent, child);
+        changes2.Add(RelationAction.Unlinked, parent, child);
+
+        var merged = changes1.Merge(changes2);
+
+        Assert.That(merged.Count(), Is.EqualTo(0));
+        Assert.That(merged.HasChanges(), Is.False);
+    }
 }

@@ -32,4 +32,15 @@ public interface IWritableModelChanges : IModelChanges
     /// </summary>
     /// <param name="model">A target model</param>
     void Apply(IModel model);
+
+    /// <summary>
+    ///     Merges two <see cref="IWritableModelChanges"/>s into one,
+    ///     reducing a number of operations (changes) stored in the <see cref="IWritableModelChanges"/>.
+    /// </summary>
+    /// <remarks>
+    ///     It helps to optimize count of actions needed to be performed to update stored data to the latest version
+    /// </remarks>
+    /// <param name="changes">Changes, that have happened after the current ones</param>
+    /// <returns>Merged changes by combining current changes with the newest</returns>
+    IWritableModelChanges Merge(IModelChanges changes);
 }

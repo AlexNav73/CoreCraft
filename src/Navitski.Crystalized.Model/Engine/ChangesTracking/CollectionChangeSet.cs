@@ -113,4 +113,17 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
     {
         return _changes.GetEnumerator();
     }
+
+    /// <inheritdoc cref="ICollectionChangeSet{TEntity, TProperties}.Merge(ICollectionChangeSet{TEntity, TProperties})"/>
+    public ICollectionChangeSet<TEntity, TProperties> Merge(ICollectionChangeSet<TEntity, TProperties> changeSet)
+    {
+        var result = new CollectionChangeSet<TEntity, TProperties>(_changes.ToList());
+
+        foreach (var change in changeSet)
+        {
+            result.Add(change.Action, change.Entity, change.OldData, change.NewData);
+        }
+
+        return result;
+    }
 }

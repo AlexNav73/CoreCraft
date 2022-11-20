@@ -82,7 +82,7 @@ class Program
 class MyModel : DomainModel
 {
     private readonly IStorage _storage;
-    private readonly IList<IModelChanges> _changes;
+    private readonly List<IModelChanges> _changes;
 
     public MyModel(IEnumerable<IModelShard> shards)
         : base(shards, new SyncScheduler())

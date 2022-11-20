@@ -44,4 +44,15 @@ public interface IRelationChangeSet<TParent, TChild> : IEnumerable<IRelationChan
     /// </summary>
     /// <returns>True - if a change set holds some changes</returns>
     bool HasChanges();
+
+    /// <summary>
+    ///     Merges two <see cref="IRelationChangeSet{TParent, TChild}"/>s into one,
+    ///     reducing a number of operations (changes) stored in the <see cref="IRelationChangeSet{TParent, TChild}"/>.
+    /// </summary>
+    /// <remarks>
+    ///     It helps to optimize count of actions needed to be performed to update stored data to the latest version
+    /// </remarks>
+    /// <param name="changeSet">Changes, that have happened after the current ones</param>
+    /// <returns>Merged changes by combining current changes with the newest</returns>
+    IRelationChangeSet<TParent, TChild> Merge(IRelationChangeSet<TParent, TChild> changeSet);
 }

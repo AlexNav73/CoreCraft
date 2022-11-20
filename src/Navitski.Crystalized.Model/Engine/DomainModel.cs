@@ -118,7 +118,7 @@ public abstract class DomainModel : IDomainModel
     /// <param name="changes">A list of changes</param>
     /// <param name="token">Cancellation token</param>
     /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
-    protected Task Save(IStorage storage, string path, IEnumerable<IModelChanges> changes, CancellationToken token = default)
+    protected Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
     {
         var copy = _view.CopyModel();
 

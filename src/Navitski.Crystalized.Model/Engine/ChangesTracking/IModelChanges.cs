@@ -14,7 +14,7 @@
 ///     of a specific <see cref="IModelShard"/> and by using properties of an <see cref="IChangesFrame"/>
 ///     a specific collection or relation can be queried.
 /// </remarks>
-public interface IModelChanges
+public interface IModelChanges : IEnumerable<IChangesFrame>
 {
     /// <summary>
     ///     Queries a specific <see cref="IChangesFrame"/> by the type
