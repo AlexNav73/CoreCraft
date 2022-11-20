@@ -24,7 +24,7 @@ public class SqliteStorageTests
     }
 
     [Test]
-    public void UpdateTransactionCreatedSuccessfulyAndCommitedTest()
+    public void UpdateWithEmptyChangesDoesNotBeginTransactionTest()
     {
         var storage = new SqliteStorage(Array.Empty<IMigration>(), Array.Empty<IModelShardStorage>(), _factory!);
 
@@ -65,6 +65,20 @@ public class SqliteStorageTests
         storage.Update("", A.Fake<IModel>(), new[] { modelChanges });
 
         A.CallTo(() => shardStorage.Update(A<IRepository>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public void UpdateMargesModelChangesBeforeSaveTest()
+    {
+        var shardStorage = A.Fake<IModelShardStorage>();
+        var storage = new SqliteStorage(Array.Empty<IMigration>(), new[] { shardStorage }, _factory!);
+        var modelChanges1 = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
+        var modelChanges2 = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
+
+        storage.Update("", A.Fake<IModel>(), new[] { modelChanges1, modelChanges2 });
+
+        A.CallTo(() => ((IWritableModelChanges)modelChanges1).Merge(A<IModelChanges>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
