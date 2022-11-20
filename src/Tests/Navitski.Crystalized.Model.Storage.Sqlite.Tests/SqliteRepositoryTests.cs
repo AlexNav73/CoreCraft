@@ -21,10 +21,17 @@ public class SqliteRepositoryTests
         string? query = null;
         using var repository = new SqliteRepository(":memory:", sql => query = sql);
 
-        repository.SetDatabaseVersion(1);
-        var version = repository.GetDatabaseVersion();
+        var id = Guid.Parse("f4a0e880-b549-4e9d-a58c-716eab14e9f1");
 
-        Assert.That(query, Is.EqualTo("PRAGMA user_version;"));
+        repository.Insert(
+            "test",
+            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            {
+                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(id), new FirstEntityProperties() with { NonNullableStringProperty = "first entity" })
+            },
+            FakeModelShardStorage.FirstCollectionScheme);
+
+        Assert.That(query, Is.EqualTo("INSERT INTO [test] ([Id], [NonNullableStringProperty], [NullableStringProperty], [NullableStringWithDefaultValueProperty]) VALUES (f4a0e880-b549-4e9d-a58c-716eab14e9f1, first entity, , );"));
     }
 
     [Test]
