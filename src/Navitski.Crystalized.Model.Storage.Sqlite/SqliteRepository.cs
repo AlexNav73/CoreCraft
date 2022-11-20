@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Text;
 using Microsoft.Data.Sqlite;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
@@ -8,12 +9,15 @@ namespace Navitski.Crystalized.Model.Storage.Sqlite;
 
 internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 {
+    private readonly Action<string>? _loggingAction;
+
     private SqliteConnection _connection;
 
-    public SqliteRepository(string path)
+    public SqliteRepository(string path, Action<string>? loggingAction = null)
     {
         _connection = new SqliteConnection($"Data Source={path}");
         _connection.Open();
+        _loggingAction = loggingAction;
     }
 
     public IDbTransaction BeginTransaction()
@@ -25,6 +29,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
     {
         using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Migrations.GetDatabaseVersion;
+
+        Log(command);
 
         using var reader = command.ExecuteReader();
         if (reader.Read())
@@ -39,6 +45,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
     {
         using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Migrations.SetDatabaseVersion(version);
+        Log(command);
         command.ExecuteNonQuery();
     }
 
@@ -46,6 +53,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
     {
         using var command = _connection.CreateCommand();
         command.CommandText = query;
+        Log(command);
         command.ExecuteNonQuery();
     }
 
@@ -99,6 +107,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             }
 
             AssignValuesToParameters(command, change.Entity.Id, modifiedProperties);
+            Log(command);
 
             command.ExecuteNonQuery();
         }
@@ -122,6 +131,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         {
             parameter.Value = entity.Id;
 
+            Log(command);
             command.ExecuteNonQuery();
         }
     }
@@ -144,6 +154,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 
         using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Collections.Select(scheme, name);
+
+        Log(command);
 
         using var reader = command.ExecuteReader();
         while (reader.Read())
@@ -172,6 +184,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Relations.Select(name);
 
+        Log(command);
+
         using var reader = command.ExecuteReader();
         while (reader.Read())
         {
@@ -189,6 +203,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
     {
         using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.IfTableExists(name);
+
+        Log(command);
 
         using var reader = command.ExecuteReader();
         if (reader.Read())
@@ -214,6 +230,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 
             AssignValuesToParameters(command, pair.Key.Id, bag);
 
+            Log(command);
             command.ExecuteNonQuery();
         }
     }
@@ -237,7 +254,26 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             parentParameter.Value = pair.Key.Id;
             childParameter.Value = pair.Value.Id;
 
+            Log(command);
             command.ExecuteNonQuery();
+        }
+    }
+
+    private void Log(SqliteCommand command)
+    {
+        if (_loggingAction != null)
+        {
+            Task.Run(() =>
+            {
+                var builder = new StringBuilder(command.CommandText);
+
+                for (var i = 0; i < command.Parameters.Count; i++)
+                {
+                    builder.Replace(command.Parameters[i].ParameterName, command.Parameters[i].Value?.ToString());
+                }
+
+                _loggingAction(builder.ToString());
+            });
         }
     }
 
@@ -256,7 +292,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    private int CreateCommandKey(IEnumerable<string> strings)
+    private static int CreateCommandKey(IEnumerable<string> strings)
     {
         unchecked // Overflow is fine, just wrap
         {

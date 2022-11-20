@@ -14,6 +14,7 @@ public sealed class SqliteStorage : IStorage
     private readonly MigrationRunner _migrationRunner;
     private readonly IEnumerable<IModelShardStorage> _storages;
     private readonly ISqliteRepositoryFactory _sqliteRepositoryFactory;
+    private readonly Action<string>? _logginAction;
 
     /// <summary>
     ///     Ctor
@@ -21,17 +22,19 @@ public sealed class SqliteStorage : IStorage
     public SqliteStorage(
         IEnumerable<IMigration> migrations,
         IEnumerable<IModelShardStorage> storages,
-        ISqliteRepositoryFactory sqliteRepositoryFactory)
+        ISqliteRepositoryFactory sqliteRepositoryFactory,
+        Action<string>? logginAction = null)
     {
         _migrationRunner = new MigrationRunner(migrations);
         _storages = storages;
         _sqliteRepositoryFactory = sqliteRepositoryFactory;
+        _logginAction = logginAction;
     }
 
     /// <inheritdoc cref="IStorage.Update(string, IModel, IReadOnlyList{IModelChanges})"/>
     public void Update(string path, IModel model, IReadOnlyList<IModelChanges> changes)
     {
-        if (changes.Any())
+        if (changes.Count > 0)
         {
             var merged = (IWritableModelChanges)changes[0];
             for (var i = 1; i < changes.Count; i++)
@@ -46,7 +49,7 @@ public sealed class SqliteStorage : IStorage
 
                 try
                 {
-                    repository = _sqliteRepositoryFactory.Create(path);
+                    repository = _sqliteRepositoryFactory.Create(path, _logginAction);
                     transaction = repository.BeginTransaction();
 
                     foreach (var storage in _storages)
@@ -78,7 +81,7 @@ public sealed class SqliteStorage : IStorage
 
         try
         {
-            repository = _sqliteRepositoryFactory.Create(path);
+            repository = _sqliteRepositoryFactory.Create(path, _logginAction);
             transaction = repository.BeginTransaction();
 
             _migrationRunner.UpdateDatabaseVersion(repository);
@@ -105,7 +108,7 @@ public sealed class SqliteStorage : IStorage
     /// <inheritdoc cref="IStorage.Load(string, IModel)"/>
     public void Load(string path, IModel model)
     {
-        using var repository = _sqliteRepositoryFactory.Create(path);
+        using var repository = _sqliteRepositoryFactory.Create(path, _logginAction);
 
         _migrationRunner.Run(repository);
 

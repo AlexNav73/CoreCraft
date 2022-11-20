@@ -28,13 +28,10 @@ class Program
         {
             await model.Run<IMutableExampleModelShard>((shard, _) =>
             {
-                for (int i = 0; i < 2; i++)
-                {
-                    var first = shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
-                    var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5 });
+                var first = shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
+                var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5 });
 
-                    shard.OneToOneRelation.Add(first, second);
-                }
+                shard.OneToOneRelation.Add(first, second);
             });
 
             var shard = model.Shard<IExampleModelShard>();
@@ -51,6 +48,7 @@ class Program
             await model.Run<IMutableExampleModelShard>((shard, _) =>
             {
                 var entity = shard.FirstCollection.Last();
+
                 shard.FirstCollection.Remove(entity);
                 shard.OneToOneRelation.Remove(entity, shard.OneToOneRelation.Children(entity).Single());
             });
@@ -90,7 +88,8 @@ class MyModel : DomainModel
         _storage = new SqliteStorage(
             Array.Empty<IMigration>(),
             new[] { new ExampleModelShardStorage() },
-            new SqliteRepositoryFactory());
+            new SqliteRepositoryFactory(),
+            Console.WriteLine);
         _changes = new List<IModelChanges>();
     }
 
