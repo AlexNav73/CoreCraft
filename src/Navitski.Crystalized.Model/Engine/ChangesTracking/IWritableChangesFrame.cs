@@ -24,4 +24,15 @@ public interface IWritableChangesFrame : IChangesFrame
     /// </summary>
     /// <returns>A new inverted changes</returns>
     IWritableChangesFrame Invert();
+
+    /// <summary>
+    ///     Merges two <see cref="IWritableChangesFrame"/>s into one,
+    ///     reducing a number of operations (changes) stored in the <see cref="IWritableChangesFrame"/>.
+    /// </summary>
+    /// <remarks>
+    ///     It helps to optimize count of actions needed to be performed to update stored data to the latest version
+    /// </remarks>
+    /// <param name="frame">Changes, that have happened after the current ones</param>
+    /// <returns>Merged frames by combining current frame with the newest</returns>
+    IWritableChangesFrame Merge(IChangesFrame frame);
 }

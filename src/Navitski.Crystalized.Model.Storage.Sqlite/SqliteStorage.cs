@@ -28,36 +28,45 @@ public sealed class SqliteStorage : IStorage
         _sqliteRepositoryFactory = sqliteRepositoryFactory;
     }
 
-    /// <inheritdoc cref="IStorage.Update(string, IModel, IEnumerable{IModelChanges})"/>
-    public void Update(string path, IModel model, IEnumerable<IModelChanges> changes)
+    /// <inheritdoc cref="IStorage.Update(string, IModel, IReadOnlyList{IModelChanges})"/>
+    public void Update(string path, IModel model, IReadOnlyList<IModelChanges> changes)
     {
-        ISqliteRepository? repository = null;
-        IDbTransaction? transaction = null;
-
-        try
+        if (changes.Any())
         {
-            repository = _sqliteRepositoryFactory.Create(path);
-            transaction = repository.BeginTransaction();
-
-            foreach (var change in changes)
+            var merged = (IWritableModelChanges)changes[0];
+            for (var i = 1; i < changes.Count; i++)
             {
-                foreach (var storage in _storages)
-                {
-                    storage.Update(repository, model, change);
-                }
+                merged = merged.Merge(changes[i]);
             }
 
-            transaction.Commit();
-        }
-        catch (Exception)
-        {
-            transaction?.Rollback();
-            throw;
-        }
-        finally
-        {
-            transaction?.Dispose();
-            repository?.Dispose();
+            if (merged.HasChanges())
+            {
+                ISqliteRepository? repository = null;
+                IDbTransaction? transaction = null;
+
+                try
+                {
+                    repository = _sqliteRepositoryFactory.Create(path);
+                    transaction = repository.BeginTransaction();
+
+                    foreach (var storage in _storages)
+                    {
+                        storage.Update(repository, model, merged);
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction?.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    transaction?.Dispose();
+                    repository?.Dispose();
+                }
+            }
         }
     }
 

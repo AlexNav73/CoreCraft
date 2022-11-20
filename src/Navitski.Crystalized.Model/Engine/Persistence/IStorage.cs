@@ -18,7 +18,7 @@ public interface IStorage
     /// <param name="path">A path to the file</param>
     /// <param name="model">A model with all the changes applied</param>
     /// <param name="changes">A collection of model changes</param>
-    void Update(string path, IModel model, IEnumerable<IModelChanges> changes);
+    void Update(string path, IModel model, IReadOnlyList<IModelChanges> changes);
 
     /// <summary>
     ///     Saves the whole model

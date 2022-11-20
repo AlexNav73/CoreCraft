@@ -1,4 +1,5 @@
-﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+﻿using System.Collections;
+using Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -79,5 +80,21 @@ public class ModelChangesTests
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = value });
 
         Assert.That(changesFrame.HasChanges(), Is.True);
+    }
+
+    [Test]
+    public void GetEnumeratorTest()
+    {
+        var modelChanges = new ModelChanges();
+
+        Assert.That(modelChanges.GetEnumerator(), Is.Not.Null);
+    }
+
+    [Test]
+    public void GetNonGenericEnumeratorTest()
+    {
+        var modelChanges = new ModelChanges();
+
+        Assert.That(((IEnumerable)modelChanges).GetEnumerator(), Is.Not.Null);
     }
 }

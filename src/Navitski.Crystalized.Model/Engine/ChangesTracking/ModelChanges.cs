@@ -1,4 +1,6 @@
-﻿namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
+﻿using System.Collections;
+
+namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 internal sealed class ModelChanges : IWritableModelChanges
 {
@@ -53,9 +55,35 @@ internal sealed class ModelChanges : IWritableModelChanges
         }
     }
 
+    public IWritableModelChanges Merge(IModelChanges changes)
+    {
+        var changesFrames = changes.Cast<IWritableChangesFrame>().ToDictionary(k => k.GetType());
+        var result = new List<IChangesFrame>();
+
+        foreach (var frame in _frames.Cast<IWritableChangesFrame>())
+        {
+            if (changesFrames.TryGetValue(frame.GetType(), out var changesFrame))
+            {
+                result.Add(frame.Merge(changesFrame));
+            }
+        }
+
+        return new ModelChanges(result);
+    }
+
     /// <inheritdoc />
     public bool HasChanges()
     {
         return _frames.Any(x => x.HasChanges());
+    }
+
+    public IEnumerator<IChangesFrame> GetEnumerator()
+    {
+        return _frames.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _frames.GetEnumerator();
     }
 }

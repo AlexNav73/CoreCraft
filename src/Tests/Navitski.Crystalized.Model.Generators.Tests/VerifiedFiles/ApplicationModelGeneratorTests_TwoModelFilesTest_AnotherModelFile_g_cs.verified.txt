@@ -47,6 +47,7 @@ namespace compilation.AnotherModelFile
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
     internal sealed partial class FakeModelShard : IFakeModelShard
     {
         public FakeModelShard()
@@ -119,6 +120,7 @@ namespace compilation.AnotherModelFile
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
     internal sealed class FakeChangesFrame : IFakeChangesFrame, IWritableChangesFrame
     {
         public FakeChangesFrame()
@@ -170,11 +172,28 @@ namespace compilation.AnotherModelFile
         {
             return FirstCollection.HasChanges() || SecondCollection.HasChanges() || OneToOneRelation.HasChanges() || OneToManyRelation.HasChanges() || ManyToOneRelation.HasChanges() || ManyToManyRelation.HasChanges();
         }
+
+        public IWritableChangesFrame Merge(IChangesFrame frame)
+        {
+            var typedFrame = (FakeChangesFrame)frame;
+
+            return new FakeChangesFrame()
+            {
+                FirstCollection = FirstCollection.Merge(typedFrame.FirstCollection),
+                SecondCollection = SecondCollection.Merge(typedFrame.SecondCollection),
+
+                OneToOneRelation = OneToOneRelation.Merge(typedFrame.OneToOneRelation),
+                OneToManyRelation = OneToManyRelation.Merge(typedFrame.OneToManyRelation),
+                ManyToOneRelation = ManyToOneRelation.Merge(typedFrame.ManyToOneRelation),
+                ManyToManyRelation = ManyToManyRelation.Merge(typedFrame.ManyToManyRelation),
+            };
+        }
     }
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
     internal sealed class TrackableFakeModelShard : IMutableFakeModelShard
     {
         public TrackableFakeModelShard(IFakeModelShard modelShard, IFakeChangesFrame frame)
@@ -200,6 +219,7 @@ namespace compilation.AnotherModelFile
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
     internal sealed class FakeModelShardStorage : ModelShardStorage
     {
         public static readonly Scheme FirstCollectionScheme = new(new Property[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
@@ -255,6 +275,7 @@ namespace compilation.AnotherModelFile.Entities
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
     public sealed record FirstEntity(global::System.Guid Id) : Entity(Id)
     {
         internal FirstEntity() : this(global::System.Guid.NewGuid())
@@ -265,6 +286,7 @@ namespace compilation.AnotherModelFile.Entities
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
     public sealed record FirstEntityProperties : Properties
     {
         public FirstEntityProperties()
@@ -302,6 +324,7 @@ namespace compilation.AnotherModelFile.Entities
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
     public sealed record SecondEntity(global::System.Guid Id) : Entity(Id)
     {
         internal SecondEntity() : this(global::System.Guid.NewGuid())
@@ -312,6 +335,7 @@ namespace compilation.AnotherModelFile.Entities
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
     public sealed record SecondEntityProperties : Properties
     {
         public SecondEntityProperties()

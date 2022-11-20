@@ -137,4 +137,22 @@ public class CollectionChangeSetTests
 
         Assert.That(changes.Count(), Is.EqualTo(0));
     }
+
+    [Test]
+    public void MergeCollectionChangeSetTest()
+    {
+        var changes1 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes2 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var entity = new FirstEntity();
+        var oldProps = new FirstEntityProperties();
+        var newProps = new FirstEntityProperties();
+
+        changes1.Add(CollectionAction.Add, entity, null, newProps);
+        changes2.Add(CollectionAction.Remove, entity, oldProps, null);
+
+        var merged = changes1.Merge(changes2);
+
+        Assert.That(merged.Count(), Is.EqualTo(0));
+        Assert.That(merged.HasChanges(), Is.False);
+    }
 }

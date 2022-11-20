@@ -73,6 +73,7 @@ internal static class IndentedTextWriterExtensions
         code.GeneratedCodeAttribute();
         code.CompilerGeneratedCodeAttribute();
         code.DebuggerNonUserCodeAttribute();
+        code.ExcludeFromCodeCoverageAttribute();
     }
 
     public static void GeneratedInterfaceAttributes(this IndentedTextWriter code)
@@ -94,6 +95,11 @@ internal static class IndentedTextWriterExtensions
     public static void DebuggerNonUserCodeAttribute(this IndentedTextWriter code)
     {
         code.WriteLine("[global::System.Diagnostics.DebuggerNonUserCodeAttribute()]");
+    }
+
+    public static void ExcludeFromCodeCoverageAttribute(this IndentedTextWriter code)
+    {
+        code.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]");
     }
 
     private static string Visibility(Visibility visibility)

@@ -182,6 +182,8 @@ internal partial class ApplicationModelGenerator
                 DefineApplyMethod(code, modelShard);
                 code.EmptyLine();
                 ImplementChangesFrameInterface(code, modelShard);
+                code.EmptyLine();
+                DefineMergeMethod(code, modelShard);
             });
 
         void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
@@ -265,6 +267,31 @@ internal partial class ApplicationModelGenerator
                     .Union(modelShard.Relations.Select(x => $"{x.Name}.HasChanges()"));
 
                 code.WriteLine($"return {string.Join(" || ", checks)};");
+            });
+        }
+
+        void DefineMergeMethod(IndentedTextWriter code, ModelShard modelShard)
+        {
+            code.WriteLine($"public IWritableChangesFrame Merge(IChangesFrame frame)");
+            code.Block(() =>
+            {
+                code.WriteLine($"var typedFrame = ({modelShard.Name}ChangesFrame)frame;");
+                code.EmptyLine();
+
+                code.WriteLine($"return new {modelShard.Name}ChangesFrame()");
+                code.Block(() =>
+                {
+                    foreach (var collection in modelShard.Collections)
+                    {
+                        code.WriteLine($"{collection.Name} = {collection.Name}.Merge(typedFrame.{collection.Name}),");
+                    }
+                    code.EmptyLine();
+
+                    foreach (var relation in modelShard.Relations)
+                    {
+                        code.WriteLine($"{relation.Name} = {relation.Name}.Merge(typedFrame.{relation.Name}),");
+                    }
+                }, true);
             });
         }
     }

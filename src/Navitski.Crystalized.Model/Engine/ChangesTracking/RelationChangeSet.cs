@@ -96,4 +96,17 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     {
         return _changes.GetEnumerator();
     }
+
+    /// <inheritdoc cref="IRelationChangeSet{TParent, TChild}.Merge(IRelationChangeSet{TParent, TChild})" />
+    public IRelationChangeSet<TParent, TChild> Merge(IRelationChangeSet<TParent, TChild> changeSet)
+    {
+        var result = new RelationChangeSet<TParent, TChild>(_changes.ToList());
+
+        foreach (var change in changeSet)
+        {
+            result.Add(change.Action, change.Parent, change.Child);
+        }
+
+        return result;
+    }
 }
