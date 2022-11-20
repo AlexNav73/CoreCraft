@@ -1,4 +1,5 @@
-﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+﻿using System.Collections;
+using Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -71,6 +72,25 @@ public class CollectionChangeSetTests
         Assert.That(change.Action, Is.EqualTo(CollectionAction.Add));
         Assert.That(change.Entity, Is.EqualTo(entity));
         Assert.That(change.OldData, Is.Null);
+        Assert.That(change.NewData, Is.EqualTo(newProps));
+    }
+
+    [Test]
+    public void RemoveAddCollectionChangeSetTest()
+    {
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var entity = new FirstEntity();
+        var oldProps = new FirstEntityProperties();
+        var newProps = new FirstEntityProperties();
+
+        changes.Add(CollectionAction.Remove, entity, oldProps, null);
+        changes.Add(CollectionAction.Add, entity, null, newProps);
+
+        var change = changes.Single();
+
+        Assert.That(change.Action, Is.EqualTo(CollectionAction.Modify));
+        Assert.That(change.Entity, Is.EqualTo(entity));
+        Assert.That(change.OldData, Is.EqualTo(oldProps));
         Assert.That(change.NewData, Is.EqualTo(newProps));
     }
 
@@ -154,5 +174,25 @@ public class CollectionChangeSetTests
 
         Assert.That(merged.Count(), Is.EqualTo(0));
         Assert.That(merged.HasChanges(), Is.False);
+    }
+
+    [Test]
+    public void GetEnumeratorCollectionChangeSetTest()
+    {
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+
+        var enumerator = changes.GetEnumerator();
+
+        Assert.That(enumerator, Is.Not.Null);
+    }
+
+    [Test]
+    public void GetNonGenericEnumeratorCollectionChangeSetTest()
+    {
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+
+        var enumerator = ((IEnumerable)changes).GetEnumerator();
+
+        Assert.That(enumerator, Is.Not.Null);
     }
 }
