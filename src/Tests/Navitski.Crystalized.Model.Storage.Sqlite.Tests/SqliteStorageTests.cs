@@ -19,7 +19,7 @@ public class SqliteStorageTests
         _repo = A.Fake<ISqliteRepository>();
         _factory = A.Fake<ISqliteRepositoryFactory>();
         
-        A.CallTo(() => _factory.Create(A<string>.Ignored)).Returns(_repo);
+        A.CallTo(() => _factory.Create(A<string>.Ignored, A<Action<string>>.Ignored)).Returns(_repo);
         A.CallTo(() => _repo.BeginTransaction()).Returns(_transaction);
     }
 
