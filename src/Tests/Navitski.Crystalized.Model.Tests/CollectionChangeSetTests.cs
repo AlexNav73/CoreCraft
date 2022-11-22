@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -14,7 +15,19 @@ public class CollectionChangeSetTests
 
         changes.Add(CollectionAction.Add, entity, null, props);
 
-        Assert.Throws<InvalidOperationException>(() => changes.Add(CollectionAction.Add, entity, null, props));
+        var exception = Assert.Throws<InvalidChangeSequenceException>(() => changes.Add(CollectionAction.Add, entity, null, props));
+        var prevChange = exception!.PreviousChange as ICollectionChange<FirstEntity, FirstEntityProperties>;
+        var nextChange = exception!.NextChange as ICollectionChange<FirstEntity, FirstEntityProperties>;
+
+        Assert.That(prevChange, Is.Not.Null);
+        Assert.That(prevChange!.Action, Is.EqualTo(CollectionAction.Add));
+        Assert.That(prevChange!.OldData, Is.Null);
+        Assert.That(prevChange!.NewData, Is.EqualTo(props));
+
+        Assert.That(nextChange, Is.Not.Null);
+        Assert.That(nextChange!.Action, Is.EqualTo(CollectionAction.Add));
+        Assert.That(nextChange!.OldData, Is.Null);
+        Assert.That(nextChange!.NewData, Is.EqualTo(props));
     }
 
     [Test]
@@ -27,7 +40,19 @@ public class CollectionChangeSetTests
 
         changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
 
-        Assert.Throws<InvalidOperationException>(() => changes.Add(CollectionAction.Add, entity, null, newProps));
+        var exception = Assert.Throws<InvalidChangeSequenceException>(() => changes.Add(CollectionAction.Add, entity, null, newProps));
+        var prevChange = exception!.PreviousChange as ICollectionChange<FirstEntity, FirstEntityProperties>;
+        var nextChange = exception!.NextChange as ICollectionChange<FirstEntity, FirstEntityProperties>;
+
+        Assert.That(prevChange, Is.Not.Null);
+        Assert.That(prevChange!.Action, Is.EqualTo(CollectionAction.Modify));
+        Assert.That(prevChange!.OldData, Is.EqualTo(oldProps));
+        Assert.That(prevChange!.NewData, Is.EqualTo(newProps));
+
+        Assert.That(nextChange, Is.Not.Null);
+        Assert.That(nextChange!.Action, Is.EqualTo(CollectionAction.Add));
+        Assert.That(nextChange!.OldData, Is.Null);
+        Assert.That(nextChange!.NewData, Is.EqualTo(newProps));
     }
 
     [Test]
@@ -40,7 +65,19 @@ public class CollectionChangeSetTests
 
         changes.Add(CollectionAction.Remove, entity, oldProps, null);
 
-        Assert.Throws<InvalidOperationException>(() => changes.Add(CollectionAction.Modify, entity, oldProps, newProps));
+        var exception = Assert.Throws<InvalidChangeSequenceException>(() => changes.Add(CollectionAction.Modify, entity, oldProps, newProps));
+        var prevChange = exception!.PreviousChange as ICollectionChange<FirstEntity, FirstEntityProperties>;
+        var nextChange = exception!.NextChange as ICollectionChange<FirstEntity, FirstEntityProperties>;
+
+        Assert.That(prevChange, Is.Not.Null);
+        Assert.That(prevChange!.Action, Is.EqualTo(CollectionAction.Remove));
+        Assert.That(prevChange!.OldData, Is.EqualTo(oldProps));
+        Assert.That(prevChange!.NewData, Is.Null);
+
+        Assert.That(nextChange, Is.Not.Null);
+        Assert.That(nextChange!.Action, Is.EqualTo(CollectionAction.Modify));
+        Assert.That(nextChange!.OldData, Is.EqualTo(oldProps));
+        Assert.That(nextChange!.NewData, Is.EqualTo(newProps));
     }
 
     [Test]
@@ -53,7 +90,19 @@ public class CollectionChangeSetTests
 
         changes.Add(CollectionAction.Remove, entity, oldProps, null);
 
-        Assert.Throws<InvalidOperationException>(() => changes.Add(CollectionAction.Remove, entity, oldProps, null));
+        var exception = Assert.Throws<InvalidChangeSequenceException>(() => changes.Add(CollectionAction.Remove, entity, oldProps, null));
+        var prevChange = exception!.PreviousChange as ICollectionChange<FirstEntity, FirstEntityProperties>;
+        var nextChange = exception!.NextChange as ICollectionChange<FirstEntity, FirstEntityProperties>;
+
+        Assert.That(prevChange, Is.Not.Null);
+        Assert.That(prevChange!.Action, Is.EqualTo(CollectionAction.Remove));
+        Assert.That(prevChange!.OldData, Is.EqualTo(oldProps));
+        Assert.That(prevChange!.NewData, Is.Null);
+
+        Assert.That(nextChange, Is.Not.Null);
+        Assert.That(nextChange!.Action, Is.EqualTo(CollectionAction.Remove));
+        Assert.That(nextChange!.OldData, Is.EqualTo(oldProps));
+        Assert.That(nextChange!.NewData, Is.Null);
     }
 
     [Test]

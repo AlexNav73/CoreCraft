@@ -1,4 +1,5 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -13,7 +14,19 @@ public class RelationChangeSetTests
 
         changes.Add(RelationAction.Linked, parent, child);
 
-        Assert.Throws<InvalidOperationException>(() => changes.Add(RelationAction.Linked, parent, child));
+        var exception = Assert.Throws<InvalidChangeSequenceException>(() => changes.Add(RelationAction.Linked, parent, child));
+        var prevChange = exception!.PreviousChange as IRelationChange<FirstEntity, SecondEntity>;
+        var nextChange = exception!.NextChange as IRelationChange<FirstEntity, SecondEntity>;
+
+        Assert.That(prevChange, Is.Not.Null);
+        Assert.That(prevChange!.Action, Is.EqualTo(RelationAction.Linked));
+        Assert.That(prevChange!.Parent, Is.EqualTo(parent));
+        Assert.That(prevChange!.Child, Is.EqualTo(child));
+
+        Assert.That(nextChange, Is.Not.Null);
+        Assert.That(nextChange!.Action, Is.EqualTo(RelationAction.Linked));
+        Assert.That(nextChange!.Parent, Is.EqualTo(parent));
+        Assert.That(nextChange!.Child, Is.EqualTo(child));
     }
 
     [Test]
@@ -25,7 +38,19 @@ public class RelationChangeSetTests
 
         changes.Add(RelationAction.Unlinked, parent, child);
 
-        Assert.Throws<InvalidOperationException>(() => changes.Add(RelationAction.Unlinked, parent, child));
+        var exception = Assert.Throws<InvalidChangeSequenceException>(() => changes.Add(RelationAction.Unlinked, parent, child));
+        var prevChange = exception!.PreviousChange as IRelationChange<FirstEntity, SecondEntity>;
+        var nextChange = exception!.NextChange as IRelationChange<FirstEntity, SecondEntity>;
+
+        Assert.That(prevChange, Is.Not.Null);
+        Assert.That(prevChange!.Action, Is.EqualTo(RelationAction.Unlinked));
+        Assert.That(prevChange!.Parent, Is.EqualTo(parent));
+        Assert.That(prevChange!.Child, Is.EqualTo(child));
+
+        Assert.That(nextChange, Is.Not.Null);
+        Assert.That(nextChange!.Action, Is.EqualTo(RelationAction.Unlinked));
+        Assert.That(prevChange!.Parent, Is.EqualTo(parent));
+        Assert.That(prevChange!.Child, Is.EqualTo(child));
     }
 
     [Test]

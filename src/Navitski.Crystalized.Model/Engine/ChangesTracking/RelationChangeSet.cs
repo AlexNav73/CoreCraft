@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 
 namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
@@ -34,11 +35,17 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
             {
                 if (change.Action == RelationAction.Linked && action == RelationAction.Linked)
                 {
-                    throw new InvalidOperationException($"Can't link [{parent}] and [{child}], because they already have been linked");
+                    throw new InvalidChangeSequenceException(
+                        change,
+                        new RelationChange<TParent, TChild>(action, parent, child),
+                        $"Can't link [{parent}] and [{child}], because they already have been linked");
                 }
                 else if (change.Action == RelationAction.Unlinked && action == RelationAction.Unlinked)
                 {
-                    throw new InvalidOperationException($"Can't unlink [{parent}] and [{child}], because they already have been unlinked");
+                    throw new InvalidChangeSequenceException(
+                        change,
+                        new RelationChange<TParent, TChild>(action, parent, child),
+                        $"Can't unlink [{parent}] and [{child}], because they already have been unlinked");
                 }
                 else if (change.Action == RelationAction.Linked && action == RelationAction.Unlinked)
                 {
