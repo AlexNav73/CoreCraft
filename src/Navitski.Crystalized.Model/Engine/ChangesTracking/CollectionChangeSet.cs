@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 
 namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
@@ -42,7 +43,10 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
                 }
                 else if ((change.Action == CollectionAction.Add || change.Action == CollectionAction.Modify) && action == CollectionAction.Add)
                 {
-                    throw new InvalidOperationException($"Can't add an entity [{entity}], because it already has been added");
+                    throw new InvalidChangeSequenceException(
+                        change,
+                        new CollectionChange<TEntity, TProperties>(action, entity, oldData, newData),
+                        $"Can't add an entity [{entity}], because it already has been added");
                 }
                 else if (change.Action == CollectionAction.Remove && action == CollectionAction.Add)
                 {
@@ -50,11 +54,17 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
                 }
                 else if (change.Action == CollectionAction.Remove && action == CollectionAction.Modify)
                 {
-                    throw new InvalidOperationException($"Can't modify an entity [{entity}], because it already has been removed");
+                    throw new InvalidChangeSequenceException(
+                        change,
+                        new CollectionChange<TEntity, TProperties>(action, entity, oldData, newData),
+                        $"Can't modify an entity [{entity}], because it already has been removed");
                 }
                 else if (change.Action == CollectionAction.Remove && action == CollectionAction.Remove)
                 {
-                    throw new InvalidOperationException($"Can't remove an entity [{entity}], because it already has been removed");
+                    throw new InvalidChangeSequenceException(
+                        change,
+                        new CollectionChange<TEntity, TProperties>(action, entity, oldData, newData),
+                        $"Can't remove an entity [{entity}], because it already has been removed");
                 }
 
                 return;
