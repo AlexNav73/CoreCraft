@@ -81,7 +81,7 @@ public abstract class ModelShardStorage : IModelShardStorage
         where TEntity : Entity
         where TProperties : Properties
     {
-        var items = collection.Select(x => new KeyValuePair<TEntity, TProperties>(x, collection.Get(x))).ToArray();
+        var items = collection.Pairs().Select(x => new KeyValuePair<TEntity, TProperties>(x.entity, x.properties)).ToArray();
 
         repository.Insert(name, items, scheme);
     }
