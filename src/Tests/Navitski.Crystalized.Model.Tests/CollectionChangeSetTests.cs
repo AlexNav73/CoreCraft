@@ -125,6 +125,20 @@ public class CollectionChangeSetTests
     }
 
     [Test]
+    public void ModifyRemoveCollectionChangeSetTest()
+    {
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var entity = new FirstEntity();
+        var oldProps = new FirstEntityProperties();
+        var newProps = new FirstEntityProperties();
+
+        changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
+        changes.Add(CollectionAction.Remove, entity, oldProps, null);
+
+        Assert.That(changes.Count(), Is.EqualTo(0));
+    }
+
+    [Test]
     public void RemoveAddCollectionChangeSetTest()
     {
         var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();

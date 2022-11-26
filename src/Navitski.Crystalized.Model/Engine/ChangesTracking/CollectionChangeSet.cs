@@ -37,7 +37,7 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
                 {
                     _changes[i] = new CollectionChange<TEntity, TProperties>(change.Action, change.Entity, change.OldData, newData);
                 }
-                else if (change.Action == CollectionAction.Add && action == CollectionAction.Remove)
+                else if ((change.Action == CollectionAction.Add || change.Action == CollectionAction.Modify) && action == CollectionAction.Remove)
                 {
                     _changes.RemoveAt(i);
                 }
