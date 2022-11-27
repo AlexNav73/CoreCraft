@@ -104,7 +104,6 @@ internal partial class Build : NukeBuild
 
     Target Coverage => _ => _
         .DependsOn(RunTests)
-        .OnlyWhenStatic(() => IsLocalBuild)
         .Executes(() =>
         {
             var reportDirectory = RootDirectory / "coveragereport";
