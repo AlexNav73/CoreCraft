@@ -63,6 +63,7 @@ internal partial class Build : NukeBuild
     Target RunMemoryTests => _ => _
         .DependsOn(Compile)
         .Before(Pack, Coverage)
+        .OnlyWhenStatic(() => IsLocalBuild) // TODO: dotMemory Unit supports only .NET 6 so disable this target until .NET 7 support will be available
         .Executes(() =>
         {
             var testProject = Solution.Tests.Navitski_Crystalized_Model_Tests_MemoryLeaks;
@@ -110,7 +111,7 @@ internal partial class Build : NukeBuild
             EnsureCleanDirectory(reportDirectory);
 
             ReportGenerator(s => s
-                .SetFramework("net6.0")
+                .SetFramework(Solution._build.GetTargetFrameworks().Single())
                 .SetReports(CoverageDirectory.GlobFiles("*.cobertura.xml").Select(x => x.ToString()))
                 .SetTargetDirectory(reportDirectory)
                 .SetReportTypes(ReportTypes.Html));
