@@ -112,18 +112,6 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
         }
     }
 
-    /// <inheritdoc />
-    public IEnumerator<ICollectionChange<TEntity, TProperties>> GetEnumerator()
-    {
-        return _changes.GetEnumerator();
-    }
-
-    /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return _changes.GetEnumerator();
-    }
-
     /// <inheritdoc cref="ICollectionChangeSet{TEntity, TProperties}.Merge(ICollectionChangeSet{TEntity, TProperties})"/>
     public ICollectionChangeSet<TEntity, TProperties> Merge(ICollectionChangeSet<TEntity, TProperties> changeSet)
     {
@@ -135,5 +123,17 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
         }
 
         return result;
+    }
+
+    /// <inheritdoc />
+    public IEnumerator<ICollectionChange<TEntity, TProperties>> GetEnumerator()
+    {
+        return _changes.GetEnumerator();
+    }
+
+    /// <inheritdoc />
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _changes.GetEnumerator();
     }
 }

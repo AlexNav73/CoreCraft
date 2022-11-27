@@ -92,18 +92,6 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
         }
     }
 
-    /// <inheritdoc />
-    public IEnumerator<IRelationChange<TParent, TChild>> GetEnumerator()
-    {
-        return _changes.GetEnumerator();
-    }
-
-    /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return _changes.GetEnumerator();
-    }
-
     /// <inheritdoc cref="IRelationChangeSet{TParent, TChild}.Merge(IRelationChangeSet{TParent, TChild})" />
     public IRelationChangeSet<TParent, TChild> Merge(IRelationChangeSet<TParent, TChild> changeSet)
     {
@@ -115,5 +103,17 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
         }
 
         return result;
+    }
+
+    /// <inheritdoc />
+    public IEnumerator<IRelationChange<TParent, TChild>> GetEnumerator()
+    {
+        return _changes.GetEnumerator();
+    }
+
+    /// <inheritdoc />
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _changes.GetEnumerator();
     }
 }
