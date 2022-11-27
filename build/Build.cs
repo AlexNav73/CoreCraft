@@ -84,12 +84,16 @@ internal partial class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .SetNoBuild(SucceededTargets.Contains(Compile))
                 .SetNoRestore(SucceededTargets.Contains(Restore))
-                .AddProperty("CollectCoverage", true)
-                .AddProperty("CoverletOutputFormat", "\\\"cobertura,json\\\"")
-                .AddProperty("CoverletOutput", CoverageDirectory + "\\")
+                // TODO: Change SetProcessEnvironmentVariable to AddProperty when coverlet will be fixed 
+                //.SetCollectCoverage(true)
+                .SetProcessEnvironmentVariable("CollectCoverage", "true")
+                //.AddProperty("CoverletOutputFormat", "\\\"cobertura,json\\\"")
+                //.SetProcessEnvironmentVariable("CoverletOutputFormat", "cobertura,json")
+                .SetProcessEnvironmentVariable("CoverletOutputFormat", "cobertura")
+                .SetProcessEnvironmentVariable("CoverletOutput", CoverageDirectory + "\\")
                 .AddProperty("ExcludeByAttribute", "\\\"Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute\\\"")
-                .AddProperty("Exclude", $"[{Solution.Tests.Navitski_Crystalized_Model_Tests_Infrastructure.Name}]*")
-                .AddProperty("MergeWith", CoverageDirectory / "coverage.json")
+                .SetProcessEnvironmentVariable("Exclude", $"[{Solution.Tests.Navitski_Crystalized_Model_Tests_Infrastructure.Name}]*")
+                //.SetProcessEnvironmentVariable("MergeWith", CoverageDirectory / "coverage.json")
                 .SetProcessArgumentConfigurator(c => c.Add("-m:1")));
         });
 
