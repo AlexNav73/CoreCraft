@@ -63,7 +63,6 @@ internal partial class Build : NukeBuild
     Target RunMemoryTests => _ => _
         .DependsOn(Compile)
         .Before(Pack, Coverage)
-        .OnlyWhenStatic(() => IsLocalBuild) // TODO: dotMemory Unit supports only .NET 6 so disable this target until .NET 7 support will be available
         .Executes(() =>
         {
             var testProject = Solution.Tests.Navitski_Crystalized_Model_Tests_MemoryLeaks;
