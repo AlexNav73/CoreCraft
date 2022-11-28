@@ -21,4 +21,24 @@ public class AutoSaveDomainModelTests
         A.CallTo(() => storage.Update(path, A<IModel>.Ignored, A<IReadOnlyList<IModelChanges>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
+
+    [Test]
+    public async Task LoadAutoSaveDomainModelTest()
+    {
+        var scheduler = new SyncScheduler();
+        var storage = A.Fake<IStorage>();
+        var model = new AutoSaveDomainModel(new[] { new FakeModelShard() }, scheduler, storage, "fake");
+        var firstCollectionChanged = false;
+
+        model.SubscribeTo<IFakeChangesFrame>(x => x.With(y => y.FirstCollection).By(c => firstCollectionChanged = true));
+
+        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
+            .Invokes(c => c.Arguments.Get<IModel>(1)!.Shard<IMutableFakeModelShard>().FirstCollection.Add(new()));
+
+        await model.Load();
+
+        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
+
+        Assert.That(firstCollectionChanged, Is.True);
+    }
 }

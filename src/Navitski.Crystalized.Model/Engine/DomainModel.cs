@@ -91,7 +91,7 @@ public abstract class DomainModel : IDomainModel
         }
         catch (Exception ex)
         {
-            throw new CommandInvokationException($"Command execution failed. Command {command.GetType()}", ex);
+            throw new CommandInvocationException($"Command execution failed. Command {command.GetType()}", ex);
         }
 
         var result = _view.ApplySnapshot(snapshot, snapshot.Changes);

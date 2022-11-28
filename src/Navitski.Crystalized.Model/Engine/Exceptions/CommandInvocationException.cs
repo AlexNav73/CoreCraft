@@ -7,29 +7,29 @@ namespace Navitski.Crystalized.Model.Engine.Exceptions;
 ///     The exception occurred while invoking a command
 /// </summary>
 [ExcludeFromCodeCoverage]
-public class CommandInvokationException : Exception
+public class CommandInvocationException : Exception
 {
     /// <summary>
     ///     Ctor
     /// </summary>
-    public CommandInvokationException()
+    public CommandInvocationException()
     {
     }
 
     /// <inheritdoc />
-    public CommandInvokationException(string? message)
+    public CommandInvocationException(string? message)
         : base(message)
     {
     }
 
     /// <inheritdoc />
-    public CommandInvokationException(string? message, Exception? innerException)
+    public CommandInvocationException(string? message, Exception? innerException)
         : base(message, innerException)
     {
     }
 
     /// <inheritdoc />
-    protected CommandInvokationException(SerializationInfo info, StreamingContext context)
+    protected CommandInvocationException(SerializationInfo info, StreamingContext context)
         : base(info, context)
     {
     }
