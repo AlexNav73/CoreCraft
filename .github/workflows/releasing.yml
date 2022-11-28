@@ -20,6 +20,8 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
       - name: Run './build.cmd Publish'
         run: ./build.cmd Publish
+        env:
+          RegistryApiKey: ${{ secrets.REGISTRY_API_KEY }}
       - name: Code Coverage
         uses: codecov/codecov-action@v2
         with:
