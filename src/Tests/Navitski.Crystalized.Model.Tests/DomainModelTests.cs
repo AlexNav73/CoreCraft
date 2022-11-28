@@ -1,5 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Exceptions;
 using Navitski.Crystalized.Model.Engine.Persistence;
@@ -73,6 +74,17 @@ public class DomainModelTests
     }
 
     [Test]
+    public void SubscribeSameDelegateTwiceTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        Action<Change<IModelChanges>> handler = args => { };
+        model.Subscribe(handler);
+
+        Assert.Throws<SubscriptionAlreadyExistsException>(() => model.Subscribe(handler));
+    }
+
+    [Test]
     public async Task ReceiveModelChangesAfterCommandExecutionTest()
     {
         var storage = A.Fake<IStorage>();
@@ -88,14 +100,25 @@ public class DomainModelTests
     }
 
     [Test]
-    public void SubscribeSameDelegateTwiceTest()
+    public void RunThrowsWhenCommandExecutionFailsTest()
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
-        Action<Change<IModelChanges>> handler = args => { };
-        model.Subscribe(handler);
 
-        Assert.Throws<SubscriptionAlreadyExistsException>(() => model.Subscribe(handler));
+        Assert.ThrowsAsync<CommandInvocationException>(() => model.Run<IMutableFakeModelShard>((shard, _) => throw new Exception("BOOM!")));
+    }
+
+    [Test]
+    public void RunCommandThrowsWhenCommandExecutionFailsTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var command = A.Fake<ICommand>();
+
+        A.CallTo(() => command.Execute(A<IModel>.Ignored, A<CancellationToken>.Ignored))
+            .Throws<Exception>();
+
+        Assert.ThrowsAsync<CommandInvocationException>(() => model.Run(command));
     }
 
     [Test]
@@ -118,6 +141,39 @@ public class DomainModelTests
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
         Assert.ThrowsAsync<ModelSaveException>(() => model.Save(""));
+    }
+
+    [Test]
+    public void LoadThrowsWhenLoadExecutionFailsTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var notificationSent = false;
+
+        model.Subscribe(x => notificationSent = true);
+
+        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
+            .Throws<Exception>();
+
+        Assert.ThrowsAsync<ModelLoadingException>(() => model.Load("fake"));
+        Assert.That(notificationSent, Is.False);
+    }
+
+    [Test]
+    public void ApplyThrowsWhenApplyExecutionFailsTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var modelChanges = A.Fake<IWritableModelChanges>();
+        var notificationSent = false;
+
+        A.CallTo(() => modelChanges.HasChanges()).Returns(true);
+        A.CallTo(() => modelChanges.Apply(A<IModel>.Ignored)).Throws<Exception>();
+
+        model.Subscribe(x => notificationSent = true);
+
+        Assert.ThrowsAsync<ApplyModelChangesException>(() => model.Apply(modelChanges));
+        Assert.That(notificationSent, Is.False);
     }
 
     private class TestDomainModel : DomainModel
@@ -143,6 +199,16 @@ public class DomainModelTests
         public async Task Save(string path)
         {
             await Save(_storage, path);
+        }
+
+        public async Task Load(string path)
+        {
+            await Load(_storage, path);
+        }
+
+        public async Task Apply(IWritableModelChanges changes)
+        {
+            await Apply(changes, CancellationToken.None);
         }
 
         protected override void OnModelChanged(Change<IModelChanges> change)
