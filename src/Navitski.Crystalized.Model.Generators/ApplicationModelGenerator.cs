@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Navitski.Crystalized.Model.Generators;
 
-[Generator]
+[Generator(LanguageNames.CSharp)]
 internal partial class ApplicationModelGenerator : GeneratorBase
 {
     protected override void ExecuteInternal(

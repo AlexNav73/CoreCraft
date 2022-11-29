@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Navitski.Crystalized.Model.Engine.Persistence;
+using Navitski.Crystalized.Model.Engine.Core;
 
 namespace Navitski.Crystalized.Model.Storage.Sqlite;
 

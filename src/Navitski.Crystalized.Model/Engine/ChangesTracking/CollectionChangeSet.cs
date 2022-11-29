@@ -33,7 +33,7 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
             var change = _changes[i];
             if (change.Entity == entity)
             {
-                if ((change.Action == CollectionAction.Add || change.Action == CollectionAction.Modify) && action == CollectionAction.Modify)
+                if ((change.Action == CollectionAction.Add || change.Action == CollectionAction.Modify) && action == CollectionAction.Modify && change.OldData != newData)
                 {
                     _changes[i] = new CollectionChange<TEntity, TProperties>(change.Action, change.Entity, change.OldData, newData);
                 }

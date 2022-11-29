@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Navitski.Crystalized.Model.Engine.Persistence;
+namespace Navitski.Crystalized.Model.Engine.Core;
 
 /// <summary>
 ///     A description of a specific property of an entity
