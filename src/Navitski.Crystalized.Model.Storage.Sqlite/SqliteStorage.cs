@@ -31,45 +31,35 @@ public sealed class SqliteStorage : IStorage
         _logginAction = logginAction;
     }
 
-    /// <inheritdoc cref="IStorage.Update(string, IModel, IReadOnlyList{IModelChanges})"/>
-    public void Update(string path, IModel model, IReadOnlyList<IModelChanges> changes)
+    /// <inheritdoc cref="IStorage.Update(string, IModel, IModelChanges)"/>
+    public void Update(string path, IModel model, IModelChanges changes)
     {
-        if (changes.Count > 0)
+        ISqliteRepository? repository = null;
+        IDbTransaction? transaction = null;
+
+        try
         {
-            var merged = (IWritableModelChanges)changes[0];
-            for (var i = 1; i < changes.Count; i++)
+            repository = _sqliteRepositoryFactory.Create(path, _logginAction);
+            transaction = repository.BeginTransaction();
+
+            foreach (var storage in _storages)
             {
-                merged = merged.Merge(changes[i]);
+                storage.Update(repository, model, changes);
             }
 
-            if (merged.HasChanges())
-            {
-                ISqliteRepository? repository = null;
-                IDbTransaction? transaction = null;
-
-                try
-                {
-                    repository = _sqliteRepositoryFactory.Create(path, _logginAction);
-                    transaction = repository.BeginTransaction();
-
-                    foreach (var storage in _storages)
-                    {
-                        storage.Update(repository, model, merged);
-                    }
-
-                    transaction.Commit();
-                }
-                catch (Exception)
-                {
-                    transaction?.Rollback();
-                    throw;
-                }
-                finally
-                {
-                    transaction?.Dispose();
-                    repository?.Dispose();
-                }
-            }
+            transaction.Commit();
+        }
+        catch (Exception ex)
+        {
+            transaction?.Rollback();
+            _logginAction?.Invoke($"Exception was thrown with message: {ex.Message}");
+            _logginAction?.Invoke($"Stack trace: {ex.StackTrace}");
+            throw;
+        }
+        finally
+        {
+            transaction?.Dispose();
+            repository?.Dispose();
         }
     }
 

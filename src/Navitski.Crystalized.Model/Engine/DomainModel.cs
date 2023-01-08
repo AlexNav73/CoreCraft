@@ -124,7 +124,17 @@ public abstract class DomainModel : IDomainModel
 
         try
         {
-            return _scheduler.RunParallel(() => storage.Update(path, copy, changes), token);
+            if (changes.Count > 0)
+            {
+                var merged = MergeChanges(changes);
+
+                if (merged.HasChanges())
+                {
+                    return _scheduler.RunParallel(() => storage.Update(path, copy, merged), token);
+                }
+            }
+
+            return Task.CompletedTask;
         }
         catch (Exception ex)
         {
@@ -222,5 +232,16 @@ public abstract class DomainModel : IDomainModel
     private static Change<IModelChanges> CreateModelChangesMessage(ModelChangeResult result)
     {
         return new Change<IModelChanges>(result.OldModel, result.NewModel, result.Changes);
+    }
+
+    private static IWritableModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)
+    {
+        var merged = (IWritableModelChanges)changes[0];
+        for (var i = 1; i < changes.Count; i++)
+        {
+            merged = merged.Merge(changes[i]);
+        }
+
+        return merged;
     }
 }
