@@ -72,7 +72,7 @@ public class UndoRedoDomainModel : DomainModel
     /// <param name="path">A path to a file</param>
     public async Task SaveAs(IStorage storage, string path)
     {
-        await Save(storage, path);
+        await base.Save(storage, path);
 
         // TODO(#8): saving operation executes in thread pool
         // and launched by 'async void' methods. If two
@@ -92,7 +92,7 @@ public class UndoRedoDomainModel : DomainModel
     /// <param name="path">A path to a file</param>
     public async Task Load(IStorage storage, string path)
     {
-        await Load(storage, path);
+        await base.Load(storage, path);
     }
 
     /// <summary>
