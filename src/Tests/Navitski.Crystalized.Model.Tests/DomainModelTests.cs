@@ -125,11 +125,40 @@ public class DomainModelTests
     public void SaveChangesThrowsExceptionTest()
     {
         var storage = A.Fake<IStorage>();
-        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModel>.Ignored, A<IReadOnlyList<IModelChanges>>.Ignored))
+        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
             .Throws<InvalidOperationException>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
         
         Assert.ThrowsAsync<ModelSaveException>(() => model.Save("", new[] { A.Fake<IModelChanges>() }));
+    }
+
+    [Test]
+    public void SaveChangesWithEmptyChangesCollectionShouldNotTriggerUpdateOnStorageTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+
+        var task = model.Save("", Array.Empty<IModelChanges>());
+
+        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
+            .MustNotHaveHappened();
+        Assert.That(task, Is.Not.Null);
+        Assert.That(task.IsCompleted, Is.True);
+    }
+
+    [Test]
+    public void SaveModelDoMergingOfModelChangesIntoOneChangeTest()
+    {
+        var modelChanges1 = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
+        var modelChanges2 = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
+
+        var storage = A.Fake<IStorage>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+
+        var task = model.Save("", new[] { modelChanges1, modelChanges2 });
+
+        A.CallTo(() => ((IWritableModelChanges)modelChanges1).Merge(modelChanges2))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Test]

@@ -21,7 +21,7 @@ internal sealed class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscr
 #if NET5_0_OR_GREATER
     public ICollectionSubscriber<TEntity, TProperties> With<TEntity, TProperties>(
         Func<T, ICollectionChangeSet<TEntity, TProperties>> accessor,
-        [CallerArgumentExpression("accessor")] string expression = "")
+        [CallerArgumentExpression(nameof(accessor))] string expression = "")
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -38,7 +38,7 @@ internal sealed class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscr
 
     public IRelationSubscriber<TParent, TChild> With<TParent, TChild>(
         Func<T, IRelationChangeSet<TParent, TChild>> accessor,
-        [CallerArgumentExpression("accessor")] string expression = "")
+        [CallerArgumentExpression(nameof(accessor))] string expression = "")
         where TParent : Entity
         where TChild : Entity
     {

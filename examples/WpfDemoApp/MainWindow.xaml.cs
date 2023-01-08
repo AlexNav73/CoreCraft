@@ -28,8 +28,8 @@ public partial class MainWindow : MetroWindow
         {
             new ToDoModelShard()
         };
-        var model = new UndoRedoDomainModel(modelShards, new AsyncScheduler(), storage);
+        var model = new UndoRedoDomainModel(modelShards, new AsyncScheduler());
 
-        DataContext = new MainWindowViewModel(model);
+        DataContext = new MainWindowViewModel(model, storage);
     }
 }

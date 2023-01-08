@@ -24,29 +24,16 @@ public class SqliteStorageTests
     }
 
     [Test]
-    public void UpdateWithEmptyChangesDoesNotBeginTransactionTest()
-    {
-        var storage = new SqliteStorage(Array.Empty<IMigration>(), Array.Empty<IModelShardStorage>(), _factory!);
-
-        storage.Update("", A.Fake<IModel>(), Array.Empty<IModelChanges>());
-
-        A.CallTo(() => _repo!.BeginTransaction()).MustNotHaveHappened();
-        A.CallTo(() => _transaction!.Commit()).MustNotHaveHappened();
-        A.CallTo(() => _transaction!.Rollback()).MustNotHaveHappened();
-    }
-
-    [Test]
     public void UpdateTransactionRollbackOnExceptionTest()
     {
         var shardStorage = A.Fake<IModelShardStorage>();
         A.CallTo(() => shardStorage.Update(A<IRepository>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
             .Throws<InvalidOperationException>();
         var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
-        A.CallTo(() => modelChanges.HasChanges()).Returns(true);
 
         var storage = new SqliteStorage(Array.Empty<IMigration>(), new[] { shardStorage }, _factory!);
 
-        Assert.Throws<InvalidOperationException>(() => storage.Update("", A.Fake<IModel>(), new[] { modelChanges }));
+        Assert.Throws<InvalidOperationException>(() => storage.Update("", A.Fake<IModel>(), modelChanges));
 
         A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _transaction!.Commit()).MustNotHaveHappened();
@@ -60,25 +47,9 @@ public class SqliteStorageTests
         var storage = new SqliteStorage(Array.Empty<IMigration>(), new[] { shardStorage }, _factory!);
         var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
 
-        A.CallTo(() => modelChanges.HasChanges()).Returns(true);
-
-        storage.Update("", A.Fake<IModel>(), new[] { modelChanges });
+        storage.Update("", A.Fake<IModel>(), modelChanges);
 
         A.CallTo(() => shardStorage.Update(A<IRepository>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
-            .MustHaveHappenedOnceExactly();
-    }
-
-    [Test]
-    public void UpdateMargesModelChangesBeforeSaveTest()
-    {
-        var shardStorage = A.Fake<IModelShardStorage>();
-        var storage = new SqliteStorage(Array.Empty<IMigration>(), new[] { shardStorage }, _factory!);
-        var modelChanges1 = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
-        var modelChanges2 = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
-
-        storage.Update("", A.Fake<IModel>(), new[] { modelChanges1, modelChanges2 });
-
-        A.CallTo(() => ((IWritableModelChanges)modelChanges1).Merge(A<IModelChanges>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
