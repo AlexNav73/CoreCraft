@@ -22,11 +22,17 @@ internal partial class ApplicationModelGenerator
                 var properties = entity.Properties.Select(x => $"new(\"{x.Name}\", typeof({x.Type}), {x.IsNullable.ToString().ToLower()})");
                 var array = string.Join(", ", properties);
 
-                code.WriteLine($"public static readonly Scheme {collection.Name}Scheme = new(new Property[] {{ {array} }});");
+                code.WriteLine($"internal static readonly CollectionInfo {collection.Name}Info = new(\"{modelShard.Name}\", \"{collection.Name}\", new Property[] {{ {array} }});");
             }
             code.EmptyLine();
 
-            code.WriteLine("public override void Update(IRepository repository, IModel model, IModelChanges changes)");
+            foreach (var relation in modelShard.Relations)
+            {
+                code.WriteLine($"internal static readonly RelationInfo {relation.Name}Info = new(\"{modelShard.Name}\", \"{relation.Name}\");");
+            }
+            code.EmptyLine();
+
+            code.WriteLine("public override void Update(IRepository repository, IModelChanges changes)");
             code.Block(() =>
             {
                 code.WriteLine($"if (changes.TryGetFrame<I{modelShard.Name}ChangesFrame>(out var frame))");
@@ -34,13 +40,13 @@ internal partial class ApplicationModelGenerator
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"Update(repository, \"{modelShard.Name}.{collection.Name}\", frame.{collection.Name}, {collection.Name}Scheme);");
+                        code.WriteLine($"Update(repository, {collection.Name}Info, frame.{collection.Name});");
                     }
                     code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"Update(repository, \"{modelShard.Name}.{relation.Name}\", frame.{relation.Name});");
+                        code.WriteLine($"Update(repository, {relation.Name}Info, frame.{relation.Name});");
                     }
                 });
             });
@@ -54,13 +60,13 @@ internal partial class ApplicationModelGenerator
 
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"Save(repository, \"{modelShard.Name}.{collection.Name}\", shard.{collection.Name}, {collection.Name}Scheme);");
+                    code.WriteLine($"Save(repository, {collection.Name}Info, shard.{collection.Name});");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"Save(repository, \"{modelShard.Name}.{relation.Name}\", shard.{relation.Name});");
+                    code.WriteLine($"Save(repository, {relation.Name}Info, shard.{relation.Name});");
                 }
             });
             code.EmptyLine();
@@ -73,7 +79,7 @@ internal partial class ApplicationModelGenerator
 
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"Load(repository, \"{modelShard.Name}.{collection.Name}\", shard.{collection.Name}, {collection.Name}Scheme);");
+                    code.WriteLine($"Load(repository, {collection.Name}Info, shard.{collection.Name});");
                 }
                 code.EmptyLine();
 
@@ -82,7 +88,7 @@ internal partial class ApplicationModelGenerator
                     var parentCollection = modelShard.Collections.Single(x => x.EntityType == relation.ParentType).Name;
                     var childCollection = modelShard.Collections.Single(x => x.EntityType == relation.ChildType).Name;
 
-                    code.WriteLine($"Load(repository, \"{modelShard.Name}.{relation.Name}\", shard.{relation.Name}, shard.{parentCollection}, shard.{childCollection});");
+                    code.WriteLine($"Load(repository, {relation.Name}Info, shard.{relation.Name}, shard.{parentCollection}, shard.{childCollection});");
                 }
             });
         });

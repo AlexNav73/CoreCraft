@@ -12,10 +12,12 @@ namespace Navitski.Crystalized.Model.Engine.Core;
 public sealed record Property(string Name, Type Type, bool IsNullable);
 
 /// <summary>
-///     A scheme of the entity properties type. This is used instead of reflection
-///     to discover all the metadata of a properties type.
+///     A scheme of a collection's type. This is used instead of reflection
+///     to discover all the metadata of a collection.
 /// </summary>
+/// <param name="ShardName">The name of a shard</param>
+/// <param name="Name">The name of a collection</param>
 /// <param name="Properties">A description of each property</param>
 // TODO(#6): Could we use PropertiesBag to generate queries?
 [ExcludeFromCodeCoverage]
-public sealed record Scheme(IReadOnlyList<Property> Properties);
+public sealed record CollectionInfo(string ShardName, string Name, IReadOnlyList<Property> Properties);

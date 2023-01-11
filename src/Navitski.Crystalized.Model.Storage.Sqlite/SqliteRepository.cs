@@ -58,27 +58,30 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
     }
 
     public void Insert<TEntity, TProperties>(
-        string name,
-        IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items,
-        Scheme scheme)
+        CollectionInfo scheme,
+        IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items)
         where TEntity : Entity
         where TProperties : Properties
     {
+        var name = $"{scheme.ShardName}.{scheme.Name}";
+
         ExecuteNonQuery(QueryBuilder.Collections.CreateTable(scheme, name));
         ExecuteCollectionCommand(QueryBuilder.Collections.Insert(scheme, name), items, scheme);
     }
 
     public void Insert<TParent, TChild>(
-        string name,
+        RelationInfo scheme,
         IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
         where TParent : Entity
         where TChild : Entity
     {
+        var name = $"{scheme.ShardName}.{scheme.Name}";
+
         ExecuteNonQuery(QueryBuilder.Relations.CreateTable(name));
         ExecuteRelationCommand(QueryBuilder.Relations.Insert(name), relations);
     }
 
-    public void Update<TEntity, TProperties>(string name, IReadOnlyCollection<ICollectionChange<TEntity, TProperties>> changes, Scheme scheme)
+    public void Update<TEntity, TProperties>(CollectionInfo scheme, IReadOnlyCollection<ICollectionChange<TEntity, TProperties>> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -98,6 +101,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             {
                 command = _connection.CreateCommand();
 
+                var name = $"{scheme.ShardName}.{scheme.Name}";
                 var properties = scheme.Properties.Where(p => modifiedProperties.ContainsProp(p.Name)).ToArray();
                 command.CommandText = QueryBuilder.Collections.Update(properties, name);
 
@@ -118,9 +122,10 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Delete<TEntity>(string name, IReadOnlyCollection<TEntity> entities)
+    public void Delete<TEntity>(CollectionInfo scheme, IReadOnlyCollection<TEntity> entities)
         where TEntity : Entity
     {
+        var name = $"{scheme.ShardName}.{scheme.Name}";
         using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Collections.Delete(name);
         var parameter = command.CreateParameter();
@@ -136,17 +141,21 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Delete<TParent, TChild>(string name, IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
+    public void Delete<TParent, TChild>(RelationInfo scheme, IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
         where TParent : Entity
         where TChild : Entity
     {
+        var name = $"{scheme.ShardName}.{scheme.Name}";
+
         ExecuteRelationCommand(QueryBuilder.Relations.Delete(name), relations);
     }
 
-    public void Select<TEntity, TProperties>(string name, IMutableCollection<TEntity, TProperties> collection, Scheme scheme)
+    public void Select<TEntity, TProperties>(CollectionInfo scheme, IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
+        var name = $"{scheme.ShardName}.{scheme.Name}";
+
         if (!Exists(name))
         {
             return;
@@ -172,10 +181,12 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Select<TParent, TChild>(string name, IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parentCollection, IEnumerable<TChild> childCollection)
+    public void Select<TParent, TChild>(RelationInfo scheme, IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parentCollection, IEnumerable<TChild> childCollection)
         where TParent : Entity
         where TChild : Entity
     {
+        var name = $"{scheme.ShardName}.{scheme.Name}";
+
         if (!Exists(name))
         {
             return;
@@ -215,7 +226,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         return false;
     }
 
-    private void ExecuteCollectionCommand<TEntity, TProperties>(string query, IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items, Scheme scheme)
+    private void ExecuteCollectionCommand<TEntity, TProperties>(string query, IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items, CollectionInfo scheme)
         where TEntity : Entity
         where TProperties : Properties
     {

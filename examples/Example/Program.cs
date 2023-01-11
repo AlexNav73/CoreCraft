@@ -24,8 +24,10 @@ class Program
 
         var model = new MyModel(new[] { new ExampleModelShard() });
 
-        using (model.SubscribeTo<IExampleChangesFrame>(x => x.With(y => y.FirstCollection).By(OnFirstCollectionChanged)))
+        using (model.SubscribeTo<IExampleChangesFrame>(x => x.With(y => y.FirstCollection).By(OnCollectionChanged)))
         {
+            Console.WriteLine("======================== Modifying ========================");
+
             await model.Run<IMutableExampleModelShard>((shard, _) =>
             {
                 var first = shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
@@ -33,8 +35,6 @@ class Program
 
                 shard.OneToOneRelation.Add(first, second);
             });
-
-            var shard = model.Shard<IExampleModelShard>();
 
             await model.Run<IMutableExampleModelShard>((shard, _) =>
             {
@@ -54,25 +54,28 @@ class Program
             });
         }
 
+        Console.WriteLine("======================== Saving ========================");
         model.Save(Path);
 
         model = new MyModel(new[] { new ExampleModelShard() });
-        using (model.SubscribeTo<IExampleChangesFrame>(x => x.With(y => y.FirstCollection).By(OnFirstCollectionChanged)))
+        using (model.SubscribeTo<IExampleChangesFrame>(x => x.With(y => y.SecondCollection).By(OnCollectionChanged)))
         {
-            Console.WriteLine("======================== Loaded ========================");
+            Console.WriteLine("======================== Loading ========================");
 
             await model.Load(Path);
         }
     }
 
-    private static void OnFirstCollectionChanged(Change<ICollectionChangeSet<FirstEntity, FirstEntityProperties>> change)
+    private static void OnCollectionChanged<TEntity, TProperties>(Change<ICollectionChangeSet<TEntity, TProperties>> change)
+        where TEntity : Entity
+        where TProperties : Properties
     {
         foreach (var c in change.Hunk)
         {
+            Console.WriteLine();
             Console.WriteLine($"Entity [{c.Entity}] has been {c.Action}ed.");
             Console.WriteLine($"   Old data: {c.OldData}");
             Console.WriteLine($"   New data: {c.NewData}");
-            Console.WriteLine();
         }
     }
 }

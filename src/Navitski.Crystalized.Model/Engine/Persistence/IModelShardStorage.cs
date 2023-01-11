@@ -21,9 +21,8 @@ public interface IModelShardStorage
     ///     Updates data by applying changes to stored data, using <see cref="IRepository"/>
     /// </summary>
     /// <param name="repository">A repository implementation (for example SQLite)</param>
-    /// <param name="model">A model after all changes applied</param>
     /// <param name="changes">A collection of model changes which should be saved</param>
-    void Update(IRepository repository, IModel model, IModelChanges changes);
+    void Update(IRepository repository, IModelChanges changes);
 
     /// <summary>
     ///     Saves all data from the model, using <see cref="IRepository"/>
