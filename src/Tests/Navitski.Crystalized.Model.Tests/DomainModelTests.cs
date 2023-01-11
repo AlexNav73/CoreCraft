@@ -125,7 +125,7 @@ public class DomainModelTests
     public void SaveChangesThrowsExceptionTest()
     {
         var storage = A.Fake<IStorage>();
-        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
+        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModelChanges>.Ignored))
             .Throws<InvalidOperationException>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
         
@@ -140,7 +140,7 @@ public class DomainModelTests
 
         var task = model.Save("", Array.Empty<IModelChanges>());
 
-        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
+        A.CallTo(() => storage.Update(A<string>.Ignored,A<IModelChanges>.Ignored))
             .MustNotHaveHappened();
         Assert.That(task, Is.Not.Null);
         Assert.That(task.IsCompleted, Is.True);

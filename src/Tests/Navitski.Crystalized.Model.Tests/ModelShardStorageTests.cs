@@ -18,12 +18,11 @@ public class ModelShardStorageTests
     public void UpdateWithoutChangesTest()
     {
         var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         var changesFrame = A.Fake<IWritableChangesFrame>(c => c.Implements<IFakeChangesFrame>());
         modelChanges.Register(changesFrame);
 
-        storage.Update(_repository!, model, modelChanges);
+        storage.Update(_repository!, modelChanges);
 
         A.CallTo(() => ((IFakeChangesFrame)changesFrame).FirstCollection.HasChanges()).MustHaveHappenedOnceExactly();
         A.CallTo(() => ((IFakeChangesFrame)changesFrame).SecondCollection.HasChanges()).MustHaveHappenedOnceExactly();
@@ -37,16 +36,14 @@ public class ModelShardStorageTests
     public void UpdateCollectionAddChangeTest()
     {
         var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         SetupModelChanges(modelChanges, CollectionAction.Add, null, new());
 
-        storage.Update(_repository!, model, modelChanges);
+        storage.Update(_repository!, modelChanges);
 
         A.CallTo(() => _repository!.Insert(
-            A<string>.Ignored,
-            A<IReadOnlyCollection<KeyValuePair<FirstEntity, FirstEntityProperties>>>.Ignored,
-            A<Scheme>.Ignored))
+            A<CollectionInfo>.Ignored,
+            A<IReadOnlyCollection<KeyValuePair<FirstEntity, FirstEntityProperties>>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -54,14 +51,13 @@ public class ModelShardStorageTests
     public void UpdateCollectionRemoveChangeTest()
     {
         var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         SetupModelChanges(modelChanges, CollectionAction.Remove, new(), null);
 
-        storage.Update(_repository!, model, modelChanges);
+        storage.Update(_repository!, modelChanges);
 
         A.CallTo(() => _repository!.Delete(
-            A<string>.Ignored,
+            A<CollectionInfo>.Ignored,
             A<IReadOnlyCollection<FirstEntity>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
@@ -70,16 +66,14 @@ public class ModelShardStorageTests
     public void UpdateCollectionModifyChangeTest()
     {
         var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         SetupModelChanges(modelChanges, CollectionAction.Modify, new(), new());
 
-        storage.Update(_repository!, model, modelChanges);
+        storage.Update(_repository!, modelChanges);
 
         A.CallTo(() => _repository!.Update(
-            A<string>.Ignored,
-            A<IReadOnlyCollection<ICollectionChange<FirstEntity, FirstEntityProperties>>>.Ignored,
-            A<Scheme>.Ignored))
+            A<CollectionInfo>.Ignored,
+            A<IReadOnlyCollection<ICollectionChange<FirstEntity, FirstEntityProperties>>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -87,14 +81,13 @@ public class ModelShardStorageTests
     public void UpdateRelationLinkChangeTest()
     {
         var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         SetupModelChanges(modelChanges, RelationAction.Linked);
 
-        storage.Update(_repository!, model, modelChanges);
+        storage.Update(_repository!, modelChanges);
 
         A.CallTo(() => _repository!.Insert(
-            A<string>.Ignored,
+            A<RelationInfo>.Ignored,
             A<IReadOnlyCollection<KeyValuePair<FirstEntity, SecondEntity>>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
@@ -103,14 +96,13 @@ public class ModelShardStorageTests
     public void UpdateRelationUnlinkChangeTest()
     {
         var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
         var modelChanges = new ModelChanges();
         SetupModelChanges(modelChanges, RelationAction.Unlinked);
 
-        storage.Update(_repository!, model, modelChanges);
+        storage.Update(_repository!, modelChanges);
 
         A.CallTo(() => _repository!.Delete(
-            A<string>.Ignored,
+            A<RelationInfo>.Ignored,
             A<IReadOnlyCollection<KeyValuePair<FirstEntity, SecondEntity>>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
@@ -125,9 +117,8 @@ public class ModelShardStorageTests
         storage.Save(_repository!, model);
 
         A.CallTo(() => _repository!.Insert(
-            A<string>.Ignored,
-            A<IReadOnlyCollection<KeyValuePair<FirstEntity, FirstEntityProperties>>>.Ignored,
-            A<Scheme>.Ignored))
+            A<CollectionInfo>.Ignored,
+            A<IReadOnlyCollection<KeyValuePair<FirstEntity, FirstEntityProperties>>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -141,7 +132,7 @@ public class ModelShardStorageTests
         storage.Save(_repository!, model);
 
         A.CallTo(() => _repository!.Insert(
-            A<string>.Ignored,
+            A<RelationInfo>.Ignored,
             A<IReadOnlyCollection<KeyValuePair<FirstEntity, SecondEntity>>>.Ignored))
             .MustHaveHappened(4, Times.Exactly);
     }
@@ -156,9 +147,8 @@ public class ModelShardStorageTests
         storage.Load(_repository!, model);
 
         A.CallTo(() => _repository!.Select(
-            A<string>.Ignored,
-            A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored,
-            A<Scheme>.Ignored))
+            A<CollectionInfo>.Ignored,
+            A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -172,7 +162,7 @@ public class ModelShardStorageTests
         storage.Load(_repository!, model);
 
         A.CallTo(() => _repository!.Select(
-            A<string>.Ignored,
+            A<RelationInfo>.Ignored,
             A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored,
             A<IEnumerable<FirstEntity>>.Ignored,
             A<IEnumerable<SecondEntity>>.Ignored))

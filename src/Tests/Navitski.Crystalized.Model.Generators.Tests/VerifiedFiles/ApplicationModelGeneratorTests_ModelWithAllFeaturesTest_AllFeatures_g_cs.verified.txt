@@ -222,20 +222,25 @@ namespace compilation.AllFeatures
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
     internal sealed class FakeModelShardStorage : ModelShardStorage
     {
-        public static readonly Scheme FirstCollectionScheme = new(new Property[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
-        public static readonly Scheme SecondCollectionScheme = new(new Property[] { new("IntProperty", typeof(int), false), new("BoolProperty", typeof(bool), false), new("DoubleProperty", typeof(double), false), new("FloatProperty", typeof(float), false) });
+        internal static readonly CollectionInfo FirstCollectionInfo = new("Fake", "FirstCollection", new Property[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
+        internal static readonly CollectionInfo SecondCollectionInfo = new("Fake", "SecondCollection", new Property[] { new("IntProperty", typeof(int), false), new("BoolProperty", typeof(bool), false), new("DoubleProperty", typeof(double), false), new("FloatProperty", typeof(float), false) });
 
-        public override void Update(IRepository repository, IModel model, IModelChanges changes)
+        internal static readonly RelationInfo OneToOneRelationInfo = new("Fake", "OneToOneRelation");
+        internal static readonly RelationInfo OneToManyRelationInfo = new("Fake", "OneToManyRelation");
+        internal static readonly RelationInfo ManyToOneRelationInfo = new("Fake", "ManyToOneRelation");
+        internal static readonly RelationInfo ManyToManyRelationInfo = new("Fake", "ManyToManyRelation");
+
+        public override void Update(IRepository repository, IModelChanges changes)
         {
             if (changes.TryGetFrame<IFakeChangesFrame>(out var frame))
             {
-                Update(repository, "Fake.FirstCollection", frame.FirstCollection, FirstCollectionScheme);
-                Update(repository, "Fake.SecondCollection", frame.SecondCollection, SecondCollectionScheme);
+                Update(repository, FirstCollectionInfo, frame.FirstCollection);
+                Update(repository, SecondCollectionInfo, frame.SecondCollection);
 
-                Update(repository, "Fake.OneToOneRelation", frame.OneToOneRelation);
-                Update(repository, "Fake.OneToManyRelation", frame.OneToManyRelation);
-                Update(repository, "Fake.ManyToOneRelation", frame.ManyToOneRelation);
-                Update(repository, "Fake.ManyToManyRelation", frame.ManyToManyRelation);
+                Update(repository, OneToOneRelationInfo, frame.OneToOneRelation);
+                Update(repository, OneToManyRelationInfo, frame.OneToManyRelation);
+                Update(repository, ManyToOneRelationInfo, frame.ManyToOneRelation);
+                Update(repository, ManyToManyRelationInfo, frame.ManyToManyRelation);
             }
         }
 
@@ -243,26 +248,26 @@ namespace compilation.AllFeatures
         {
             var shard = model.Shard<IFakeModelShard>();
 
-            Save(repository, "Fake.FirstCollection", shard.FirstCollection, FirstCollectionScheme);
-            Save(repository, "Fake.SecondCollection", shard.SecondCollection, SecondCollectionScheme);
+            Save(repository, FirstCollectionInfo, shard.FirstCollection);
+            Save(repository, SecondCollectionInfo, shard.SecondCollection);
 
-            Save(repository, "Fake.OneToOneRelation", shard.OneToOneRelation);
-            Save(repository, "Fake.OneToManyRelation", shard.OneToManyRelation);
-            Save(repository, "Fake.ManyToOneRelation", shard.ManyToOneRelation);
-            Save(repository, "Fake.ManyToManyRelation", shard.ManyToManyRelation);
+            Save(repository, OneToOneRelationInfo, shard.OneToOneRelation);
+            Save(repository, OneToManyRelationInfo, shard.OneToManyRelation);
+            Save(repository, ManyToOneRelationInfo, shard.ManyToOneRelation);
+            Save(repository, ManyToManyRelationInfo, shard.ManyToManyRelation);
         }
 
         public override void Load(IRepository repository, IModel model)
         {
             var shard = model.Shard<IMutableFakeModelShard>();
 
-            Load(repository, "Fake.FirstCollection", shard.FirstCollection, FirstCollectionScheme);
-            Load(repository, "Fake.SecondCollection", shard.SecondCollection, SecondCollectionScheme);
+            Load(repository, FirstCollectionInfo, shard.FirstCollection);
+            Load(repository, SecondCollectionInfo, shard.SecondCollection);
 
-            Load(repository, "Fake.OneToOneRelation", shard.OneToOneRelation, shard.FirstCollection, shard.SecondCollection);
-            Load(repository, "Fake.OneToManyRelation", shard.OneToManyRelation, shard.FirstCollection, shard.SecondCollection);
-            Load(repository, "Fake.ManyToOneRelation", shard.ManyToOneRelation, shard.FirstCollection, shard.SecondCollection);
-            Load(repository, "Fake.ManyToManyRelation", shard.ManyToManyRelation, shard.FirstCollection, shard.SecondCollection);
+            Load(repository, OneToOneRelationInfo, shard.OneToOneRelation, shard.FirstCollection, shard.SecondCollection);
+            Load(repository, OneToManyRelationInfo, shard.OneToManyRelation, shard.FirstCollection, shard.SecondCollection);
+            Load(repository, ManyToOneRelationInfo, shard.ManyToOneRelation, shard.FirstCollection, shard.SecondCollection);
+            Load(repository, ManyToManyRelationInfo, shard.ManyToManyRelation, shard.FirstCollection, shard.SecondCollection);
         }
     }
 

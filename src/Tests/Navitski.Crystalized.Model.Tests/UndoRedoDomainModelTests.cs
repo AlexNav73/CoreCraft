@@ -115,7 +115,7 @@ public class UndoRedoDomainModelTests
 
         await model.Save(storage, "fake");
 
-        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModel>.Ignored, A<IModelChanges>.Ignored))
+        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModelChanges>.Ignored))
             .MustHaveHappenedOnceExactly();
 
         Assert.That(model.UndoStack.Count, Is.EqualTo(0));

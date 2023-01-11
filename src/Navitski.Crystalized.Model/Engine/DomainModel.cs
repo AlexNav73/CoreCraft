@@ -120,8 +120,6 @@ public abstract class DomainModel : IDomainModel
     /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
     protected Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
     {
-        var copy = _view.CopyModel();
-
         try
         {
             if (changes.Count > 0)
@@ -130,7 +128,7 @@ public abstract class DomainModel : IDomainModel
 
                 if (merged.HasChanges())
                 {
-                    return _scheduler.RunParallel(() => storage.Update(path, copy, merged), token);
+                    return _scheduler.RunParallel(() => storage.Update(path, merged), token);
                 }
             }
 

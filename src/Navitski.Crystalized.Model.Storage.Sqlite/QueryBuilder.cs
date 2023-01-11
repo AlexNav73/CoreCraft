@@ -12,7 +12,7 @@ internal static class QueryBuilder
 
     internal static string DropTable(string name)
     {
-        return $"DROP TABLE IF EXISTS {name};";
+        return $"DROP TABLE IF EXISTS [{name}];";
     }
 
     internal static class Migrations
@@ -24,7 +24,7 @@ internal static class QueryBuilder
 
     internal static class Collections
     {
-        internal static string CreateTable(Scheme scheme, string name)
+        internal static string CreateTable(CollectionInfo scheme, string name)
         {
             var builder = new StringBuilder();
 
@@ -40,7 +40,7 @@ internal static class QueryBuilder
             return builder.ToString();
         }
 
-        internal static string Insert(Scheme scheme, string name)
+        internal static string Insert(CollectionInfo scheme, string name)
         {
             var builder = new StringBuilder();
 
@@ -81,7 +81,7 @@ internal static class QueryBuilder
             return $"DELETE FROM [{name}] WHERE [Id] = $Id;";
         }
 
-        internal static string Select(Scheme scheme, string name)
+        internal static string Select(CollectionInfo scheme, string name)
         {
             var builder = new StringBuilder();
 

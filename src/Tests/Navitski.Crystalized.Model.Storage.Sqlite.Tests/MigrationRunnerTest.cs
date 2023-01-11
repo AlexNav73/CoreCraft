@@ -9,16 +9,15 @@ internal class MigrationRunnerTest
     public void RunTest()
     {
         using var repository = new SqliteRepository(":memory:");
-        var table = "test";
+        var table = $"{FakeModelShardStorage.FirstCollectionInfo.ShardName}.{FakeModelShardStorage.FirstCollectionInfo.Name}";
         var runner = new MigrationRunner(new[] { new DropTableMigration(table) });
 
         repository.Insert(
-            table,
+            FakeModelShardStorage.FirstCollectionInfo,
             new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
             {
                 new KeyValuePair<FirstEntity, FirstEntityProperties>(new(), new())
-            },
-            FakeModelShardStorage.FirstCollectionScheme);
+            });
 
         Assert.That(repository.Exists(table), Is.True);
         Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(0));

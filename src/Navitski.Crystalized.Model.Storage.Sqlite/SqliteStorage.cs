@@ -31,8 +31,8 @@ public sealed class SqliteStorage : IStorage
         _logginAction = logginAction;
     }
 
-    /// <inheritdoc cref="IStorage.Update(string, IModel, IModelChanges)"/>
-    public void Update(string path, IModel model, IModelChanges changes)
+    /// <inheritdoc cref="IStorage.Update(string, IModelChanges)"/>
+    public void Update(string path, IModelChanges changes)
     {
         ISqliteRepository? repository = null;
         IDbTransaction? transaction = null;
@@ -44,7 +44,7 @@ public sealed class SqliteStorage : IStorage
 
             foreach (var storage in _storages)
             {
-                storage.Update(repository, model, changes);
+                storage.Update(repository, changes);
             }
 
             transaction.Commit();

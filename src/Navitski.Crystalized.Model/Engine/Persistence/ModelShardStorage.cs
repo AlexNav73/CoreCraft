@@ -5,8 +5,8 @@ namespace Navitski.Crystalized.Model.Engine.Persistence;
 /// <inheritdoc cref="IModelShardStorage"/>
 public abstract class ModelShardStorage : IModelShardStorage
 {
-    /// <inheritdoc cref="IModelShardStorage.Update(IRepository, IModel, IModelChanges)"/>
-    public abstract void Update(IRepository repository, IModel model, IModelChanges changes);
+    /// <inheritdoc cref="IModelShardStorage.Update(IRepository, IModelChanges)"/>
+    public abstract void Update(IRepository repository, IModelChanges changes);
 
     /// <inheritdoc cref="IModelShardStorage.Save(IRepository, IModel)"/>
     public abstract void Save(IRepository repository, IModel model);
@@ -20,10 +20,9 @@ public abstract class ModelShardStorage : IModelShardStorage
     /// <typeparam name="TEntity">A type of an entity</typeparam>
     /// <typeparam name="TProperties">A type of properties</typeparam>
     /// <param name="repository">A repository</param>
-    /// <param name="name">A collection name</param>
     /// <param name="changes">Changes to apply</param>
     /// <param name="scheme">Scheme of properties</param>
-    protected void Update<TEntity, TProperties>(IRepository repository, string name, ICollectionChangeSet<TEntity, TProperties> changes, Scheme scheme)
+    protected void Update<TEntity, TProperties>(IRepository repository, CollectionInfo scheme, ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -56,15 +55,15 @@ public abstract class ModelShardStorage : IModelShardStorage
 
         if (added.Count > 0)
         {
-            repository.Insert(name, added, scheme);
+            repository.Insert(scheme, added);
         }
         if (modified.Count > 0)
         {
-            repository.Update(name, modified, scheme);
+            repository.Update(scheme, modified);
         }
         if (removed.Count > 0)
         {
-            repository.Delete(name, removed);
+            repository.Delete(scheme, removed);
         }
     }
 
@@ -74,16 +73,15 @@ public abstract class ModelShardStorage : IModelShardStorage
     /// <typeparam name="TEntity">A type of an entity</typeparam>
     /// <typeparam name="TProperties">A type of properties</typeparam>
     /// <param name="repository">A repository</param>
-    /// <param name="name">A collection name</param>
+    /// <param name="scheme">A collection scheme</param>
     /// <param name="collection">A collection to store</param>
-    /// <param name="scheme">Scheme of properties</param>
-    protected void Save<TEntity, TProperties>(IRepository repository, string name, ICollection<TEntity, TProperties> collection, Scheme scheme)
+    protected void Save<TEntity, TProperties>(IRepository repository, CollectionInfo scheme, ICollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
         var items = collection.Pairs().Select(x => new KeyValuePair<TEntity, TProperties>(x.entity, x.properties)).ToArray();
 
-        repository.Insert(name, items, scheme);
+        repository.Insert(scheme, items);
     }
 
     /// <summary>
@@ -92,9 +90,9 @@ public abstract class ModelShardStorage : IModelShardStorage
     /// <typeparam name="TParent">A type of a parent entity</typeparam>
     /// <typeparam name="TChild">A type of a child entity</typeparam>
     /// <param name="repository">A repository</param>
-    /// <param name="name">A relation name</param>
+    /// <param name="scheme">A relation scheme</param>
     /// <param name="changes">Changes to apply</param>
-    protected void Update<TParent, TChild>(IRepository repository, string name, IRelationChangeSet<TParent, TChild> changes)
+    protected void Update<TParent, TChild>(IRepository repository, RelationInfo scheme, IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
@@ -121,11 +119,11 @@ public abstract class ModelShardStorage : IModelShardStorage
 
         if (linked.Count > 0)
         {
-            repository.Insert(name, linked);
+            repository.Insert(scheme, linked);
         }
         if (unlinked.Count > 0)
         {
-            repository.Delete(name, unlinked);
+            repository.Delete(scheme, unlinked);
         }
     }
 
@@ -135,16 +133,16 @@ public abstract class ModelShardStorage : IModelShardStorage
     /// <typeparam name="TParent">A type of a parent entity</typeparam>
     /// <typeparam name="TChild">A type of a child entity</typeparam>
     /// <param name="repository">A repository</param>
-    /// <param name="name">A relation name</param>
+    /// <param name="scheme">A relation scheme</param>
     /// <param name="relation">A relation to store</param>
-    protected void Save<TParent, TChild>(IRepository repository, string name, IRelation<TParent, TChild> relation)
+    protected void Save<TParent, TChild>(IRepository repository, RelationInfo scheme, IRelation<TParent, TChild> relation)
         where TParent : Entity
         where TChild : Entity
     {
         var pairs = relation
             .SelectMany(x => relation.Children(x).Select(y => new KeyValuePair<TParent, TChild>(x, y)));
 
-        repository.Insert(name, pairs.ToArray());
+        repository.Insert(scheme, pairs.ToArray());
     }
 
     /// <summary>
@@ -153,18 +151,16 @@ public abstract class ModelShardStorage : IModelShardStorage
     /// <typeparam name="TEntity">A type of an entity</typeparam>
     /// <typeparam name="TProperties">A type of properties</typeparam>
     /// <param name="repository">A repository</param>
-    /// <param name="name">A collection name</param>
-    /// <param name="collection">A collection to store</param>
     /// <param name="scheme">Scheme of properties</param>
+    /// <param name="collection">A collection to store</param>
     protected void Load<TEntity, TProperties>(
         IRepository repository,
-        string name,
-        IMutableCollection<TEntity, TProperties> collection,
-        Scheme scheme)
+        CollectionInfo scheme,
+        IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
-        repository.Select(name, collection, scheme);
+        repository.Select(scheme, collection);
     }
 
     /// <summary>
@@ -173,19 +169,19 @@ public abstract class ModelShardStorage : IModelShardStorage
     /// <typeparam name="TParent">A type of a parent entity</typeparam>
     /// <typeparam name="TChild">A type of a child entity</typeparam>
     /// <param name="repository">A repository</param>
-    /// <param name="name">A relation name</param>
+    /// <param name="scheme">A relation scheme</param>
     /// <param name="relation">A relation to store</param>
     /// <param name="parents">A parent entities collection</param>
     /// <param name="children">A child entities collection</param>
     protected void Load<TParent, TChild>(
         IRepository repository,
-        string name,
+        RelationInfo scheme,
         IMutableRelation<TParent, TChild> relation,
         IEnumerable<TParent> parents,
         IEnumerable<TChild> children)
         where TParent : Entity
         where TChild : Entity
     {
-        repository.Select(name, relation, parents, children);
+        repository.Select(scheme, relation, parents, children);
     }
 }

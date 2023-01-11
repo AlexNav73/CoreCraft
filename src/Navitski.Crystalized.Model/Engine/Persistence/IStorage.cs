@@ -16,9 +16,8 @@ public interface IStorage
     ///     Updates existing stored data by applying new changes to them
     /// </summary>
     /// <param name="path">A path to the file</param>
-    /// <param name="model">A model with all the changes applied</param>
     /// <param name="changes">A model changes happened since model creation or last save</param>
-    void Update(string path, IModel model, IModelChanges changes);
+    void Update(string path, IModelChanges changes);
 
     /// <summary>
     ///     Saves the whole model
