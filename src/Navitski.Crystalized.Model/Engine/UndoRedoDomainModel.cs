@@ -90,10 +90,11 @@ public class UndoRedoDomainModel : DomainModel
     /// <summary>
     ///     Loads the model
     /// </summary>
+    /// <param name="storage">A storage from which a model will be loaded</param>
     /// <param name="path">A path to a file</param>
-    public async Task Load(string path)
+    public async Task Load(string path, IStorage? storage = null)
     {
-        await Load(_storage, path);
+        await Load(storage ?? _storage, path);
     }
 
     /// <summary>
