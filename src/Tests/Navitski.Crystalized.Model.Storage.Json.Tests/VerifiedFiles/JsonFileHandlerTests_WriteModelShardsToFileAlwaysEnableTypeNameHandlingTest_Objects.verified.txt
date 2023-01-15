@@ -1,0 +1,80 @@
+﻿[
+  {
+    "$type": "Navitski.Crystalized.Model.Storage.Json.Model.ModelShard, Navitski.Crystalized.Model.Storage.Json",
+    "Name": "Test",
+    "Collections": [
+      {
+        "$type": "Navitski.Crystalized.Model.Storage.Json.Model.Collection`1[[Navitski.Crystalized.Model.Tests.Infrastructure.Model.Entities.FirstEntityProperties, Navitski.Crystalized.Model.Tests.Infrastructure]], Navitski.Crystalized.Model.Storage.Json",
+        "Name": "First",
+        "Items": [
+          {
+            "$type": "Navitski.Crystalized.Model.Storage.Json.Model.Item`1[[Navitski.Crystalized.Model.Tests.Infrastructure.Model.Entities.FirstEntityProperties, Navitski.Crystalized.Model.Tests.Infrastructure]], Navitski.Crystalized.Model.Storage.Json",
+            "Id": "4338c5bd-62a5-4881-9496-de733cbc32e9",
+            "Properties": {
+              "$type": "Navitski.Crystalized.Model.Tests.Infrastructure.Model.Entities.FirstEntityProperties, Navitski.Crystalized.Model.Tests.Infrastructure",
+              "NonNullableStringProperty": "",
+              "NullableStringProperty": "value1",
+              "NullableStringWithDefaultValueProperty": null
+            }
+          },
+          {
+            "$type": "Navitski.Crystalized.Model.Storage.Json.Model.Item`1[[Navitski.Crystalized.Model.Tests.Infrastructure.Model.Entities.FirstEntityProperties, Navitski.Crystalized.Model.Tests.Infrastructure]], Navitski.Crystalized.Model.Storage.Json",
+            "Id": "51a44e3e-3a5e-4f08-b0fa-04779c95530f",
+            "Properties": {
+              "$type": "Navitski.Crystalized.Model.Tests.Infrastructure.Model.Entities.FirstEntityProperties, Navitski.Crystalized.Model.Tests.Infrastructure",
+              "NonNullableStringProperty": "",
+              "NullableStringProperty": "value2",
+              "NullableStringWithDefaultValueProperty": null
+            }
+          }
+        ]
+      },
+      {
+        "$type": "Navitski.Crystalized.Model.Storage.Json.Model.Collection`1[[Navitski.Crystalized.Model.Tests.Infrastructure.Model.Entities.SecondEntityProperties, Navitski.Crystalized.Model.Tests.Infrastructure]], Navitski.Crystalized.Model.Storage.Json",
+        "Name": "Second",
+        "Items": [
+          {
+            "$type": "Navitski.Crystalized.Model.Storage.Json.Model.Item`1[[Navitski.Crystalized.Model.Tests.Infrastructure.Model.Entities.SecondEntityProperties, Navitski.Crystalized.Model.Tests.Infrastructure]], Navitski.Crystalized.Model.Storage.Json",
+            "Id": "484591a6-0382-4c9d-9f2c-8a12d3227570",
+            "Properties": {
+              "$type": "Navitski.Crystalized.Model.Tests.Infrastructure.Model.Entities.SecondEntityProperties, Navitski.Crystalized.Model.Tests.Infrastructure",
+              "IntProperty": 0,
+              "BoolProperty": false,
+              "DoubleProperty": 1.1,
+              "FloatProperty": 0.0
+            }
+          },
+          {
+            "$type": "Navitski.Crystalized.Model.Storage.Json.Model.Item`1[[Navitski.Crystalized.Model.Tests.Infrastructure.Model.Entities.SecondEntityProperties, Navitski.Crystalized.Model.Tests.Infrastructure]], Navitski.Crystalized.Model.Storage.Json",
+            "Id": "b5165342-e8b9-456b-aa1e-1a363693e50e",
+            "Properties": {
+              "$type": "Navitski.Crystalized.Model.Tests.Infrastructure.Model.Entities.SecondEntityProperties, Navitski.Crystalized.Model.Tests.Infrastructure",
+              "IntProperty": 0,
+              "BoolProperty": false,
+              "DoubleProperty": 2.2,
+              "FloatProperty": 0.0
+            }
+          }
+        ]
+      }
+    ],
+    "Relations": [
+      {
+        "$type": "Navitski.Crystalized.Model.Storage.Json.Model.Relation, Navitski.Crystalized.Model.Storage.Json",
+        "Name": "OneToOne",
+        "Pairs": [
+          {
+            "$type": "Navitski.Crystalized.Model.Storage.Json.Model.Pair, Navitski.Crystalized.Model.Storage.Json",
+            "Parent": "4338c5bd-62a5-4881-9496-de733cbc32e9",
+            "Child": "484591a6-0382-4c9d-9f2c-8a12d3227570"
+          },
+          {
+            "$type": "Navitski.Crystalized.Model.Storage.Json.Model.Pair, Navitski.Crystalized.Model.Storage.Json",
+            "Parent": "51a44e3e-3a5e-4f08-b0fa-04779c95530f",
+            "Child": "b5165342-e8b9-456b-aa1e-1a363693e50e"
+          }
+        ]
+      }
+    ]
+  }
+]

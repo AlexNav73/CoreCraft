@@ -2,6 +2,7 @@
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Storage.Json.Model;
+using Newtonsoft.Json;
 
 namespace Navitski.Crystalized.Model.Storage.Json;
 
@@ -10,29 +11,34 @@ namespace Navitski.Crystalized.Model.Storage.Json;
 /// </summary>
 public sealed class JsonStorage : IStorage
 {
+    private readonly JsonSerializerSettings? _settings;
     private readonly IJsonFileHandler _jsonFileHandler;
     private readonly IEnumerable<IModelShardStorage> _storages;
 
     /// <summary>
     ///     Ctor
     /// </summary>
-    public JsonStorage(IEnumerable<IModelShardStorage> storages)
-        : this(storages, new JsonFileHandler())
+    public JsonStorage(
+        IEnumerable<IModelShardStorage> storages,
+        JsonSerializerSettings? options = null)
+        : this(storages, new JsonFileHandler(), options)
     {
     }
 
     internal JsonStorage(
         IEnumerable<IModelShardStorage> storages,
-        IJsonFileHandler jsonFileHandler)
+        IJsonFileHandler jsonFileHandler,
+        JsonSerializerSettings? options = null)
     {
         _storages = storages;
         _jsonFileHandler = jsonFileHandler;
+        _settings = options;
     }
 
     /// <inheritdoc/>
     public void Update(string path, IModelChanges changes)
     {
-        var shards = _jsonFileHandler.ReadModelShardsFromFile(path);
+        var shards = _jsonFileHandler.ReadModelShardsFromFile(path, _settings);
         var repository = new JsonRepository(shards);
 
         foreach (var storage in _storages)
@@ -40,7 +46,7 @@ public sealed class JsonStorage : IStorage
             storage.Update(repository, changes);
         }
 
-        _jsonFileHandler.WriteModelShardsToFile(path, shards);
+        _jsonFileHandler.WriteModelShardsToFile(path, shards, _settings);
     }
 
     /// <inheritdoc/>
@@ -54,13 +60,13 @@ public sealed class JsonStorage : IStorage
             storage.Save(repository, model);
         }
 
-        _jsonFileHandler.WriteModelShardsToFile(path, shards);
+        _jsonFileHandler.WriteModelShardsToFile(path, shards, _settings);
     }
 
     /// <inheritdoc/>
     public void Load(string path, IModel model)
     {
-        var shards = _jsonFileHandler.ReadModelShardsFromFile(path);
+        var shards = _jsonFileHandler.ReadModelShardsFromFile(path, _settings);
 
         var repository = new JsonRepository(shards);
 

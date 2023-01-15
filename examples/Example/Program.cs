@@ -1,5 +1,4 @@
 ﻿using Example.Model;
-using Example.Model.Entities;
 using Navitski.Crystalized.Model.Engine;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;

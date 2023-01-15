@@ -1,4 +1,5 @@
 ﻿using Navitski.Crystalized.Model.Storage.Json.Model;
+using Newtonsoft.Json;
 
 namespace Navitski.Crystalized.Model.Storage.Json.Tests;
 
@@ -9,9 +10,10 @@ public class JsonFileHandlerTests
     {
         var shards = CreateModel();
         var jsonFileHandler = new JsonFileHandler();
+        var setting = new JsonSerializerSettings();
         var file = "test1.json";
 
-        jsonFileHandler.WriteModelShardsToFile(file, shards);
+        jsonFileHandler.WriteModelShardsToFile(file, shards, setting);
 
         var json = File.ReadAllText(file);
         File.Delete(file);
@@ -20,17 +22,83 @@ public class JsonFileHandlerTests
     }
 
     [Test]
+    public async Task WriteModelShardsToFilePreserveJsonSettingsTest()
+    {
+        var shards = CreateModel();
+        var jsonFileHandler = new JsonFileHandler();
+        var setting = new JsonSerializerSettings()
+        {
+            Formatting = Formatting.Indented
+        };
+        var file = "test1.json";
+
+        jsonFileHandler.WriteModelShardsToFile(file, shards, setting);
+
+        var json = File.ReadAllText(file);
+        File.Delete(file);
+
+        await Verify(json).UseDirectory("./VerifiedFiles");
+    }
+
+    [Test]
+    [TestCase(TypeNameHandling.All)]
+    [TestCase(TypeNameHandling.None)]
+    [TestCase(TypeNameHandling.Objects)]
+    [TestCase(TypeNameHandling.Arrays)]
+    [TestCase(TypeNameHandling.Auto)]
+    public async Task WriteModelShardsToFileAlwaysEnableTypeNameHandlingTest(TypeNameHandling typeNameHandling)
+    {
+        var shards = CreateModel();
+        var jsonFileHandler = new JsonFileHandler();
+        var setting = new JsonSerializerSettings()
+        {
+            Formatting = Formatting.Indented,
+            TypeNameHandling = typeNameHandling
+        };
+        var file = "test1.json";
+
+        jsonFileHandler.WriteModelShardsToFile(file, shards, setting);
+
+        var json = File.ReadAllText(file);
+
+        var redShards = jsonFileHandler.ReadModelShardsFromFile(file, setting);
+
+        File.Delete(file);
+
+        Assert.That(redShards.Count, Is.EqualTo(1));
+
+        var fileName = $"{GetType().Name}_{nameof(WriteModelShardsToFileAlwaysEnableTypeNameHandlingTest)}_{typeNameHandling}";
+        await Verify(json).UseDirectory("./VerifiedFiles").UseFileName(fileName);
+    }
+
+    [Test]
+    public void WriteModelShardsToFileThrowsOnInvalidTypeNameHandlingTest()
+    {
+        var shards = CreateModel();
+        var jsonFileHandler = new JsonFileHandler();
+        var setting = new JsonSerializerSettings()
+        {
+            Formatting = Formatting.Indented,
+            TypeNameHandling = (TypeNameHandling)55
+        };
+        var file = "test1.json";
+
+        Assert.Throws<NotSupportedException>(() => jsonFileHandler.WriteModelShardsToFile(file, shards, setting));
+    }
+
+    [Test]
     public void ReadModelShardsFromFileTest()
     {
         var shards = CreateModel();
         var jsonFileHandler = new JsonFileHandler();
+        var setting = new JsonSerializerSettings();
         var file = "test2.json";
 
-        jsonFileHandler.WriteModelShardsToFile(file, shards);
+        jsonFileHandler.WriteModelShardsToFile(file, shards, setting);
         var json1 = File.ReadAllText(file);
 
-        var redShards = jsonFileHandler.ReadModelShardsFromFile(file);
-        jsonFileHandler.WriteModelShardsToFile(file, redShards);
+        var redShards = jsonFileHandler.ReadModelShardsFromFile(file, setting);
+        jsonFileHandler.WriteModelShardsToFile(file, redShards, setting);
 
         var json2 = File.ReadAllText(file);
         File.Delete(file);
@@ -42,9 +110,10 @@ public class JsonFileHandlerTests
     public void ReadModelShardsFromFileReturnsEmptyResultIfFileNotFoundTest()
     {
         var jsonFileHandler = new JsonFileHandler();
+        var setting = new JsonSerializerSettings();
         var file = "test3.json";
 
-        var redShards = jsonFileHandler.ReadModelShardsFromFile(file);
+        var redShards = jsonFileHandler.ReadModelShardsFromFile(file, setting);
 
         Assert.That(redShards.Count, Is.EqualTo(0));
     }
