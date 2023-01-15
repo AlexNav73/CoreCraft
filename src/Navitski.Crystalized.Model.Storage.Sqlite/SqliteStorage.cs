@@ -22,6 +22,14 @@ public sealed class SqliteStorage : IStorage
     public SqliteStorage(
         IEnumerable<IMigration> migrations,
         IEnumerable<IModelShardStorage> storages,
+        Action<string>? logginAction = null)
+        : this(migrations, storages, new SqliteRepositoryFactory(), logginAction)
+    {
+    }
+
+    internal SqliteStorage(
+        IEnumerable<IMigration> migrations,
+        IEnumerable<IModelShardStorage> storages,
         ISqliteRepositoryFactory sqliteRepositoryFactory,
         Action<string>? logginAction = null)
     {

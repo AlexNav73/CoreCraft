@@ -91,7 +91,6 @@ class MyModel : DomainModel
         _storage = new SqliteStorage(
             Array.Empty<IMigration>(),
             new[] { new ExampleModelShardStorage() },
-            new SqliteRepositoryFactory(),
             Console.WriteLine);
         _changes = new List<IModelChanges>();
     }

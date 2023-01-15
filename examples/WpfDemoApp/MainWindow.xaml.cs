@@ -23,13 +23,13 @@ public partial class MainWindow : MetroWindow
         {
             new ToDoModelShardStorage()
         };
-        var storage = new SqliteStorage(Array.Empty<IMigration>(), modelShardStorages, new SqliteRepositoryFactory());
+        var storage = new SqliteStorage(Array.Empty<IMigration>(), modelShardStorages);
         var modelShards = new IModelShard[]
         {
             new ToDoModelShard()
         };
-        var model = new UndoRedoDomainModel(modelShards, new AsyncScheduler());
+        var model = new UndoRedoDomainModel(storage, modelShards, new AsyncScheduler());
 
-        DataContext = new MainWindowViewModel(model, storage);
+        DataContext = new MainWindowViewModel(model);
     }
 }

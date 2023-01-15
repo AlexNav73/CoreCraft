@@ -4,7 +4,7 @@ using System.Data;
 namespace Navitski.Crystalized.Model.Storage.Sqlite;
 
 /// <summary>
-///     An implementation of repository for SQLite
+///     SQLite extension of the base <see cref="IRepository"/> interface
 /// </summary>
 public interface ISqliteRepository : IRepository, IDisposable
 {

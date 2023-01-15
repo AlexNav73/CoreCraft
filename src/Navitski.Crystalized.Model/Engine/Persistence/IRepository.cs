@@ -8,9 +8,10 @@ namespace Navitski.Crystalized.Model.Engine.Persistence;
 /// <remarks>
 ///     To store or load model from file or a database <see cref="IRepository"/> is used.
 ///     <see cref="IRepository"/> provides methods to store and load for both collections and relations.
-///     <see cref="CollectionInfo"/> is a description of the properties type. It contains a list of properties
-///     with they names, types of value, null-ability flag and so one. It is used instead of reflection
-///     when it's not clear, how to save or load entity properties.
+///     <see cref="CollectionInfo"/> is a description of a collection type. It contains a list of properties
+///     with they names, types of value, null-ability flag and so one.
+///     <see cref="RelationInfo"/> is a description of a relation type. It contains shard and relation names.
+///     They are used instead of reflection when it's not clear, how to save or load entities and their properties.
 /// </remarks>
 public interface IRepository
 {
