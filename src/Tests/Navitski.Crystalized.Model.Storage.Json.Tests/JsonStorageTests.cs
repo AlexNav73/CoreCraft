@@ -1,6 +1,7 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Storage.Json.Model;
+using Newtonsoft.Json;
 
 namespace Navitski.Crystalized.Model.Storage.Json.Tests;
 
@@ -21,15 +22,16 @@ public class JsonStorageTests
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
         var storage = new JsonStorage(new[] { modelShardStorage }, jsonFileHandler);
 
-        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored)).Returns(new List<ModelShard>());
+        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
+            .Returns(new List<ModelShard>());
 
         storage.Update("", A.Fake<IModelChanges>());
 
-        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored))
+        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => modelShardStorage.Update(A<IRepository>.Ignored, A<IModelChanges>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => jsonFileHandler.WriteModelShardsToFile(A<string>.Ignored, A<IList<ModelShard>>.Ignored))
+        A.CallTo(() => jsonFileHandler.WriteModelShardsToFile(A<string>.Ignored, A<IList<ModelShard>>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -44,7 +46,7 @@ public class JsonStorageTests
 
         A.CallTo(() => modelShardStorage.Save(A<IRepository>.Ignored, A<IModel>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => jsonFileHandler.WriteModelShardsToFile(A<string>.Ignored, A<IList<ModelShard>>.Ignored))
+        A.CallTo(() => jsonFileHandler.WriteModelShardsToFile(A<string>.Ignored, A<IList<ModelShard>>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -57,7 +59,7 @@ public class JsonStorageTests
 
         storage.Load("", A.Fake<IModel>());
 
-        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored))
+        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => modelShardStorage.Load(A<IRepository>.Ignored, A<IModel>.Ignored))
             .MustHaveHappenedOnceExactly();
