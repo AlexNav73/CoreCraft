@@ -193,7 +193,7 @@ When we have added this package we can then implement a save method for the mode
 class MyModel : DomainModel
 {
     // "IStorage" interface comes from "Navitski.Crystalized.Model" package
-    // and everybody can implement it co store data in a suitable way.
+    // and everybody can implement it to store data in a suitable way.
     // Out-of-the-box only SQLite is supported.
     private readonly IStorage _storage;
 

@@ -10,6 +10,7 @@ namespace Navitski.Crystalized.Model.Engine;
 /// </summary>
 public class UndoRedoDomainModel : DomainModel
 {
+    private readonly IStorage _storage;
     private readonly Stack<IWritableModelChanges> _undoStack;
     private readonly Stack<IWritableModelChanges> _redoStack;
 
@@ -17,10 +18,12 @@ public class UndoRedoDomainModel : DomainModel
     ///     Ctor
     /// </summary>
     public UndoRedoDomainModel(
+        IStorage storage,
         IEnumerable<IModelShard> modelShards,
         IScheduler scheduler)
         : base(modelShards, scheduler)
     {
+        _storage = storage;
         _undoStack = new Stack<IWritableModelChanges>();
         _redoStack = new Stack<IWritableModelChanges>();
     }
@@ -43,15 +46,14 @@ public class UndoRedoDomainModel : DomainModel
     /// <summary>
     ///     Saves changes happened since the last save operation
     /// </summary>
-    /// <param name="storage">A storage where a model will be saved</param>
     /// <param name="path">A path to file</param>
-    public async Task Save(IStorage storage, string path)
+    public async Task Save(string path)
     {
         var changes = _undoStack.Reverse().ToArray();
 
         if (changes.Any())
         {
-            await Save(storage, path, changes);
+            await Save(_storage, path, changes);
 
             // TODO(#8): saving operation executes in thread pool
             // and launched by 'async void' methods. If two
@@ -70,9 +72,9 @@ public class UndoRedoDomainModel : DomainModel
     /// </summary>
     /// <param name="storage">A storage where a model will be saved</param>
     /// <param name="path">A path to a file</param>
-    public async Task SaveAs(IStorage storage, string path)
+    public async Task SaveAs(string path, IStorage? storage = null)
     {
-        await base.Save(storage, path);
+        await Save(storage ?? _storage, path);
 
         // TODO(#8): saving operation executes in thread pool
         // and launched by 'async void' methods. If two
@@ -88,11 +90,10 @@ public class UndoRedoDomainModel : DomainModel
     /// <summary>
     ///     Loads the model
     /// </summary>
-    /// <param name="storage">A storage from which a model will be loaded</param>
     /// <param name="path">A path to a file</param>
-    public async Task Load(IStorage storage, string path)
+    public async Task Load(string path)
     {
-        await base.Load(storage, path);
+        await Load(_storage, path);
     }
 
     /// <summary>

@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using Navitski.Crystalized.Model.Engine;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Subscription;
 using System;
 using System.Collections.Generic;
@@ -21,15 +20,13 @@ internal partial class MainWindowViewModel : ObservableObject
 {
     private readonly IDisposable _subscription; // Dispose to unsubscribe
     private readonly UndoRedoDomainModel _model;
-    private readonly IStorage _storage;
 
     [ObservableProperty]
     private string? _newItemName;
 
-    public MainWindowViewModel(UndoRedoDomainModel model, IStorage storage)
+    public MainWindowViewModel(UndoRedoDomainModel model)
     {
         _model = model;
-        _storage = storage;
         Items = new ObservableCollection<ItemViewModel>();
         Logs = new ObservableCollection<string>();
 
@@ -72,7 +69,7 @@ internal partial class MainWindowViewModel : ObservableObject
 
         if (saveFileDialog.ShowDialog() == true)
         {
-            await _model.Save(_storage, saveFileDialog.FileName);
+            await _model.Save(saveFileDialog.FileName);
         }
     }
 
@@ -83,7 +80,7 @@ internal partial class MainWindowViewModel : ObservableObject
 
         if (openFileDialog.ShowDialog() == true)
         {
-            await _model.Load(_storage, openFileDialog.FileName);
+            await _model.Load(openFileDialog.FileName);
         }
     }
 

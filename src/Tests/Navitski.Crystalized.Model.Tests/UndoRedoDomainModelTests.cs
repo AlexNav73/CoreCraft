@@ -12,7 +12,8 @@ public class UndoRedoDomainModelTests
     public async Task HasChangesTest()
     {
         var scheduler = new SyncScheduler();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler);
+        var storage = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(storage, new[] { new FakeModelShard() }, scheduler);
 
         await ExecuteAddCommand(model);
 
@@ -23,7 +24,8 @@ public class UndoRedoDomainModelTests
     public async Task ChangedEventRaisedTest()
     {
         var scheduler = new SyncScheduler();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler);
+        var storage = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(storage, new[] { new FakeModelShard() }, scheduler);
         var changedEventOccurred = false;
         model.Changed += (s, e) => changedEventOccurred = true;
 
@@ -36,7 +38,8 @@ public class UndoRedoDomainModelTests
     public async Task UndoStackHasOneChangeTest()
     {
         var scheduler = new SyncScheduler();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler);
+        var storage = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(storage, new[] { new FakeModelShard() }, scheduler);
 
         await ExecuteAddCommand(model);
 
@@ -47,7 +50,8 @@ public class UndoRedoDomainModelTests
     public async Task UndoStackIsEmptyAfterUndoExecutedTest()
     {
         var scheduler = new SyncScheduler();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler);
+        var storage = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(storage, new[] { new FakeModelShard() }, scheduler);
 
         await ExecuteAddCommand(model);
 
@@ -61,7 +65,8 @@ public class UndoRedoDomainModelTests
     public async Task RedoStackIsEmptyAfterRedoExecutedTest()
     {
         var scheduler = new SyncScheduler();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler);
+        var storage = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(storage, new[] { new FakeModelShard() }, scheduler);
         var modelHasBeenChanged = false;
 
         await ExecuteAddCommand(model);
@@ -83,7 +88,8 @@ public class UndoRedoDomainModelTests
     public async Task RedoStackMustBeDroppedWhenNewChangesHappenedTest()
     {
         var scheduler = new SyncScheduler();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler);
+        var storage = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(storage, new[] { new FakeModelShard() }, scheduler);
 
         await ExecuteAddCommand(model);
 
@@ -103,7 +109,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler);
+        var model = new UndoRedoDomainModel(storage, new[] { new FakeModelShard() }, scheduler);
         var modelHasBeenChanged = false;
 
         model.Changed += (s, args) => modelHasBeenChanged = true;
@@ -113,7 +119,7 @@ public class UndoRedoDomainModelTests
         Assert.That(model.UndoStack.Count, Is.EqualTo(1));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
 
-        await model.Save(storage, "fake");
+        await model.Save("fake");
 
         A.CallTo(() => storage.Update(A<string>.Ignored, A<IModelChanges>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -128,7 +134,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler);
+        var model = new UndoRedoDomainModel(storage, new[] { new FakeModelShard() }, scheduler);
         var modelHasBeenChanged = false;
 
         model.Changed += (s, args) => modelHasBeenChanged = true;
@@ -138,9 +144,34 @@ public class UndoRedoDomainModelTests
         Assert.That(model.UndoStack.Count, Is.EqualTo(1));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
 
-        await model.SaveAs(storage, "fake");
+        await model.SaveAs("fake");
 
         A.CallTo(() => storage.Save(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
+
+        Assert.That(model.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(modelHasBeenChanged, Is.True);
+    }
+
+    [Test]
+    public async Task SaveAsWithOtherStorageUndoRedoDomainModelTest()
+    {
+        var scheduler = new SyncScheduler();
+        var storage = A.Fake<IStorage>();
+        var storage2 = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(storage, new[] { new FakeModelShard() }, scheduler);
+        var modelHasBeenChanged = false;
+
+        model.Changed += (s, args) => modelHasBeenChanged = true;
+
+        await ExecuteAddCommand(model);
+
+        Assert.That(model.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(model.RedoStack.Count, Is.EqualTo(0));
+
+        await model.SaveAs("fake", storage2);
+
+        A.CallTo(() => storage2.Save(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
 
         Assert.That(model.UndoStack.Count, Is.EqualTo(0));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
@@ -152,7 +183,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler);
+        var model = new UndoRedoDomainModel(storage, new[] { new FakeModelShard() }, scheduler);
         var firstCollectionChanged = false;
 
         model.SubscribeTo<IFakeChangesFrame>(x => x.With(y => y.FirstCollection).By(c => firstCollectionChanged = true));
@@ -160,7 +191,7 @@ public class UndoRedoDomainModelTests
         A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
             .Invokes(c => c.Arguments.Get<IModel>(1)!.Shard<IMutableFakeModelShard>().FirstCollection.Add(new()));
 
-        await model.Load(storage, "fake");
+        await model.Load("fake");
 
         A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
 
