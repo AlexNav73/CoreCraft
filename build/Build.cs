@@ -142,6 +142,12 @@ internal partial class Build : NukeBuild
                 .SetDescription("SQLite storage implementation for 'Navitski.Crystalized.Model' library")
                 .AddPackageTags("Model", "Domain", "SQLite"));
 
+            DotNetPack(s => s
+                .SetProject(Solution.Navitski_Crystalized_Model_Storage_Json)
+                .Apply(PackSettingsBase)
+                .SetDescription("Json storage implementation for 'Navitski.Crystalized.Model' library")
+                .AddPackageTags("Model", "Domain", "Json"));
+
             ReportSummary(_ => _
                 .AddPair("Packages", PackagesDirectory.GlobFiles("*.nupkg").Count.ToString()));
 
