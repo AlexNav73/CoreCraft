@@ -67,7 +67,7 @@ public class JsonFileHandlerTests
 
         Assert.That(redShards.Count, Is.EqualTo(1));
 
-        var fileName = $"{GetType().Name}_{nameof(WriteModelShardsToFileAlwaysEnableTypeNameHandlingTest)}_{typeNameHandling}";
+        var fileName = $"{nameof(JsonFileHandlerTests)}_{nameof(WriteModelShardsToFileAlwaysEnableTypeNameHandlingTest)}_{typeNameHandling}";
         await Verify(json).UseDirectory("./VerifiedFiles").UseFileName(fileName);
     }
 
