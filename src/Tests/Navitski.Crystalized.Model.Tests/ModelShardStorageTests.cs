@@ -1,5 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 using Navitski.Crystalized.Model.Engine.Persistence;
 
 namespace Navitski.Crystalized.Model.Tests;
@@ -112,7 +113,6 @@ public class ModelShardStorageTests
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
-        var shard = A.Fake<IFakeModelShard>();
 
         storage.Save(_repository!, model);
 
@@ -127,7 +127,6 @@ public class ModelShardStorageTests
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
-        var shard = A.Fake<IFakeModelShard>();
 
         storage.Save(_repository!, model);
 
@@ -142,7 +141,6 @@ public class ModelShardStorageTests
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
-        var shard = A.Fake<IFakeModelShard>();
 
         storage.Load(_repository!, model);
 
@@ -153,11 +151,25 @@ public class ModelShardStorageTests
     }
 
     [Test]
+    public void LoadCollectionDataToNonEmptyModelTest()
+    {
+        var storage = new FakeModelShardStorage();
+        var model = A.Fake<IModel>();
+        var shard = A.Fake<IMutableFakeModelShard>();
+        var collection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
+
+        A.CallTo(() => model.Shard<IMutableFakeModelShard>()).Returns(shard);
+        A.CallTo(() => shard.FirstCollection).Returns(collection);
+        A.CallTo(() => collection.Count).Returns(1);
+
+        Assert.Throws<NonEmptyModelException>(() => storage.Load(_repository!, model));
+    }
+
+    [Test]
     public void LoadRelationChangeTest()
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
-        var shard = A.Fake<IFakeModelShard>();
 
         storage.Load(_repository!, model);
 
@@ -167,6 +179,22 @@ public class ModelShardStorageTests
             A<IEnumerable<FirstEntity>>.Ignored,
             A<IEnumerable<SecondEntity>>.Ignored))
             .MustHaveHappened(4, Times.Exactly);
+    }
+
+    [Test]
+    public void LoadRelationDataToNonEmptyModelTest()
+    {
+        var storage = new FakeModelShardStorage();
+        var model = A.Fake<IModel>();
+        var shard = A.Fake<IMutableFakeModelShard>();
+        var relation = A.Fake<IMutableRelation<FirstEntity, SecondEntity>>();
+        var relations = new List<FirstEntity>() { new FirstEntity() };
+
+        A.CallTo(() => model.Shard<IMutableFakeModelShard>()).Returns(shard);
+        A.CallTo(() => shard.OneToOneRelation).Returns(relation);
+        A.CallTo(() => relation.GetEnumerator()).Returns(relations.GetEnumerator());
+
+        Assert.Throws<NonEmptyModelException>(() => storage.Load(_repository!, model));
     }
 
     private void SetupModelChanges(ModelChanges modelChanges, CollectionAction action, FirstEntityProperties? oldProps, FirstEntityProperties? newProps)

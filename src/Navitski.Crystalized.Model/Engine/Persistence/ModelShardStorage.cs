@@ -1,4 +1,5 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 
 namespace Navitski.Crystalized.Model.Engine.Persistence;
 
@@ -160,6 +161,11 @@ public abstract class ModelShardStorage : IModelShardStorage
         where TEntity : Entity
         where TProperties : Properties
     {
+        if (collection.Count != 0)
+        {
+            throw new NonEmptyModelException($"The [{scheme.ShardName}.{scheme.Name}] is not empty. Clear or recreate the model before loading data");
+        }
+
         repository.Select(scheme, collection);
     }
 
@@ -182,6 +188,11 @@ public abstract class ModelShardStorage : IModelShardStorage
         where TParent : Entity
         where TChild : Entity
     {
+        if (relation.Any())
+        {
+            throw new NonEmptyModelException($"The [{scheme.ShardName}.{scheme.Name}] is not empty. Clear or recreate the model before loading data");
+        }
+
         repository.Select(scheme, relation, parents, children);
     }
 }
