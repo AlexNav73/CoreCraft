@@ -30,7 +30,7 @@ class Program
             await model.Run<IMutableExampleModelShard>((shard, _) =>
             {
                 var first = shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
-                var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5 });
+                var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5, EnumProperty = Model.Entities.SecondEntityEnum.First });
 
                 shard.OneToOneRelation.Add(first, second);
             });
@@ -42,6 +42,13 @@ class Program
                 shard.FirstCollection.Modify(entity, props => props with { StringProperty = "modified 1" });
                 shard.FirstCollection.Modify(entity, props => props with { IntegerProperty = "modified 2".GetHashCode() });
                 shard.FirstCollection.Modify(entity, props => props with { StringProperty = "modified 3", IntegerProperty = "modified 3".GetHashCode() });
+            });
+
+            await model.Run<IMutableExampleModelShard>((shard, _) =>
+            {
+                var entity = shard.SecondCollection.First();
+
+                shard.SecondCollection.Modify(entity, props => props with { EnumProperty = Model.Entities.SecondEntityEnum.Second });
             });
 
             await model.Run<IMutableExampleModelShard>((shard, _) =>

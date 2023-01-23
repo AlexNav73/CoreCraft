@@ -292,7 +292,7 @@ namespace compilation.AnotherModelFile.Entities
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
-    public sealed record FirstEntityProperties : Properties
+    public sealed partial record FirstEntityProperties : Properties
     {
         public FirstEntityProperties()
         {
@@ -341,7 +341,7 @@ namespace compilation.AnotherModelFile.Entities
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage()]
-    public sealed record SecondEntityProperties : Properties
+    public sealed partial record SecondEntityProperties : Properties
     {
         public SecondEntityProperties()
         {
