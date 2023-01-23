@@ -41,7 +41,7 @@ internal partial class ApplicationModelGenerator
     private void DefineEntityPropertiesClass(IndentedTextWriter code, Entity entity)
     {
         code.GeneratedClassAttributes();
-        code.WriteLine($"public sealed record {PropertiesType(entity)} : Properties");
+        code.WriteLine($"public sealed partial record {PropertiesType(entity)} : Properties");
         code.Block(() =>
         {
             DefineCtor(code, entity);

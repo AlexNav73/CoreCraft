@@ -1,5 +1,9 @@
 [![build](https://github.com/AlexNav73/Navitski.Crystalized/workflows/releasing/badge.svg)](https://github.com/AlexNav73/Navitski.Crystalized/actions)
-[![codecov](https://codecov.io/gh/AlexNav73/Navitski.Crystalized/branch/master/graph/badge.svg?token=Q6ZY0WHL9J)](https://codecov.io/gh/AlexNav73/Navitski.Crystalized)
+[![codecov](https://codecov.io/gh/AlexNav73/Navitski.Crystalized/branch/master/graph/badge.svg?token=Q6ZY0WHL9J)](https://codecov.io/gh/AlexNav73/Navitski.Crystalized) ![Nuget](https://img.shields.io/nuget/dt/Navitski.Crystalized.Model) ![GitHub](https://img.shields.io/github/license/AlexNav73/Navitski.Crystalized) ![Lines of code](https://img.shields.io/tokei/lines/github/AlexNav73/Navitski.Crystalized)  
+[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Navitski.Crystalized.Model?color=blue&label=Navitski.Crystalized.Model)](https://www.nuget.org/packages/Navitski.Crystalized.Model)  
+[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Navitski.Crystalized.Model.Generators?color=blue&label=Navitski.Crystalized.Model.Generators)](https://www.nuget.org/packages/Navitski.Crystalized.Model.Generators)  
+[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Navitski.Crystalized.Model.Storage.SQLite?color=blue&label=Navitski.Crystalized.Model.Storage.SQLite)](https://www.nuget.org/packages/Navitski.Crystalized.Model.Storage.SQLite)  
+[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Navitski.Crystalized.Model.Storage.Json?color=blue&label=Navitski.Crystalized.Model.Storage.Json)](https://www.nuget.org/packages/Navitski.Crystalized.Model.Storage.Json)
 
 ## 📖 About
 
@@ -243,3 +247,64 @@ using (model.Subscribe(OnModelChanged))
 // save all data to the file
 model.Save("test.db");
 ```
+
+## 👷 Advanced
+
+### Usage of types which are not supported by the storage (like SQLite)
+
+SQLite doesn't have an enum type as a column type so it can be stored as string (TEXT) value. Therefore, generating an enum based on `*.model.json` schema is not flexible, because it could be different options how the user would like to handle enums (store as text or as an int). To give the user possibility to have enum properties in their model, all generated _properties types_ marked as partial. So if an entity in `*.model.json` described as following:
+
+```json
+{
+    "name": "MyEntity",
+    "properties": [
+        {
+            "name": "IntProperty",
+            "type": "int"
+        }
+    ]
+}
+```
+
+The model generator will generate the following code:
+
+```cs
+public sealed partial record MyEntityProperties : Properties
+//            ^^^^^^^ - helps us to extend the properties type
+{
+    public int IntProperty { get; init; }
+
+    public override MyEntityProperties ReadFrom(IPropertiesBag bag)
+    {
+        return new MyEntityProperties() { IntProperty = bag.Read<int>("IntProperty") };
+    }
+
+    public override void WriteTo(IPropertiesBag bag)
+    {
+        bag.Write("IntProperty", IntProperty);
+    }
+}
+```
+
+The generated record will have a **partial** modifier. In this case, we can add new property with a custom data type which will be mapped to the `IntProperty` and be saved in the database
+as an int value and when it will be loaded we can read the enum value by reading value from the `IntProperty` and casting it to the enum type. For example:
+
+```cs
+public enum MyEnum : int
+{
+    None = 0,
+    First = 1,
+    Second = 2,
+}
+
+partial record MyEntityProperties
+{
+    public MyEnum EnumProperty
+    {
+        get => (MyEnum)IntProperty;
+        init => IntProperty = (int)value;
+    }
+}
+```
+
+> This approach could be used to store arbitrary types by storing values as a json in the string (TEXT) columns, but it is more preferable to describe all your data types as entities in `*.model.json`.
