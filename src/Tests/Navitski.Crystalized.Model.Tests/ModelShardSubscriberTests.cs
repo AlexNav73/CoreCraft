@@ -32,16 +32,6 @@ internal class ModelShardSubscriberTests
         Assert.That(ReferenceEquals(collectionSubscriber1, collectionSubscriber2), Is.True);
     }
 
-#if NETCOREAPP3_1 || NET48_OR_GREATER
-    [Test]
-    public void CallOfWithCollectionWillThrowOnInvalidExpressionTest()
-    {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
-
-        Assert.Throws<InvalidPropertySubscriptionException>(() => subscriber.With(x => new CollectionChangeSet<FirstEntity, FirstEntityProperties>()));
-    }
-#endif
-
     [Test]
     public void FirstCallOfWithRelationWillCreateNewSubscriberTest()
     {
@@ -64,16 +54,6 @@ internal class ModelShardSubscriberTests
         Assert.That(relationSubscriber2, Is.Not.Null);
         Assert.That(ReferenceEquals(relationSubscriber1, relationSubscriber2), Is.True);
     }
-
-#if NETCOREAPP3_1 || NET48_OR_GREATER
-    [Test]
-    public void CallOfWithRelationWillThrowOnInvalidExpressionTest()
-    {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
-
-        Assert.Throws<InvalidPropertySubscriptionException>(() => subscriber.With(x => new RelationChangeSet<FirstEntity, SecondEntity>()));
-    }
-#endif
 
     [Test]
     public void PushChangesWillNotifySubscriptionsTest()

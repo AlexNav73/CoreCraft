@@ -44,8 +44,7 @@ internal sealed class MigrationRunner
     {
         if (_migrations.Any())
         {
-            var lastMigration = _migrations[_migrations.Count - 1];
-            repository.SetDatabaseVersion(lastMigration.Version);
+            repository.SetDatabaseVersion(_migrations[^1].Version);
         }
     }
 }
