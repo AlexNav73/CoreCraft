@@ -12,6 +12,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="PolySharp" Version="1.12.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Navitski.Crystalized.Model\Navitski.Crystalized.Model.csproj" />
     <ProjectReference Include="..\..\Navitski.Crystalized.Model.Generators\Navitski.Crystalized.Model.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
