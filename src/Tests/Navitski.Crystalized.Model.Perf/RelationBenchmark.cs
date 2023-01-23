@@ -77,12 +77,12 @@ public class RelationBenchmark
     [Benchmark]
     public bool ContainsParent()
     {
-        return _relation.Contains(_parents[_i++]);
+        return _relation.ContainsParent(_parents[_i++]);
     }
 
     [Benchmark]
     public bool ContainsChild()
     {
-        return _relation.Contains(_children[_i++]);
+        return _relation.ContainsChild(_children[_i++]);
     }
 }
