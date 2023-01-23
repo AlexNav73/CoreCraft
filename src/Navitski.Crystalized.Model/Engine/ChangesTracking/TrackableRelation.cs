@@ -36,16 +36,16 @@ public sealed class TrackableRelation<TParent, TChild> : IMutableRelation<TParen
         _changes.Add(RelationAction.Unlinked, parent, child);
     }
 
-    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TParent)" />
-    public bool Contains(TParent entity)
+    /// <inheritdoc cref="IRelation{TParent, TChild}.ContainsParent(TParent)" />
+    public bool ContainsParent(TParent entity)
     {
-        return _relation.Contains(entity);
+        return _relation.ContainsParent(entity);
     }
 
-    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TChild)" />
-    public bool Contains(TChild entity)
+    /// <inheritdoc cref="IRelation{TParent, TChild}.ContainsChild(TChild)" />
+    public bool ContainsChild(TChild entity)
     {
-        return _relation.Contains(entity);
+        return _relation.ContainsChild(entity);
     }
 
     /// <inheritdoc cref="IRelation{TParent, TChild}.Children(TParent)" />

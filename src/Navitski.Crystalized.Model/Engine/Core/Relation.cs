@@ -31,14 +31,14 @@ public sealed class Relation<TParent, TChild> : IMutableRelation<TParent, TChild
         _childToParentRelations.Add(child, parent);
     }
 
-    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TParent)"/>
-    public bool Contains(TParent entity)
+    /// <inheritdoc cref="IRelation{TParent, TChild}.ContainsParent(TParent)"/>
+    public bool ContainsParent(TParent entity)
     {
         return _parentToChildRelations.Contains(entity);
     }
 
-    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TChild)"/>
-    public bool Contains(TChild entity)
+    /// <inheritdoc cref="IRelation{TParent, TChild}.ContainsChild(TChild)"/>
+    public bool ContainsChild(TChild entity)
     {
         return _childToParentRelations.Contains(entity);
     }

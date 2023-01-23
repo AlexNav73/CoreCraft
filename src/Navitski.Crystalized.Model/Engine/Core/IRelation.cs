@@ -22,14 +22,14 @@ public interface IRelation<TParent, TChild> : IEnumerable<TParent>, ICopy<IRelat
     /// </summary>
     /// <param name="entity">An entity to test</param>
     /// <returns>True - if relation contains parent entity</returns>
-    bool Contains(TParent entity);
+    bool ContainsParent(TParent entity);
 
     /// <summary>
     ///     Tests if a relation contains an entity
     /// </summary>
     /// <param name="entity">An entity to test</param>
     /// <returns>True - if relation contains child entity</returns>
-    bool Contains(TChild entity);
+    bool ContainsChild(TChild entity);
 
     /// <summary>
     ///     Retrieves all children entities for a given parent entity

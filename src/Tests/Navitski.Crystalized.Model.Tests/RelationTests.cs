@@ -48,7 +48,7 @@ public class RelationTests
         var firstEntity = new FirstEntity();
         var secondEntity = new SecondEntity();
 
-        _relation!.Contains(firstEntity);
+        _relation!.ContainsParent(firstEntity);
 
         A.CallTo(() => _parentMapping!.Contains(firstEntity)).MustHaveHappened();
         A.CallTo(() => _childMapping!.Contains(secondEntity)).MustNotHaveHappened();
@@ -60,7 +60,7 @@ public class RelationTests
         var firstEntity = new FirstEntity();
         var secondEntity = new SecondEntity();
 
-        _relation!.Contains(secondEntity);
+        _relation!.ContainsChild(secondEntity);
 
         A.CallTo(() => _parentMapping!.Contains(firstEntity)).MustNotHaveHappened();
         A.CallTo(() => _childMapping!.Contains(secondEntity)).MustHaveHappened();
@@ -75,10 +75,10 @@ public class RelationTests
 
         relation.Add(firstEntity, secondEntity);
 
-        Assert.That(relation.Contains(firstEntity), Is.True);
-        Assert.That(relation.Contains(secondEntity), Is.True);
-        Assert.That(relation.Contains(new FirstEntity()), Is.False);
-        Assert.That(relation.Contains(new SecondEntity()), Is.False);
+        Assert.That(relation.ContainsParent(firstEntity), Is.True);
+        Assert.That(relation.ContainsChild(secondEntity), Is.True);
+        Assert.That(relation.ContainsParent(new FirstEntity()), Is.False);
+        Assert.That(relation.ContainsChild(new SecondEntity()), Is.False);
     }
 
     [Test]
