@@ -100,6 +100,26 @@ public class DomainModelTests
     }
 
     [Test]
+    public async Task ModelShouldNotBeUpdatedAndNotificationsSentIfNothingChanged()
+    {
+        var storage = A.Fake<IStorage>();
+        var changesReceived = false;
+        var model = new TestDomainModel(
+            new[] { new FakeModelShard() },
+            storage,
+            m => changesReceived = true);
+
+        model.Subscribe(c => changesReceived = true);
+
+        var before = model.Shard<IFakeModelShard>();
+        await model.Run<IMutableFakeModelShard>((shard, _) => { });
+        var after = model.Shard<IFakeModelShard>();
+
+        Assert.That(changesReceived, Is.False);
+        Assert.That(ReferenceEquals(before, after), Is.True);
+    }
+
+    [Test]
     public void RunThrowsWhenCommandExecutionFailsTest()
     {
         var storage = A.Fake<IStorage>();
@@ -179,13 +199,46 @@ public class DomainModelTests
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
         var notificationSent = false;
 
-        model.Subscribe(x => notificationSent = true);
+        model.Subscribe(c => notificationSent = true);
 
         A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
             .Throws<Exception>();
 
         Assert.ThrowsAsync<ModelLoadingException>(() => model.Load("fake"));
         Assert.That(notificationSent, Is.False);
+    }
+
+    [Test]
+    public async Task ModelShouldNotBeUpdatedAndNotificationsSentIfNothingLoaded()
+    {
+        var storage = A.Fake<IStorage>();
+        var changesReceived = false;
+        var model = new TestDomainModel(
+            new[] { new FakeModelShard() },
+            storage,
+            m => changesReceived = true);
+
+        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
+            .Invokes(c =>
+            {
+                // Acquiring mutable shard here we force model to make a shard's copy.
+                // This is needed for shard's reference check. In case when nothing was
+                // changed, copy of the model shard should not become a part of the new
+                // model (it should be just discarded). So, in case when nothing was changed
+                // ApplySnapshot should not be called and model should not be changed
+                var shard = ((IModel)c.Arguments[1]!).Shard<IMutableFakeModelShard>();
+
+                Assert.That(shard, Is.Not.Null);
+            });
+
+        model.Subscribe(c => changesReceived = true);
+
+        var before = model.Shard<IFakeModelShard>();
+        await model.Load("fake");
+        var after = model.Shard<IFakeModelShard>();
+
+        Assert.That(changesReceived, Is.False);
+        Assert.That(ReferenceEquals(before, after), Is.True);
     }
 
     [Test]

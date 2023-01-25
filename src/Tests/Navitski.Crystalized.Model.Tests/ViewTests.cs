@@ -26,14 +26,4 @@ public class ViewTests
 
         A.CallTo(() => ((ICopy<IFakeModelShard>)originalShard).Copy()).MustHaveHappenedOnceExactly();
     }
-
-    [Test]
-    public void CopyModelReturnsCopiedModelShardTest()
-    {
-        var originalShard = A.Fake<IFakeModelShard>(c => c.Implements<ICopy<IFakeModelShard>>());
-        var view = new View(new[] { originalShard });
-        var snapshot = view.CopyModel();
-
-        A.CallTo(() => ((ICopy<IFakeModelShard>)originalShard).Copy()).MustHaveHappenedOnceExactly();
-    }
 }
