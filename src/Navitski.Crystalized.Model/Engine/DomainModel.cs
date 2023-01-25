@@ -80,6 +80,12 @@ public abstract class DomainModel : IDomainModel
         await Run((m, t) => command(m.Shard<T>(), t), token);
     }
 
+    /// <inheritdoc cref="IDomainModel.Run(ICommand, CancellationToken)"/>
+    public async Task Run(ICommand command, CancellationToken token = default)
+    {
+        await Run(command.Execute, token);
+    }
+
     /// <inheritdoc cref="IDomainModel.Run(Action{IModel, CancellationToken}, CancellationToken)"/>
     public async Task Run(Action<IModel, CancellationToken> command, CancellationToken token = default)
     {
@@ -94,20 +100,14 @@ public abstract class DomainModel : IDomainModel
             throw new CommandInvocationException($"Command execution failed. Command {command.GetType()}", ex);
         }
 
-        var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
-        if (result.Changes.HasChanges())
+        if (snapshot.Changes.HasChanges())
         {
-            var eventArgs = CreateModelChangesMessage(result);
+            var result = _view.ApplySnapshot(snapshot);
+            var eventArgs = CreateChangeObject(result, snapshot.Changes);
 
             NotifySubscribers(eventArgs);
             OnModelChanged(eventArgs);
         }
-    }
-
-    /// <inheritdoc cref="IDomainModel.Run(ICommand, CancellationToken)"/>
-    public async Task Run(ICommand command, CancellationToken token = default)
-    {
-        await Run(command.Execute, token);
     }
 
     /// <summary>
@@ -149,11 +149,17 @@ public abstract class DomainModel : IDomainModel
     /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
     protected Task Save(IStorage storage, string path, CancellationToken token = default)
     {
-        var copy = _view.CopyModel();
+        // Store a reference to the model before start saving task. It is safe to use UnsafeModel here
+        // because we are storing IModel object in the RunParallel delegate, but not the reference to the
+        // view. When the UnsafeModel stored in the local variable all changes happened after, will not
+        // change stored model (instead a reference to the model in the _view will be replaced with a reference
+        // to the new model, leaving old reference and model untouched). This is exact behavior we need, because
+        // when Save is executed it should save state at this moment, but not when storage.Save is executed.
+        var model = _view.UnsafeModel;
 
         try
         {
-            return _scheduler.RunParallel(() => storage.Save(path, copy), token);
+            return _scheduler.RunParallel(() => storage.Save(path, model), token);
         }
         catch (Exception ex)
         {
@@ -181,10 +187,10 @@ public abstract class DomainModel : IDomainModel
             throw new ModelLoadingException("Model loading has failed", ex);
         }
 
-        var result = _view.ApplySnapshot(snapshot, snapshot.Changes);
-        if (result.Changes.HasChanges())
+        if (snapshot.Changes.HasChanges())
         {
-            var eventArgs = CreateModelChangesMessage(result);
+            var result = _view.ApplySnapshot(snapshot);
+            var eventArgs = CreateChangeObject(result, snapshot.Changes);
 
             NotifySubscribers(eventArgs);
         }
@@ -211,10 +217,10 @@ public abstract class DomainModel : IDomainModel
                 throw new ApplyModelChangesException("Applying changes has failed", ex);
             }
 
-            var result = _view.ApplySnapshot(snapshot, changes);
-            var eventArgs = CreateModelChangesMessage(result);
+            var result = _view.ApplySnapshot(snapshot);
+            var changeObject = CreateChangeObject(result, changes);
 
-            NotifySubscribers(eventArgs);
+            NotifySubscribers(changeObject);
         }
     }
 
@@ -227,9 +233,9 @@ public abstract class DomainModel : IDomainModel
         _currentChanges = null;
     }
 
-    private static Change<IModelChanges> CreateModelChangesMessage(ModelChangeResult result)
+    private static Change<IModelChanges> CreateChangeObject(ModelChangeResult result, IWritableModelChanges changes)
     {
-        return new Change<IModelChanges>(result.OldModel, result.NewModel, result.Changes);
+        return new Change<IModelChanges>(result.OldModel, result.NewModel, changes);
     }
 
     private static IWritableModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)
