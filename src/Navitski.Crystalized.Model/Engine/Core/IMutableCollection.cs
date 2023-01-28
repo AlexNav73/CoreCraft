@@ -1,4 +1,4 @@
-﻿namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
+﻿namespace Navitski.Crystalized.Model.Engine.Core;
 
 /// <summary>
 ///     An mutable counterpart of a <see cref="ICollection{TEntity, TProperties}"/> interface
