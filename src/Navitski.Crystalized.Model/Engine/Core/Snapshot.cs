@@ -1,35 +1,46 @@
-﻿namespace Navitski.Crystalized.Model.Engine.Core;
+﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 
-internal class Snapshot : IModel
+namespace Navitski.Crystalized.Model.Engine.Core;
+
+internal sealed class Snapshot : IModel
 {
     private readonly Model _model;
-    private readonly IDictionary<Type, IModelShard> _copies;
+    private readonly Features _features;
+    private readonly IDictionary<Type, ICanBeReadOnly<IModelShard>> _copies;
 
-    public Snapshot(Model model)
+    public Snapshot(Model model, Features features)
     {
         _model = model;
-        _copies = new Dictionary<Type, IModelShard>();
+        _features = features;
+        _copies = new Dictionary<Type, ICanBeReadOnly<IModelShard>>();
+
+        Changes = new ModelChanges();
     }
 
-    public virtual T Shard<T>() where T : IModelShard
+    public IWritableModelChanges Changes { get; }
+
+    public T Shard<T>() where T : IModelShard
     {
         if (_copies.TryGetValue(typeof(T), out var shard))
         {
             return (T)shard;
         }
 
-        var modelShard = _model.Shard<T>();
-        var copy = ((ICopy<IModelShard>)modelShard).Copy();
-        _copies.Add(typeof(T), copy);
+        var modelShard = _model.Shard<ICanBeMutable<T>>();
+        var mutable = modelShard.AsMutable(_features, Changes);
 
-        return (T)copy;
+        _copies.Add(typeof(T), (ICanBeReadOnly<IModelShard>)mutable);
+
+        return mutable;
     }
 
     public Model ToModel()
     {
+        var readOnlyCopies = _copies.Values.Select(x => x.AsReadOnly()).ToArray();
+
         var shards = _model.Shards
-            .Where(x => !_copies.Keys.Any(y => y.IsInstanceOfType(x)))
-            .Union(_copies.Values);
+            .Where(x => readOnlyCopies.All(y => y.GetType() != x.GetType()))
+            .Union(readOnlyCopies);
 
         return new Model(shards);
     }

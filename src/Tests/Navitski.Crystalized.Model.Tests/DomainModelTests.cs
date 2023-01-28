@@ -258,6 +258,47 @@ public class DomainModelTests
         Assert.That(notificationSent, Is.False);
     }
 
+    [Test]
+    public async Task ChangesToTheOneCollectionShouldNotCauseCopyingOfOtherCollections()
+    {
+        var storage = A.Fake<IStorage>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var originalShard = model.Shard<IFakeModelShard>();
+
+        await model.Run<IMutableFakeModelShard>((shard, _) =>
+        {
+            shard.FirstCollection.Add(new());
+        });
+
+        var changedShard = model.Shard<IFakeModelShard>();
+
+        Assert.That(ReferenceEquals(originalShard, changedShard), Is.False);
+        Assert.That(ReferenceEquals(originalShard.FirstCollection, changedShard.FirstCollection), Is.False);
+        Assert.That(ReferenceEquals(originalShard.SecondCollection, changedShard.SecondCollection), Is.True);
+    }
+
+    [Test]
+    public async Task ChangesToTheOneRelationShouldNotCauseCopyingOfOtherRelations()
+    {
+        var storage = A.Fake<IStorage>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var originalShard = model.Shard<IFakeModelShard>();
+
+        await model.Run<IMutableFakeModelShard>((shard, _) =>
+        {
+            var parent = shard.FirstCollection.Add(new());
+            var child = shard.SecondCollection.Add(new());
+
+            shard.OneToOneRelation.Add(parent, child);
+        });
+
+        var changedShard = model.Shard<IFakeModelShard>();
+
+        Assert.That(ReferenceEquals(originalShard, changedShard), Is.False);
+        Assert.That(ReferenceEquals(originalShard.OneToOneRelation, changedShard.OneToOneRelation), Is.False);
+        Assert.That(ReferenceEquals(originalShard.ManyToManyRelation, changedShard.ManyToManyRelation), Is.True);
+    }
+
     private class TestDomainModel : DomainModel
     {
         private readonly IStorage _storage;

@@ -5,7 +5,9 @@ namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}"/>
 [DebuggerDisplay("{_collection}")]
-public sealed class TrackableCollection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
+public sealed class TrackableCollection<TEntity, TProperties> :
+    IMutableCollection<TEntity, TProperties>,
+    ICanBeReadOnly<ICollection<TEntity, TProperties>>
     where TEntity : Entity
     where TProperties : Properties
 {
@@ -17,14 +19,20 @@ public sealed class TrackableCollection<TEntity, TProperties> : IMutableCollecti
     /// </summary>
     public TrackableCollection(
         ICollectionChangeSet<TEntity, TProperties> changesCollection,
-        ICollection<TEntity, TProperties> modelCollection)
+        IMutableCollection<TEntity, TProperties> modelCollection)
     {
         _changes = changesCollection;
-        _collection = (IMutableCollection<TEntity, TProperties>)modelCollection;
+        _collection = modelCollection;
     }
 
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _collection.Count;
+
+    /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
+    public ICollection<TEntity, TProperties> AsReadOnly()
+    {
+        return ((ICanBeReadOnly<ICollection<TEntity, TProperties>>)_collection).AsReadOnly();
+    }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Add(TProperties)"/>
     public TEntity Add(TProperties properties)

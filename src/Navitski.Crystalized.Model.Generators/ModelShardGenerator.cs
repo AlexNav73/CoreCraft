@@ -12,8 +12,6 @@ internal partial class ApplicationModelGenerator
             code.EmptyLine();
             DefineModelShardClass(code, modelShard);
             code.EmptyLine();
-            DefineModelShardClassAsICopy(code, modelShard);
-            code.EmptyLine();
             DefineModelShardClassAsCanBeMutable(code, modelShard);
             code.EmptyLine();
             DefineChangesFrameInterface(code, modelShard);
@@ -90,31 +88,6 @@ internal partial class ApplicationModelGenerator
         }
     }
 
-    private void DefineModelShardClassAsICopy(IndentedTextWriter code, ModelShard modelShard)
-    {
-        code.Class("sealed partial", $"{modelShard.Name}ModelShard", new[] { $"ICopy<I{modelShard.Name}ModelShard>" }, () =>
-        {
-            code.WriteLine($"public I{modelShard.Name}ModelShard Copy()");
-            code.Block(() =>
-            {
-                code.WriteLine($"return new {modelShard.Name}ModelShard()");
-                code.Block(() =>
-                {
-                    foreach (var collection in modelShard.Collections)
-                    {
-                        code.WriteLine($"{collection.Name} = {collection.Name}.Copy(),");
-                    }
-                    code.EmptyLine();
-
-                    foreach (var relation in modelShard.Relations)
-                    {
-                        code.WriteLine($"{relation.Name} = {relation.Name}.Copy(),");
-                    }
-                }, true);
-            });
-        });
-    }
-
     private void DefineModelShardClassAsCanBeMutable(IndentedTextWriter code, ModelShard modelShard)
     {
         code.Class("sealed partial", $"{modelShard.Name}ModelShard", new[]
@@ -126,19 +99,49 @@ internal partial class ApplicationModelGenerator
             code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsMutable(Features features, IWritableModelChanges modelChanges)");
             code.Block(() =>
             {
-                code.WriteLine($"var frame = modelChanges.Register(new {modelShard.Name}ChangesFrame());");
-                code.WriteLine($"return new Mutable{modelShard.Name}ModelShard()");
+                foreach (var collection in modelShard.Collections)
+                {
+                    code.WriteLine($"IMutable{Type(collection)} {ToCamelCase(collection.Name)} = new CoW{Type(collection)}({collection.Name});");
+                }
+                code.EmptyLine();
+
+                foreach (var relation in modelShard.Relations)
+                {
+                    code.WriteLine($"IMutable{Type(relation)} {ToCamelCase(relation.Name)} = new CoW{Type(relation)}({relation.Name});");
+                }
+                code.EmptyLine();
+
+                code.WriteLine("if ((features & Features.Track) == Features.Track)");
                 code.Block(() =>
                 {
+                    code.WriteLine($"var frame = modelChanges.Register(new {modelShard.Name}ChangesFrame());");
+                    code.EmptyLine();
+
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{collection.Name} = new Trackable{Type(collection)}(frame.{collection.Name}, {collection.Name}),");
+                        code.WriteLine($"{ToCamelCase(collection.Name)} = new Trackable{Type(collection)}(frame.{collection.Name}, {ToCamelCase(collection.Name)});");
                     }
                     code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{relation.Name} = new Trackable{Type(relation)}(frame.{relation.Name}, {relation.Name}),");
+                        code.WriteLine($"{ToCamelCase(relation.Name)} = new Trackable{Type(relation)}(frame.{relation.Name}, {ToCamelCase(relation.Name)});");
+                    }
+                });
+                code.EmptyLine();
+
+                code.WriteLine($"return new Mutable{modelShard.Name}ModelShard()");
+                code.Block(() =>
+                {
+                    foreach (var collection in modelShard.Collections)
+                    {
+                        code.WriteLine($"{collection.Name} = {ToCamelCase(collection.Name)},");
+                    }
+                    code.EmptyLine();
+
+                    foreach (var relation in modelShard.Relations)
+                    {
+                        code.WriteLine($"{relation.Name} = {ToCamelCase(relation.Name)},");
                     }
                 }, true);
             });
@@ -247,11 +250,11 @@ internal partial class ApplicationModelGenerator
             code.WriteLine($"public void Apply(IModel model)");
             code.Block(() =>
             {
-                code.WriteLine($"var modelShard = model.Shard<I{modelShard.Name}ModelShard>();");
+                code.WriteLine($"var modelShard = model.Shard<IMutable{modelShard.Name}ModelShard>();");
                 code.EmptyLine();
 
-                var operations = modelShard.Relations.Select(x => $"{x.Name}.Apply((IMutable{Type(x)})modelShard.{x.Name});")
-                    .Union(modelShard.Collections.Select(x => $"{x.Name}.Apply((IMutable{Type(x)})modelShard.{x.Name});"));
+                var operations = modelShard.Relations.Select(x => $"{x.Name}.Apply(modelShard.{x.Name});")
+                    .Union(modelShard.Collections.Select(x => $"{x.Name}.Apply(modelShard.{x.Name});"));
 
                 foreach (var op in operations)
                 {
@@ -304,9 +307,15 @@ internal partial class ApplicationModelGenerator
         code.Class("sealed", $"Mutable{modelShard.Name}ModelShard",
             new[]
             {
-                $"IMutable{modelShard.Name}ModelShard"
+                $"IMutable{modelShard.Name}ModelShard",
+                $"ICanBeReadOnly<I{modelShard.Name}ModelShard>"
             },
-            () => ImplementModelShardInterface(code, modelShard));
+            () =>
+            {
+                ImplementModelShardInterface(code, modelShard);
+                code.EmptyLine();
+                ImplementCanBeReadOnlyInterface(code, modelShard);
+            });
 
         void ImplementModelShardInterface(IndentedTextWriter code, ModelShard modelShard)
         {
@@ -320,6 +329,28 @@ internal partial class ApplicationModelGenerator
             {
                 code.WriteLine($"public required {Property($"IMutable{Type(relation)}", relation.Name, "get; init;")}");
             }
+        }
+
+        void ImplementCanBeReadOnlyInterface(IndentedTextWriter code, ModelShard modelShard)
+        {
+            code.WriteLine($"public I{modelShard.Name}ModelShard AsReadOnly()");
+            code.Block(() =>
+            {
+                code.WriteLine($"return new {modelShard.Name}ModelShard()");
+                code.Block(() =>
+                {
+                    foreach (var collection in modelShard.Collections)
+                    {
+                        code.WriteLine($"{collection.Name} = ((ICanBeReadOnly<I{Type(collection)}>){collection.Name}).AsReadOnly(),");
+                    }
+                    code.EmptyLine();
+
+                    foreach (var relation in modelShard.Relations)
+                    {
+                        code.WriteLine($"{relation.Name} = ((ICanBeReadOnly<I{Type(relation)}>){relation.Name}).AsReadOnly(),");
+                    }
+                }, true);
+            });
         }
     }
 }

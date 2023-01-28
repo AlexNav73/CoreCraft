@@ -1,6 +1,4 @@
-﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-
-namespace Navitski.Crystalized.Model.Engine.Core;
+﻿namespace Navitski.Crystalized.Model.Engine.Core;
 
 internal sealed class View
 {
@@ -13,14 +11,9 @@ internal sealed class View
 
     public IModel UnsafeModel => _model;
 
-    public TrackableSnapshot CreateTrackableSnapshot()
+    public Snapshot CreateSnapshot(Features features)
     {
-        return new TrackableSnapshot(_model);
-    }
-
-    public Snapshot CreateSnapshot()
-    {
-        return new Snapshot(_model);
+        return new Snapshot(_model, features);
     }
 
     public ModelChangeResult ApplySnapshot(Snapshot snapshot)

@@ -89,7 +89,7 @@ public abstract class DomainModel : IDomainModel
     /// <inheritdoc cref="IDomainModel.Run(Action{IModel, CancellationToken}, CancellationToken)"/>
     public async Task Run(Action<IModel, CancellationToken> command, CancellationToken token = default)
     {
-        var snapshot = _view.CreateTrackableSnapshot();
+        var snapshot = _view.CreateSnapshot(Features.Track);
 
         try
         {
@@ -176,7 +176,7 @@ public abstract class DomainModel : IDomainModel
     /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model</exception>
     protected async Task Load(IStorage storage, string path, CancellationToken token = default)
     {
-        var snapshot = _view.CreateTrackableSnapshot();
+        var snapshot = _view.CreateSnapshot(Features.Track);
 
         try
         {
@@ -206,7 +206,7 @@ public abstract class DomainModel : IDomainModel
     {
         if (changes.HasChanges())
         {
-            var snapshot = _view.CreateSnapshot();
+            var snapshot = _view.CreateSnapshot(Features.Copy);
 
             try
             {

@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Diagnostics;
-using Navitski.Crystalized.Model.Engine.ChangesTracking;
 
 namespace Navitski.Crystalized.Model.Engine.Core;
 
 /// <inheritdoc cref="IRelation{TParent, TChild}"/>
 [DebuggerDisplay(@"Parent [{_parentToChildRelations}] Children [{_childToParentRelations}]")]
-public sealed class Relation<TParent, TChild> : IMutableRelation<TParent, TChild>
+public sealed class Relation<TParent, TChild> :
+    IMutableRelation<TParent, TChild>,
+    ICanBeReadOnly<IRelation<TParent, TChild>>
     where TParent : Entity
     where TChild : Entity
 {
@@ -22,6 +23,12 @@ public sealed class Relation<TParent, TChild> : IMutableRelation<TParent, TChild
     {
         _parentToChildRelations = parentToChildRelation;
         _childToParentRelations = childToParentRelation;
+    }
+
+    /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
+    public IRelation<TParent, TChild> AsReadOnly()
+    {
+        return this;
     }
 
     /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Add(TParent, TChild)"/>

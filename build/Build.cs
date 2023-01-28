@@ -88,7 +88,7 @@ internal partial class Build : NukeBuild
                 .AddProperty("CoverletOutputFormat", "\\\"cobertura,json\\\"")
                 .AddProperty("CoverletOutput", CoverageDirectory + "\\")
                 .AddProperty("ExcludeByAttribute", "\\\"Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute\\\"")
-                .AddProperty("Exclude", $"[{Solution.Tests.Navitski_Crystalized_Model_Tests_Infrastructure.Name}]*")
+                .AddProperty("Exclude", $"\\\"[{Solution.Tests.Navitski_Crystalized_Model_Tests_Infrastructure.Name}]*,[{Solution.Navitski_Crystalized_Model.Name}]System.*\\\"")
                 .AddProperty("MergeWith", CoverageDirectory / "coverage.json")
                 .SetProcessArgumentConfigurator(c => c.Add("-m:1")));
         });
