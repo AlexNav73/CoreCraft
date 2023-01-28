@@ -29,7 +29,7 @@ internal sealed class ModelChanges : IWritableModelChanges
     public T Register<T>(T changesFrame) where T : class, IWritableChangesFrame
     {
         var frame = _frames.OfType<T>().SingleOrDefault();
-        if (frame != null)
+        if (frame is not null)
         {
             return frame;
         }

@@ -12,8 +12,8 @@ internal sealed class TrackableSnapshot : Snapshot
 
     public override T Shard<T>()
     {
-        var modelShard = base.Shard<ITrackableModelShard<T>>();
-        var trackable = modelShard.AsTrackable(Changes);
+        var modelShard = base.Shard<ICanBeMutable<T>>();
+        var trackable = modelShard.AsMutable(Features.Track, Changes);
 
         return trackable;
     }

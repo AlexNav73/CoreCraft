@@ -14,13 +14,13 @@ internal partial class ApplicationModelGenerator
             code.EmptyLine();
             DefineModelShardClassAsICopy(code, modelShard);
             code.EmptyLine();
-            DefineModelShardClassAsITrackable(code, modelShard);
+            DefineModelShardClassAsCanBeMutable(code, modelShard);
             code.EmptyLine();
             DefineChangesFrameInterface(code, modelShard);
             code.EmptyLine();
             DefineChangesFrameClass(code, modelShard);
             code.EmptyLine();
-            DefineTrackableModelShardClass(code, modelShard);
+            DefineMutableModelShardClass(code, modelShard);
             code.EmptyLine();
         }
     }
@@ -58,6 +58,7 @@ internal partial class ApplicationModelGenerator
 
         void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
         {
+            code.SetsRequiredMembersAttribute();
             code.WriteLine($"public {modelShard.Name}ModelShard()");
             code.Block(() =>
             {
@@ -78,67 +79,68 @@ internal partial class ApplicationModelGenerator
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public {Property($"I{Type(collection)}", collection.Name)}");
+                code.WriteLine($"public required {Property($"I{Type(collection)}", collection.Name, "get; init;")}");
             }
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name)}");
+                code.WriteLine($"public required {Property($"I{Type(relation)}", relation.Name, "get; init;")}");
             }
         }
     }
 
     private void DefineModelShardClassAsICopy(IndentedTextWriter code, ModelShard modelShard)
     {
-        code.Class("sealed partial", $"{modelShard.Name}ModelShard", new[] { "ICopy<IModelShard>" }, () =>
+        code.Class("sealed partial", $"{modelShard.Name}ModelShard", new[] { $"ICopy<I{modelShard.Name}ModelShard>" }, () =>
         {
-            code.WriteLine($"public IModelShard Copy()");
+            code.WriteLine($"public I{modelShard.Name}ModelShard Copy()");
             code.Block(() =>
             {
-                foreach (var collection in modelShard.Collections)
-                {
-                    code.WriteLine($"var {collection.Name.ToLower()} = {collection.Name}.Copy();");
-                }
-                code.EmptyLine();
-
-                foreach (var relation in modelShard.Relations)
-                {
-                    code.WriteLine($"var {relation.Name.ToLower()} = {relation.Name}.Copy();");
-                }
-                code.EmptyLine();
-
                 code.WriteLine($"return new {modelShard.Name}ModelShard()");
                 code.Block(() =>
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{collection.Name} = {collection.Name.ToLower()},");
+                        code.WriteLine($"{collection.Name} = {collection.Name}.Copy(),");
                     }
                     code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{relation.Name} = {relation.Name.ToLower()},");
+                        code.WriteLine($"{relation.Name} = {relation.Name}.Copy(),");
                     }
                 }, true);
             });
         });
     }
 
-    private void DefineModelShardClassAsITrackable(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineModelShardClassAsCanBeMutable(IndentedTextWriter code, ModelShard modelShard)
     {
         code.Class("sealed partial", $"{modelShard.Name}ModelShard", new[]
         {
-            $"ITrackableModelShard<IMutable{modelShard.Name}ModelShard>"
+            $"ICanBeMutable<IMutable{modelShard.Name}ModelShard>"
         },
         () =>
         {
-            code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsTrackable(IWritableModelChanges modelChanges)");
+            code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsMutable(Features features, IWritableModelChanges modelChanges)");
             code.Block(() =>
             {
                 code.WriteLine($"var frame = modelChanges.Register(new {modelShard.Name}ChangesFrame());");
-                code.WriteLine($"return new Trackable{modelShard.Name}ModelShard(this, frame);");
+                code.WriteLine($"return new Mutable{modelShard.Name}ModelShard()");
+                code.Block(() =>
+                {
+                    foreach (var collection in modelShard.Collections)
+                    {
+                        code.WriteLine($"{collection.Name} = new Trackable{Type(collection)}(frame.{collection.Name}, {collection.Name}),");
+                    }
+                    code.EmptyLine();
+
+                    foreach (var relation in modelShard.Relations)
+                    {
+                        code.WriteLine($"{relation.Name} = new Trackable{Type(relation)}(frame.{relation.Name}, {relation.Name}),");
+                    }
+                }, true);
             });
         });
     }
@@ -296,50 +298,27 @@ internal partial class ApplicationModelGenerator
         }
     }
 
-    private void DefineTrackableModelShardClass(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineMutableModelShardClass(IndentedTextWriter code, ModelShard modelShard)
     {
         code.GeneratedClassAttributes();
-        code.Class("sealed", $"Trackable{modelShard.Name}ModelShard",
+        code.Class("sealed", $"Mutable{modelShard.Name}ModelShard",
             new[]
             {
                 $"IMutable{modelShard.Name}ModelShard"
             },
-            () =>
-            {
-                DefineCtor(code, modelShard);
-                code.EmptyLine();
-                ImplementModelShardInterface(code, modelShard);
-            });
-
-        void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
-        {
-            code.WriteLine($"public Trackable{modelShard.Name}ModelShard(I{modelShard.Name}ModelShard modelShard, I{modelShard.Name}ChangesFrame frame)");
-            code.Block(() =>
-            {
-                foreach (var collection in modelShard.Collections)
-                {
-                    code.WriteLine($"{collection.Name} = new Trackable{Type(collection)}(frame.{collection.Name}, modelShard.{collection.Name});");
-                }
-                code.EmptyLine();
-
-                foreach (var relation in modelShard.Relations)
-                {
-                    code.WriteLine($"{relation.Name} = new Trackable{Type(relation)}(frame.{relation.Name}, modelShard.{relation.Name});");
-                }
-            });
-        }
+            () => ImplementModelShardInterface(code, modelShard));
 
         void ImplementModelShardInterface(IndentedTextWriter code, ModelShard modelShard)
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public {Property($"IMutable{Type(collection)}", collection.Name)}");
+                code.WriteLine($"public required {Property($"IMutable{Type(collection)}", collection.Name, "get; init;")}");
             }
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public {Property($"IMutable{Type(relation)}", relation.Name)}");
+                code.WriteLine($"public required {Property($"IMutable{Type(relation)}", relation.Name, "get; init;")}");
             }
         }
     }

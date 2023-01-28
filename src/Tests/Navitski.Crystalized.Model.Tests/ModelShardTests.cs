@@ -14,13 +14,13 @@ public class ModelShardTests
         A.CallTo(() => modelChanges.Register(A<FakeChangesFrame>.Ignored))
             .Returns(new FakeChangesFrame());
 
-        var trackable = modelShard.AsTrackable(modelChanges);
+        var trackable = modelShard.AsMutable(Features.Track, modelChanges);
 
         A.CallTo(() => modelChanges.Register(A<FakeChangesFrame>.Ignored))
             .MustHaveHappenedOnceExactly();
 
         Assert.That(trackable, Is.Not.Null);
-        Assert.That(trackable, Is.TypeOf<TrackableFakeModelShard>());
+        Assert.That(trackable, Is.TypeOf<MutableFakeModelShard>());
     }
 
     [Test]
@@ -34,7 +34,7 @@ public class ModelShardTests
             .Invokes(c => registeredFrame = c.Arguments.Single() as IChangesFrame)
             .Returns(new FakeChangesFrame());
 
-        var trackable = modelShard.AsTrackable(modelChanges);
+        var trackable = modelShard.AsMutable(Features.Track, modelChanges);
 
         Assert.That(registeredFrame, Is.Not.Null);
         Assert.That(registeredFrame, Is.TypeOf<FakeChangesFrame>());
@@ -59,7 +59,7 @@ public class ModelShardTests
         var firstProperies = shard.FirstCollection.Get(first!);
         var secondProperies = shard.SecondCollection.Get(second!);
 
-        var copy = (model.Shard<IFakeModelShard>() as ICopy<IModelShard>)?.Copy() as IFakeModelShard;
+        var copy = (model.Shard<IFakeModelShard>() as ICopy<IFakeModelShard>)?.Copy();
 
         Assert.That(copy, Is.Not.Null);
         Assert.That(copy, Is.TypeOf<FakeModelShard>());
