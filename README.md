@@ -7,13 +7,13 @@
 
 ## 📖 About
 
-`Navitski.Crystalized` is a set of cross-platform libraries which helps in building of your own domain model. Think of it as a in-memory database which provides some interesting features like: precise diffing, undo/redo support, persisting to the file (for now only SQLite database is supported), changes notifications and code generation!
+`Navitski.Crystalized` is a set of cross-platform libraries which helps in building of your own domain model. Think of it as a in-memory database which provides some interesting features like: precise diffing, undo/redo support, persisting to the file (Json, SQLite are supported out of the box), changes notifications and code generation!
 
-Using the simple json configuration, the `Navitski.Crystalized.Model.Generators` can generate a new domain model for you with all entities, relations, persistence infrastructure and changes handling. All you need to do is start implementing your business logic everything else will be generated for you. `Navitski.Crystalized.Model.Generators` is using brand new Roslyn Source Generators and targeting _.NET Standart 2.0_, so it can be used in old .NET Framework applications.
+Using the simple json configuration, the `Navitski.Crystalized.Model.Generators` can generate a new domain model for you with all entities, relations, persistence infrastructure and changes handling. All you need to do is start implementing your business logic, everything else will be generated for you. `Navitski.Crystalized.Model.Generators` package is using brand new Roslyn Source Generators and targeting _.NET Standart 2.0_, so it can be used in old .NET Framework applications.
 
 ## 🚀 Getting Started
 
-> To see the full example, go to the [examples](https://github.com/AlexNav73/Navitski.Crystalized/tree/master/examples/Example) folder.
+> To see the full example, go to the [examples](https://github.com/AlexNav73/Navitski.Crystalized/tree/master/examples/Example) folder or [Small WPF app](https://github.com/AlexNav73/Navitski.Crystalized/tree/master/examples/WpfDemoApp).
 
 To get started first of all, you need to add references to libraries.
 
@@ -28,7 +28,7 @@ To enable code generation add another package:
 dotnet add package Navitski.Crystalized.Model.Generators
 ```
 
-After this two packages are installed we can start writing a model description. Create file called `Model.model.json` and add it to the project as a additional file like so:
+After this two packages are installed, we can start writing a model description. Create file called `Model.model.json` and add it to the project as a additional file like so:
 
 ```xml
 <ItemGroup>
@@ -36,7 +36,7 @@ After this two packages are installed we can start writing a model description. 
 </ItemGroup>
 ```
 
-> Files with an extension `*.model.json` will be used to generate parts of the domain model called **Shards**. Think of it as a sub-databases which can help to separate domain model by functionality or provide a possibility to register new shards by plugins.
+> Files with an extension `*.model.json` will be used to generate parts of the domain model called **Shards**. Think of them as sub-databases which can help to separate domain model by functionality or provide a possibility to register new shards by plugins.
 
 The content of the `Model.model.json` should include shards (sub-databases), entities with their properties, collections and relations between entities. See the example below:
 ```json
@@ -70,7 +70,7 @@ The content of the `Model.model.json` should include shards (sub-databases), ent
 
 > For the simplicity, we will use only one entity without any relations
 
-Next, we need to create a domain model class. We could use one of out-of-box implementations. But to show you how simple implement it, we create a new class. This class must inherit from the `DomainModel` abstract class.
+Next, we need to create a domain model class (we could use one of out-of-box implementations). This class must inherit from the `DomainModel` abstract class.
 
 ```cs
 class MyModel : DomainModel
@@ -82,9 +82,9 @@ class MyModel : DomainModel
 }
 ```
 
-> `DomainModel` base constructor takes a collection of shards (which are generated from `Model.model.json`) and a `IScheduler` implementation. For now, we use `SyncScheduler`. It just run everything in the same thread so it can be used for unit testing as an example.
+> `DomainModel` base constructor takes a collection of shards (which are generated from `Model.model.json`) and an `IScheduler` implementation. For now, we will use `SyncScheduler`. It just run everything in the same thread so it can be used for unit testing, as an example.
 
-Now we can create our model model:
+Now, we can create our model model:
 
 ```cs
 var model = new MyModel(new[]
@@ -95,7 +95,7 @@ var model = new MyModel(new[]
 });
 ```
 
-When our first domain model created, we can start implementing commands. Commands are used to group related modifications in one single change (CQRS pattern). **All modifications can be made only inside a command**.
+When our first domain model is created, we can start implementing commands. Commands are used to group related modifications in one single change (CQRS pattern). **All modifications can be made only inside a command**.
 
 ```cs
 class MyAddCommand : ICommand
@@ -114,7 +114,9 @@ class MyAddCommand : ICommand
 
 > This command will simply add new entity to the collection with `MyProperty` set to `"test"`.
 
-Now we need to execute the command, but before that we need to subscribe to the domain model changes.
+> `DomainModel` base class contains overload to run delegates as commands (see `Run` method's overloads), so you don't need to create new class for each logic, but it is a good practice to create new class if command's logic is quite big
+
+Now, we need to execute the command, but before that we need to subscribe to the domain model changes.
 
 ```cs
 using (model.Subscribe(OnModelChanged))
@@ -172,6 +174,10 @@ When we setup everything, we can execute our command:
 using (model.Subscribe(OnModelChanged))
 {
     model.Run(new MyAddCommand());
+
+    // Some overloads exists:
+    // model.Run((IModel m) => { ... })
+    // model.Run<Model.IMutableMyAppModelShard>((Model.IMutableMyAppModelShard shard, CancellationToken token) => { ... })
 }
 ```
 
@@ -190,7 +196,7 @@ To store model data in the SQLite database, the `Navitski.Crystalized.Model.Stor
 dotnet add package Navitski.Crystalized.Model.Storage.Sqlite
 ```
 
-When we have added this package we can then implement a save method for the model class:
+When we have added this package, we can then implement a save method for the model class:
 
 ```cs
 // the "DomainModel" base class provides couple of methods to save and load data.
@@ -198,7 +204,7 @@ class MyModel : DomainModel
 {
     // "IStorage" interface comes from "Navitski.Crystalized.Model" package
     // and everybody can implement it to store data in a suitable way.
-    // Out-of-the-box only SQLite is supported.
+    // Json and SQLite are supported out of the box.
     private readonly IStorage _storage;
 
     public MyModel(IEnumerable<IModelShard> shards)
@@ -206,16 +212,16 @@ class MyModel : DomainModel
     {
         _storage = new SqliteStorage(
             // To create a SQLite storage, we need to provide a collection
-            // of migrations (each database store the latest version so it will
-            // execute only those migrations that are needed).
+            // of migrations (each database, store the latest version so it will
+            // execute only those migrations, that are needed).
             Array.Empty<IMigration>(),
             // Also, we need to provide model shard storages which are generated
             // automatically for each shard. Storages know, how to store a specific
             // model shard.
             new[] { new Model.ExampleModelShardStorage() },
-            // Repository factory is needed to create a new repository instance
-            // when we have a path to the file
-            new SqliteRepositoryFactory());
+            // If you want to see, which SQL statements are executed, you can provide optional
+            // logging method
+            Console.WriteLine);
     }
 
     public void Save(string path)
@@ -228,7 +234,7 @@ class MyModel : DomainModel
             File.Delete(path);
         }
 
-        // in these case, we call base Save method to save whole
+        // in this case, we call base Save method to save whole
         // data to the file. If we want to save only changes, then we need
         // to call another Save overload which accepts a collection of IModelChanges.
         Save(_storage, path);
