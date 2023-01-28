@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using Navitski.Crystalized.Model.Engine.Core;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -57,11 +58,12 @@ public class ModelChangesTests
         var props = new FirstEntityProperties();
         var value = "test";
         var model = new Engine.Core.Model(new[] { new FakeModelShard() });
+        var snapshot = new Snapshot(model, Features.Copy);
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = value });
-        changesFrame.Apply(model);
+        changesFrame.Apply(snapshot);
 
-        var shard = model.Shard<IFakeModelShard>();
+        var shard = snapshot.ToModel().Shard<IFakeModelShard>();
 
         Assert.That(shard.FirstCollection.Count, Is.EqualTo(1));
         Assert.That(shard.FirstCollection.First(), Is.EqualTo(entity));

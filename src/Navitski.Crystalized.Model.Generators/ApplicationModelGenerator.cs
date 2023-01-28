@@ -49,6 +49,7 @@ internal partial class ApplicationModelGenerator : GeneratorBase
             code.WriteLine("using Navitski.Crystalized.Model.Engine;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.Core;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.ChangesTracking;");
+            code.WriteLine("using Navitski.Crystalized.Model.Engine.Lazy;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.Persistence;");
             code.WriteLine($"using {assemblyName}.{modelName}.Entities;");
             code.EmptyLine();
@@ -81,4 +82,14 @@ internal partial class ApplicationModelGenerator : GeneratorBase
     private static string PropertiesType(Entity entitiy) => PropertiesType(entitiy.Name);
 
     private static string PropertiesType(string type) => $"{type}Properties";
+
+    private static string ToCamelCase(string value)
+    {
+        if (value.Length > 1)
+        {
+            return $"{char.ToLower(value[0])}{value.Substring(1)}";
+        }
+
+        return value;
+    }
 }

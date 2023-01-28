@@ -1,7 +1,6 @@
-﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Exceptions;
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics;
+using Navitski.Crystalized.Model.Engine.Exceptions;
 
 namespace Navitski.Crystalized.Model.Engine.Core;
 
@@ -12,7 +11,9 @@ namespace Navitski.Crystalized.Model.Engine.Core;
 /// <typeparam name="TEntity">An entity type</typeparam>
 /// <typeparam name="TProperties">A type of a properties</typeparam>
 [DebuggerDisplay("Count = {Count}")]
-public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntity, TProperties>
+public sealed class Collection<TEntity, TProperties> :
+    IMutableCollection<TEntity, TProperties>,
+    ICanBeReadOnly<ICollection<TEntity, TProperties>>
     where TEntity : Entity
     where TProperties : Properties
 {
@@ -40,6 +41,12 @@ public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntit
 
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _relation.Count;
+
+    /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
+    public ICollection<TEntity, TProperties> AsReadOnly()
+    {
+        return this;
+    }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Add(TProperties)"/>
     public TEntity Add(TProperties properties)
@@ -111,7 +118,7 @@ public sealed class Collection<TEntity, TProperties> : IMutableCollection<TEntit
         }
     }
 
-    /// <inheritdoc cref="ICopy{T}.Copy"/>
+    /// <inheritdoc cref="ICopy{T}.Copy()"/>
     public ICollection<TEntity, TProperties> Copy()
     {
         return new Collection<TEntity, TProperties>(
