@@ -51,6 +51,8 @@ internal partial class ApplicationModelGenerator
         {
             DefineCtor(code, modelShard);
             code.EmptyLine();
+            DefineConversionCtor(code, modelShard);
+            code.EmptyLine();
             ImplementModelShardInterface(code, modelShard);
         });
 
@@ -62,13 +64,42 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = new {Type(collection)}(id => new {collection.EntityType}(id), () => new {collection.EntityType}Properties());");
+                    code.WriteLine($"{collection.Name} = new {Type(collection)}(");
+                    code.WithIndent(c =>
+                    {
+                        c.WriteLine($"id => new {collection.EntityType}(id),");
+                        c.WriteLine($"() => new {collection.EntityType}Properties());");
+                    });
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = new {Type(relation)}(new {relation.ParentRelationType}<{relation.ParentType}, {relation.ChildType}>(), new {relation.ChildRelationType}<{relation.ChildType}, {relation.ParentType}>());");
+                    code.WriteLine($"{relation.Name} = new {Type(relation)}(");
+                    code.WithIndent(c =>
+                    {
+                        code.WriteLine($"new {relation.ParentRelationType}<{relation.ParentType}, {relation.ChildType}>(),");
+                        code.WriteLine($"new {relation.ChildRelationType}<{relation.ChildType}, {relation.ParentType}>());");
+                    });
+                }
+            });
+        }
+
+        void DefineConversionCtor(IndentedTextWriter code, ModelShard modelShard)
+        {
+            code.SetsRequiredMembersAttribute();
+            code.WriteLine($"internal {modelShard.Name}ModelShard(IMutable{modelShard.Name}ModelShard mutable)");
+            code.Block(() =>
+            {
+                foreach (var collection in modelShard.Collections)
+                {
+                    code.WriteLine($"{collection.Name} = ((ICanBeReadOnly<I{Type(collection)}>)mutable.{collection.Name}).AsReadOnly();");
+                }
+                code.EmptyLine();
+
+                foreach (var relation in modelShard.Relations)
+                {
+                    code.WriteLine($"{relation.Name} = ((ICanBeReadOnly<I{Type(relation)}>)mutable.{relation.Name}).AsReadOnly();");
                 }
             });
         }
@@ -96,7 +127,7 @@ internal partial class ApplicationModelGenerator
         },
         () =>
         {
-            code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsMutable(Features features, IWritableModelChanges modelChanges)");
+            code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsMutable(IWritableModelChanges? modelChanges)");
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -111,7 +142,7 @@ internal partial class ApplicationModelGenerator
                 }
                 code.EmptyLine();
 
-                code.WriteLine("if ((features & Features.Track) == Features.Track)");
+                code.WriteLine("if (modelChanges is not null)");
                 code.Block(() =>
                 {
                     code.WriteLine($"var frame = modelChanges.Register(new {modelShard.Name}ChangesFrame());");
@@ -336,20 +367,7 @@ internal partial class ApplicationModelGenerator
             code.WriteLine($"public I{modelShard.Name}ModelShard AsReadOnly()");
             code.Block(() =>
             {
-                code.WriteLine($"return new {modelShard.Name}ModelShard()");
-                code.Block(() =>
-                {
-                    foreach (var collection in modelShard.Collections)
-                    {
-                        code.WriteLine($"{collection.Name} = ((ICanBeReadOnly<I{Type(collection)}>){collection.Name}).AsReadOnly(),");
-                    }
-                    code.EmptyLine();
-
-                    foreach (var relation in modelShard.Relations)
-                    {
-                        code.WriteLine($"{relation.Name} = ((ICanBeReadOnly<I{Type(relation)}>){relation.Name}).AsReadOnly(),");
-                    }
-                }, true);
+                code.WriteLine($"return new {modelShard.Name}ModelShard(this);");
             });
         }
     }

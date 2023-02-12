@@ -1,11 +1,11 @@
-﻿using MahApps.Metro.Controls;
+﻿using Autofac;
+using MahApps.Metro.Controls;
 using Navitski.Crystalized.Model.Engine;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
 using Navitski.Crystalized.Model.Storage.Sqlite;
-using Navitski.Crystalized.Model.Storage.Sqlite.Migrations;
-using System;
+using System.Collections.Generic;
 using WpfDemoApp.Model;
 
 namespace WpfDemoApp;
@@ -19,17 +19,19 @@ public partial class MainWindow : MetroWindow
     {
         InitializeComponent();
 
-        var modelShardStorages = new IModelShardStorage[]
-        {
-            new ToDoModelShardStorage()
-        };
-        var storage = new SqliteStorage(Array.Empty<IMigration>(), modelShardStorages);
-        var modelShards = new IModelShard[]
-        {
-            new ToDoModelShard()
-        };
-        var model = new UndoRedoDomainModel(modelShards, new AsyncScheduler(), storage);
+        var builder = new ContainerBuilder();
 
-        DataContext = new MainWindowViewModel(model);
+        builder.RegisterType<ToDoModelShardStorage>().As<IModelShardStorage>();
+        builder.RegisterType<SqliteStorage>().As<IStorage>();
+        builder.RegisterType<ToDoModelShard>().As<IModelShard>();
+        builder.Register(c => new UndoRedoDomainModel(
+            c.Resolve<IEnumerable<IModelShard>>(),
+            new AsyncScheduler(),
+            c.Resolve<IStorage>()));
+        builder.RegisterType<MainWindowViewModel>().AsSelf();
+
+        var container = builder.Build();
+
+        DataContext = container.Resolve<MainWindowViewModel>();
     }
 }

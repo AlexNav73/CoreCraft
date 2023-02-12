@@ -63,6 +63,13 @@ internal static class IndentedTextWriterExtensions
         code.Indent = indent;
     }
 
+    public static void WithIndent(this IndentedTextWriter code, Action<IndentedTextWriter> action)
+    {
+        code.Indent++;
+        action(code);
+        code.Indent--;
+    }
+
     public static void EmptyLine(this IndentedTextWriter code)
     {
         code.WriteLineNoTabs(string.Empty);

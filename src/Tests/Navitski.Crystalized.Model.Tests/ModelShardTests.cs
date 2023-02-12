@@ -15,7 +15,7 @@ public class ModelShardTests
         A.CallTo(() => modelChanges.Register(A<FakeChangesFrame>.Ignored))
             .Returns(new FakeChangesFrame());
 
-        var mutable = modelShard.AsMutable(Features.Track, modelChanges);
+        var mutable = modelShard.AsMutable(modelChanges);
 
         A.CallTo(() => modelChanges.Register(A<FakeChangesFrame>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -35,7 +35,7 @@ public class ModelShardTests
             .Invokes(c => registeredFrame = c.Arguments.Single() as IChangesFrame)
             .Returns(new FakeChangesFrame());
 
-        var mutable = modelShard.AsMutable(Features.Track, modelChanges);
+        var mutable = modelShard.AsMutable(modelChanges);
 
         Assert.That(registeredFrame, Is.Not.Null);
         Assert.That(registeredFrame, Is.TypeOf<FakeChangesFrame>());
@@ -45,9 +45,8 @@ public class ModelShardTests
     public void AsMutableWithCopyFeatureCreatesCoWCollectionsAndRelationsTest()
     {
         var modelShard = new FakeModelShard();
-        var modelChanges = A.Fake<IWritableModelChanges>();
 
-        var mutable = modelShard.AsMutable(Features.Copy, modelChanges);
+        var mutable = modelShard.AsMutable(null);
 
         Assert.That(mutable.FirstCollection, Is.TypeOf<CoWCollection<FirstEntity, FirstEntityProperties>>());
         Assert.That(mutable.OneToOneRelation, Is.TypeOf<CoWRelation<FirstEntity, SecondEntity>>());
@@ -59,7 +58,7 @@ public class ModelShardTests
         var modelShard = new FakeModelShard();
         var modelChanges = A.Fake<IWritableModelChanges>();
 
-        var mutable = modelShard.AsMutable(Features.Track, modelChanges);
+        var mutable = modelShard.AsMutable(modelChanges);
 
         Assert.That(mutable.FirstCollection, Is.TypeOf<TrackableCollection<FirstEntity, FirstEntityProperties>>());
         Assert.That(mutable.OneToOneRelation, Is.TypeOf<TrackableRelation<FirstEntity, SecondEntity>>());
@@ -69,9 +68,8 @@ public class ModelShardTests
     public void AsReadOnlyWithCopyFeatureCreatesRegularCollectionsAndRelationsTest()
     {
         var modelShard = new FakeModelShard();
-        var modelChanges = A.Fake<IWritableModelChanges>();
 
-        var mutable = modelShard.AsMutable(Features.Copy, modelChanges);
+        var mutable = modelShard.AsMutable(null);
         var readOnly = ((ICanBeReadOnly<IFakeModelShard>)mutable).AsReadOnly();
 
         Assert.That(readOnly.FirstCollection, Is.TypeOf<Collection<FirstEntity, FirstEntityProperties>>());
@@ -84,7 +82,7 @@ public class ModelShardTests
         var modelShard = new FakeModelShard();
         var modelChanges = A.Fake<IWritableModelChanges>();
 
-        var mutable = modelShard.AsMutable(Features.Track, modelChanges);
+        var mutable = modelShard.AsMutable(modelChanges);
         var readOnly = ((ICanBeReadOnly<IFakeModelShard>)mutable).AsReadOnly();
 
         Assert.That(readOnly.FirstCollection, Is.TypeOf<Collection<FirstEntity, FirstEntityProperties>>());

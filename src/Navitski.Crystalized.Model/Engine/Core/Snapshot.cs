@@ -5,19 +5,15 @@ namespace Navitski.Crystalized.Model.Engine.Core;
 internal sealed class Snapshot : IModel
 {
     private readonly Model _model;
-    private readonly Features _features;
+    private readonly IWritableModelChanges? _modelChanges;
     private readonly IDictionary<Type, ICanBeReadOnly<IModelShard>> _copies;
 
-    public Snapshot(Model model, Features features)
+    public Snapshot(Model model, IWritableModelChanges? modelChanges)
     {
         _model = model;
-        _features = features;
+        _modelChanges = modelChanges;
         _copies = new Dictionary<Type, ICanBeReadOnly<IModelShard>>();
-
-        Changes = new ModelChanges();
     }
-
-    public IWritableModelChanges Changes { get; }
 
     public T Shard<T>() where T : IModelShard
     {
@@ -27,7 +23,7 @@ internal sealed class Snapshot : IModel
         }
 
         var modelShard = _model.Shard<ICanBeMutable<T>>();
-        var mutable = modelShard.AsMutable(_features, Changes);
+        var mutable = modelShard.AsMutable(_modelChanges);
 
         _copies.Add(typeof(T), (ICanBeReadOnly<IModelShard>)mutable);
 
