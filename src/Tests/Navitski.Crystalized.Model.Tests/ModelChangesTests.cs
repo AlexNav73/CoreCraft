@@ -58,7 +58,7 @@ public class ModelChangesTests
         var props = new FirstEntityProperties();
         var value = "test";
         var model = new Engine.Core.Model(new[] { new FakeModelShard() });
-        var snapshot = new Snapshot(model, Features.Copy);
+        var snapshot = new Snapshot(model, null);
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = value });
         changesFrame.Apply(snapshot);

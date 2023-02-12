@@ -43,7 +43,9 @@ internal partial class ApplicationModelGenerator : GeneratorBase
 
     private void Generate(string assemblyName, string modelName, IndentedTextWriter code, ModelScheme modelScheme)
     {
-        code.WriteLine($"namespace {assemblyName}.{modelName}");
+        var @namespace = $"{assemblyName}.{modelName}";
+
+        code.WriteLine($"namespace {@namespace}");
         code.Block(() =>
         {
             code.WriteLine("using Navitski.Crystalized.Model.Engine;");
@@ -51,7 +53,7 @@ internal partial class ApplicationModelGenerator : GeneratorBase
             code.WriteLine("using Navitski.Crystalized.Model.Engine.ChangesTracking;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.Lazy;");
             code.WriteLine("using Navitski.Crystalized.Model.Engine.Persistence;");
-            code.WriteLine($"using {assemblyName}.{modelName}.Entities;");
+            code.WriteLine($"using {@namespace}.Entities;");
             code.EmptyLine();
 
             GenerateModelShards(code, modelScheme.Shards);
@@ -59,7 +61,7 @@ internal partial class ApplicationModelGenerator : GeneratorBase
         });
         code.EmptyLine();
 
-        code.WriteLine($"namespace {assemblyName}.{modelName}.Entities");
+        code.WriteLine($"namespace {@namespace}.Entities");
         code.Block(() =>
         {
             GenerateEntities(code, modelScheme.Shards);

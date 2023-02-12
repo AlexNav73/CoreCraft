@@ -1,6 +1,5 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
-using Navitski.Crystalized.Model.Engine.Lazy;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -12,17 +11,17 @@ public class ViewTests
         var originalShard = A.Fake<IFakeModelShard>(c => c.Implements<ICanBeMutable<IMutableFakeModelShard>>());
         var mutableShard = A.Fake<IMutableFakeModelShard>(c => c.Implements<ICanBeReadOnly<IFakeModelShard>>());
 
-        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<Features>.Ignored, A<IWritableModelChanges>.Ignored))
+        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<IWritableModelChanges?>.Ignored))
             .Returns(mutableShard);
         A.CallTo(() => ((ICanBeReadOnly<IFakeModelShard>)mutableShard).AsReadOnly())
             .Returns(A.Fake<IFakeModelShard>());
 
         var view = new View(new[] { originalShard });
-        var snapshot = view.CreateSnapshot(Features.Copy);
+        var snapshot = view.CreateSnapshot(null);
         var mutableShardSnapshot = snapshot.Shard<IMutableFakeModelShard>();
         var model = snapshot.ToModel();
 
-        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<Features>.Ignored, A<IWritableModelChanges>.Ignored))
+        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<IWritableModelChanges?>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => ((ICanBeReadOnly<IFakeModelShard>)mutableShard).AsReadOnly())
             .MustHaveHappenedOnceExactly();
@@ -34,18 +33,18 @@ public class ViewTests
         var originalShard = A.Fake<IFakeModelShard>(c => c.Implements<ICanBeMutable<IMutableFakeModelShard>>());
         var mutableShard = A.Fake<IMutableFakeModelShard>(c => c.Implements<ICanBeReadOnly<IFakeModelShard>>());
 
-        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<Features>.Ignored, A<IWritableModelChanges>.Ignored))
+        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<IWritableModelChanges?>.Ignored))
             .Returns(mutableShard);
         A.CallTo(() => ((ICanBeReadOnly<IFakeModelShard>)mutableShard).AsReadOnly())
             .Returns(A.Fake<IFakeModelShard>());
 
         var view = new View(new[] { originalShard });
-        var snapshot = view.CreateSnapshot(Features.Copy);
+        var snapshot = view.CreateSnapshot(null);
         var mutableShardSnapshot = snapshot.Shard<IMutableFakeModelShard>();
         var mutableShardSnapshot2 = snapshot.Shard<IMutableFakeModelShard>();
         var model = snapshot.ToModel();
 
-        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<Features>.Ignored, A<IWritableModelChanges>.Ignored))
+        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<IWritableModelChanges?>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => ((ICanBeReadOnly<IFakeModelShard>)mutableShard).AsReadOnly())
             .MustHaveHappenedOnceExactly();

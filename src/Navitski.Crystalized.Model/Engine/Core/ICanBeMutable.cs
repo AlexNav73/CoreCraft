@@ -20,8 +20,7 @@ public interface ICanBeMutable<out TShard> : IModelShard
     /// <summary>
     ///     Returns a model shard which can be mutated
     /// </summary>
-    /// <param name="features">A set of features which resulting mutable shard should include</param>
     /// <param name="modelChanges">A model changes</param>
     /// <returns>A mutable model shard</returns>
-    TShard AsMutable(Features features, IWritableModelChanges modelChanges);
+    TShard AsMutable(IWritableModelChanges? modelChanges);
 }

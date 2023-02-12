@@ -54,13 +54,37 @@ namespace compilation.AllFeatures
         [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute()]
         public FakeModelShard()
         {
-            FirstCollection = new Collection<FirstEntity, FirstEntityProperties>(id => new FirstEntity(id), () => new FirstEntityProperties());
-            SecondCollection = new Collection<SecondEntity, SecondEntityProperties>(id => new SecondEntity(id), () => new SecondEntityProperties());
+            FirstCollection = new Collection<FirstEntity, FirstEntityProperties>(
+                id => new FirstEntity(id),
+                () => new FirstEntityProperties());
+            SecondCollection = new Collection<SecondEntity, SecondEntityProperties>(
+                id => new SecondEntity(id),
+                () => new SecondEntityProperties());
 
-            OneToOneRelation = new Relation<FirstEntity, SecondEntity>(new OneToOne<FirstEntity, SecondEntity>(), new OneToOne<SecondEntity, FirstEntity>());
-            OneToManyRelation = new Relation<FirstEntity, SecondEntity>(new OneToMany<FirstEntity, SecondEntity>(), new OneToOne<SecondEntity, FirstEntity>());
-            ManyToOneRelation = new Relation<FirstEntity, SecondEntity>(new OneToOne<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
-            ManyToManyRelation = new Relation<FirstEntity, SecondEntity>(new OneToMany<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
+            OneToOneRelation = new Relation<FirstEntity, SecondEntity>(
+                new OneToOne<FirstEntity, SecondEntity>(),
+                new OneToOne<SecondEntity, FirstEntity>());
+            OneToManyRelation = new Relation<FirstEntity, SecondEntity>(
+                new OneToMany<FirstEntity, SecondEntity>(),
+                new OneToOne<SecondEntity, FirstEntity>());
+            ManyToOneRelation = new Relation<FirstEntity, SecondEntity>(
+                new OneToOne<FirstEntity, SecondEntity>(),
+                new OneToMany<SecondEntity, FirstEntity>());
+            ManyToManyRelation = new Relation<FirstEntity, SecondEntity>(
+                new OneToMany<FirstEntity, SecondEntity>(),
+                new OneToMany<SecondEntity, FirstEntity>());
+        }
+
+        [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute()]
+        internal FakeModelShard(IMutableFakeModelShard mutable)
+        {
+            FirstCollection = ((ICanBeReadOnly<ICollection<FirstEntity, FirstEntityProperties>>)mutable.FirstCollection).AsReadOnly();
+            SecondCollection = ((ICanBeReadOnly<ICollection<SecondEntity, SecondEntityProperties>>)mutable.SecondCollection).AsReadOnly();
+
+            OneToOneRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)mutable.OneToOneRelation).AsReadOnly();
+            OneToManyRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)mutable.OneToManyRelation).AsReadOnly();
+            ManyToOneRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToOneRelation).AsReadOnly();
+            ManyToManyRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToManyRelation).AsReadOnly();
         }
 
         public required ICollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; }
@@ -74,7 +98,7 @@ namespace compilation.AllFeatures
 
     internal sealed partial class FakeModelShard : ICanBeMutable<IMutableFakeModelShard>
     {
-        public IMutableFakeModelShard AsMutable(Features features, IWritableModelChanges modelChanges)
+        public IMutableFakeModelShard AsMutable(IWritableModelChanges? modelChanges)
         {
             IMutableCollection<FirstEntity, FirstEntityProperties> firstCollection = new CoWCollection<FirstEntity, FirstEntityProperties>(FirstCollection);
             IMutableCollection<SecondEntity, SecondEntityProperties> secondCollection = new CoWCollection<SecondEntity, SecondEntityProperties>(SecondCollection);
@@ -84,7 +108,7 @@ namespace compilation.AllFeatures
             IMutableRelation<FirstEntity, SecondEntity> manyToOneRelation = new CoWRelation<FirstEntity, SecondEntity>(ManyToOneRelation);
             IMutableRelation<FirstEntity, SecondEntity> manyToManyRelation = new CoWRelation<FirstEntity, SecondEntity>(ManyToManyRelation);
 
-            if ((features & Features.Track) == Features.Track)
+            if (modelChanges is not null)
             {
                 var frame = modelChanges.Register(new FakeChangesFrame());
 
@@ -212,16 +236,7 @@ namespace compilation.AllFeatures
 
         public IFakeModelShard AsReadOnly()
         {
-            return new FakeModelShard()
-            {
-                FirstCollection = ((ICanBeReadOnly<ICollection<FirstEntity, FirstEntityProperties>>)FirstCollection).AsReadOnly(),
-                SecondCollection = ((ICanBeReadOnly<ICollection<SecondEntity, SecondEntityProperties>>)SecondCollection).AsReadOnly(),
-
-                OneToOneRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)OneToOneRelation).AsReadOnly(),
-                OneToManyRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)OneToManyRelation).AsReadOnly(),
-                ManyToOneRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)ManyToOneRelation).AsReadOnly(),
-                ManyToManyRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)ManyToManyRelation).AsReadOnly(),
-            };
+            return new FakeModelShard(this);
         }
     }
 

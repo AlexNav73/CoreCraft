@@ -89,7 +89,8 @@ public abstract class DomainModel : IDomainModel
     /// <inheritdoc cref="IDomainModel.Run(Action{IModel, CancellationToken}, CancellationToken)"/>
     public async Task Run(Action<IModel, CancellationToken> command, CancellationToken token = default)
     {
-        var snapshot = _view.CreateSnapshot(Features.Track);
+        var changes = new ModelChanges();
+        var snapshot = _view.CreateSnapshot(changes);
 
         try
         {
@@ -100,10 +101,10 @@ public abstract class DomainModel : IDomainModel
             throw new CommandInvocationException($"Command execution failed. Command {command.GetType()}", ex);
         }
 
-        if (snapshot.Changes.HasChanges())
+        if (changes.HasChanges())
         {
             var result = _view.ApplySnapshot(snapshot);
-            var eventArgs = CreateChangeObject(result, snapshot.Changes);
+            var eventArgs = CreateChangeObject(result, changes);
 
             NotifySubscribers(eventArgs);
             OnModelChanged(eventArgs);
@@ -176,7 +177,8 @@ public abstract class DomainModel : IDomainModel
     /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model</exception>
     protected async Task Load(IStorage storage, string path, CancellationToken token = default)
     {
-        var snapshot = _view.CreateSnapshot(Features.Track);
+        var changes = new ModelChanges();
+        var snapshot = _view.CreateSnapshot(changes);
 
         try
         {
@@ -187,10 +189,10 @@ public abstract class DomainModel : IDomainModel
             throw new ModelLoadingException("Model loading has failed", ex);
         }
 
-        if (snapshot.Changes.HasChanges())
+        if (changes.HasChanges())
         {
             var result = _view.ApplySnapshot(snapshot);
-            var eventArgs = CreateChangeObject(result, snapshot.Changes);
+            var eventArgs = CreateChangeObject(result, changes);
 
             NotifySubscribers(eventArgs);
         }
@@ -206,7 +208,7 @@ public abstract class DomainModel : IDomainModel
     {
         if (changes.HasChanges())
         {
-            var snapshot = _view.CreateSnapshot(Features.Copy);
+            var snapshot = _view.CreateSnapshot(null);
 
             try
             {
