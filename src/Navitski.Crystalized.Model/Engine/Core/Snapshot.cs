@@ -1,17 +1,15 @@
-﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-
-namespace Navitski.Crystalized.Model.Engine.Core;
+﻿namespace Navitski.Crystalized.Model.Engine.Core;
 
 internal sealed class Snapshot : IModel
 {
     private readonly Model _model;
-    private readonly IWritableModelChanges? _modelChanges;
+    private readonly IEnumerable<IFeature> _features;
     private readonly IDictionary<Type, ICanBeReadOnly<IModelShard>> _copies;
 
-    public Snapshot(Model model, IWritableModelChanges? modelChanges)
+    public Snapshot(Model model, IEnumerable<IFeature> features)
     {
         _model = model;
-        _modelChanges = modelChanges;
+        _features = features;
         _copies = new Dictionary<Type, ICanBeReadOnly<IModelShard>>();
     }
 
@@ -23,7 +21,7 @@ internal sealed class Snapshot : IModel
         }
 
         var modelShard = _model.Shard<ICanBeMutable<T>>();
-        var mutable = modelShard.AsMutable(_modelChanges);
+        var mutable = modelShard.AsMutable(_features);
 
         _copies.Add(typeof(T), (ICanBeReadOnly<IModelShard>)mutable);
 

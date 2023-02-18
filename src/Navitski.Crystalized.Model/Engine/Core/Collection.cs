@@ -24,12 +24,13 @@ public sealed class Collection<TEntity, TProperties> :
     /// <summary>
     ///     Ctor
     /// </summary>
-    public Collection(Func<Guid, TEntity> entityCreator, Func<TProperties> propsCreator)
-        : this(new Dictionary<TEntity, TProperties>(), entityCreator, propsCreator)
+    public Collection(string id, Func<Guid, TEntity> entityCreator, Func<TProperties> propsCreator)
+        : this(id, new Dictionary<TEntity, TProperties>(), entityCreator, propsCreator)
     {
     }
 
     private Collection(
+        string id,
         IDictionary<TEntity, TProperties> relation,
         Func<Guid, TEntity> entityFactory,
         Func<TProperties> dataFactory)
@@ -37,7 +38,12 @@ public sealed class Collection<TEntity, TProperties> :
         _relation = relation;
         _entityFactory = entityFactory;
         _propsFactory = dataFactory;
+
+        Id = id;
     }
+
+    /// <inheritdoc cref="IHaveId.Id"/>
+    public string Id { get; }
 
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _relation.Count;
@@ -122,6 +128,7 @@ public sealed class Collection<TEntity, TProperties> :
     public ICollection<TEntity, TProperties> Copy()
     {
         return new Collection<TEntity, TProperties>(
+            Id,
             new Dictionary<TEntity, TProperties>(_relation),
             _entityFactory,
             _propsFactory);

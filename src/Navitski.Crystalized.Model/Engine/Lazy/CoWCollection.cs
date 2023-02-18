@@ -29,6 +29,9 @@ public sealed class CoWCollection<TEntity, TProperties> :
         _collection = collection;
     }
 
+    /// <inheritdoc cref="IHaveId.Id"/>
+    public string Id => _collection.Id;
+
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => (_copy ?? _collection).Count;
 

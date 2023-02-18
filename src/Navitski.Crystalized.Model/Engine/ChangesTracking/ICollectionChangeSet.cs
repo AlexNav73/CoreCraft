@@ -13,7 +13,7 @@
 ///     When needed, change sets can be applied to the collection or relation to update it
 ///     to the newer version
 /// </remarks>
-public interface ICollectionChangeSet<TEntity, TProperties> : IEnumerable<ICollectionChange<TEntity, TProperties>>
+public interface ICollectionChangeSet<TEntity, TProperties> : IHaveId, IEnumerable<ICollectionChange<TEntity, TProperties>>
     where TEntity : Entity
     where TProperties : Properties
 {

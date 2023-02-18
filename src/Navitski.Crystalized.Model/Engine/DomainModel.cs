@@ -1,6 +1,7 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Exceptions;
+using Navitski.Crystalized.Model.Engine.Feature;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
 using Navitski.Crystalized.Model.Engine.Subscription;
@@ -90,7 +91,7 @@ public abstract class DomainModel : IDomainModel
     public async Task Run(Action<IModel, CancellationToken> command, CancellationToken token = default)
     {
         var changes = new ModelChanges();
-        var snapshot = _view.CreateSnapshot(changes);
+        var snapshot = _view.CreateSnapshot(new IFeature[] { new CoWFeature(), new TrackableFeature(changes) });
 
         try
         {
@@ -178,7 +179,7 @@ public abstract class DomainModel : IDomainModel
     protected async Task Load(IStorage storage, string path, CancellationToken token = default)
     {
         var changes = new ModelChanges();
-        var snapshot = _view.CreateSnapshot(changes);
+        var snapshot = _view.CreateSnapshot(new IFeature[] { new CoWFeature(), new TrackableFeature(changes) });
 
         try
         {
@@ -208,7 +209,7 @@ public abstract class DomainModel : IDomainModel
     {
         if (changes.HasChanges())
         {
-            var snapshot = _view.CreateSnapshot(null);
+            var snapshot = _view.CreateSnapshot(new IFeature[] { new CoWFeature() });
 
             try
             {

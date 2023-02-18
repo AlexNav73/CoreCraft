@@ -29,6 +29,9 @@ public sealed class CoWRelation<TParent, TChild> :
         _relation = relation;
     }
 
+    /// <inheritdoc cref="IHaveId.Id" />
+    public string Id => _relation.Id;
+
     /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
     public IRelation<TParent, TChild> AsReadOnly()
     {

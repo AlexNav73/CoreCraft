@@ -22,20 +22,21 @@ internal sealed class ModelChanges : IWritableModelChanges
     {
         frame = _frames.OfType<T>().SingleOrDefault()!;
 
-        return frame != null;
+        return frame is not null;
     }
 
     /// <inheritdoc />
-    public T Register<T>(T changesFrame) where T : class, IWritableChangesFrame
+    public T Register<T>(Func<T> factory)
+        where T : class, IWritableChangesFrame
     {
-        var frame = _frames.OfType<T>().SingleOrDefault();
-        if (frame is not null)
+        if (TryGetFrame<T>(out var frame))
         {
             return frame;
         }
 
-        _frames.Add(changesFrame);
-        return changesFrame;
+        var newFrame = factory();
+        _frames.Add(newFrame);
+        return newFrame;
     }
 
     /// <inheritdoc />

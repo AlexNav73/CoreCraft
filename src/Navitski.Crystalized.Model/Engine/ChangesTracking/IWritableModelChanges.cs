@@ -17,9 +17,9 @@ public interface IWritableModelChanges : IModelChanges
     ///     Registers an empty changes frame which will hold all changes happened with a model shard
     /// </summary>
     /// <typeparam name="T">A concrete type of a changes frame</typeparam>
-    /// <param name="changesFrame">An instance of a empty change frame</param>
+    /// <param name="factory">A factory of a empty change frame</param>
     /// <returns>A writable part of a changes frame</returns>
-    T Register<T>(T changesFrame) where T : class, IWritableChangesFrame;
+    T Register<T>(Func<T> factory) where T : class, IWritableChangesFrame;
 
     /// <summary>
     ///     Creates a new <see cref="IWritableModelChanges"/> which holds the changes opposite to the original changes

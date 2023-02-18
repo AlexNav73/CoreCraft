@@ -55,22 +55,28 @@ namespace compilation.AllFeatures
         public FakeModelShard()
         {
             FirstCollection = new Collection<FirstEntity, FirstEntityProperties>(
-                id => new FirstEntity(id),
-                () => new FirstEntityProperties());
+                "compilation.AllFeatures.Fake.FirstCollection",
+                static id => new FirstEntity(id),
+                static () => new FirstEntityProperties());
             SecondCollection = new Collection<SecondEntity, SecondEntityProperties>(
-                id => new SecondEntity(id),
-                () => new SecondEntityProperties());
+                "compilation.AllFeatures.Fake.SecondCollection",
+                static id => new SecondEntity(id),
+                static () => new SecondEntityProperties());
 
             OneToOneRelation = new Relation<FirstEntity, SecondEntity>(
+                "compilation.AllFeatures.Fake.OneToOneRelation",
                 new OneToOne<FirstEntity, SecondEntity>(),
                 new OneToOne<SecondEntity, FirstEntity>());
             OneToManyRelation = new Relation<FirstEntity, SecondEntity>(
+                "compilation.AllFeatures.Fake.OneToManyRelation",
                 new OneToMany<FirstEntity, SecondEntity>(),
                 new OneToOne<SecondEntity, FirstEntity>());
             ManyToOneRelation = new Relation<FirstEntity, SecondEntity>(
+                "compilation.AllFeatures.Fake.ManyToOneRelation",
                 new OneToOne<FirstEntity, SecondEntity>(),
                 new OneToMany<SecondEntity, FirstEntity>());
             ManyToManyRelation = new Relation<FirstEntity, SecondEntity>(
+                "compilation.AllFeatures.Fake.ManyToManyRelation",
                 new OneToMany<FirstEntity, SecondEntity>(),
                 new OneToMany<SecondEntity, FirstEntity>());
         }
@@ -98,27 +104,25 @@ namespace compilation.AllFeatures
 
     internal sealed partial class FakeModelShard : ICanBeMutable<IMutableFakeModelShard>
     {
-        public IMutableFakeModelShard AsMutable(IWritableModelChanges? modelChanges)
+        public IMutableFakeModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)
         {
-            IMutableCollection<FirstEntity, FirstEntityProperties> firstCollection = new CoWCollection<FirstEntity, FirstEntityProperties>(FirstCollection);
-            IMutableCollection<SecondEntity, SecondEntityProperties> secondCollection = new CoWCollection<SecondEntity, SecondEntityProperties>(SecondCollection);
+            var firstCollection = (IMutableCollection<FirstEntity, FirstEntityProperties>)FirstCollection;
+            var secondCollection = (IMutableCollection<SecondEntity, SecondEntityProperties>)SecondCollection;
 
-            IMutableRelation<FirstEntity, SecondEntity> oneToOneRelation = new CoWRelation<FirstEntity, SecondEntity>(OneToOneRelation);
-            IMutableRelation<FirstEntity, SecondEntity> oneToManyRelation = new CoWRelation<FirstEntity, SecondEntity>(OneToManyRelation);
-            IMutableRelation<FirstEntity, SecondEntity> manyToOneRelation = new CoWRelation<FirstEntity, SecondEntity>(ManyToOneRelation);
-            IMutableRelation<FirstEntity, SecondEntity> manyToManyRelation = new CoWRelation<FirstEntity, SecondEntity>(ManyToManyRelation);
+            var oneToOneRelation = (IMutableRelation<FirstEntity, SecondEntity>)OneToOneRelation;
+            var oneToManyRelation = (IMutableRelation<FirstEntity, SecondEntity>)OneToManyRelation;
+            var manyToOneRelation = (IMutableRelation<FirstEntity, SecondEntity>)ManyToOneRelation;
+            var manyToManyRelation = (IMutableRelation<FirstEntity, SecondEntity>)ManyToManyRelation;
 
-            if (modelChanges is not null)
+            foreach (var feature in features)
             {
-                var frame = modelChanges.Register(new FakeChangesFrame());
+                firstCollection = feature.Decorate(this, firstCollection);
+                secondCollection = feature.Decorate(this, secondCollection);
 
-                firstCollection = new TrackableCollection<FirstEntity, FirstEntityProperties>(frame.FirstCollection, firstCollection);
-                secondCollection = new TrackableCollection<SecondEntity, SecondEntityProperties>(frame.SecondCollection, secondCollection);
-
-                oneToOneRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.OneToOneRelation, oneToOneRelation);
-                oneToManyRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.OneToManyRelation, oneToManyRelation);
-                manyToOneRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.ManyToOneRelation, manyToOneRelation);
-                manyToManyRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.ManyToManyRelation, manyToManyRelation);
+                oneToOneRelation = feature.Decorate(this, oneToOneRelation);
+                oneToManyRelation = feature.Decorate(this, oneToManyRelation);
+                manyToOneRelation = feature.Decorate(this, manyToOneRelation);
+                manyToManyRelation = feature.Decorate(this, manyToManyRelation);
             }
 
             return new MutableFakeModelShard()
@@ -131,6 +135,14 @@ namespace compilation.AllFeatures
                 ManyToOneRelation = manyToOneRelation,
                 ManyToManyRelation = manyToManyRelation,
             };
+        }
+    }
+
+    internal sealed partial class FakeModelShard : IFeatureContext
+    {
+        public IChangesFrame GetOrAddFrame(IWritableModelChanges modelChanges)
+        {
+            return modelChanges.Register(static () => new FakeChangesFrame());
         }
     }
 
@@ -155,13 +167,13 @@ namespace compilation.AllFeatures
     {
         public FakeChangesFrame()
         {
-            FirstCollection = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
-            SecondCollection = new CollectionChangeSet<SecondEntity, SecondEntityProperties>();
+            FirstCollection = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("compilation.AllFeatures.Fake.FirstCollection");
+            SecondCollection = new CollectionChangeSet<SecondEntity, SecondEntityProperties>("compilation.AllFeatures.Fake.SecondCollection");
 
-            OneToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>();
-            OneToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>();
-            ManyToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>();
-            ManyToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>();
+            OneToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.AllFeatures.Fake.OneToOneRelation");
+            OneToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.AllFeatures.Fake.OneToManyRelation");
+            ManyToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.AllFeatures.Fake.ManyToOneRelation");
+            ManyToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.AllFeatures.Fake.ManyToManyRelation");
         }
 
         public ICollectionChangeSet<FirstEntity, FirstEntityProperties> FirstCollection { get; private set; }
@@ -171,6 +183,28 @@ namespace compilation.AllFeatures
         public IRelationChangeSet<FirstEntity, SecondEntity> OneToManyRelation { get; private set; }
         public IRelationChangeSet<FirstEntity, SecondEntity> ManyToOneRelation { get; private set; }
         public IRelationChangeSet<FirstEntity, SecondEntity> ManyToManyRelation { get; private set; }
+
+        public ICollectionChangeSet<TEntity, TProperty> Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
+            where TEntity : Entity
+            where TProperty : Properties
+        {
+            if (FirstCollection.Id == collection.Id) return FirstCollection as ICollectionChangeSet<TEntity, TProperty>;
+            if (SecondCollection.Id == collection.Id) return SecondCollection as ICollectionChangeSet<TEntity, TProperty>;
+
+            throw new System.InvalidOperationException("Unable to find collection's changes set");
+        }
+
+        public IRelationChangeSet<TParent, TChild> Get<TParent, TChild>(IRelation<TParent, TChild> relation)
+            where TParent : Entity
+            where TChild : Entity
+        {
+            if (OneToOneRelation.Id == relation.Id) return OneToOneRelation as IRelationChangeSet<TParent, TChild>;
+            if (OneToManyRelation.Id == relation.Id) return OneToManyRelation as IRelationChangeSet<TParent, TChild>;
+            if (ManyToOneRelation.Id == relation.Id) return ManyToOneRelation as IRelationChangeSet<TParent, TChild>;
+            if (ManyToManyRelation.Id == relation.Id) return ManyToManyRelation as IRelationChangeSet<TParent, TChild>;
+
+            throw new System.InvalidOperationException($"Unable to find relation's change set");
+        }
 
         public IWritableChangesFrame Invert()
         {

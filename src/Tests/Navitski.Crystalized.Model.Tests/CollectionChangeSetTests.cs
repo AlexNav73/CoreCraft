@@ -9,7 +9,7 @@ public class CollectionChangeSetTests
     [Test]
     public void AddMultipleTimesShouldThrowExceptionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
 
@@ -33,7 +33,7 @@ public class CollectionChangeSetTests
     [Test]
     public void ModifyAddCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -58,7 +58,7 @@ public class CollectionChangeSetTests
     [Test]
     public void RemoveModifyCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -83,7 +83,7 @@ public class CollectionChangeSetTests
     [Test]
     public void RemoveMultipleTimesShouldThrowExceptionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -108,7 +108,7 @@ public class CollectionChangeSetTests
     [Test]
     public void AddModifyCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -127,7 +127,7 @@ public class CollectionChangeSetTests
     [Test]
     public void ModifyRemoveCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -141,7 +141,7 @@ public class CollectionChangeSetTests
     [Test]
     public void RemoveAddCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -160,7 +160,7 @@ public class CollectionChangeSetTests
     [Test]
     public void ModifyModifyCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -179,7 +179,7 @@ public class CollectionChangeSetTests
     [Test]
     public void AddModifyRemoveCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -194,7 +194,7 @@ public class CollectionChangeSetTests
     [Test]
     public void AddModifyModifyRemoveCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -210,7 +210,7 @@ public class CollectionChangeSetTests
     [Test]
     public void AddRemoveCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -224,8 +224,8 @@ public class CollectionChangeSetTests
     [Test]
     public void MergeCollectionChangeSetTest()
     {
-        var changes1 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
-        var changes2 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes1 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
+        var changes2 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -242,7 +242,7 @@ public class CollectionChangeSetTests
     [Test]
     public void GetEnumeratorCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
 
         var enumerator = changes.GetEnumerator();
 
@@ -252,7 +252,7 @@ public class CollectionChangeSetTests
     [Test]
     public void GetNonGenericEnumeratorCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
 
         var enumerator = ((IEnumerable)changes).GetEnumerator();
 

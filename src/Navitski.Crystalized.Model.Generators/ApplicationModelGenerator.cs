@@ -56,7 +56,7 @@ internal partial class ApplicationModelGenerator : GeneratorBase
             code.WriteLine($"using {@namespace}.Entities;");
             code.EmptyLine();
 
-            GenerateModelShards(code, modelScheme.Shards);
+            GenerateModelShards(code, modelScheme.Shards, @namespace);
             GenerateStorages(code, modelScheme.Shards);
         });
         code.EmptyLine();

@@ -1,6 +1,4 @@
-﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-
-namespace Navitski.Crystalized.Model.Engine.Core;
+﻿namespace Navitski.Crystalized.Model.Engine.Core;
 
 /// <summary>
 ///     A model shard which can be mutated
@@ -20,7 +18,7 @@ public interface ICanBeMutable<out TShard> : IModelShard
     /// <summary>
     ///     Returns a model shard which can be mutated
     /// </summary>
-    /// <param name="modelChanges">A model changes</param>
+    /// <param name="features">A collection of features to apply on the model shard</param>
     /// <returns>A mutable model shard</returns>
-    TShard AsMutable(IWritableModelChanges? modelChanges);
+    TShard AsMutable(IEnumerable<IFeature> features);
 }

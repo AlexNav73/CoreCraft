@@ -18,12 +18,18 @@ public sealed class Relation<TParent, TChild> :
     ///     Ctor
     /// </summary>
     public Relation(
+        string id,
         IMapping<TParent, TChild> parentToChildRelation,
         IMapping<TChild, TParent> childToParentRelation)
     {
         _parentToChildRelations = parentToChildRelation;
         _childToParentRelations = childToParentRelation;
+
+        Id = id;
     }
+
+    /// <inheritdoc cref="IHaveId.Id" />
+    public string Id { get; }
 
     /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
     public IRelation<TParent, TChild> AsReadOnly()
@@ -73,6 +79,7 @@ public sealed class Relation<TParent, TChild> :
     public IRelation<TParent, TChild> Copy()
     {
         return new Relation<TParent, TChild>(
+            Id,
             _parentToChildRelations.Copy(),
             _childToParentRelations.Copy());
     }
