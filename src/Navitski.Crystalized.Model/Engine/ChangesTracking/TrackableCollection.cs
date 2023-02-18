@@ -25,6 +25,9 @@ public sealed class TrackableCollection<TEntity, TProperties> :
         _collection = modelCollection;
     }
 
+    /// <inheritdoc cref="IHaveId.Id" />
+    public string Id => _collection.Id;
+
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _collection.Count;
 

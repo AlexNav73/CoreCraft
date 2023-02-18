@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
 
 namespace Navitski.Crystalized.Model.Perf;
@@ -20,7 +19,7 @@ public class RelationBenchmark
     [IterationSetup(Targets = new[] { nameof(Add) })]
     public void IterationSetupEmpty()
     {
-        _relation = new Relation<FirstEntity, SecondEntity>(new OneToMany<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
+        _relation = new Relation<FirstEntity, SecondEntity>("", new OneToMany<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
     }
 
     [IterationSetup(Targets = new[]
@@ -33,7 +32,7 @@ public class RelationBenchmark
     })]
     public void IterationSetupFilled()
     {
-        _relation = new Relation<FirstEntity, SecondEntity>(new OneToMany<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
+        _relation = new Relation<FirstEntity, SecondEntity>("", new OneToMany<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
         _i = 0;
         _parents = new List<FirstEntity>();
         _children = new List<SecondEntity>();

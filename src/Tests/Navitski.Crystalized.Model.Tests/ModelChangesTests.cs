@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
+using Navitski.Crystalized.Model.Engine.Feature;
 
 namespace Navitski.Crystalized.Model.Tests;
 
@@ -10,7 +11,7 @@ public class ModelChangesTests
     public void ChangesFrameRegisteredByConcreteTypeAndRetievedByInterfaceTypeTest()
     {
         var modelChanges = new ModelChanges();
-        var changesFrame = modelChanges.Register(new FakeChangesFrame());
+        var changesFrame = modelChanges.Register(() => new FakeChangesFrame());
 
         var success = modelChanges.TryGetFrame<IFakeChangesFrame>(out var frame);
 
@@ -23,8 +24,8 @@ public class ModelChangesTests
     public void RegisterChangesFrameMultipleTimesTest()
     {
         var modelChanges = new ModelChanges();
-        var changesFrame1 = modelChanges.Register(new FakeChangesFrame());
-        var changesFrame2 = modelChanges.Register(new FakeChangesFrame());
+        var changesFrame1 = modelChanges.Register(() => new FakeChangesFrame());
+        var changesFrame2 = modelChanges.Register(() => new FakeChangesFrame());
 
         Assert.That(ReferenceEquals(changesFrame1, changesFrame2), Is.True);
     }
@@ -32,8 +33,7 @@ public class ModelChangesTests
     [Test]
     public void InvertChangesFrameTest()
     {
-        var modelChanges = new ModelChanges();
-        var changesFrame = modelChanges.Register(new FakeChangesFrame());
+        var changesFrame = new FakeChangesFrame();
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
         var value = "test";
@@ -52,13 +52,12 @@ public class ModelChangesTests
     [Test]
     public void ApplyChangesTest()
     {
-        var modelChanges = new ModelChanges();
-        var changesFrame = modelChanges.Register(new FakeChangesFrame());
+        var changesFrame = new FakeChangesFrame();
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
         var value = "test";
         var model = new Engine.Core.Model(new[] { new FakeModelShard() });
-        var snapshot = new Snapshot(model, null);
+        var snapshot = new Snapshot(model, new[] { new CoWFeature() });
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = value });
         changesFrame.Apply(snapshot);
@@ -74,14 +73,14 @@ public class ModelChangesTests
     public void MigrateTest()
     {
         var modelChanges = new ModelChanges();
-        var changesFrame = modelChanges.Register(new FakeChangesFrame());
+        var changesFrame = modelChanges.Register(() => new FakeChangesFrame());
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = "test" });
 
         var modelChanges2 = new ModelChanges();
-        var changesFrame2 = modelChanges2.Register(new FakeChangesFrame());
+        var changesFrame2 = modelChanges2.Register(() => new FakeChangesFrame());
         var props2 = new FirstEntityProperties();
 
         changesFrame2.FirstCollection.Add(CollectionAction.Remove, entity, props2, props2 with { NonNullableStringProperty = "test" });
@@ -95,7 +94,7 @@ public class ModelChangesTests
     public void HasChangesTest()
     {
         var modelChanges = new ModelChanges();
-        var changesFrame = modelChanges.Register(new FakeChangesFrame());
+        var changesFrame = modelChanges.Register(() => new FakeChangesFrame());
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
         var value = "test";

@@ -15,7 +15,7 @@ public class TrackableRelationTests
     {
         _relation = A.Fake<IMutableRelation<FirstEntity, SecondEntity>>();
 
-        _changes = new RelationChangeSet<FirstEntity, SecondEntity>();
+        _changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         _trackable = new TrackableRelation<FirstEntity, SecondEntity>(_changes, _relation);
     }
 

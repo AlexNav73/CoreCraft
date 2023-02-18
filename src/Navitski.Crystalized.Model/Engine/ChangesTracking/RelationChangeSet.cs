@@ -15,15 +15,20 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     /// <summary>
     ///     Ctor
     /// </summary>
-    public RelationChangeSet()
-        : this(new List<IRelationChange<TParent, TChild>>())
+    public RelationChangeSet(string id)
+        : this(id, new List<IRelationChange<TParent, TChild>>())
     {
     }
 
-    private RelationChangeSet(IList<IRelationChange<TParent, TChild>> changes)
+    private RelationChangeSet(string id, IList<IRelationChange<TParent, TChild>> changes)
     {
         _changes = changes;
+
+        Id = id;
     }
+
+    /// <inheritdoc />
+    public string Id { get; }
 
     /// <inheritdoc />
     public void Add(RelationAction action, TParent parent, TChild child)
@@ -67,7 +72,7 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     public IRelationChangeSet<TParent, TChild> Invert()
     {
         var inverted = _changes.Reverse().Select(x => x.Invert()).ToList();
-        return new RelationChangeSet<TParent, TChild>(inverted);
+        return new RelationChangeSet<TParent, TChild>(Id, inverted);
     }
 
     /// <inheritdoc />
@@ -95,7 +100,7 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     /// <inheritdoc cref="IRelationChangeSet{TParent, TChild}.Merge(IRelationChangeSet{TParent, TChild})" />
     public IRelationChangeSet<TParent, TChild> Merge(IRelationChangeSet<TParent, TChild> changeSet)
     {
-        var result = new RelationChangeSet<TParent, TChild>(_changes.ToList());
+        var result = new RelationChangeSet<TParent, TChild>(Id, _changes.ToList());
 
         foreach (var change in changeSet)
         {

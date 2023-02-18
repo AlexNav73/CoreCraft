@@ -1,23 +1,22 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
-using Navitski.Crystalized.Model.Engine.Lazy;
 
 namespace Navitski.Crystalized.Model.Tests;
 
 public class ModelShardTests
 {
     [Test]
-    public void AsMutableTest()
+    public void AsMutableApplyAllFeaturesTest()
     {
         var modelShard = new FakeModelShard();
-        var modelChanges = A.Fake<IWritableModelChanges>();
+        var feature1 = A.Fake<IFeature>();
+        var feature2 = A.Fake<IFeature>();
 
-        A.CallTo(() => modelChanges.Register(A<FakeChangesFrame>.Ignored))
-            .Returns(new FakeChangesFrame());
+        var mutable = modelShard.AsMutable(new[] { feature1, feature2 });
 
-        var mutable = modelShard.AsMutable(modelChanges);
-
-        A.CallTo(() => modelChanges.Register(A<FakeChangesFrame>.Ignored))
+        A.CallTo(() => feature1.Decorate(A<IFeatureContext>.Ignored, A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => feature2.Decorate(A<IFeatureContext>.Ignored, A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
 
         Assert.That(mutable, Is.Not.Null);
@@ -25,67 +24,27 @@ public class ModelShardTests
     }
 
     [Test]
-    public void AsMutableCheckRegisteredChangesFrameTest()
+    public void GetOrAddFrameWithMissingFrameTest()
     {
         var modelShard = new FakeModelShard();
-        var modelChanges = A.Fake<IWritableModelChanges>();
-        IChangesFrame? registeredFrame = null;
+        var modelChanges = new ModelChanges();
 
-        A.CallTo(() => modelChanges.Register(A<FakeChangesFrame>.Ignored))
-            .Invokes(c => registeredFrame = c.Arguments.Single() as IChangesFrame)
-            .Returns(new FakeChangesFrame());
+        var registered = modelShard.GetOrAddFrame(modelChanges);
 
-        var mutable = modelShard.AsMutable(modelChanges);
-
-        Assert.That(registeredFrame, Is.Not.Null);
-        Assert.That(registeredFrame, Is.TypeOf<FakeChangesFrame>());
+        Assert.That(registered, Is.Not.Null);
+        Assert.That(registered, Is.TypeOf<FakeChangesFrame>());
     }
 
     [Test]
-    public void AsMutableWithCopyFeatureCreatesCoWCollectionsAndRelationsTest()
+    public void GetOrAddFrameWithFrameTest()
     {
         var modelShard = new FakeModelShard();
+        var modelChanges = new ModelChanges();
+        var frame = modelChanges.Register(() => new FakeChangesFrame());
 
-        var mutable = modelShard.AsMutable(null);
+        var registered = modelShard.GetOrAddFrame(modelChanges);
 
-        Assert.That(mutable.FirstCollection, Is.TypeOf<CoWCollection<FirstEntity, FirstEntityProperties>>());
-        Assert.That(mutable.OneToOneRelation, Is.TypeOf<CoWRelation<FirstEntity, SecondEntity>>());
-    }
-
-    [Test]
-    public void AsMutableWithTrackFeatureCreatesTrackableCollectionsAndRelationsTest()
-    {
-        var modelShard = new FakeModelShard();
-        var modelChanges = A.Fake<IWritableModelChanges>();
-
-        var mutable = modelShard.AsMutable(modelChanges);
-
-        Assert.That(mutable.FirstCollection, Is.TypeOf<TrackableCollection<FirstEntity, FirstEntityProperties>>());
-        Assert.That(mutable.OneToOneRelation, Is.TypeOf<TrackableRelation<FirstEntity, SecondEntity>>());
-    }
-
-    [Test]
-    public void AsReadOnlyWithCopyFeatureCreatesRegularCollectionsAndRelationsTest()
-    {
-        var modelShard = new FakeModelShard();
-
-        var mutable = modelShard.AsMutable(null);
-        var readOnly = ((ICanBeReadOnly<IFakeModelShard>)mutable).AsReadOnly();
-
-        Assert.That(readOnly.FirstCollection, Is.TypeOf<Collection<FirstEntity, FirstEntityProperties>>());
-        Assert.That(readOnly.OneToOneRelation, Is.TypeOf<Relation<FirstEntity, SecondEntity>>());
-    }
-
-    [Test]
-    public void AsReadOnlyWithTrackFeatureCreatesRegularCollectionsAndRelationsTest()
-    {
-        var modelShard = new FakeModelShard();
-        var modelChanges = A.Fake<IWritableModelChanges>();
-
-        var mutable = modelShard.AsMutable(modelChanges);
-        var readOnly = ((ICanBeReadOnly<IFakeModelShard>)mutable).AsReadOnly();
-
-        Assert.That(readOnly.FirstCollection, Is.TypeOf<Collection<FirstEntity, FirstEntityProperties>>());
-        Assert.That(readOnly.OneToOneRelation, Is.TypeOf<Relation<FirstEntity, SecondEntity>>());
+        Assert.That(registered, Is.Not.Null);
+        Assert.That(ReferenceEquals(frame, registered), Is.True);
     }
 }

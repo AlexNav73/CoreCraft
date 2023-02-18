@@ -1,5 +1,4 @@
-﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Core;
+﻿using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Exceptions;
 
 namespace Navitski.Crystalized.Model.Tests;
@@ -11,7 +10,7 @@ public class CollectionTests
     [SetUp]
     public void Setup()
     {
-        _collection = new Collection<FirstEntity, FirstEntityProperties>(id => new FirstEntity(id), () => new FirstEntityProperties());
+        _collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new FirstEntity(id), () => new FirstEntityProperties());
     }
 
     [Test]

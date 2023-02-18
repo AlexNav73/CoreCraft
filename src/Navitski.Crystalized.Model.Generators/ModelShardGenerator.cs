@@ -2,7 +2,7 @@
 
 internal partial class ApplicationModelGenerator
 {
-    public void GenerateModelShards(IndentedTextWriter code, IEnumerable<ModelShard> shards)
+    public void GenerateModelShards(IndentedTextWriter code, IEnumerable<ModelShard> shards, string idBase)
     {
         foreach (var modelShard in shards)
         {
@@ -10,13 +10,15 @@ internal partial class ApplicationModelGenerator
             code.EmptyLine();
             DefineModelShardInterface(code, modelShard, true);
             code.EmptyLine();
-            DefineModelShardClass(code, modelShard);
+            DefineModelShardClass(code, modelShard, idBase);
             code.EmptyLine();
             DefineModelShardClassAsCanBeMutable(code, modelShard);
             code.EmptyLine();
+            DefineModelShardClassAsIFeatureContext(code, modelShard);
+            code.EmptyLine();
             DefineChangesFrameInterface(code, modelShard);
             code.EmptyLine();
-            DefineChangesFrameClass(code, modelShard);
+            DefineChangesFrameClass(code, modelShard, idBase);
             code.EmptyLine();
             DefineMutableModelShardClass(code, modelShard);
             code.EmptyLine();
@@ -44,19 +46,19 @@ internal partial class ApplicationModelGenerator
         });
     }
 
-    private void DefineModelShardClass(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineModelShardClass(IndentedTextWriter code, ModelShard modelShard, string idBase)
     {
         code.GeneratedClassAttributes();
         code.Class("sealed partial", $"{modelShard.Name}ModelShard", new[] { $"I{modelShard.Name}ModelShard" }, () =>
         {
-            DefineCtor(code, modelShard);
+            DefineCtor(code, modelShard, idBase);
             code.EmptyLine();
             DefineConversionCtor(code, modelShard);
             code.EmptyLine();
             ImplementModelShardInterface(code, modelShard);
         });
 
-        void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
+        void DefineCtor(IndentedTextWriter code, ModelShard modelShard, string idBase)
         {
             code.SetsRequiredMembersAttribute();
             code.WriteLine($"public {modelShard.Name}ModelShard()");
@@ -67,8 +69,9 @@ internal partial class ApplicationModelGenerator
                     code.WriteLine($"{collection.Name} = new {Type(collection)}(");
                     code.WithIndent(c =>
                     {
-                        c.WriteLine($"id => new {collection.EntityType}(id),");
-                        c.WriteLine($"() => new {collection.EntityType}Properties());");
+                        c.WriteLine($"\"{idBase}.{modelShard.Name}.{collection.Name}\",");
+                        c.WriteLine($"static id => new {collection.EntityType}(id),");
+                        c.WriteLine($"static () => new {collection.EntityType}Properties());");
                     });
                 }
                 code.EmptyLine();
@@ -78,6 +81,7 @@ internal partial class ApplicationModelGenerator
                     code.WriteLine($"{relation.Name} = new {Type(relation)}(");
                     code.WithIndent(c =>
                     {
+                        c.WriteLine($"\"{idBase}.{modelShard.Name}.{relation.Name}\",");
                         code.WriteLine($"new {relation.ParentRelationType}<{relation.ParentType}, {relation.ChildType}>(),");
                         code.WriteLine($"new {relation.ChildRelationType}<{relation.ChildType}, {relation.ParentType}>());");
                     });
@@ -127,36 +131,33 @@ internal partial class ApplicationModelGenerator
         },
         () =>
         {
-            code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsMutable(IWritableModelChanges? modelChanges)");
+            code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)");
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"IMutable{Type(collection)} {ToCamelCase(collection.Name)} = new CoW{Type(collection)}({collection.Name});");
+                    code.WriteLine($"var {ToCamelCase(collection.Name)} = (IMutable{Type(collection)}){collection.Name};");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"IMutable{Type(relation)} {ToCamelCase(relation.Name)} = new CoW{Type(relation)}({relation.Name});");
+                    code.WriteLine($"var {ToCamelCase(relation.Name)} = (IMutable{Type(relation)}){relation.Name};");
                 }
                 code.EmptyLine();
 
-                code.WriteLine("if (modelChanges is not null)");
+                code.WriteLine("foreach (var feature in features)");
                 code.Block(() =>
                 {
-                    code.WriteLine($"var frame = modelChanges.Register(new {modelShard.Name}ChangesFrame());");
-                    code.EmptyLine();
-
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{ToCamelCase(collection.Name)} = new Trackable{Type(collection)}(frame.{collection.Name}, {ToCamelCase(collection.Name)});");
+                        code.WriteLine($"{ToCamelCase(collection.Name)} = feature.Decorate(this, {ToCamelCase(collection.Name)});");
                     }
                     code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{ToCamelCase(relation.Name)} = new Trackable{Type(relation)}(frame.{relation.Name}, {ToCamelCase(relation.Name)});");
+                        code.WriteLine($"{ToCamelCase(relation.Name)} = feature.Decorate(this, {ToCamelCase(relation.Name)});");
                     }
                 });
                 code.EmptyLine();
@@ -175,6 +176,22 @@ internal partial class ApplicationModelGenerator
                         code.WriteLine($"{relation.Name} = {ToCamelCase(relation.Name)},");
                     }
                 }, true);
+            });
+        });
+    }
+
+    private void DefineModelShardClassAsIFeatureContext(IndentedTextWriter code, ModelShard modelShard)
+    {
+        code.Class("sealed partial", $"{modelShard.Name}ModelShard", new[]
+        {
+            $"IFeatureContext"
+        },
+        () =>
+        {
+            code.WriteLine("public IChangesFrame GetOrAddFrame(IWritableModelChanges modelChanges)");
+            code.Block(() =>
+            {
+                code.WriteLine($"return modelChanges.Register(static () => new {modelShard.Name}ChangesFrame());");
             });
         });
     }
@@ -198,7 +215,7 @@ internal partial class ApplicationModelGenerator
         });
     }
 
-    private void DefineChangesFrameClass(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineChangesFrameClass(IndentedTextWriter code, ModelShard modelShard, string idBase)
     {
         code.GeneratedClassAttributes();
         code.Class("sealed", $"{modelShard.Name}ChangesFrame",
@@ -209,9 +226,11 @@ internal partial class ApplicationModelGenerator
             },
             () =>
             {
-                DefineCtor(code, modelShard);
+                DefineCtor(code, modelShard, idBase);
                 code.EmptyLine();
                 ImplementModelShardChangesFrameInterface(code, modelShard);
+                code.EmptyLine();
+                DefineGetMethod(code, modelShard);
                 code.EmptyLine();
                 DefineInvertMethod(code, modelShard);
                 code.EmptyLine();
@@ -222,20 +241,20 @@ internal partial class ApplicationModelGenerator
                 DefineMergeMethod(code, modelShard);
             });
 
-        void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
+        void DefineCtor(IndentedTextWriter code, ModelShard modelShard, string idBase)
         {
             code.WriteLine($"public {modelShard.Name}ChangesFrame()");
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = new {ChangesType(collection)}();");
+                    code.WriteLine($"{collection.Name} = new {ChangesType(collection)}(\"{idBase}.{modelShard.Name}.{collection.Name}\");");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = new {ChangesType(relation)}();");
+                    code.WriteLine($"{relation.Name} = new {ChangesType(relation)}(\"{idBase}.{modelShard.Name}.{relation.Name}\");");
                 }
             });
         }
@@ -252,6 +271,44 @@ internal partial class ApplicationModelGenerator
             {
                 code.WriteLine($"public {Property($"I{ChangesType(relation)}", relation.Name)}");
             }
+        }
+
+        void DefineGetMethod(IndentedTextWriter code, ModelShard modelShard)
+        {
+            code.WriteLine("public ICollectionChangeSet<TEntity, TProperty> Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)");
+            code.WithIndent(c =>
+            {
+                code.WriteLine("where TEntity : Entity");
+                code.WriteLine("where TProperty : Properties");
+            });
+            code.Block(() =>
+            {
+                foreach (var collection in modelShard.Collections)
+                {
+                    code.WriteLine($"if ({collection.Name}.Id == collection.Id) return {collection.Name} as ICollectionChangeSet<TEntity, TProperty>;");
+                }
+                code.EmptyLine();
+
+                code.WriteLine("throw new System.InvalidOperationException(\"Unable to find collection's changes set\");");
+            });
+            code.EmptyLine();
+
+            code.WriteLine("public IRelationChangeSet<TParent, TChild> Get<TParent, TChild>(IRelation<TParent, TChild> relation)");
+            code.WithIndent(c =>
+            {
+                code.WriteLine("where TParent : Entity");
+                code.WriteLine("where TChild : Entity");
+            });
+            code.Block(() =>
+            {
+                foreach (var relation in modelShard.Relations)
+                {
+                    code.WriteLine($"if ({relation.Name}.Id == relation.Id) return {relation.Name} as IRelationChangeSet<TParent, TChild>;");
+                }
+                code.EmptyLine();
+
+                code.WriteLine("throw new System.InvalidOperationException($\"Unable to find relation's change set\");");
+            });
         }
 
         void DefineInvertMethod(IndentedTextWriter code, ModelShard modelShard)

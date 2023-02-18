@@ -25,6 +25,9 @@ public sealed class TrackableRelation<TParent, TChild> :
         _relation = modelRelation;
     }
 
+    /// <inheritdoc cref="IHaveId.Id" />
+    public string Id => _relation.Id;
+
     /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
     public IRelation<TParent, TChild> AsReadOnly()
     {

@@ -21,7 +21,7 @@ public class ModelShardStorageTests
         var storage = new FakeModelShardStorage();
         var modelChanges = new ModelChanges();
         var changesFrame = A.Fake<IWritableChangesFrame>(c => c.Implements<IFakeChangesFrame>());
-        modelChanges.Register(changesFrame);
+        modelChanges.Register(() => changesFrame);
 
         storage.Update(_repository!, modelChanges);
 
@@ -206,7 +206,7 @@ public class ModelShardStorageTests
             {
                 new CollectionChange<FirstEntity, FirstEntityProperties>(action, new(), oldProps, newProps)
             }.GetEnumerator());
-        modelChanges.Register(changesFrame);
+        modelChanges.Register(() => changesFrame);
     }
 
     private void SetupModelChanges(ModelChanges modelChanges, RelationAction action)
@@ -218,6 +218,6 @@ public class ModelShardStorageTests
             {
                 new RelationChange<FirstEntity, SecondEntity>(action, new(), new())
             }.GetEnumerator());
-        modelChanges.Register(changesFrame);
+        modelChanges.Register(() => changesFrame);
     }
 }

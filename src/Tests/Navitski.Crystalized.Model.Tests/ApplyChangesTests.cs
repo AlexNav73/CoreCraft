@@ -18,7 +18,7 @@ public class ApplyChangesTests
     [Test]
     public void ApplyAddChangeToCollectionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
 
@@ -32,7 +32,7 @@ public class ApplyChangesTests
     [Test]
     public void ApplyRemoveChangeToCollectionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
 
@@ -46,7 +46,7 @@ public class ApplyChangesTests
     [Test]
     public void ApplyModifyChangeToCollectionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -62,7 +62,7 @@ public class ApplyChangesTests
     [Test]
     public void ApplyLinkChangeToRelationTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>();
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var parent = new FirstEntity();
         var child = new SecondEntity();
 
@@ -76,7 +76,7 @@ public class ApplyChangesTests
     [Test]
     public void ApplyUnlinkChangeToRelationTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>();
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var parent = new FirstEntity();
         var child = new SecondEntity();
 

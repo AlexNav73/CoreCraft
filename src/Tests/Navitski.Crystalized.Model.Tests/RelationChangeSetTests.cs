@@ -8,7 +8,7 @@ public class RelationChangeSetTests
     [Test]
     public void LinkMultipleTimesShouldThrowExceptionTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>();
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var parent = new FirstEntity();
         var child = new SecondEntity();
 
@@ -32,7 +32,7 @@ public class RelationChangeSetTests
     [Test]
     public void UnlinkMultipleTimesShouldThrowExceptionTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>();
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var parent = new FirstEntity();
         var child = new SecondEntity();
 
@@ -56,7 +56,7 @@ public class RelationChangeSetTests
     [Test]
     public void LinkUnlinkRelationChangeSetTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>();
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var parent = new FirstEntity();
         var child = new SecondEntity();
 
@@ -69,7 +69,7 @@ public class RelationChangeSetTests
     [Test]
     public void UnlinkLinkRelationChangeSetTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>();
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var parent = new FirstEntity();
         var child = new SecondEntity();
 
@@ -87,8 +87,8 @@ public class RelationChangeSetTests
     [Test]
     public void MergeRelationChangeSetTest()
     {
-        var changes1 = new RelationChangeSet<FirstEntity, SecondEntity>();
-        var changes2 = new RelationChangeSet<FirstEntity, SecondEntity>();
+        var changes1 = new RelationChangeSet<FirstEntity, SecondEntity>("");
+        var changes2 = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var parent = new FirstEntity();
         var child = new SecondEntity();
 

@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
 
 namespace Navitski.Crystalized.Model.Perf;
@@ -19,13 +18,13 @@ public class CollectionBenchmark
     [IterationSetup(Targets = new[] { nameof(Add) })]
     public void IterationSetupEmpty()
     {
-        _collection = new Collection<FirstEntity, FirstEntityProperties>(id => new FirstEntity(id), () => new());
+        _collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new FirstEntity(id), () => new());
     }
 
     [IterationSetup(Targets = new[] { nameof(Remove), nameof(Modify), nameof(Get), nameof(Contains) })]
     public void IterationSetupFilled()
     {
-        _collection = new Collection<FirstEntity, FirstEntityProperties>(id => new FirstEntity(id), () => new());
+        _collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new FirstEntity(id), () => new());
         _i = 0;
         _entities = new List<FirstEntity>();
 

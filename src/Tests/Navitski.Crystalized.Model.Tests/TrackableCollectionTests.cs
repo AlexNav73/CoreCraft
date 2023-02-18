@@ -15,7 +15,7 @@ public class TrackableCollectionTests
     {
         _collection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
 
-        _changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>();
+        _changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         _trackable = new TrackableCollection<FirstEntity, FirstEntityProperties>(_changes, _collection);
     }
 

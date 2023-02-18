@@ -13,7 +13,7 @@
 /// </remarks>
 /// <typeparam name="TParent">A type of parent entity</typeparam>
 /// <typeparam name="TChild">A type of child entity</typeparam>
-public interface IRelation<TParent, TChild> : IEnumerable<TParent>, ICopy<IRelation<TParent, TChild>>
+public interface IRelation<TParent, TChild> : IEnumerable<TParent>, IHaveId, ICopy<IRelation<TParent, TChild>>
     where TParent : Entity
     where TChild : Entity
 {
