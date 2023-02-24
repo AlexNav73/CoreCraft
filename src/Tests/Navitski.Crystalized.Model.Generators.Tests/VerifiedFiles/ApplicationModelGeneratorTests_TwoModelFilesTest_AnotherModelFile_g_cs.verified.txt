@@ -163,7 +163,7 @@ namespace compilation.AnotherModelFile
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    internal sealed class FakeChangesFrame : IFakeChangesFrame, IWritableChangesFrame
+    file sealed class FakeChangesFrame : IFakeChangesFrame, IWritableChangesFrame
     {
         public FakeChangesFrame()
         {
@@ -258,7 +258,7 @@ namespace compilation.AnotherModelFile
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    internal sealed class MutableFakeModelShard : IMutableFakeModelShard, ICanBeReadOnly<IFakeModelShard>
+    file sealed class MutableFakeModelShard : IMutableFakeModelShard, ICanBeReadOnly<IFakeModelShard>
     {
         public required IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; }
         public required IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; }
