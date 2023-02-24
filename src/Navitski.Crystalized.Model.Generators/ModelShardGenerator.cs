@@ -218,7 +218,7 @@ internal partial class ApplicationModelGenerator
     private void DefineChangesFrameClass(IndentedTextWriter code, ModelShard modelShard, string idBase)
     {
         code.GeneratedClassAttributes();
-        code.Class("sealed", $"{modelShard.Name}ChangesFrame",
+        code.Class("file", "sealed", $"{modelShard.Name}ChangesFrame",
             new[]
             {
                 $"I{modelShard.Name}ChangesFrame",
@@ -392,7 +392,7 @@ internal partial class ApplicationModelGenerator
     private void DefineMutableModelShardClass(IndentedTextWriter code, ModelShard modelShard)
     {
         code.GeneratedClassAttributes();
-        code.Class("sealed", $"Mutable{modelShard.Name}ModelShard",
+        code.Class("file", "sealed", $"Mutable{modelShard.Name}ModelShard",
             new[]
             {
                 $"IMutable{modelShard.Name}ModelShard",

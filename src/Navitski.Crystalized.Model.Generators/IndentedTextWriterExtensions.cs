@@ -48,7 +48,12 @@ internal static class IndentedTextWriterExtensions
 
     public static void Class(this IndentedTextWriter code, string attributes, string name, string[] bases, Action body)
     {
-        code.WriteLine($"internal {attributes} class {name} : {string.Join(", ", bases)}");
+        code.Class("internal", attributes, name, bases, body);
+    }
+
+    public static void Class(this IndentedTextWriter code, string visibility, string attributes, string name, string[] bases, Action body)
+    {
+        code.WriteLine($"{visibility} {attributes} class {name} : {string.Join(", ", bases)}");
         code.Block(() =>
         {
             body();
