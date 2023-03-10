@@ -14,7 +14,7 @@ internal partial class ApplicationModelGenerator
     private void DefineStorage(IndentedTextWriter code, ModelShard modelShard)
     {
         code.GeneratedClassAttributes();
-        code.Class("sealed", $"{modelShard.Name}ModelShardStorage", new[] { $"ModelShardStorage" }, () =>
+        code.Class(modelShard.Visibility, "sealed", $"{modelShard.Name}ModelShardStorage", new[] { $"ModelShardStorage" }, () =>
         {
             foreach (var collection in modelShard.Collections)
             {

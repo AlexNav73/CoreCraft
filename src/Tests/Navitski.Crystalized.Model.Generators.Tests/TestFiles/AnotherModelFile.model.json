@@ -2,6 +2,7 @@
   "shards": [
     {
       "name": "Fake",
+      "visibility": "All",
       "entities": [
         {
           "name": "FirstEntity",

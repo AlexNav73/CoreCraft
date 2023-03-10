@@ -57,6 +57,19 @@ public class ChangesInversionTests
     }
 
     [Test]
+    public void CollectionInvertInvalidActionTest()
+    {
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
+        var entity = new FirstEntity();
+        var oldProps = new FirstEntityProperties();
+        var newProps = new FirstEntityProperties();
+
+        changes.Add((CollectionAction)42, entity, oldProps, newProps);
+
+        Assert.Throws<NotSupportedException>(() => changes.Invert());
+    }
+
+    [Test]
     public void RelationInvertLinkChangeTest()
     {
         var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
@@ -86,5 +99,17 @@ public class ChangesInversionTests
         Assert.That(inverted.Single().Action, Is.EqualTo(RelationAction.Linked));
         Assert.That(inverted.Single().Parent, Is.EqualTo(first));
         Assert.That(inverted.Single().Child, Is.EqualTo(second));
+    }
+
+    [Test]
+    public void RelationInvertInvalidActionTest()
+    {
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
+        var first = new FirstEntity();
+        var second = new SecondEntity();
+
+        changes.Add((RelationAction)42, first, second);
+
+        Assert.Throws<NotSupportedException>(() => changes.Invert());
     }
 }

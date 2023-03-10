@@ -29,5 +29,16 @@ namespace Navitski.Crystalized.Model.Generators.Tests
                 "AnotherModelFile.model.json"
             });
         }
+
+        [Test]
+        public Task ModelWithVisibilityImplementationsTest()
+        {
+            return Run(verification: result =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result.Diagnostics.Count(), Is.EqualTo(0));
+            },
+            files: "VisibilityImplementations.model.json");
+        }
     }
 }
