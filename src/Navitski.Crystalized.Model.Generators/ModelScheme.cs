@@ -32,8 +32,9 @@ internal sealed record Relation
 
 internal enum Visibility
 {
-    Internal,
-    Public
+    Interfaces,
+    Implementations,
+    All,
 }
 
 internal enum RelationType

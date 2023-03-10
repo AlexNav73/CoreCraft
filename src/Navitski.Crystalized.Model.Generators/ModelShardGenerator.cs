@@ -30,7 +30,7 @@ internal partial class ApplicationModelGenerator
         var mutability = isMutable ? "Mutable" : string.Empty;
 
         code.GeneratedInterfaceAttributes();
-        code.Interface(modelShard.Visibility, $"I{mutability}{modelShard.Name}ModelShard", new[] { "IModelShard" }, () =>
+        code.Interface($"I{mutability}{modelShard.Name}ModelShard", new[] { "IModelShard" }, () =>
         {
             foreach (var collection in modelShard.Collections)
             {
@@ -49,7 +49,7 @@ internal partial class ApplicationModelGenerator
     private void DefineModelShardClass(IndentedTextWriter code, ModelShard modelShard, string idBase)
     {
         code.GeneratedClassAttributes();
-        code.Class("sealed partial", $"{modelShard.Name}ModelShard", new[] { $"I{modelShard.Name}ModelShard" }, () =>
+        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", new[] { $"I{modelShard.Name}ModelShard" }, () =>
         {
             DefineCtor(code, modelShard, idBase);
             code.EmptyLine();
@@ -125,7 +125,7 @@ internal partial class ApplicationModelGenerator
 
     private void DefineModelShardClassAsCanBeMutable(IndentedTextWriter code, ModelShard modelShard)
     {
-        code.Class("sealed partial", $"{modelShard.Name}ModelShard", new[]
+        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", new[]
         {
             $"ICanBeMutable<IMutable{modelShard.Name}ModelShard>"
         },
@@ -182,7 +182,7 @@ internal partial class ApplicationModelGenerator
 
     private void DefineModelShardClassAsIFeatureContext(IndentedTextWriter code, ModelShard modelShard)
     {
-        code.Class("sealed partial", $"{modelShard.Name}ModelShard", new[]
+        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", new[]
         {
             $"IFeatureContext"
         },
@@ -199,7 +199,7 @@ internal partial class ApplicationModelGenerator
     private void DefineChangesFrameInterface(IndentedTextWriter code, ModelShard modelShard)
     {
         code.GeneratedInterfaceAttributes();
-        code.Interface(modelShard.Visibility, $"I{modelShard.Name}ChangesFrame", new[] { "IChangesFrame" }, () =>
+        code.Interface($"I{modelShard.Name}ChangesFrame", new[] { "IChangesFrame" }, () =>
         {
             foreach (var collection in modelShard.Collections)
             {
@@ -217,8 +217,10 @@ internal partial class ApplicationModelGenerator
 
     private void DefineChangesFrameClass(IndentedTextWriter code, ModelShard modelShard, string idBase)
     {
+        var visibility = GetInternalTypeVisibility(modelShard);
+
         code.GeneratedClassAttributes();
-        code.Class("file", "sealed", $"{modelShard.Name}ChangesFrame",
+        code.Class(visibility, "sealed", $"{modelShard.Name}ChangesFrame",
             new[]
             {
                 $"I{modelShard.Name}ChangesFrame",
@@ -391,8 +393,10 @@ internal partial class ApplicationModelGenerator
 
     private void DefineMutableModelShardClass(IndentedTextWriter code, ModelShard modelShard)
     {
+        var visibility = GetInternalTypeVisibility(modelShard);
+
         code.GeneratedClassAttributes();
-        code.Class("file", "sealed", $"Mutable{modelShard.Name}ModelShard",
+        code.Class(visibility, "sealed", $"Mutable{modelShard.Name}ModelShard",
             new[]
             {
                 $"IMutable{modelShard.Name}ModelShard",
@@ -427,5 +431,14 @@ internal partial class ApplicationModelGenerator
                 code.WriteLine($"return new {modelShard.Name}ModelShard(this);");
             });
         }
+    }
+
+    private static string GetInternalTypeVisibility(ModelShard modelShard)
+    {
+        return modelShard.Visibility switch
+        {
+            Visibility.All => "public",
+            _ => "file"
+        };
     }
 }
