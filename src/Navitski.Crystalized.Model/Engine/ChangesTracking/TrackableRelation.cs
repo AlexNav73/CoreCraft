@@ -7,7 +7,7 @@ namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 [DebuggerDisplay("{_relation}")]
 public sealed class TrackableRelation<TParent, TChild> :
     IMutableRelation<TParent, TChild>,
-    ICanBeReadOnly<IRelation<TParent, TChild>>
+    IMutableState<IRelation<TParent, TChild>>
     where TParent : Entity
     where TChild : Entity
 {
@@ -28,10 +28,10 @@ public sealed class TrackableRelation<TParent, TChild> :
     /// <inheritdoc cref="IHaveId.Id" />
     public string Id => _relation.Id;
 
-    /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
+    /// <inheritdoc cref="IMutableState{T}.AsReadOnly()" />
     public IRelation<TParent, TChild> AsReadOnly()
     {
-        return ((ICanBeReadOnly<IRelation<TParent, TChild>>)_relation).AsReadOnly();
+        return ((IMutableState<IRelation<TParent, TChild>>)_relation).AsReadOnly();
     }
 
     /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Add(TParent, TChild)" />

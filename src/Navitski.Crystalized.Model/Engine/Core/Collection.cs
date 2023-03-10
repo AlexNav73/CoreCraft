@@ -13,7 +13,7 @@ namespace Navitski.Crystalized.Model.Engine.Core;
 [DebuggerDisplay("Count = {Count}")]
 public sealed class Collection<TEntity, TProperties> :
     IMutableCollection<TEntity, TProperties>,
-    ICanBeReadOnly<ICollection<TEntity, TProperties>>
+    IMutableState<ICollection<TEntity, TProperties>>
     where TEntity : Entity
     where TProperties : Properties
 {
@@ -48,7 +48,7 @@ public sealed class Collection<TEntity, TProperties> :
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _relation.Count;
 
-    /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
+    /// <inheritdoc cref="IMutableState{T}.AsReadOnly()" />
     public ICollection<TEntity, TProperties> AsReadOnly()
     {
         return this;

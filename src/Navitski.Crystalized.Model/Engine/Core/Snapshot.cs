@@ -4,13 +4,13 @@ internal sealed class Snapshot : IModel
 {
     private readonly Model _model;
     private readonly IEnumerable<IFeature> _features;
-    private readonly IDictionary<Type, ICanBeReadOnly<IModelShard>> _copies;
+    private readonly IDictionary<Type, IMutableState<IModelShard>> _copies;
 
     public Snapshot(Model model, IEnumerable<IFeature> features)
     {
         _model = model;
         _features = features;
-        _copies = new Dictionary<Type, ICanBeReadOnly<IModelShard>>();
+        _copies = new Dictionary<Type, IMutableState<IModelShard>>();
     }
 
     public T Shard<T>() where T : IModelShard
@@ -20,10 +20,10 @@ internal sealed class Snapshot : IModel
             return (T)shard;
         }
 
-        var modelShard = _model.Shard<ICanBeMutable<T>>();
+        var modelShard = _model.Shards.OfType<IReadOnlyState<T>>().Single();
         var mutable = modelShard.AsMutable(_features);
 
-        _copies.Add(typeof(T), (ICanBeReadOnly<IModelShard>)mutable);
+        _copies.Add(typeof(T), (IMutableState<IModelShard>)mutable);
 
         return mutable;
     }

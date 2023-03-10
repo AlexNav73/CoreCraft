@@ -10,13 +10,13 @@ public class CoWRelationTests
     public void AsReadOnlyWhenNotCopiedTest()
     {
         var inner = A.Fake<IRelation<FirstEntity, SecondEntity>>(c => c
-            .Implements<ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>>());
+            .Implements<IMutableState<IRelation<FirstEntity, SecondEntity>>>());
         var relation = new CoWRelation<FirstEntity, SecondEntity>(inner);
 
         relation.AsReadOnly();
 
         A.CallTo(() => inner.Copy()).MustNotHaveHappened();
-        A.CallTo(() => ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)inner).AsReadOnly())
+        A.CallTo(() => ((IMutableState<IRelation<FirstEntity, SecondEntity>>)inner).AsReadOnly())
             .MustHaveHappenedOnceExactly();
     }
 
@@ -25,9 +25,9 @@ public class CoWRelationTests
     {
         var copy = A.Fake<IRelation<FirstEntity, SecondEntity>>(c => c
             .Implements<IMutableRelation<FirstEntity, SecondEntity>>()
-            .Implements<ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>>());
+            .Implements<IMutableState<IRelation<FirstEntity, SecondEntity>>>());
         var inner = A.Fake<IRelation<FirstEntity, SecondEntity>>(c => c
-            .Implements<ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>>());
+            .Implements<IMutableState<IRelation<FirstEntity, SecondEntity>>>());
         var relation = new CoWRelation<FirstEntity, SecondEntity>(inner);
 
         A.CallTo(() => inner.Copy()).Returns(copy);
@@ -36,9 +36,9 @@ public class CoWRelationTests
         relation.AsReadOnly();
 
         A.CallTo(() => inner.Copy()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)inner).AsReadOnly())
+        A.CallTo(() => ((IMutableState<IRelation<FirstEntity, SecondEntity>>)inner).AsReadOnly())
             .MustNotHaveHappened();
-        A.CallTo(() => ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)copy).AsReadOnly())
+        A.CallTo(() => ((IMutableState<IRelation<FirstEntity, SecondEntity>>)copy).AsReadOnly())
             .MustHaveHappenedOnceExactly();
     }
 

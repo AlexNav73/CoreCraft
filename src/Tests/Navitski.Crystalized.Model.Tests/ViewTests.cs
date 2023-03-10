@@ -9,12 +9,12 @@ public class ViewTests
     [Test]
     public void SnapshotCallsAsMutableAndAsReadOnlyModelShardTest()
     {
-        var originalShard = A.Fake<IFakeModelShard>(c => c.Implements<ICanBeMutable<IMutableFakeModelShard>>());
-        var mutableShard = A.Fake<IMutableFakeModelShard>(c => c.Implements<ICanBeReadOnly<IFakeModelShard>>());
+        var originalShard = A.Fake<IFakeModelShard>(c => c.Implements<IReadOnlyState<IMutableFakeModelShard>>());
+        var mutableShard = A.Fake<IMutableFakeModelShard>(c => c.Implements<IMutableState<IFakeModelShard>>());
 
-        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<IEnumerable<IFeature>>.Ignored))
+        A.CallTo(() => ((IReadOnlyState<IMutableFakeModelShard>)originalShard).AsMutable(A<IEnumerable<IFeature>>.Ignored))
             .Returns(mutableShard);
-        A.CallTo(() => ((ICanBeReadOnly<IFakeModelShard>)mutableShard).AsReadOnly())
+        A.CallTo(() => ((IMutableState<IFakeModelShard>)mutableShard).AsReadOnly())
             .Returns(A.Fake<IFakeModelShard>());
 
         var view = new View(new[] { originalShard });
@@ -22,21 +22,21 @@ public class ViewTests
         var mutableShardSnapshot = snapshot.Shard<IMutableFakeModelShard>();
         var model = snapshot.ToModel();
 
-        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<IEnumerable<IFeature>>.Ignored))
+        A.CallTo(() => ((IReadOnlyState<IMutableFakeModelShard>)originalShard).AsMutable(A<IEnumerable<IFeature>>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => ((ICanBeReadOnly<IFakeModelShard>)mutableShard).AsReadOnly())
+        A.CallTo(() => ((IMutableState<IFakeModelShard>)mutableShard).AsReadOnly())
             .MustHaveHappenedOnceExactly();
     }
 
     [Test]
     public void CreateSnapshotReturnsCachedModelShardTest()
     {
-        var originalShard = A.Fake<IFakeModelShard>(c => c.Implements<ICanBeMutable<IMutableFakeModelShard>>());
-        var mutableShard = A.Fake<IMutableFakeModelShard>(c => c.Implements<ICanBeReadOnly<IFakeModelShard>>());
+        var originalShard = A.Fake<IFakeModelShard>(c => c.Implements<IReadOnlyState<IMutableFakeModelShard>>());
+        var mutableShard = A.Fake<IMutableFakeModelShard>(c => c.Implements<IMutableState<IFakeModelShard>>());
 
-        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<IEnumerable<IFeature>>.Ignored))
+        A.CallTo(() => ((IReadOnlyState<IMutableFakeModelShard>)originalShard).AsMutable(A<IEnumerable<IFeature>>.Ignored))
             .Returns(mutableShard);
-        A.CallTo(() => ((ICanBeReadOnly<IFakeModelShard>)mutableShard).AsReadOnly())
+        A.CallTo(() => ((IMutableState<IFakeModelShard>)mutableShard).AsReadOnly())
             .Returns(A.Fake<IFakeModelShard>());
 
         var view = new View(new[] { originalShard });
@@ -45,9 +45,9 @@ public class ViewTests
         var mutableShardSnapshot2 = snapshot.Shard<IMutableFakeModelShard>();
         var model = snapshot.ToModel();
 
-        A.CallTo(() => ((ICanBeMutable<IMutableFakeModelShard>)originalShard).AsMutable(A<IEnumerable<IFeature>>.Ignored))
+        A.CallTo(() => ((IReadOnlyState<IMutableFakeModelShard>)originalShard).AsMutable(A<IEnumerable<IFeature>>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => ((ICanBeReadOnly<IFakeModelShard>)mutableShard).AsReadOnly())
+        A.CallTo(() => ((IMutableState<IFakeModelShard>)mutableShard).AsReadOnly())
             .MustHaveHappenedOnceExactly();
 
         Assert.That(ReferenceEquals(mutableShardSnapshot, mutableShardSnapshot2), Is.True);

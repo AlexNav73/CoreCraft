@@ -12,7 +12,7 @@ namespace Navitski.Crystalized.Model.Engine.Lazy;
 [DebuggerDisplay("{_copy ?? _collection}")]
 public sealed class CoWCollection<TEntity, TProperties> :
     IMutableCollection<TEntity, TProperties>,
-    ICanBeReadOnly<ICollection<TEntity, TProperties>>
+    IMutableState<ICollection<TEntity, TProperties>>
     where TEntity : Entity
     where TProperties : Properties
 {
@@ -35,10 +35,10 @@ public sealed class CoWCollection<TEntity, TProperties> :
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => (_copy ?? _collection).Count;
 
-    /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
+    /// <inheritdoc cref="IMutableState{T}.AsReadOnly()" />
     public ICollection<TEntity, TProperties> AsReadOnly()
     {
-        return ((ICanBeReadOnly<ICollection<TEntity, TProperties>>)(_copy ?? _collection)).AsReadOnly();
+        return ((IMutableState<ICollection<TEntity, TProperties>>)(_copy ?? _collection)).AsReadOnly();
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Add(TProperties)"/>
