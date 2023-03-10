@@ -84,13 +84,13 @@ namespace compilation.AnotherModelFile
         [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute()]
         internal FakeModelShard(IMutableFakeModelShard mutable)
         {
-            FirstCollection = ((ICanBeReadOnly<ICollection<FirstEntity, FirstEntityProperties>>)mutable.FirstCollection).AsReadOnly();
-            SecondCollection = ((ICanBeReadOnly<ICollection<SecondEntity, SecondEntityProperties>>)mutable.SecondCollection).AsReadOnly();
+            FirstCollection = ((IMutableState<ICollection<FirstEntity, FirstEntityProperties>>)mutable.FirstCollection).AsReadOnly();
+            SecondCollection = ((IMutableState<ICollection<SecondEntity, SecondEntityProperties>>)mutable.SecondCollection).AsReadOnly();
 
-            OneToOneRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)mutable.OneToOneRelation).AsReadOnly();
-            OneToManyRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)mutable.OneToManyRelation).AsReadOnly();
-            ManyToOneRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToOneRelation).AsReadOnly();
-            ManyToManyRelation = ((ICanBeReadOnly<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToManyRelation).AsReadOnly();
+            OneToOneRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.OneToOneRelation).AsReadOnly();
+            OneToManyRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.OneToManyRelation).AsReadOnly();
+            ManyToOneRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToOneRelation).AsReadOnly();
+            ManyToManyRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToManyRelation).AsReadOnly();
         }
 
         public required ICollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; }
@@ -102,7 +102,7 @@ namespace compilation.AnotherModelFile
         public required IRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; init; }
     }
 
-    internal sealed partial class FakeModelShard : ICanBeMutable<IMutableFakeModelShard>
+    internal sealed partial class FakeModelShard : IReadOnlyState<IMutableFakeModelShard>
     {
         public IMutableFakeModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)
         {
@@ -258,7 +258,7 @@ namespace compilation.AnotherModelFile
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed class MutableFakeModelShard : IMutableFakeModelShard, ICanBeReadOnly<IFakeModelShard>
+    public sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
     {
         public required IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; }
         public required IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; }

@@ -7,7 +7,7 @@ namespace Navitski.Crystalized.Model.Engine.Core;
 [DebuggerDisplay(@"Parent [{_parentToChildRelations}] Children [{_childToParentRelations}]")]
 public sealed class Relation<TParent, TChild> :
     IMutableRelation<TParent, TChild>,
-    ICanBeReadOnly<IRelation<TParent, TChild>>
+    IMutableState<IRelation<TParent, TChild>>
     where TParent : Entity
     where TChild : Entity
 {
@@ -31,7 +31,7 @@ public sealed class Relation<TParent, TChild> :
     /// <inheritdoc cref="IHaveId.Id" />
     public string Id { get; }
 
-    /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
+    /// <inheritdoc cref="IMutableState{T}.AsReadOnly()" />
     public IRelation<TParent, TChild> AsReadOnly()
     {
         return this;

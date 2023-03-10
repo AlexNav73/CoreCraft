@@ -12,7 +12,7 @@ internal partial class ApplicationModelGenerator
             code.EmptyLine();
             DefineModelShardClass(code, modelShard, idBase);
             code.EmptyLine();
-            DefineModelShardClassAsCanBeMutable(code, modelShard);
+            DefineModelShardClassAsReadOnlyState(code, modelShard);
             code.EmptyLine();
             DefineModelShardClassAsIFeatureContext(code, modelShard);
             code.EmptyLine();
@@ -97,13 +97,13 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = ((ICanBeReadOnly<I{Type(collection)}>)mutable.{collection.Name}).AsReadOnly();");
+                    code.WriteLine($"{collection.Name} = ((IMutableState<I{Type(collection)}>)mutable.{collection.Name}).AsReadOnly();");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = ((ICanBeReadOnly<I{Type(relation)}>)mutable.{relation.Name}).AsReadOnly();");
+                    code.WriteLine($"{relation.Name} = ((IMutableState<I{Type(relation)}>)mutable.{relation.Name}).AsReadOnly();");
                 }
             });
         }
@@ -123,11 +123,11 @@ internal partial class ApplicationModelGenerator
         }
     }
 
-    private void DefineModelShardClassAsCanBeMutable(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineModelShardClassAsReadOnlyState(IndentedTextWriter code, ModelShard modelShard)
     {
         code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", new[]
         {
-            $"ICanBeMutable<IMutable{modelShard.Name}ModelShard>"
+            $"IReadOnlyState<IMutable{modelShard.Name}ModelShard>"
         },
         () =>
         {
@@ -400,13 +400,13 @@ internal partial class ApplicationModelGenerator
             new[]
             {
                 $"IMutable{modelShard.Name}ModelShard",
-                $"ICanBeReadOnly<I{modelShard.Name}ModelShard>"
+                $"IMutableState<I{modelShard.Name}ModelShard>"
             },
             () =>
             {
                 ImplementModelShardInterface(code, modelShard);
                 code.EmptyLine();
-                ImplementCanBeReadOnlyInterface(code, modelShard);
+                ImplementMutableStateInterface(code, modelShard);
             });
 
         void ImplementModelShardInterface(IndentedTextWriter code, ModelShard modelShard)
@@ -423,7 +423,7 @@ internal partial class ApplicationModelGenerator
             }
         }
 
-        void ImplementCanBeReadOnlyInterface(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementMutableStateInterface(IndentedTextWriter code, ModelShard modelShard)
         {
             code.WriteLine($"public I{modelShard.Name}ModelShard AsReadOnly()");
             code.Block(() =>

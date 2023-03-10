@@ -12,7 +12,7 @@ namespace Navitski.Crystalized.Model.Engine.Lazy;
 [DebuggerDisplay("{_copy ?? _relation}")]
 public sealed class CoWRelation<TParent, TChild> :
     IMutableRelation<TParent, TChild>,
-    ICanBeReadOnly<IRelation<TParent, TChild>>
+    IMutableState<IRelation<TParent, TChild>>
     where TParent : Entity
     where TChild : Entity
 {
@@ -32,10 +32,10 @@ public sealed class CoWRelation<TParent, TChild> :
     /// <inheritdoc cref="IHaveId.Id" />
     public string Id => _relation.Id;
 
-    /// <inheritdoc cref="ICanBeReadOnly{T}.AsReadOnly()" />
+    /// <inheritdoc cref="IMutableState{T}.AsReadOnly()" />
     public IRelation<TParent, TChild> AsReadOnly()
     {
-        return ((ICanBeReadOnly<IRelation<TParent, TChild>>)(_copy ?? _relation)).AsReadOnly();
+        return ((IMutableState<IRelation<TParent, TChild>>)(_copy ?? _relation)).AsReadOnly();
     }
 
     /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Add(TParent, TChild)" />

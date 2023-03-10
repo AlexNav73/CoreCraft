@@ -38,13 +38,13 @@ public class CoWCollectionTests
     public void AsReadOnlyWhenNotCopiedTest()
     {
         var inner = A.Fake<ICollection<FirstEntity, FirstEntityProperties>>(c => c
-            .Implements<ICanBeReadOnly<ICollection<FirstEntity, FirstEntityProperties>>>());
+            .Implements<IMutableState<ICollection<FirstEntity, FirstEntityProperties>>>());
         var collection = new CoWCollection<FirstEntity, FirstEntityProperties>(inner);
 
         collection.AsReadOnly();
 
         A.CallTo(() => inner.Copy()).MustNotHaveHappened();
-        A.CallTo(() => ((ICanBeReadOnly<ICollection<FirstEntity, FirstEntityProperties>>)inner).AsReadOnly())
+        A.CallTo(() => ((IMutableState<ICollection<FirstEntity, FirstEntityProperties>>)inner).AsReadOnly())
             .MustHaveHappenedOnceExactly();
     }
 
@@ -53,9 +53,9 @@ public class CoWCollectionTests
     {
         var copy = A.Fake<ICollection<FirstEntity, FirstEntityProperties>>(c => c
             .Implements<IMutableCollection<FirstEntity, FirstEntityProperties>>()
-            .Implements<ICanBeReadOnly<ICollection<FirstEntity, FirstEntityProperties>>>());
+            .Implements<IMutableState<ICollection<FirstEntity, FirstEntityProperties>>>());
         var inner = A.Fake<ICollection<FirstEntity, FirstEntityProperties>>(c => c
-            .Implements<ICanBeReadOnly<ICollection<FirstEntity, FirstEntityProperties>>>());
+            .Implements<IMutableState<ICollection<FirstEntity, FirstEntityProperties>>>());
         var collection = new CoWCollection<FirstEntity, FirstEntityProperties>(inner);
 
         A.CallTo(() => inner.Copy()).Returns(copy);
@@ -64,9 +64,9 @@ public class CoWCollectionTests
         collection.AsReadOnly();
 
         A.CallTo(() => inner.Copy()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => ((ICanBeReadOnly<ICollection<FirstEntity, FirstEntityProperties>>)inner).AsReadOnly())
+        A.CallTo(() => ((IMutableState<ICollection<FirstEntity, FirstEntityProperties>>)inner).AsReadOnly())
             .MustNotHaveHappened();
-        A.CallTo(() => ((ICanBeReadOnly<ICollection<FirstEntity, FirstEntityProperties>>)copy).AsReadOnly())
+        A.CallTo(() => ((IMutableState<ICollection<FirstEntity, FirstEntityProperties>>)copy).AsReadOnly())
             .MustHaveHappenedOnceExactly();
     }
 
