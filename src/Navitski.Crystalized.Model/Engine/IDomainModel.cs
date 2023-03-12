@@ -7,7 +7,7 @@ namespace Navitski.Crystalized.Model.Engine;
 /// <summary>
 ///     A base interface for a domain model implementation
 /// </summary>
-public interface IDomainModel : IModelShardAccessor
+public interface IDomainModel : IModel
 {
     /// <summary>
     ///     Subscribes to the model changes notifications
