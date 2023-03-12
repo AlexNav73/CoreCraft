@@ -36,7 +36,7 @@ public abstract class DomainModel : IDomainModel
     {
     }
 
-    /// <inheritdoc cref="IModelShardAccessor.Shard{T}"/>
+    /// <inheritdoc cref="IModel.Shard{T}"/>
     public T Shard<T>() where T : IModelShard
     {
         return _view.UnsafeModel.Shard<T>();
