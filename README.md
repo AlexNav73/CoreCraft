@@ -7,15 +7,15 @@
 
 ## 📖 About
 
-`Navitski.Crystalized` is a set of cross-platform libraries which helps in building of your own domain model. Think of it as a in-memory database which provides some interesting features like: precise diffing, undo/redo support, persisting to the file (Json, SQLite are supported out of the box), changes notifications and code generation!
+`Navitski.Crystalized` is a set of cross-platform libraries which helps in building your domain model. Think of it as an in-memory database which provides some interesting features like precise diffing, undo/redo support, persisting to the file (Json, SQLite are supported out of the box), changes notifications and code generation!
 
-Using the simple json configuration, the `Navitski.Crystalized.Model.Generators` can generate a new domain model for you with all entities, relations, persistence infrastructure and changes handling. All you need to do is start implementing your business logic, everything else will be generated for you. `Navitski.Crystalized.Model.Generators` package is using brand new Roslyn Source Generators and targeting _.NET Standart 2.0_, so it can be used in old .NET Framework applications.
+Using the simple json configuration, the `Navitski.Crystalized.Model.Generators` can generate a new domain model for you with all entities, relations, persistence infrastructure and changes handling. All you need to do is start implementing your business logic, everything else will be generated for you. `Navitski.Crystalized.Model.Generators` package is using brand new Roslyn Source Generators and targets _.NET Standart 2.0_, so it can be used in old .NET Framework applications.
 
 ## 🚀 Getting Started
 
-> To see the full example, go to the [examples](https://github.com/AlexNav73/Navitski.Crystalized/tree/master/examples/Example) folder or [Small WPF app](https://github.com/AlexNav73/Navitski.Crystalized/tree/master/examples/WpfDemoApp).
+> To see the examples, go to the [examples](https://github.com/AlexNav73/Navitski.Crystalized/tree/master/examples/Example) folder.
 
-To get started first of all, you need to add references to libraries.
+To get started, you need to add references to libraries.
 
 ```
 dotnet add package Navitski.Crystalized.Model
@@ -23,12 +23,12 @@ dotnet add package Navitski.Crystalized.Model
 
 > This is a main package with all core functionality.
 
-To enable code generation add another package:
+To enable code generation, add another package:
 ```
 dotnet add package Navitski.Crystalized.Model.Generators
 ```
 
-After this two packages are installed, we can start writing a model description. Create file called `Model.model.json` and add it to the project as a additional file like so:
+After these two packages are installed, we can start writing a model description. Create a file called `Model.model.json` and add it to the project as an additional file like so:
 
 ```xml
 <ItemGroup>
@@ -36,7 +36,7 @@ After this two packages are installed, we can start writing a model description.
 </ItemGroup>
 ```
 
-> Files with an extension `*.model.json` will be used to generate parts of the domain model called **Shards**. Think of them as sub-databases which can help to separate domain model by functionality or provide a possibility to register new shards by plugins.
+> Files with an extension `*.model.json` will be used to generate parts of the domain model called **Shards**. Think of them as sub-databases which can help to divide domain model by functionality or provide a possibility to register new shards by plugins.
 
 The content of the `Model.model.json` should include shards (sub-databases), entities with their properties, collections and relations between entities. See the example below:
 ```json
@@ -70,7 +70,7 @@ The content of the `Model.model.json` should include shards (sub-databases), ent
 
 > For the simplicity, we will use only one entity without any relations
 
-Next, we need to create a domain model class (we could use one of out-of-box implementations). This class must inherit from the `DomainModel` abstract class.
+Next, we need to create a domain model class (we could use one of the out-of-box implementations). This class must inherit from the `DomainModel` abstract class.
 
 ```cs
 class MyModel : DomainModel
@@ -82,7 +82,7 @@ class MyModel : DomainModel
 }
 ```
 
-> `DomainModel` base constructor takes a collection of shards (which are generated from `Model.model.json`) and an `IScheduler` implementation. For now, we will use `SyncScheduler`. It just run everything in the same thread so it can be used for unit testing, as an example.
+> `DomainModel` base constructor takes a collection of shards (generated from `Model.model.json`) and an `IScheduler` implementation. For now, we will use `SyncScheduler`. It runs everything in the same thread, so it can be used for unit testing, for example.
 
 Now, we can create our model model:
 
@@ -95,7 +95,7 @@ var model = new MyModel(new[]
 });
 ```
 
-When our first domain model is created, we can start implementing commands. Commands are used to group related modifications in one single change (CQRS pattern). **All modifications can be made only inside a command**.
+When we create our first domain model, we can start implementing commands. Commands are used to group related modifications in one single change (CQRS pattern). **All modifications must be made only inside a command**.
 
 ```cs
 class MyAddCommand : ICommand
@@ -112,11 +112,11 @@ class MyAddCommand : ICommand
 }
 ```
 
-> This command will simply add new entity to the collection with `MyProperty` set to `"test"`.
+> This command will simply add a new entity to the collection with `MyProperty` set to `"test"`.
 
-> `DomainModel` base class contains overload to run delegates as commands (see `Run` method's overloads), so you don't need to create new class for each logic, but it is a good practice to create new class if command's logic is quite big
+> `DomainModel` base class contains overload to run delegates as commands (see `Run` method's overloads), so you don't need to create a new class for each logic, but it is a good practice to create a new class if the command's logic is quite big
 
-Now, we need to execute the command, but before that we need to subscribe to the domain model changes.
+Now, we need to execute the command, but before that, we need to subscribe to the domain model changes.
 
 ```cs
 using (model.Subscribe(OnModelChanged))
@@ -147,7 +147,7 @@ private static void OnModelChanged(Change<IModelChanges> change)
 }
 ```
 
-It is also possible to subscribe to specific changes like model shard changes or collection/relation changes
+It is also possible to subscribe to specific changes like model shard changes or collection/relation changes.
 
 ```cs
 using (model.SubscribeTo<Model.IMyAppChangesFrame>(x => x.With(y => y.MyEntitiesCollection).By(OnModelChanged)))
@@ -258,7 +258,7 @@ model.Save("test.db");
 
 ### Usage of types which are not supported by the storage (like SQLite)
 
-SQLite doesn't have an enum type as a column type so it can be stored as string (TEXT) value. Therefore, generating an enum based on `*.model.json` schema is not flexible, because it could be different options how the user would like to handle enums (store as text or as an int). To give the user possibility to have enum properties in their model, all generated _properties types_ marked as partial. So if an entity in `*.model.json` described as following:
+SQLite doesn't have an enum type as a column type so it can be stored as a string (TEXT) value. Therefore, generating an enum based on `*.model.json` schema is not flexible, because it could be different options for how the user would like to handle enums (stored as text or as an int). To give the user possibility to have enum properties in their model, all generated _properties types_ are marked as partial. So if an entity in `*.model.json` is described as:
 
 ```json
 {
@@ -292,8 +292,8 @@ public sealed partial record MyEntityProperties : Properties
 }
 ```
 
-The generated record will have a **partial** modifier. In this case, we can add new property with a custom data type which will be mapped to the `IntProperty` and be saved in the database
-as an int value and when it will be loaded we can read the enum value by reading value from the `IntProperty` and casting it to the enum type. For example:
+The generated record will have a **partial** modifier. In this case, we can add a new property with a custom data type which will map to the `IntProperty` and save in the database
+as an int value. When it will be loaded, we can read the enum value by reading the value from the `IntProperty` and casting it to the enum type. For example:
 
 ```cs
 public enum MyEnum : int
@@ -313,4 +313,4 @@ partial record MyEntityProperties
 }
 ```
 
-> This approach could be used to store arbitrary types by storing values as a json in the string (TEXT) columns, but it is more preferable to describe all your data types as entities in `*.model.json`.
+> This approach could be used to store arbitrary types by storing values as a JSON in the string (TEXT) columns, but it is preferable to describe all your data types as entities in `*.model.json`.
