@@ -62,10 +62,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TEntity : Entity
         where TProperties : Properties
     {
-        var name = $"{scheme.ShardName}.{scheme.Name}";
-
-        ExecuteNonQuery(QueryBuilder.Collections.CreateTable(scheme, name));
-        ExecuteCollectionCommand(QueryBuilder.Collections.Insert(scheme, name), items, scheme);
+        ExecuteNonQuery(QueryBuilder.Collections.CreateTable(scheme));
+        ExecuteCollectionCommand(QueryBuilder.Collections.Insert(scheme), items, scheme);
     }
 
     public void Insert<TParent, TChild>(
@@ -74,10 +72,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TParent : Entity
         where TChild : Entity
     {
-        var name = $"{scheme.ShardName}.{scheme.Name}";
-
-        ExecuteNonQuery(QueryBuilder.Relations.CreateTable(name));
-        ExecuteRelationCommand(QueryBuilder.Relations.Insert(name), relations);
+        ExecuteNonQuery(QueryBuilder.Relations.CreateTable(scheme));
+        ExecuteRelationCommand(QueryBuilder.Relations.Insert(scheme), relations);
     }
 
     public void Update<TEntity, TProperties>(CollectionInfo scheme, IReadOnlyCollection<ICollectionChange<TEntity, TProperties>> changes)
@@ -100,9 +96,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             {
                 command = _connection.CreateCommand();
 
-                var name = $"{scheme.ShardName}.{scheme.Name}";
                 var properties = scheme.Properties.Where(p => modifiedProperties.ContainsProp(p.Name)).ToArray();
-                command.CommandText = QueryBuilder.Collections.Update(properties, name);
+                command.CommandText = QueryBuilder.Collections.Update(properties, scheme);
 
                 CreateParameters(command, properties);
 
@@ -124,9 +119,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
     public void Delete<TEntity>(CollectionInfo scheme, IReadOnlyCollection<TEntity> entities)
         where TEntity : Entity
     {
-        var name = $"{scheme.ShardName}.{scheme.Name}";
         using var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.Collections.Delete(name);
+        command.CommandText = QueryBuilder.Collections.Delete(scheme);
         var parameter = command.CreateParameter();
         parameter.ParameterName = "$Id";
         command.Parameters.Add(parameter);
@@ -144,24 +138,20 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TParent : Entity
         where TChild : Entity
     {
-        var name = $"{scheme.ShardName}.{scheme.Name}";
-
-        ExecuteRelationCommand(QueryBuilder.Relations.Delete(name), relations);
+        ExecuteRelationCommand(QueryBuilder.Relations.Delete(scheme), relations);
     }
 
     public void Select<TEntity, TProperties>(CollectionInfo scheme, IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
-        var name = $"{scheme.ShardName}.{scheme.Name}";
-
-        if (!Exists(name))
+        if (!Exists(QueryBuilder.InferName(scheme)))
         {
             return;
         }
 
         using var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.Collections.Select(scheme, name);
+        command.CommandText = QueryBuilder.Collections.Select(scheme);
 
         Log(command);
 
@@ -184,15 +174,13 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TParent : Entity
         where TChild : Entity
     {
-        var name = $"{scheme.ShardName}.{scheme.Name}";
-
-        if (!Exists(name))
+        if (!Exists(QueryBuilder.InferName(scheme)))
         {
             return;
         }
 
         using var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.Relations.Select(name);
+        command.CommandText = QueryBuilder.Relations.Select(scheme);
 
         Log(command);
 
