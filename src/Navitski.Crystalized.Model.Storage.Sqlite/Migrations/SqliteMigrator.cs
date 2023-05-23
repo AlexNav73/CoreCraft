@@ -13,4 +13,9 @@ internal class SqliteMigrator : IMigrator
     {
         _repository.ExecuteNonQuery(QueryBuilder.DropTable(name));
     }
+
+    public void ExecuteRawSql(string sql)
+    {
+        _repository.ExecuteNonQuery(sql);
+    }
 }

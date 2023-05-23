@@ -37,6 +37,23 @@ internal class MigrationRunnerTest
         Assert.Throws<NotImplementedException>(() => runner.Run(repository));
     }
 
+    [Test]
+    public void ExecuteRawSqlTest()
+    {
+        var table = "Test";
+        using var repository = new SqliteRepository(":memory:");
+        var sql = $"CREATE TABLE [{table}]([Id] INTEGER);";
+        var runner = new MigrationRunner(new[] { new ExecuteRawSqlMigration(sql) });
+
+        Assert.That(repository.Exists(table), Is.False);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(0));
+
+        runner.Run(repository);
+
+        Assert.That(repository.Exists(table), Is.True);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(1));
+    }
+
     private class FailingMigration : Migration
     {
         public FailingMigration()

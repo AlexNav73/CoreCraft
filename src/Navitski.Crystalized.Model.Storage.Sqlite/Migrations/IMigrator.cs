@@ -10,4 +10,10 @@ public interface IMigrator
     /// </summary>
     /// <param name="name">Table name</param>
     void DropTable(string name);
+
+    /// <summary>
+    ///     Executes sql statement as is
+    /// </summary>
+    /// <param name="sql">Sql statement</param>
+    void ExecuteRawSql(string sql);
 }
