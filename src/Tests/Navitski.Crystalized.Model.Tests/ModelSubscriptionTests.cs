@@ -4,12 +4,12 @@ using Navitski.Crystalized.Model.Engine.Subscription;
 
 namespace Navitski.Crystalized.Model.Tests;
 
-internal class ModelSubscriberTests
+internal class ModelSubscriptionTests
 {
     [Test]
     public void FirstCallOfToWillCreateNewSubscriberTest()
     {
-        var subscriber = new ModelSubscriber();
+        var subscriber = new ModelSubscription();
 
         var shardSubscriber = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>();
 
@@ -19,7 +19,7 @@ internal class ModelSubscriberTests
     [Test]
     public void SecondCallOfToWillReturnTheSameSubscriberTest()
     {
-        var subscriber = new ModelSubscriber();
+        var subscriber = new ModelSubscription();
 
         var shardSubscriber1 = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>();
         var shardSubscriber2 = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>();
@@ -32,10 +32,10 @@ internal class ModelSubscriberTests
     [Test]
     public void PublishChangesWillNotifySubscriptionsTest()
     {
-        var subscriber = new ModelSubscriber();
+        var subscriber = new ModelSubscription();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.By(m => subscriptionWasCalled = true);
+        var subscription = subscriber.Add(m => subscriptionWasCalled = true);
 
         subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), A.Fake<IModelChanges>()));
 
@@ -46,10 +46,10 @@ internal class ModelSubscriberTests
     [Test]
     public void PublishChangesWillNotifyModelShardSubscriptionsTest()
     {
-        var subscriber = new ModelSubscriber();
+        var subscriber = new ModelSubscription();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>().By(m => subscriptionWasCalled = true);
+        var subscription = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>().Add(m => subscriptionWasCalled = true);
         var modelChanges = A.Fake<IModelChanges>();
         IFakeChangesFrame? ignore = null;
         var frame = A.Fake<IFakeChangesFrame>();

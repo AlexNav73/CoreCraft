@@ -30,7 +30,7 @@ internal partial class MainWindowViewModel : ObservableObject
         Items = new ObservableCollection<ItemViewModel>();
         Logs = new ObservableCollection<string>();
 
-        _subscription = _model.SubscribeTo<IToDoChangesFrame>(x => x.With(x => x.Items).By(OnItemChanged));
+        _subscription = _model.For<IToDoChangesFrame>().With(x => x.Items).Subscribe(OnItemChanged);
         _model.Changed += OnModelChanged; // unsubscribe
     }
 

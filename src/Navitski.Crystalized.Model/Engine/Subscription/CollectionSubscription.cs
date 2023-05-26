@@ -2,26 +2,26 @@
 
 namespace Navitski.Crystalized.Model.Engine.Subscription;
 
-internal sealed class CollectionSubscriber<TChangesFrame, TEntity, TProperties> :
-    Subscriber<ICollectionChangeSet<TEntity, TProperties>>,
-    ICollectionSubscriber<TEntity, TProperties>,
+internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties> :
+    Subscription<ICollectionChangeSet<TEntity, TProperties>>,
     ISubscription<TChangesFrame>
     where TChangesFrame : class, IChangesFrame
     where TEntity : Entity
     where TProperties : Properties
 {
-    private readonly Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> _accessor;
 
-    public CollectionSubscriber(Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> accessor)
+    public CollectionSubscription(Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> accessor)
     {
-        _accessor = accessor;
+        Accessor = accessor;
     }
+
+    public Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> Accessor { get; }
 
     public void Publish(Change<TChangesFrame> change)
     {
         var (oldModel, newModel, hunk) = change;
 
-        var collectionChangeSet = _accessor(hunk);
+        var collectionChangeSet = Accessor(hunk);
         if (collectionChangeSet.HasChanges())
         {
             var msg = new Change<ICollectionChangeSet<TEntity, TProperties>>(

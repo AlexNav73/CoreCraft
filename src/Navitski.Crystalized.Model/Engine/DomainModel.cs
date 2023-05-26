@@ -5,6 +5,7 @@ using Navitski.Crystalized.Model.Engine.Feature;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
 using Navitski.Crystalized.Model.Engine.Subscription;
+using Navitski.Crystalized.Model.Engine.Subscription.Builders;
 
 namespace Navitski.Crystalized.Model.Engine;
 
@@ -15,7 +16,7 @@ public abstract class DomainModel : IDomainModel
 {
     private readonly View _view;
     private readonly IScheduler _scheduler;
-    private readonly ModelSubscriber _modelSubscriber;
+    private readonly ModelSubscription _modelSubscriber;
 
     private volatile Change<IModelChanges>? _currentChanges;
 
@@ -26,7 +27,7 @@ public abstract class DomainModel : IDomainModel
     {
         _view = new View(shards);
         _scheduler = scheduler;
-        _modelSubscriber = new ModelSubscriber();
+        _modelSubscriber = new ModelSubscription();
     }
 
     /// <summary>
@@ -45,7 +46,7 @@ public abstract class DomainModel : IDomainModel
     /// <inheritdoc cref="IDomainModel.Subscribe(Action{Change{IModelChanges}})"/>
     public IDisposable Subscribe(Action<Change<IModelChanges>> onModelChanges)
     {
-        var subscription = _modelSubscriber.By(onModelChanges);
+        var subscription = _modelSubscriber.Add(onModelChanges);
 
         if (_currentChanges != null)
         {
@@ -55,23 +56,11 @@ public abstract class DomainModel : IDomainModel
         return subscription;
     }
 
-    /// <inheritdoc cref="IDomainModel.SubscribeTo{T}(Func{IModelShardSubscriber{T}, IDisposable})"/>
-    public IDisposable SubscribeTo<T>(Func<IModelShardSubscriber<T>, IDisposable> builder)
+    /// <inheritdoc cref="IDomainModel.For{T}()"/>
+    public IModelShardSubscriptionBuilder<T> For<T>()
          where T : class, IChangesFrame
     {
-        var subscription = builder(_modelSubscriber.GetOrCreateSubscriberFor<T>());
-
-        if (_currentChanges != null)
-        {
-            var tempSubscriber = new ModelSubscriber();
-
-            using (builder(tempSubscriber.GetOrCreateSubscriberFor<T>()))
-            {
-                tempSubscriber.Publish(_currentChanges);
-            }
-        }
-
-        return subscription;
+        return new ModelShardSubscriptionBuilder<T>(_modelSubscriber.GetOrCreateSubscriberFor<T>(), _currentChanges);
     }
 
     /// <inheritdoc cref="IDomainModel.Run{T}(Action{T, CancellationToken}, CancellationToken)"/>

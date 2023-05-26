@@ -23,14 +23,14 @@ public class AutoSaveDomainModelTests
     }
 
     [Test]
-    public async Task LoadAutoSaveDomainModelTest()
+    public async Task LoadCollectionAutoSaveDomainModelTest()
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
         var model = new AutoSaveDomainModel(new[] { new FakeModelShard() }, scheduler, storage, "fake");
         var firstCollectionChanged = false;
 
-        model.SubscribeTo<IFakeChangesFrame>(x => x.With(y => y.FirstCollection).By(c => firstCollectionChanged = true));
+        model.For<IFakeChangesFrame>().With(y => y.FirstCollection).Subscribe(c => firstCollectionChanged = true);
 
         A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
             .Invokes(c => c.Arguments.Get<IModel>(1)!.Shard<IMutableFakeModelShard>().FirstCollection.Add(new()));
@@ -40,5 +40,25 @@ public class AutoSaveDomainModelTests
         A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
 
         Assert.That(firstCollectionChanged, Is.True);
+    }
+
+    [Test]
+    public async Task LoadRelationAutoSaveDomainModelTest()
+    {
+        var scheduler = new SyncScheduler();
+        var storage = A.Fake<IStorage>();
+        var model = new AutoSaveDomainModel(new[] { new FakeModelShard() }, scheduler, storage, "fake");
+        var relationChanged = false;
+
+        model.For<IFakeChangesFrame>().With(y => y.OneToOneRelation).Subscribe(c => relationChanged = true);
+
+        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
+            .Invokes(c => c.Arguments.Get<IModel>(1)!.Shard<IMutableFakeModelShard>().OneToOneRelation.Add(new(), new()));
+
+        await model.Load();
+
+        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
+
+        Assert.That(relationChanged, Is.True);
     }
 }

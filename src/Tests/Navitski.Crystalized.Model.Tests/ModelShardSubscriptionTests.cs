@@ -7,12 +7,12 @@ using Navitski.Crystalized.Model.Engine.Subscription;
 
 namespace Navitski.Crystalized.Model.Tests;
 
-internal class ModelShardSubscriberTests
+internal class ModelShardSubscriptionTests
 {
     [Test]
     public void FirstCallOfWithCollectionWillCreateNewSubscriberTest()
     {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
+        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
 
         var collectionSubscriber = subscriber.With(x => x.FirstCollection);
 
@@ -22,7 +22,7 @@ internal class ModelShardSubscriberTests
     [Test]
     public void SecondCallOfWithCollectionWillReturnTheSameSubscriberTest()
     {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
+        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
 
         var collectionSubscriber1 = subscriber.With(x => x.FirstCollection);
         var collectionSubscriber2 = subscriber.With(x => x.FirstCollection);
@@ -35,7 +35,7 @@ internal class ModelShardSubscriberTests
     [Test]
     public void FirstCallOfWithRelationWillCreateNewSubscriberTest()
     {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
+        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
 
         var relationSubscriber = subscriber.With(x => x.OneToOneRelation);
 
@@ -45,7 +45,7 @@ internal class ModelShardSubscriberTests
     [Test]
     public void SecondCallOfWithRelationWillReturnTheSameSubscriberTest()
     {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
+        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
 
         var relationSubscriber1 = subscriber.With(x => x.OneToOneRelation);
         var relationSubscriber2 = subscriber.With(x => x.OneToOneRelation);
@@ -58,11 +58,11 @@ internal class ModelShardSubscriberTests
     [Test]
     public void PushChangesWillNotifySubscriptionsTest()
     {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
+        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
         IModelChanges modelChanges = CreateFakeModelChanges();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.By(m => subscriptionWasCalled = true);
+        var subscription = subscriber.Add(m => subscriptionWasCalled = true);
 
         subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
@@ -73,11 +73,11 @@ internal class ModelShardSubscriberTests
     [Test]
     public void PushChangesWillNotNotifySubscriptionsWhenNoChangesTest()
     {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
+        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
         IModelChanges modelChanges = CreateFakeModelChanges(frameHasChanges: false);
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.By(m => subscriptionWasCalled = true);
+        var subscription = subscriber.Add(m => subscriptionWasCalled = true);
 
         subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
@@ -88,11 +88,11 @@ internal class ModelShardSubscriberTests
     [Test]
     public void PushChangesWillNotNotifySubscriptionsWhenMissingChangesFrameTest()
     {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
+        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
         IModelChanges modelChanges = CreateFakeModelChanges(hasChangesFrame: false);
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.By(m => subscriptionWasCalled = true);
+        var subscription = subscriber.Add(m => subscriptionWasCalled = true);
 
         subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
@@ -103,10 +103,10 @@ internal class ModelShardSubscriberTests
     [Test]
     public void PushChangesWillNotifyCollectionSubscriptionsTest()
     {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
+        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.With(x => x.FirstCollection).By(m => subscriptionWasCalled = true);
+        var subscription = subscriber.With(x => x.FirstCollection).Add(m => subscriptionWasCalled = true);
         var fakeCollectionChanges = A.Fake<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>();
         var frame = A.Fake<IFakeChangesFrame>();
         var modelChanges = CreateFakeModelChanges(frame);
@@ -124,10 +124,10 @@ internal class ModelShardSubscriberTests
     [Test]
     public void PushChangesWillNotifyRelationSubscriptionsTest()
     {
-        var subscriber = new ModelShardSubscriber<IFakeChangesFrame>();
+        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.With(x => x.OneToOneRelation).By(m => subscriptionWasCalled = true);
+        var subscription = subscriber.With(x => x.OneToOneRelation).Add(m => subscriptionWasCalled = true);
         var fakeRelationChanges = A.Fake<IRelationChangeSet<FirstEntity, SecondEntity>>();
         var frame = A.Fake<IFakeChangesFrame>();
         var modelChanges = CreateFakeModelChanges(frame);

@@ -3,17 +3,17 @@ using System.Runtime.CompilerServices;
 
 namespace Navitski.Crystalized.Model.Engine.Subscription;
 
-internal sealed class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscriber<T>, ISubscription<IModelChanges>
+internal sealed class ModelShardSubscription<T> : Subscription<T>, ISubscription<IModelChanges>
     where T : class, IChangesFrame
 {
     private readonly IDictionary<string, ISubscription<T>> _subscriptions;
 
-    public ModelShardSubscriber()
+    public ModelShardSubscription()
     {
         _subscriptions = new Dictionary<string, ISubscription<T>>();
     }
 
-    public ICollectionSubscriber<TEntity, TProperties> With<TEntity, TProperties>(
+    public CollectionSubscription<T, TEntity, TProperties> With<TEntity, TProperties>(
         Func<T, ICollectionChangeSet<TEntity, TProperties>> accessor,
         [CallerArgumentExpression(nameof(accessor))] string expression = "")
         where TEntity : Entity
@@ -21,16 +21,16 @@ internal sealed class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscr
     {
         if (_subscriptions.TryGetValue(expression, out var subs))
         {
-            return (ICollectionSubscriber<TEntity, TProperties>)subs;
+            return (CollectionSubscription<T, TEntity, TProperties>)subs;
         }
 
-        var subscriber = new CollectionSubscriber<T, TEntity, TProperties>(accessor);
+        var subscriber = new CollectionSubscription<T, TEntity, TProperties>(accessor);
         _subscriptions.Add(expression, subscriber);
 
         return subscriber;
     }
 
-    public IRelationSubscriber<TParent, TChild> With<TParent, TChild>(
+    public RelationSubscription<T, TParent, TChild> With<TParent, TChild>(
         Func<T, IRelationChangeSet<TParent, TChild>> accessor,
         [CallerArgumentExpression(nameof(accessor))] string expression = "")
         where TParent : Entity
@@ -38,10 +38,10 @@ internal sealed class ModelShardSubscriber<T> : Subscriber<T>, IModelShardSubscr
     {
         if (_subscriptions.TryGetValue(expression, out var subs))
         {
-            return (IRelationSubscriber<TParent, TChild>)subs;
+            return (RelationSubscription<T, TParent, TChild>)subs;
         }
 
-        var subscriber = new RelationSubscriber<T, TParent, TChild>(accessor);
+        var subscriber = new RelationSubscription<T, TParent, TChild>(accessor);
         _subscriptions.Add(expression, subscriber);
 
         return subscriber;
