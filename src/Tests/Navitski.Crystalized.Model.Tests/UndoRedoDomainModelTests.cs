@@ -179,14 +179,14 @@ public class UndoRedoDomainModelTests
     }
 
     [Test]
-    public async Task LoadUndoRedoDomainModelTest()
+    public async Task LoadCollectionUndoRedoDomainModelTest()
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
         var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
         var firstCollectionChanged = false;
 
-        model.SubscribeTo<IFakeChangesFrame>(x => x.With(y => y.FirstCollection).By(c => firstCollectionChanged = true));
+        model.For<IFakeChangesFrame>().With(y => y.FirstCollection).Subscribe(c => firstCollectionChanged = true);
 
         A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
             .Invokes(c => c.Arguments.Get<IModel>(1)!.Shard<IMutableFakeModelShard>().FirstCollection.Add(new()));
@@ -198,6 +198,28 @@ public class UndoRedoDomainModelTests
         Assert.That(model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
         Assert.That(firstCollectionChanged, Is.True);
+    }
+
+    [Test]
+    public async Task LoadRelationUndoRedoDomainModelTest()
+    {
+        var scheduler = new SyncScheduler();
+        var storage = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var relationChanged = false;
+
+        model.For<IFakeChangesFrame>().With(y => y.OneToOneRelation).Subscribe(c => relationChanged = true);
+
+        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
+            .Invokes(c => c.Arguments.Get<IModel>(1)!.Shard<IMutableFakeModelShard>().OneToOneRelation.Add(new(), new()));
+
+        await model.Load("fake");
+
+        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
+
+        Assert.That(model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
+        Assert.That(model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(relationChanged, Is.True);
     }
 
     private static async Task ExecuteAddCommand(IDomainModel model)

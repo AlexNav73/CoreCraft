@@ -1,6 +1,7 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Subscription;
+using Navitski.Crystalized.Model.Engine.Subscription.Builders;
 
 namespace Navitski.Crystalized.Model.Engine;
 
@@ -17,11 +18,10 @@ public interface IDomainModel : IModel
     IDisposable Subscribe(Action<Change<IModelChanges>> onModelChanges);
 
     /// <summary>
-    ///     Provides a precise subscription mode to subscribe to a specific part of the model
+    ///     Provides a precise subscription mode for a specific part of the model
     /// </summary>
-    /// <param name="builder">A subscription builder</param>
-    /// <returns>Subscription</returns>
-    IDisposable SubscribeTo<T>(Func<IModelShardSubscriber<T>, IDisposable> builder)
+    /// <returns>Subscription builder</returns>
+    IModelShardSubscriptionBuilder<T> For<T>()
          where T : class, IChangesFrame;
 
     /// <summary>

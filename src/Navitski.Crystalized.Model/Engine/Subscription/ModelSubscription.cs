@@ -2,26 +2,26 @@
 
 namespace Navitski.Crystalized.Model.Engine.Subscription;
 
-internal sealed class ModelSubscriber : Subscriber<IModelChanges>
+internal sealed class ModelSubscription : Subscription<IModelChanges>
 {
     private readonly IDictionary<Type, ISubscription<IModelChanges>> _modelShardSubscriptions;
 
-    public ModelSubscriber()
+    public ModelSubscription()
     {
         _modelShardSubscriptions = new Dictionary<Type, ISubscription<IModelChanges>>();
     }
 
-    public IModelShardSubscriber<T> GetOrCreateSubscriberFor<T>() where T : class, IChangesFrame
+    public ModelShardSubscription<T> GetOrCreateSubscriberFor<T>() where T : class, IChangesFrame
     {
         if (_modelShardSubscriptions.TryGetValue(typeof(T), out var subs))
         {
-            return (IModelShardSubscriber<T>)subs;
+            return (ModelShardSubscription<T>)subs;
         }
 
-        var subscriber = new ModelShardSubscriber<T>();
-        _modelShardSubscriptions.Add(typeof(T), subscriber);
+        var subscription = new ModelShardSubscription<T>();
+        _modelShardSubscriptions.Add(typeof(T), subscription);
 
-        return subscriber;
+        return subscription;
     }
 
     public override void Publish(Change<IModelChanges> change)

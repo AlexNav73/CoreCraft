@@ -23,7 +23,7 @@ class Program
 
         var model = new MyModel(new[] { new ExampleModelShard() });
 
-        using (model.SubscribeTo<IExampleChangesFrame>(x => x.With(y => y.FirstCollection).By(OnCollectionChanged)))
+        using (model.For<IExampleChangesFrame>().With(y => y.FirstCollection).Subscribe(OnCollectionChanged))
         {
             Console.WriteLine("======================== Modifying ========================");
 
@@ -64,7 +64,7 @@ class Program
         model.Save(Path);
 
         model = new MyModel(new[] { new ExampleModelShard() });
-        using (model.SubscribeTo<IExampleChangesFrame>(x => x.With(y => y.SecondCollection).By(OnCollectionChanged)))
+        using (model.For<IExampleChangesFrame>().With(y => y.SecondCollection).Subscribe(OnCollectionChanged))
         {
             Console.WriteLine("======================== Loading ========================");
 

@@ -30,7 +30,7 @@ public class DomainModelTests
         var model = new TestDomainModel(Array.Empty<IModelShard>(), storage);
         Action<Change<IFakeChangesFrame>> handler = args => { };
 
-        var subscription = model.SubscribeTo<IFakeChangesFrame>(x => x.By(handler));
+        var subscription = model.For<IFakeChangesFrame>().Subscribe(handler);
 
         Assert.That(subscription, Is.Not.Null);
     }
@@ -59,16 +59,17 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
-        model.SubscribeTo<IFakeChangesFrame>(x => x.By(args =>
-        {
-            var subscriptionCalledImmidiately = false;
-            Action<Change<IFakeChangesFrame>> handler = args => subscriptionCalledImmidiately = true;
+        model.For<IFakeChangesFrame>()
+            .Subscribe(args =>
+            {
+                var subscriptionCalledImmidiately = false;
+                Action<Change<IFakeChangesFrame>> handler = args => subscriptionCalledImmidiately = true;
 
-            var subscription = model.SubscribeTo<IFakeChangesFrame>(x => x.By(handler));
+                var subscription = model.For<IFakeChangesFrame>().Subscribe(handler);
 
-            Assert.That(subscription, Is.Not.Null);
-            Assert.That(subscriptionCalledImmidiately, Is.True);
-        }));
+                Assert.That(subscription, Is.Not.Null);
+                Assert.That(subscriptionCalledImmidiately, Is.True);
+            });
 
         await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
     }
