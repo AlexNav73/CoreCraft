@@ -11,7 +11,7 @@ internal sealed class ModelSubscription : Subscription<IModelChanges>
         _modelShardSubscriptions = new Dictionary<Type, ISubscription<IModelChanges>>();
     }
 
-    public ModelShardSubscription<T> GetOrCreateSubscriberFor<T>() where T : class, IChangesFrame
+    public ModelShardSubscription<T> GetOrCreateSubscriptionFor<T>() where T : class, IChangesFrame
     {
         if (_modelShardSubscriptions.TryGetValue(typeof(T), out var subs))
         {

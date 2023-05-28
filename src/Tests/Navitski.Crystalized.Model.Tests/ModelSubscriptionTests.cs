@@ -7,49 +7,49 @@ namespace Navitski.Crystalized.Model.Tests;
 internal class ModelSubscriptionTests
 {
     [Test]
-    public void FirstCallOfToWillCreateNewSubscriberTest()
+    public void FirstCallOfToWillCreateNewSubscriptionTest()
     {
-        var subscriber = new ModelSubscription();
+        var subscription = new ModelSubscription();
 
-        var shardSubscriber = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>();
+        var shardSubscription = subscription.GetOrCreateSubscriptionFor<IFakeChangesFrame>();
 
-        Assert.That(shardSubscriber, Is.Not.Null);
+        Assert.That(shardSubscription, Is.Not.Null);
     }
 
     [Test]
-    public void SecondCallOfToWillReturnTheSameSubscriberTest()
+    public void SecondCallOfToWillReturnTheSameSubscriptionTest()
     {
-        var subscriber = new ModelSubscription();
+        var subscription = new ModelSubscription();
 
-        var shardSubscriber1 = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>();
-        var shardSubscriber2 = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>();
+        var shardSubscription1 = subscription.GetOrCreateSubscriptionFor<IFakeChangesFrame>();
+        var shardSubscription2 = subscription.GetOrCreateSubscriptionFor<IFakeChangesFrame>();
 
-        Assert.That(shardSubscriber1, Is.Not.Null);
-        Assert.That(shardSubscriber2, Is.Not.Null);
-        Assert.That(ReferenceEquals(shardSubscriber1, shardSubscriber2), Is.True);
+        Assert.That(shardSubscription1, Is.Not.Null);
+        Assert.That(shardSubscription2, Is.Not.Null);
+        Assert.That(ReferenceEquals(shardSubscription1, shardSubscription2), Is.True);
     }
 
     [Test]
     public void PublishChangesWillNotifySubscriptionsTest()
     {
-        var subscriber = new ModelSubscription();
+        var subscription = new ModelSubscription();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.Add(m => subscriptionWasCalled = true);
+        var disposable = subscription.Add(m => subscriptionWasCalled = true);
 
-        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), A.Fake<IModelChanges>()));
+        subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), A.Fake<IModelChanges>()));
 
-        Assert.That(subscription, Is.Not.Null);
+        Assert.That(disposable, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.True);
     }
 
     [Test]
     public void PublishChangesWillNotifyModelShardSubscriptionsTest()
     {
-        var subscriber = new ModelSubscription();
+        var subscription = new ModelSubscription();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.GetOrCreateSubscriberFor<IFakeChangesFrame>().Add(m => subscriptionWasCalled = true);
+        var disposable = subscription.GetOrCreateSubscriptionFor<IFakeChangesFrame>().Add(m => subscriptionWasCalled = true);
         var modelChanges = A.Fake<IModelChanges>();
         IFakeChangesFrame? ignore = null;
         var frame = A.Fake<IFakeChangesFrame>();
@@ -59,9 +59,9 @@ internal class ModelSubscriptionTests
             .Returns(true)
             .AssignsOutAndRefParameters(frame);
 
-        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
-        Assert.That(subscription, Is.Not.Null);
+        Assert.That(disposable, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.True);
     }
 }

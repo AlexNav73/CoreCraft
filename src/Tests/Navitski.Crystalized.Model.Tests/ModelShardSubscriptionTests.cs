@@ -10,103 +10,158 @@ namespace Navitski.Crystalized.Model.Tests;
 internal class ModelShardSubscriptionTests
 {
     [Test]
-    public void FirstCallOfWithCollectionWillCreateNewSubscriberTest()
+    public void FirstCallOfWithCollectionWillCreateNewSubscriptionTest()
     {
-        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
 
-        var collectionSubscriber = subscriber.With(x => x.FirstCollection);
+        var collectionSubscription = subscription.With(x => x.FirstCollection);
 
-        Assert.That(collectionSubscriber, Is.Not.Null);
+        Assert.That(collectionSubscription, Is.Not.Null);
     }
 
     [Test]
-    public void SecondCallOfWithCollectionWillReturnTheSameSubscriberTest()
+    public void SecondCallOfWithCollectionWillReturnTheSameSubscriptionTest()
     {
-        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
 
-        var collectionSubscriber1 = subscriber.With(x => x.FirstCollection);
-        var collectionSubscriber2 = subscriber.With(x => x.FirstCollection);
+        var collectionSubscription1 = subscription.With(x => x.FirstCollection);
+        var collectionSubscription2 = subscription.With(x => x.FirstCollection);
 
-        Assert.That(collectionSubscriber1, Is.Not.Null);
-        Assert.That(collectionSubscriber2, Is.Not.Null);
-        Assert.That(ReferenceEquals(collectionSubscriber1, collectionSubscriber2), Is.True);
+        Assert.That(collectionSubscription1, Is.Not.Null);
+        Assert.That(collectionSubscription2, Is.Not.Null);
+        Assert.That(ReferenceEquals(collectionSubscription1, collectionSubscription2), Is.True);
     }
 
     [Test]
-    public void FirstCallOfWithRelationWillCreateNewSubscriberTest()
+    public void LambdaArgumentNameShouldNotBeTheSameToReturnTheSameCollectionSubscriptionTest()
     {
-        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
 
-        var relationSubscriber = subscriber.With(x => x.OneToOneRelation);
+        var collectionSubscription1 = subscription.With(x => x.FirstCollection);
+        var collectionSubscription2 = subscription.With(y => y.FirstCollection);
+        var collectionSubscription3 = subscription.With(name => name.FirstCollection);
+        var collectionSubscription4 = subscription.With(nameOfVar => nameOfVar.FirstCollection);
+        var collectionSubscription5 = subscription.With(name_of_var => name_of_var.FirstCollection);
 
-        Assert.That(relationSubscriber, Is.Not.Null);
+        Assert.That(collectionSubscription1, Is.Not.Null);
+        Assert.That(collectionSubscription2, Is.Not.Null);
+        Assert.That(collectionSubscription3, Is.Not.Null);
+        Assert.That(collectionSubscription4, Is.Not.Null);
+        Assert.That(collectionSubscription5, Is.Not.Null);
+        Assert.That(ReferenceEquals(collectionSubscription1, collectionSubscription2), Is.True);
+        Assert.That(ReferenceEquals(collectionSubscription2, collectionSubscription3), Is.True);
+        Assert.That(ReferenceEquals(collectionSubscription3, collectionSubscription4), Is.True);
+        Assert.That(ReferenceEquals(collectionSubscription4, collectionSubscription5), Is.True);
     }
 
     [Test]
-    public void SecondCallOfWithRelationWillReturnTheSameSubscriberTest()
+    public void LambdaArgumentNameShouldNotBeTheSameToReturnTheSameRelationSubscriptionTest()
     {
-        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
 
-        var relationSubscriber1 = subscriber.With(x => x.OneToOneRelation);
-        var relationSubscriber2 = subscriber.With(x => x.OneToOneRelation);
+        var relationSubscription1 = subscription.With(x => x.OneToOneRelation);
+        var relationSubscription2 = subscription.With(y => y.OneToOneRelation);
+        var relationSubscription3 = subscription.With(name => name.OneToOneRelation);
+        var relationSubscription4 = subscription.With(nameOfVar => nameOfVar.OneToOneRelation);
+        var relationSubscription5 = subscription.With(name_of_var => name_of_var.OneToOneRelation);
 
-        Assert.That(relationSubscriber1, Is.Not.Null);
-        Assert.That(relationSubscriber2, Is.Not.Null);
-        Assert.That(ReferenceEquals(relationSubscriber1, relationSubscriber2), Is.True);
+        Assert.That(relationSubscription1, Is.Not.Null);
+        Assert.That(relationSubscription2, Is.Not.Null);
+        Assert.That(relationSubscription3, Is.Not.Null);
+        Assert.That(relationSubscription4, Is.Not.Null);
+        Assert.That(relationSubscription5, Is.Not.Null);
+        Assert.That(ReferenceEquals(relationSubscription1, relationSubscription2), Is.True);
+        Assert.That(ReferenceEquals(relationSubscription2, relationSubscription3), Is.True);
+        Assert.That(ReferenceEquals(relationSubscription3, relationSubscription4), Is.True);
+        Assert.That(ReferenceEquals(relationSubscription4, relationSubscription5), Is.True);
+    }
+
+    [Test]
+    public void SubscriptionToInvalidCollectionOrRelationShouldThrowExceptionTest()
+    {
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
+        var fakeCollection = A.Fake<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>();
+        var fakeRelation = A.Fake<IRelationChangeSet<FirstEntity, SecondEntity>>();
+
+        Assert.Throws<InvalidOperationException>(() => subscription.With(x => fakeCollection));
+        Assert.Throws<InvalidOperationException>(() => subscription.With(y => fakeRelation));
+    }
+
+    [Test]
+    public void FirstCallOfWithRelationWillCreateNewSubscriptionTest()
+    {
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
+
+        var relationSubscription = subscription.With(x => x.OneToOneRelation);
+
+        Assert.That(relationSubscription, Is.Not.Null);
+    }
+
+    [Test]
+    public void SecondCallOfWithRelationWillReturnTheSameSubscriptionTest()
+    {
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
+
+        var relationSubscription1 = subscription.With(x => x.OneToOneRelation);
+        var relationSubscription2 = subscription.With(x => x.OneToOneRelation);
+
+        Assert.That(relationSubscription1, Is.Not.Null);
+        Assert.That(relationSubscription2, Is.Not.Null);
+        Assert.That(ReferenceEquals(relationSubscription1, relationSubscription2), Is.True);
     }
 
     [Test]
     public void PushChangesWillNotifySubscriptionsTest()
     {
-        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
         IModelChanges modelChanges = CreateFakeModelChanges();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.Add(m => subscriptionWasCalled = true);
+        var disposable = subscription.Add(m => subscriptionWasCalled = true);
 
-        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
-        Assert.That(subscription, Is.Not.Null);
+        Assert.That(disposable, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.True);
     }
 
     [Test]
     public void PushChangesWillNotNotifySubscriptionsWhenNoChangesTest()
     {
-        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
         IModelChanges modelChanges = CreateFakeModelChanges(frameHasChanges: false);
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.Add(m => subscriptionWasCalled = true);
+        var disposable = subscription.Add(m => subscriptionWasCalled = true);
 
-        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
-        Assert.That(subscription, Is.Not.Null);
+        Assert.That(disposable, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.False);
     }
 
     [Test]
     public void PushChangesWillNotNotifySubscriptionsWhenMissingChangesFrameTest()
     {
-        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
         IModelChanges modelChanges = CreateFakeModelChanges(hasChangesFrame: false);
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.Add(m => subscriptionWasCalled = true);
+        var disposable = subscription.Add(m => subscriptionWasCalled = true);
 
-        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
-        Assert.That(subscription, Is.Not.Null);
+        Assert.That(disposable, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.False);
     }
 
     [Test]
     public void PushChangesWillNotifyCollectionSubscriptionsTest()
     {
-        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.With(x => x.FirstCollection).Add(m => subscriptionWasCalled = true);
+        var disposable = subscription.With(x => x.FirstCollection).Add(m => subscriptionWasCalled = true);
         var fakeCollectionChanges = A.Fake<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>();
         var frame = A.Fake<IFakeChangesFrame>();
         var modelChanges = CreateFakeModelChanges(frame);
@@ -115,19 +170,19 @@ internal class ModelShardSubscriptionTests
         A.CallTo(() => frame.HasChanges()).Returns(true);
         A.CallTo(() => frame.FirstCollection).Returns(fakeCollectionChanges);
 
-        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
-        Assert.That(subscription, Is.Not.Null);
+        Assert.That(disposable, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.True);
     }
 
     [Test]
     public void PushChangesWillNotifyRelationSubscriptionsTest()
     {
-        var subscriber = new ModelShardSubscription<IFakeChangesFrame>();
+        var subscription = new ModelShardSubscription<IFakeChangesFrame>();
 
         var subscriptionWasCalled = false;
-        var subscription = subscriber.With(x => x.OneToOneRelation).Add(m => subscriptionWasCalled = true);
+        var disposable = subscription.With(x => x.OneToOneRelation).Add(m => subscriptionWasCalled = true);
         var fakeRelationChanges = A.Fake<IRelationChangeSet<FirstEntity, SecondEntity>>();
         var frame = A.Fake<IFakeChangesFrame>();
         var modelChanges = CreateFakeModelChanges(frame);
@@ -136,9 +191,9 @@ internal class ModelShardSubscriptionTests
         A.CallTo(() => frame.HasChanges()).Returns(true);
         A.CallTo(() => frame.OneToOneRelation).Returns(fakeRelationChanges);
 
-        subscriber.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
+        subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
-        Assert.That(subscription, Is.Not.Null);
+        Assert.That(disposable, Is.Not.Null);
         Assert.That(subscriptionWasCalled, Is.True);
     }
 
