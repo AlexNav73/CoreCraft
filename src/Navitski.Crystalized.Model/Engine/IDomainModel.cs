@@ -13,7 +13,7 @@ public interface IDomainModel : IModel
     /// <summary>
     ///     Subscribes to the model changes notifications
     /// </summary>
-    /// <param name="onModelChanges">A subscriber</param>
+    /// <param name="onModelChanges">A changes handler</param>
     /// <returns>Subscription</returns>
     IDisposable Subscribe(Action<Change<IModelChanges>> onModelChanges);
 

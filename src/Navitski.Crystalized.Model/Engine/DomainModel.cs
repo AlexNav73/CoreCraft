@@ -16,7 +16,7 @@ public abstract class DomainModel : IDomainModel
 {
     private readonly View _view;
     private readonly IScheduler _scheduler;
-    private readonly ModelSubscription _modelSubscriber;
+    private readonly ModelSubscription _modelSubscription;
 
     private volatile Change<IModelChanges>? _currentChanges;
 
@@ -27,7 +27,7 @@ public abstract class DomainModel : IDomainModel
     {
         _view = new View(shards);
         _scheduler = scheduler;
-        _modelSubscriber = new ModelSubscription();
+        _modelSubscription = new ModelSubscription();
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public abstract class DomainModel : IDomainModel
     /// <inheritdoc cref="IDomainModel.Subscribe(Action{Change{IModelChanges}})"/>
     public IDisposable Subscribe(Action<Change<IModelChanges>> onModelChanges)
     {
-        var subscription = _modelSubscriber.Add(onModelChanges);
+        var subscription = _modelSubscription.Add(onModelChanges);
 
         if (_currentChanges != null)
         {
@@ -60,7 +60,7 @@ public abstract class DomainModel : IDomainModel
     public IModelShardSubscriptionBuilder<T> For<T>()
          where T : class, IChangesFrame
     {
-        return new ModelShardSubscriptionBuilder<T>(_modelSubscriber.GetOrCreateSubscriberFor<T>(), _currentChanges);
+        return new ModelShardSubscriptionBuilder<T>(_modelSubscription.GetOrCreateSubscriptionFor<T>(), _currentChanges);
     }
 
     /// <inheritdoc cref="IDomainModel.Run{T}(Action{T, CancellationToken}, CancellationToken)"/>
@@ -96,7 +96,7 @@ public abstract class DomainModel : IDomainModel
             var result = _view.ApplySnapshot(snapshot);
             var eventArgs = CreateChangeObject(result, changes);
 
-            NotifySubscribers(eventArgs);
+            NotifySubscriptions(eventArgs);
             OnModelChanged(eventArgs);
         }
     }
@@ -184,7 +184,7 @@ public abstract class DomainModel : IDomainModel
             var result = _view.ApplySnapshot(snapshot);
             var eventArgs = CreateChangeObject(result, changes);
 
-            NotifySubscribers(eventArgs);
+            NotifySubscriptions(eventArgs);
         }
     }
 
@@ -212,15 +212,15 @@ public abstract class DomainModel : IDomainModel
             var result = _view.ApplySnapshot(snapshot);
             var changeObject = CreateChangeObject(result, changes);
 
-            NotifySubscribers(changeObject);
+            NotifySubscriptions(changeObject);
         }
     }
 
-    private void NotifySubscribers(Change<IModelChanges> change)
+    private void NotifySubscriptions(Change<IModelChanges> change)
     {
         _currentChanges = change;
 
-        _modelSubscriber.Publish(change);
+        _modelSubscription.Publish(change);
 
         _currentChanges = null;
     }

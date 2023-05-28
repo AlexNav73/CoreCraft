@@ -19,15 +19,16 @@ internal sealed class ModelShardSubscription<T> : Subscription<T>, ISubscription
         where TEntity : Entity
         where TProperties : Properties
     {
-        if (_subscriptions.TryGetValue(expression, out var subs))
+        var collectionName = GetCollectionOrRelationName(expression);
+        if (_subscriptions.TryGetValue(collectionName, out var subs))
         {
             return (CollectionSubscription<T, TEntity, TProperties>)subs;
         }
 
-        var subscriber = new CollectionSubscription<T, TEntity, TProperties>(accessor);
-        _subscriptions.Add(expression, subscriber);
+        var subscription = new CollectionSubscription<T, TEntity, TProperties>(accessor);
+        _subscriptions.Add(collectionName, subscription);
 
-        return subscriber;
+        return subscription;
     }
 
     public RelationSubscription<T, TParent, TChild> With<TParent, TChild>(
@@ -36,15 +37,16 @@ internal sealed class ModelShardSubscription<T> : Subscription<T>, ISubscription
         where TParent : Entity
         where TChild : Entity
     {
-        if (_subscriptions.TryGetValue(expression, out var subs))
+        var relationName = GetCollectionOrRelationName(expression);
+        if (_subscriptions.TryGetValue(relationName, out var subs))
         {
             return (RelationSubscription<T, TParent, TChild>)subs;
         }
 
-        var subscriber = new RelationSubscription<T, TParent, TChild>(accessor);
-        _subscriptions.Add(expression, subscriber);
+        var subscription = new RelationSubscription<T, TParent, TChild>(accessor);
+        _subscriptions.Add(relationName, subscription);
 
-        return subscriber;
+        return subscription;
     }
 
     public void Publish(Change<IModelChanges> change)
@@ -62,5 +64,16 @@ internal sealed class ModelShardSubscription<T> : Subscription<T>, ISubscription
                 subscription.Publish(msg);
             }
         }
+    }
+
+    private static string GetCollectionOrRelationName(string expression)
+    {
+        var indexOfLastPoint = expression.LastIndexOf('.');
+        if (indexOfLastPoint == -1)
+        {
+            throw new InvalidOperationException($"Unable to subscribe to missing member in {typeof(T).FullName}");
+        }
+
+        return expression.Substring(indexOfLastPoint + 1);
     }
 }

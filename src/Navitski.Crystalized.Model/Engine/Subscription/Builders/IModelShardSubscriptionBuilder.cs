@@ -17,7 +17,7 @@ public interface IModelShardSubscriptionBuilder<T> : ISubscriptionBuilder<T>
     /// <typeparam name="TProperties">A type of a properties</typeparam>
     /// <param name="accessor">A function to access a collection property</param>
     /// <param name="expression">A string representation of accessor function</param>
-    /// <returns>A subscriber for the collection changes</returns>
+    /// <returns>A subscription builder for the collection changes</returns>
     ICollectionSubscriptionBuilder<TEntity, TProperties> With<TEntity, TProperties>(
         Func<T, ICollectionChangeSet<TEntity, TProperties>> accessor,
         [CallerArgumentExpression(nameof(accessor))] string expression = "")
@@ -31,7 +31,7 @@ public interface IModelShardSubscriptionBuilder<T> : ISubscriptionBuilder<T>
     /// <typeparam name="TChild">A type of child entity</typeparam>
     /// <param name="accessor">A function to access a relation property</param>
     /// <param name="expression">A string representation of accessor function</param>
-    /// <returns>A subscriber for the relation changes</returns>
+    /// <returns>A subscription builder for the relation changes</returns>
     IRelationSubscriptionBuilder<TParent, TChild> With<TParent, TChild>(
         Func<T, IRelationChangeSet<TParent, TChild>> accessor,
         [CallerArgumentExpression(nameof(accessor))] string expression = "")
