@@ -115,9 +115,20 @@ public class RelationTests
     }
 
     [Test]
-    public void RelationEnumeratorTest()
+    public void RelationGetEnumeratorTest()
     {
         _relation!.GetEnumerator();
+
+        A.CallTo(() => _parentMapping!.GetEnumerator()).MustHaveHappened();
+        A.CallTo(() => _childMapping!.GetEnumerator()).MustNotHaveHappened();
+    }
+
+    [Test]
+    public void RelationNonGenericGetEnumeratorTest()
+    {
+        System.Collections.IEnumerable relation = _relation!;
+
+        relation.GetEnumerator();
 
         A.CallTo(() => _parentMapping!.GetEnumerator()).MustHaveHappened();
         A.CallTo(() => _childMapping!.GetEnumerator()).MustNotHaveHappened();
