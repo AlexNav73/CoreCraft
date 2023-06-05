@@ -42,7 +42,7 @@ public class CollectionTests
     }
 
     [Test]
-    public void RemoveEntitiyFromCollectionTest()
+    public void RemoveEntityFromCollectionTest()
     {
         var entity = _collection!.Add(new());
 
@@ -175,5 +175,15 @@ public class CollectionTests
         Assert.That(pairs.Length, Is.EqualTo(1));
         Assert.That(pairs[0].entity, Is.EqualTo(entity));
         Assert.That(pairs[0].properties, Is.EqualTo(property));
+    }
+
+    [Test]
+    public void GetEnumeratorTest()
+    {
+        System.Collections.IEnumerable collection = _collection!;
+        var enumerator = collection.GetEnumerator();
+
+        Assert.That(enumerator, Is.Not.Null);
+        Assert.That(enumerator.MoveNext(), Is.False);
     }
 }

@@ -100,4 +100,15 @@ public class RelationChangeSetTests
         Assert.That(merged.Count(), Is.EqualTo(0));
         Assert.That(merged.HasChanges(), Is.False);
     }
+
+    [Test]
+    public void NonGenericGetEnumeratorTest()
+    {
+        System.Collections.IEnumerable relation = new RelationChangeSet<FirstEntity, SecondEntity>("");
+
+        var enumerator = relation.GetEnumerator();
+
+        Assert.That(enumerator, Is.Not.Null);
+        Assert.That(enumerator.MoveNext(), Is.False);
+    }
 }

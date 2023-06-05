@@ -90,8 +90,8 @@ public class TrackableCollectionTests
     public void TrackableCollectionContainsTest()
     {
         var entity = new FirstEntity();
-        
-        _collection!.Contains(entity);
+
+        _trackable!.Contains(entity);
 
         A.CallTo(() => _collection!.Contains(entity)).MustHaveHappened();
     }
