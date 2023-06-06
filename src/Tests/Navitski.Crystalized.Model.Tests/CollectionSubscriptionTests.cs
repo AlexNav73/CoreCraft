@@ -14,7 +14,7 @@ internal class CollectionSubscriptionTests
         var onEntityChanged1Called = false;
         var onEntityChanged2Called = false;
 
-        var firstEntity = BindToEntity(collectionSubscription , () => onEntityChanged1Called = true);
+        var firstEntity = BindToEntity(collectionSubscription, () => onEntityChanged1Called = true);
         var secondItem = CreateEntityBinding(() => onEntityChanged2Called = true);
         var secondEntity = new FirstEntity();
 
@@ -99,6 +99,7 @@ internal class CollectionSubscriptionTests
         collectionSubscription.Publish(CreateChanges(new()));
 
         // binding is dropped here
+        binding = null;
     }
 
     private FirstEntity BindToEntity(
@@ -111,6 +112,7 @@ internal class CollectionSubscriptionTests
         collectionSubscription.Bind(entity, binding);
 
         // binding is dropped here
+        binding = null;
         return entity;
     }
 
