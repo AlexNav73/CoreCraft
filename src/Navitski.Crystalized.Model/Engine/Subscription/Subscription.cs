@@ -2,16 +2,16 @@
 
 namespace Navitski.Crystalized.Model.Engine.Subscription;
 
-internal abstract class Subscription<T> : ISubscription<T>
+internal abstract class Subscription<T> : ISubscription<T>, IObservable<Change<T>>
 {
-    private readonly HashSet<Action<Change<T>>> _handlers;
+    private readonly HashSet<IObserver<Change<T>>> _handlers;
 
     public Subscription()
     {
-        _handlers = new HashSet<Action<Change<T>>>();
+        _handlers = new HashSet<IObserver<Change<T>>>();
     }
 
-    public IDisposable Add(Action<Change<T>> onModelChanges)
+    public IDisposable Subscribe(IObserver<Change<T>> onModelChanges)
     {
         if (_handlers.Contains(onModelChanges))
         {
@@ -27,7 +27,7 @@ internal abstract class Subscription<T> : ISubscription<T>
     {
         foreach (var handler in _handlers.ToArray())
         {
-            handler(change);
+            handler.OnNext(change);
         }
     }
 }

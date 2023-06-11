@@ -42,13 +42,18 @@ internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : I
         });
     }
 
-    public IDisposable Subscribe(Action<Change<ICollectionChangeSet<TEntity, TProperties>>> handler)
+    public IDisposable Subscribe(IObserver<Change<ICollectionChangeSet<TEntity, TProperties>>> observer)
     {
-        var subscription = _root.Add(handler);
+        var subscription = _root.Subscribe(observer);
 
-        NotifyIfHasChanges(collection => handler(new Change<ICollectionChangeSet<TEntity, TProperties>>(_changes!.OldModel, _changes.NewModel, collection)));
+        NotifyIfHasChanges(collection => observer.OnNext(new Change<ICollectionChangeSet<TEntity, TProperties>>(_changes!.OldModel, _changes.NewModel, collection)));
 
         return subscription;
+    }
+
+    public IDisposable Subscribe(Action<Change<ICollectionChangeSet<TEntity, TProperties>>> handler)
+    {
+        return Subscribe(new AnonymousObserver<ICollectionChangeSet<TEntity, TProperties>>(handler));
     }
 
     private void NotifyIfHasChanges(Action<ICollectionChangeSet<TEntity, TProperties>> action)

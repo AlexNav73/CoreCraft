@@ -4,7 +4,7 @@
 ///     A common interface for all subscription builders
 /// </summary>
 /// <typeparam name="T">A change type</typeparam>
-public interface ISubscriptionBuilder<T>
+public interface ISubscriptionBuilder<T> : IObservable<Change<T>>
 {
     /// <summary>
     ///     Subscribes a delegate to a change event
