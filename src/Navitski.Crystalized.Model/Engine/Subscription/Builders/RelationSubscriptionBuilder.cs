@@ -16,19 +16,24 @@ internal sealed class RelationSubscriptionBuilder<T, TParent, TChild> : IRelatio
         _changes = changes;
     }
 
-    public IDisposable Subscribe(Action<Change<IRelationChangeSet<TParent, TChild>>> handler)
+    public IDisposable Subscribe(IObserver<Change<IRelationChangeSet<TParent, TChild>>> observer)
     {
-        var subscription = _root.Add(handler);
+        var subscription = _root.Subscribe(observer);
 
         if (_changes != null)
         {
             var relation = _root.Accessor(_changes.Hunk);
             if (relation.HasChanges())
             {
-                handler(new Change<IRelationChangeSet<TParent, TChild>>(_changes.OldModel, _changes.NewModel, relation));
+                observer.OnNext(new Change<IRelationChangeSet<TParent, TChild>>(_changes.OldModel, _changes.NewModel, relation));
             }
         }
 
         return subscription;
+    }
+
+    public IDisposable Subscribe(Action<Change<IRelationChangeSet<TParent, TChild>>> handler)
+    {
+        return Subscribe(new AnonymousObserver<IRelationChangeSet<TParent, TChild>>(handler));
     }
 }

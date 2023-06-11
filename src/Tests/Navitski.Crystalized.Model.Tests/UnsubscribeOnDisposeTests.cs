@@ -7,10 +7,10 @@ namespace Navitski.Crystalized.Model.Tests;
 public class UnsubscribeOnDisposeTests
 {
     [Test]
-    public void UnsubscribeHappendsTest()
+    public void UnsubscribeHappensTest()
     {
-        var method = (Change<IModelChanges> args) => { };
-        var subscriptions = new HashSet<Action<Change<IModelChanges>>>() { method };
+        var method = A.Fake<IObserver<Change<IModelChanges>>>();
+        var subscriptions = new HashSet<IObserver<Change<IModelChanges>>>() { method };
         var subscription = new UnsubscribeOnDispose<Change<IModelChanges>>(method, subscriptions);
 
         Assert.That(subscriptions, Has.Member(method));

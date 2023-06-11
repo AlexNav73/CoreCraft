@@ -33,16 +33,21 @@ internal sealed class ModelShardSubscriptionBuilder<T> : IModelShardSubscription
         return new RelationSubscriptionBuilder<T, TParent, TChild>(_root.With(accessor, expression), _changes);
     }
 
-    public IDisposable Subscribe(Action<Change<T>> handler)
+    public IDisposable Subscribe(IObserver<Change<T>> observer)
     {
-        var subscription = _root.Add(handler);
+        var subscription = _root.Subscribe(observer);
 
         if (_changes != null)
         {
-            handler(_changes);
+            observer.OnNext(_changes);
         }
 
         return subscription;
+    }
+
+    public IDisposable Subscribe(Action<Change<T>> handler)
+    {
+       return Subscribe(new AnonymousObserver<T>(handler));
     }
 
     private static Change<T>? Map(Change<IModelChanges>? changes)
