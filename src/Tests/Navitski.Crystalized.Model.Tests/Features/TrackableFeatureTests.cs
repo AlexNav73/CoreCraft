@@ -1,6 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
-using Navitski.Crystalized.Model.Engine.Feature;
+using Navitski.Crystalized.Model.Engine.Features;
 
 namespace Navitski.Crystalized.Model.Tests.Features;
 

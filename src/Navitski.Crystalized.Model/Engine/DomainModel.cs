@@ -1,7 +1,7 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Commands;
 using Navitski.Crystalized.Model.Engine.Exceptions;
-using Navitski.Crystalized.Model.Engine.Feature;
+using Navitski.Crystalized.Model.Engine.Features;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
 using Navitski.Crystalized.Model.Engine.Subscription;

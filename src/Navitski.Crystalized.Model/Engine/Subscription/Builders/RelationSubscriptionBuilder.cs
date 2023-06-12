@@ -31,9 +31,4 @@ internal sealed class RelationSubscriptionBuilder<T, TParent, TChild> : IRelatio
 
         return subscription;
     }
-
-    public IDisposable Subscribe(Action<Change<IRelationChangeSet<TParent, TChild>>> handler)
-    {
-        return Subscribe(new AnonymousObserver<IRelationChangeSet<TParent, TChild>>(handler));
-    }
 }

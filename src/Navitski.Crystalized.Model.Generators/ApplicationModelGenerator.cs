@@ -33,7 +33,7 @@ internal partial class ApplicationModelGenerator : GeneratorBase
             using (var writer = new StringWriter())
             using (var code = new IndentedTextWriter(writer, "    "))
             {
-                code.Preambula();
+                code.Preamble();
                 Generate(assemblyName, file.name, code, modelScheme);
 
                 AddSourceFile(context, file.name, writer.ToString());

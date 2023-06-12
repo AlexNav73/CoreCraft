@@ -2,7 +2,7 @@
 
 internal static class IndentedTextWriterExtensions
 {
-    public static void Preambula(this IndentedTextWriter code)
+    public static void Preamble(this IndentedTextWriter code)
     {
         code.WriteLine(@"
 //------------------------------------------------------------------------------

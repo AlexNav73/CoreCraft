@@ -5,6 +5,7 @@ using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
 using Navitski.Crystalized.Model.Engine.Subscription;
+using Navitski.Crystalized.Model.Engine.Subscription.Extensions;
 using Navitski.Crystalized.Model.Storage.Sqlite;
 using Navitski.Crystalized.Model.Storage.Sqlite.Migrations;
 

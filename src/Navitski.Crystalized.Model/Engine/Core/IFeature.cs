@@ -1,4 +1,4 @@
-﻿using Navitski.Crystalized.Model.Engine.Feature;
+﻿using Navitski.Crystalized.Model.Engine.Features;
 
 namespace Navitski.Crystalized.Model.Engine.Core;
 

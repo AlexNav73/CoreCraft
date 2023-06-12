@@ -45,11 +45,6 @@ internal sealed class ModelShardSubscriptionBuilder<T> : IModelShardSubscription
         return subscription;
     }
 
-    public IDisposable Subscribe(Action<Change<T>> handler)
-    {
-       return Subscribe(new AnonymousObserver<T>(handler));
-    }
-
     private static Change<T>? Map(Change<IModelChanges>? changes)
     {
         if (changes != null && changes.Hunk.TryGetFrame<T>(out var frame) && frame.HasChanges())
