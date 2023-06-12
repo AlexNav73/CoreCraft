@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="JetBrains.DotMemoryUnit" Version="3.2.20220510" />
-    <PackageReference Include="Nuke.Common" Version="6.3.0" />
+    <PackageReference Include="Nuke.Common" Version="7.0.2" />
 
     <PackageDownload Include="NUnit.ConsoleRunner" Version="[3.16.0]" />
     <PackageDownload Include="GitVersion.Tool" Version="[5.11.1]" />
