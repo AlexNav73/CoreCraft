@@ -51,11 +51,6 @@ internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : I
         return subscription;
     }
 
-    public IDisposable Subscribe(Action<Change<ICollectionChangeSet<TEntity, TProperties>>> handler)
-    {
-        return Subscribe(new AnonymousObserver<ICollectionChangeSet<TEntity, TProperties>>(handler));
-    }
-
     private void NotifyIfHasChanges(Action<ICollectionChangeSet<TEntity, TProperties>> action)
     {
         if (_changes != null)

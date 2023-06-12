@@ -1,5 +1,5 @@
 ﻿using Navitski.Crystalized.Model.Engine.Core;
-using Navitski.Crystalized.Model.Engine.Feature;
+using Navitski.Crystalized.Model.Engine.Features;
 using Navitski.Crystalized.Model.Engine.Lazy;
 
 namespace Navitski.Crystalized.Model.Tests.Features;
