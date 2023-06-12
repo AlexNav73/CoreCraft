@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using Navitski.Crystalized.Model.Engine;
 using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Subscription;
+using Navitski.Crystalized.Model.Engine.Subscription.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
