@@ -188,7 +188,7 @@ internal partial class ApplicationModelGenerator
         },
         () =>
         {
-            code.WriteLine("public IChangesFrame GetOrAddFrame(IWritableModelChanges modelChanges)");
+            code.WriteLine("IChangesFrame IFeatureContext.GetOrAddFrame(IWritableModelChanges modelChanges)");
             code.Block(() =>
             {
                 code.WriteLine($"return modelChanges.Register(static () => new {modelShard.Name}ChangesFrame());");
@@ -277,12 +277,7 @@ internal partial class ApplicationModelGenerator
 
         void DefineGetMethod(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine("public ICollectionChangeSet<TEntity, TProperty> Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)");
-            code.WithIndent(c =>
-            {
-                code.WriteLine("where TEntity : Entity");
-                code.WriteLine("where TProperty : Properties");
-            });
+            code.WriteLine("ICollectionChangeSet<TEntity, TProperty> IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)");
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -295,12 +290,7 @@ internal partial class ApplicationModelGenerator
             });
             code.EmptyLine();
 
-            code.WriteLine("public IRelationChangeSet<TParent, TChild> Get<TParent, TChild>(IRelation<TParent, TChild> relation)");
-            code.WithIndent(c =>
-            {
-                code.WriteLine("where TParent : Entity");
-                code.WriteLine("where TChild : Entity");
-            });
+            code.WriteLine("IRelationChangeSet<TParent, TChild> IChangesFrame.Get<TParent, TChild>(IRelation<TParent, TChild> relation)");
             code.Block(() =>
             {
                 foreach (var relation in modelShard.Relations)

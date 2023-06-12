@@ -26,7 +26,7 @@ public class ModelShardTests
     [Test]
     public void GetOrAddFrameWithMissingFrameTest()
     {
-        var modelShard = new FakeModelShard();
+        IFeatureContext modelShard = new FakeModelShard();
         var modelChanges = new ModelChanges();
 
         var registered = modelShard.GetOrAddFrame(modelChanges);
@@ -38,7 +38,7 @@ public class ModelShardTests
     [Test]
     public void GetOrAddFrameWithFrameTest()
     {
-        var modelShard = new FakeModelShard();
+        IFeatureContext modelShard = new FakeModelShard();
         var modelChanges = new ModelChanges();
         var frame = modelChanges.Register(() => new FakeChangesFrame());
 

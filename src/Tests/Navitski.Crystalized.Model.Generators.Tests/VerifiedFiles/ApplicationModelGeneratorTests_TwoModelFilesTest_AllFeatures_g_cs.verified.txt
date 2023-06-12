@@ -140,7 +140,7 @@ namespace compilation.AllFeatures
 
     internal sealed partial class FakeModelShard : IFeatureContext
     {
-        public IChangesFrame GetOrAddFrame(IWritableModelChanges modelChanges)
+        IChangesFrame IFeatureContext.GetOrAddFrame(IWritableModelChanges modelChanges)
         {
             return modelChanges.Register(static () => new FakeChangesFrame());
         }
@@ -184,9 +184,7 @@ namespace compilation.AllFeatures
         public IRelationChangeSet<FirstEntity, SecondEntity> ManyToOneRelation { get; private set; }
         public IRelationChangeSet<FirstEntity, SecondEntity> ManyToManyRelation { get; private set; }
 
-        public ICollectionChangeSet<TEntity, TProperty> Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
-            where TEntity : Entity
-            where TProperty : Properties
+        ICollectionChangeSet<TEntity, TProperty> IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
         {
             if (FirstCollection.Id == collection.Id) return FirstCollection as ICollectionChangeSet<TEntity, TProperty>;
             if (SecondCollection.Id == collection.Id) return SecondCollection as ICollectionChangeSet<TEntity, TProperty>;
@@ -194,9 +192,7 @@ namespace compilation.AllFeatures
             throw new System.InvalidOperationException("Unable to find collection's changes set");
         }
 
-        public IRelationChangeSet<TParent, TChild> Get<TParent, TChild>(IRelation<TParent, TChild> relation)
-            where TParent : Entity
-            where TChild : Entity
+        IRelationChangeSet<TParent, TChild> IChangesFrame.Get<TParent, TChild>(IRelation<TParent, TChild> relation)
         {
             if (OneToOneRelation.Id == relation.Id) return OneToOneRelation as IRelationChangeSet<TParent, TChild>;
             if (OneToManyRelation.Id == relation.Id) return OneToManyRelation as IRelationChangeSet<TParent, TChild>;
