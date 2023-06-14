@@ -25,22 +25,26 @@ internal partial class Build : NukeBuild
 
     static AbsolutePath SourceDirectory => RootDirectory / "src";
     static AbsolutePath PackagesDirectory => RootDirectory / "packages";
-    static AbsolutePath CoverageDirectory = RootDirectory / "coverage";
+    static AbsolutePath CoverageDirectory => RootDirectory / "coverage";
+    static AbsolutePath ReportDirectory => RootDirectory / "coveragereport";
 
     [CI]
     readonly GitHubActions GitHubActions;
 
-    string NugetOrgRegistry => GitHubActions != null
+    string NuGetOrgRegistry => GitHubActions != null
         ? "https://api.nuget.org/v3/index.json"
         : null;
+
     IEnumerable<AbsolutePath> PushPackageFiles => PackagesDirectory.GlobFiles("*.nupkg");
 
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
         {
-            SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-            EnsureCleanDirectory(PackagesDirectory);
+            SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
+            PackagesDirectory.CreateOrCleanDirectory();
+            CoverageDirectory.CreateOrCleanDirectory();
+            ReportDirectory.CreateOrCleanDirectory();
         });
 
     Target Restore => _ => _
@@ -77,7 +81,7 @@ internal partial class Build : NukeBuild
         .Triggers(RunMemoryTests, Coverage)
         .Executes(() =>
         {
-            EnsureCleanDirectory(CoverageDirectory);
+            CoverageDirectory.CreateOrCleanDirectory();
 
             DotNetTest(s => s
                 .SetProjectFile(Solution)
@@ -86,7 +90,7 @@ internal partial class Build : NukeBuild
                 .SetNoRestore(SucceededTargets.Contains(Restore))
                 .AddProperty("CollectCoverage", true)
                 .AddProperty("CoverletOutputFormat", "\\\"cobertura,json\\\"")
-                .AddProperty("CoverletOutput", CoverageDirectory + "\\")
+                .AddProperty("CoverletOutput", $"{CoverageDirectory}\\")
                 .AddProperty("ExcludeByAttribute", "\\\"Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute\\\"")
                 .AddProperty("Exclude", $"\\\"[{Solution.Tests.Navitski_Crystalized_Model_Tests_Infrastructure.Name}]*,[{Solution.Navitski_Crystalized_Model.Name}]System.*\\\"")
                 .AddProperty("MergeWith", CoverageDirectory / "coverage.json")
@@ -105,13 +109,12 @@ internal partial class Build : NukeBuild
         .DependsOn(RunTests)
         .Executes(() =>
         {
-            var reportDirectory = RootDirectory / "coveragereport";
-            EnsureCleanDirectory(reportDirectory);
+            ReportDirectory.CreateOrCleanDirectory();
 
             ReportGenerator(s => s
                 .SetFramework(Solution._build.GetTargetFrameworks().Single())
                 .SetReports(CoverageDirectory.GlobFiles("*.cobertura.xml").Select(x => x.ToString()))
-                .SetTargetDirectory(reportDirectory)
+                .SetTargetDirectory(ReportDirectory)
                 .SetReportTypes(ReportTypes.Html));
         });
 
@@ -120,6 +123,8 @@ internal partial class Build : NukeBuild
         .Produces(PackagesDirectory / "*.nupkg")
         .Executes(() =>
         {
+            PackagesDirectory.CreateOrCleanDirectory();
+
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model)
                 .Apply(PackSettingsBase)
@@ -167,7 +172,7 @@ internal partial class Build : NukeBuild
         .Executes(() =>
         {
             DotNetNuGetPush(s => s
-                .SetSource(NugetOrgRegistry)
+                .SetSource(NuGetOrgRegistry)
                 .SetApiKey(RegistryApiKey)
                 .SetSkipDuplicate(true)
                 .CombineWith(PushPackageFiles, (_, p) => _
