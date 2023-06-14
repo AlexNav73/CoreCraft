@@ -20,7 +20,12 @@ internal class TrackableFeature : IFeature
         var frame = context.GetOrAddFrame(_modelChanges);
         var collectionChangesSet = frame.Get(collection);
 
-        return new TrackableCollection<TEntity, TProperties>(collectionChangesSet, collection);
+        if (collectionChangesSet is not null)
+        {
+            return new TrackableCollection<TEntity, TProperties>(collectionChangesSet, collection);
+        }
+
+        return collection;
     }
 
     public IMutableRelation<TParent, TChild> Decorate<TParent, TChild>(
@@ -32,6 +37,11 @@ internal class TrackableFeature : IFeature
         var frame = context.GetOrAddFrame(_modelChanges);
         var relationChangesSet = frame.Get(relation);
 
-        return new TrackableRelation<TParent, TChild>(relationChangesSet, relation);
+        if (relationChangesSet is not null)
+        {
+            return new TrackableRelation<TParent, TChild>(relationChangesSet, relation);
+        }
+
+        return relation;
     }
 }

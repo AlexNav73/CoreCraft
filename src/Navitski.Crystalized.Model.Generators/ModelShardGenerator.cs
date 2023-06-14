@@ -277,7 +277,7 @@ internal partial class ApplicationModelGenerator
 
         void DefineGetMethod(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine("ICollectionChangeSet<TEntity, TProperty> IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)");
+            code.WriteLine("ICollectionChangeSet<TEntity, TProperty>? IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)");
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -290,7 +290,7 @@ internal partial class ApplicationModelGenerator
             });
             code.EmptyLine();
 
-            code.WriteLine("IRelationChangeSet<TParent, TChild> IChangesFrame.Get<TParent, TChild>(IRelation<TParent, TChild> relation)");
+            code.WriteLine("IRelationChangeSet<TParent, TChild>? IChangesFrame.Get<TParent, TChild>(IRelation<TParent, TChild> relation)");
             code.Block(() =>
             {
                 foreach (var relation in modelShard.Relations)

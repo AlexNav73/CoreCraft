@@ -184,7 +184,7 @@ namespace compilation.AnotherModelFile
         public IRelationChangeSet<FirstEntity, SecondEntity> ManyToOneRelation { get; private set; }
         public IRelationChangeSet<FirstEntity, SecondEntity> ManyToManyRelation { get; private set; }
 
-        ICollectionChangeSet<TEntity, TProperty> IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
+        ICollectionChangeSet<TEntity, TProperty>? IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
         {
             if (FirstCollection.Id == collection.Id) return FirstCollection as ICollectionChangeSet<TEntity, TProperty>;
             if (SecondCollection.Id == collection.Id) return SecondCollection as ICollectionChangeSet<TEntity, TProperty>;
@@ -192,7 +192,7 @@ namespace compilation.AnotherModelFile
             throw new System.InvalidOperationException("Unable to find collection's changes set");
         }
 
-        IRelationChangeSet<TParent, TChild> IChangesFrame.Get<TParent, TChild>(IRelation<TParent, TChild> relation)
+        IRelationChangeSet<TParent, TChild>? IChangesFrame.Get<TParent, TChild>(IRelation<TParent, TChild> relation)
         {
             if (OneToOneRelation.Id == relation.Id) return OneToOneRelation as IRelationChangeSet<TParent, TChild>;
             if (OneToManyRelation.Id == relation.Id) return OneToManyRelation as IRelationChangeSet<TParent, TChild>;
