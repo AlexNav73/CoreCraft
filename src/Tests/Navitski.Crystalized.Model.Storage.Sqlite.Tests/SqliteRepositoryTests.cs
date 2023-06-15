@@ -165,4 +165,30 @@ public class SqliteRepositoryTests
 
         Assert.That(relation.Count, Is.EqualTo(0));
     }
+
+    [Test]
+    public void SelectFromNotExistingCollectionTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+
+        var collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new(id), () => new());
+
+        repository.Select(FakeModelShardStorage.FirstCollectionInfo, collection);
+
+        Assert.That(collection.Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void SelectFromNotExistingRelationTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+
+        var parentCollection = new Collection<FirstEntity, FirstEntityProperties>("", id => new(id), () => new());
+        var childCollection = new Collection<SecondEntity, SecondEntityProperties>("", id => new(id), () => new());
+        var relation = new Relation<FirstEntity, SecondEntity>("", new OneToOne<FirstEntity, SecondEntity>(), new OneToOne<SecondEntity, FirstEntity>());
+
+        repository.Select(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
+
+        Assert.That(relation.Count, Is.EqualTo(0));
+    }
 }

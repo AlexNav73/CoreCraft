@@ -20,6 +20,14 @@ public class TrackableRelationTests
     }
 
     [Test]
+    public void TrackableRelationIdTest()
+    {
+        var id = _trackable!.Id;
+
+        A.CallTo(() => _relation!.Id).MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
     public void TrackableAddToRelationTest()
     {
         var first = new FirstEntity();

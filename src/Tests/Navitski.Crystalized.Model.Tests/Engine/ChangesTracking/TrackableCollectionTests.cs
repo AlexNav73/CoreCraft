@@ -78,6 +78,14 @@ public class TrackableCollectionTests
     }
 
     [Test]
+    public void TrackableCollectionIdTest()
+    {
+        var id = _trackable!.Id;
+
+        A.CallTo(() => _collection!.Id).MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
     public void TrackableCollectionGetTest()
     {
         var props = new FirstEntityProperties();
