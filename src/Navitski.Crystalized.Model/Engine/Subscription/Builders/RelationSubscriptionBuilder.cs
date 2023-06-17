@@ -25,7 +25,7 @@ internal sealed class RelationSubscriptionBuilder<T, TParent, TChild> : IRelatio
             var relation = _root.Accessor(_changes.Hunk);
             if (relation.HasChanges())
             {
-                observer.OnNext(new Change<IRelationChangeSet<TParent, TChild>>(_changes.OldModel, _changes.NewModel, relation));
+                observer.OnNext(_changes.Map(_ => relation));
             }
         }
 

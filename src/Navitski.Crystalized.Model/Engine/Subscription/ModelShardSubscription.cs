@@ -51,11 +51,9 @@ internal sealed class ModelShardSubscription<T> : Subscription<T>, ISubscription
 
     public void Publish(Change<IModelChanges> change)
     {
-        var (oldModel, newModel, hunk) = change;
-
-        if (hunk.TryGetFrame<T>(out var frame) && frame.HasChanges())
+        if (change.Hunk.TryGetFrame<T>(out var frame) && frame.HasChanges())
         {
-            var msg = new Change<T>(oldModel, newModel, frame);
+            var msg = change.Map(_ => frame);
 
             Publish(msg);
 

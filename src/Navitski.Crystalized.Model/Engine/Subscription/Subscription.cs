@@ -20,7 +20,7 @@ internal abstract class Subscription<T> : ISubscription<T>, IObservable<Change<T
 
         _handlers.Add(onModelChanges);
 
-        return new UnsubscribeOnDispose<Change<T>>(onModelChanges, _handlers);
+        return new UnsubscribeOnDispose<IObserver<Change<T>>>(onModelChanges, s => _handlers.Remove(s));
     }
 
     public virtual void Publish(Change<T> change)

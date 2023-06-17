@@ -17,9 +17,9 @@ internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : I
         _changes = changes;
     }
 
-    public void Bind(ICollectionBinding<TEntity, TProperties> binding)
+    public IDisposable Bind(ICollectionBinding<TEntity, TProperties> binding)
     {
-        _root.Bind(binding);
+        var subscription = _root.Bind(binding);
 
         NotifyIfHasChanges(collection =>
         {
@@ -27,11 +27,13 @@ internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : I
 
             binding.OnCollectionChanged(changes);
         });
+
+        return subscription;
     }
 
-    public void Bind(TEntity entity, IEntityBinding<TEntity, TProperties> binding)
+    public IDisposable Bind(TEntity entity, IEntityBinding<TEntity, TProperties> binding)
     {
-        _root.Bind(entity, binding);
+        var subscription = _root.Bind(entity, binding);
 
         NotifyIfHasChanges(collection =>
         {
@@ -40,13 +42,15 @@ internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : I
                 binding.OnEntityChanged(change.OldData!, change.NewData!);
             }
         });
+
+        return subscription;
     }
 
     public IDisposable Subscribe(IObserver<Change<ICollectionChangeSet<TEntity, TProperties>>> observer)
     {
         var subscription = _root.Subscribe(observer);
 
-        NotifyIfHasChanges(collection => observer.OnNext(new Change<ICollectionChangeSet<TEntity, TProperties>>(_changes!.OldModel, _changes.NewModel, collection)));
+        NotifyIfHasChanges(collection => observer.OnNext(_changes!.Map(_ => collection)));
 
         return subscription;
     }

@@ -33,6 +33,44 @@ internal class CollectionSubscriptionTests
     }
 
     [Test]
+    public void CallingDisposeOnSubscriptionWillRemoveEntityBindingTest()
+    {
+        var collectionSubscription = new CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties>(x => x.FirstCollection);
+        var onEntityChanged1Called = false;
+        var onEntityChanged2Called = false;
+
+        var entity = new FirstEntity();
+        var firstItem = CreateEntityBinding(() => onEntityChanged1Called = true);
+        var secondItem = CreateEntityBinding(() => onEntityChanged2Called = true);
+
+        var subscription1 = collectionSubscription.Bind(entity, firstItem);
+        var subscription2 = collectionSubscription.Bind(entity, secondItem);
+
+        collectionSubscription.Publish(CreateChanges(entity));
+
+        Assert.That(onEntityChanged1Called, Is.True);
+        Assert.That(onEntityChanged2Called, Is.True);
+
+        onEntityChanged1Called = false;
+        onEntityChanged2Called = false;
+
+        subscription1.Dispose();
+
+        collectionSubscription.Publish(CreateChanges(entity));
+
+        Assert.That(onEntityChanged1Called, Is.False);
+        Assert.That(onEntityChanged2Called, Is.True);
+
+        subscription2.Dispose();
+
+        onEntityChanged2Called = false;
+
+        collectionSubscription.Publish(CreateChanges(entity));
+
+        Assert.That(onEntityChanged2Called, Is.False);
+    }
+
+    [Test]
     public void ItShouldBePossibleToHaveMultipleBindingsToTheSameEntityTest()
     {
         var collectionSubscription = new CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties>(x => x.FirstCollection);
