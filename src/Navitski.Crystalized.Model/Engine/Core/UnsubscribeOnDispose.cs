@@ -2,17 +2,17 @@
 
 internal sealed class UnsubscribeOnDispose<T> : DisposableBase
 {
-    private readonly HashSet<IObserver<T>> _observers;
-    private readonly IObserver<T> _observer;
+    private readonly Action<T> _unsubscribeAction;
+    private readonly T _observer;
 
-    public UnsubscribeOnDispose(IObserver<T> observer, HashSet<IObserver<T>> subscriptions)
+    public UnsubscribeOnDispose(T observer, Action<T> unsubscribeAction)
     {
         _observer = observer;
-        _observers = subscriptions;
+        _unsubscribeAction = unsubscribeAction;
     }
 
     protected override void DisposeManagedObjects()
     {
-        _observers.Remove(_observer);
+        _unsubscribeAction(_observer);
     }
 }

@@ -16,12 +16,14 @@ public interface ICollectionSubscriptionBuilder<TEntity, TProperties> : ISubscri
     ///     Binds an object to a specific collection to receive notifications about the collection's changes
     /// </summary>
     /// <param name="binding">The collection binding to be bound</param>
-    void Bind(ICollectionBinding<TEntity, TProperties> binding);
+    /// <returns>A subscription</returns>
+    IDisposable Bind(ICollectionBinding<TEntity, TProperties> binding);
 
     /// <summary>
     ///     Binds an object to the specified entity to receive notifications about the entity's changes
     /// </summary>
     /// <param name="entity">An entity to which an object will be bound</param>
     /// <param name="binding">An object which will receive notifications about entity changes</param>
-    void Bind(TEntity entity, IEntityBinding<TEntity, TProperties> binding);
+    /// <returns>A subscription</returns>
+    IDisposable Bind(TEntity entity, IEntityBinding<TEntity, TProperties> binding);
 }

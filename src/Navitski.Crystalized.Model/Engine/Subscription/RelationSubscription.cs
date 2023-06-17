@@ -18,12 +18,10 @@ internal sealed class RelationSubscription<TChangesFrame, TParent, TChild> :
 
     public void Publish(Change<TChangesFrame> change)
     {
-        var (oldModel, newModel, hunk) = change;
-
-        var relationChangeSet = Accessor(hunk);
+        var relationChangeSet = Accessor(change.Hunk);
         if (relationChangeSet.HasChanges())
         {
-            var msg = new Change<IRelationChangeSet<TParent, TChild>>(oldModel, newModel, relationChangeSet);
+            var msg = change.Map(_ => relationChangeSet);
 
             Publish(msg);
         }

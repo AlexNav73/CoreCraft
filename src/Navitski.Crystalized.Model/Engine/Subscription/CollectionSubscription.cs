@@ -22,13 +22,15 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
 
     public Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> Accessor { get; }
 
-    public void Bind(ICollectionBinding<TEntity, TProperties> binding)
+    public IDisposable Bind(ICollectionBinding<TEntity, TProperties> binding)
     {
         var reference = new WeakReference<ICollectionBinding<TEntity, TProperties>>(binding);
         _collectionBindings.Add(reference);
+
+        return new UnsubscribeOnDispose<WeakReference<ICollectionBinding<TEntity, TProperties>>>(reference, r => _collectionBindings.Remove(r));
     }
 
-    public void Bind(TEntity entity, IEntityBinding<TEntity, TProperties> binding)
+    public IDisposable Bind(TEntity entity, IEntityBinding<TEntity, TProperties> binding)
     {
         var reference = new WeakReference<IEntityBinding<TEntity, TProperties>>(binding);
         if (_entityBindings.TryGetValue(entity, out var bindings))
@@ -39,19 +41,16 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
         {
             _entityBindings.Add(entity, new List<WeakReference<IEntityBinding<TEntity, TProperties>>>() { reference });
         }
+
+        return new UnsubscribeOnDispose<WeakReference<IEntityBinding<TEntity, TProperties>>>(reference, r => RemoveEntityBinding(entity, r));
     }
 
     public void Publish(Change<TChangesFrame> change)
     {
-        var (oldModel, newModel, hunk) = change;
-
-        var collectionChangeSet = Accessor(hunk);
+        var collectionChangeSet = Accessor(change.Hunk);
         if (collectionChangeSet.HasChanges())
         {
-            var changes = new Change<ICollectionChangeSet<TEntity, TProperties>>(
-                oldModel,
-                newModel,
-                collectionChangeSet);
+            var changes = change.Map(_ => collectionChangeSet);
 
             Publish(changes);
             UpdateBindings(changes);
@@ -127,6 +126,19 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
             if (references.Count == 0)
             {
                 _entityBindings.Remove(change.Entity);
+            }
+        }
+    }
+
+    private void RemoveEntityBinding(TEntity entity, WeakReference<IEntityBinding<TEntity, TProperties>> reference)
+    {
+        if (_entityBindings.TryGetValue(entity, out var references))
+        {
+            references.Remove(reference);
+
+            if (references.Count == 0)
+            {
+                _entityBindings.Remove(entity);
             }
         }
     }

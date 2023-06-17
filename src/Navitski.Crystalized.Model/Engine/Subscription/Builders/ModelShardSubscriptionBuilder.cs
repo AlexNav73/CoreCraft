@@ -49,7 +49,7 @@ internal sealed class ModelShardSubscriptionBuilder<T> : IModelShardSubscription
     {
         if (changes != null && changes.Hunk.TryGetFrame<T>(out var frame) && frame.HasChanges())
         {
-            return new Change<T>(changes.OldModel, changes.NewModel, frame);
+            return changes.Map(_ => frame);
         }
 
         return null;
