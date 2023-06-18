@@ -1,15 +1,15 @@
 ﻿namespace Navitski.Crystalized.Model.Engine.Subscription;
 
-internal sealed class AnonymousObserver<T> : IObserver<Change<T>>
+internal sealed class AnonymousObserver<T> : IObserver<T>
 {
-    private readonly Action<Change<T>> _action;
+    private readonly Action<T> _action;
 
-    public AnonymousObserver(Action<Change<T>> action)
+    public AnonymousObserver(Action<T> action)
     {
         _action = action;
     }
 
-    public void OnNext(Change<T> value)
+    public void OnNext(T value)
     {
         _action(value);
     }

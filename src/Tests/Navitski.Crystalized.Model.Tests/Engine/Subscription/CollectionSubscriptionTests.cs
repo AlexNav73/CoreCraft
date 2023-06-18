@@ -1,7 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Subscription;
-using Navitski.Crystalized.Model.Engine.Subscription.Binding;
 
 namespace Navitski.Crystalized.Model.Tests.Engine.Subscription;
 
@@ -16,7 +15,7 @@ internal class CollectionSubscriptionTests
         var onEntityChanged2Called = false;
 
         var firstEntity = BindToEntity(collectionSubscription, () => onEntityChanged1Called = true);
-        var secondItem = CreateEntityBinding(() => onEntityChanged2Called = true);
+        var secondItem = CreateEntityObserver(() => onEntityChanged2Called = true);
         var secondEntity = new FirstEntity();
 
         collectionSubscription.Bind(secondEntity, secondItem);
@@ -40,8 +39,8 @@ internal class CollectionSubscriptionTests
         var onEntityChanged2Called = false;
 
         var entity = new FirstEntity();
-        var firstItem = CreateEntityBinding(() => onEntityChanged1Called = true);
-        var secondItem = CreateEntityBinding(() => onEntityChanged2Called = true);
+        var firstItem = CreateEntityObserver(() => onEntityChanged1Called = true);
+        var secondItem = CreateEntityObserver(() => onEntityChanged2Called = true);
 
         var subscription1 = collectionSubscription.Bind(entity, firstItem);
         var subscription2 = collectionSubscription.Bind(entity, secondItem);
@@ -76,16 +75,16 @@ internal class CollectionSubscriptionTests
         var collectionSubscription = new CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties>(x => x.FirstCollection);
 
         var entity = new FirstEntity();
-        var firstBinding = A.Fake<IEntityBinding<FirstEntity, FirstEntityProperties>>();
-        var secondBinding = A.Fake<IEntityBinding<FirstEntity, FirstEntityProperties>>();
+        var firstObserver = A.Fake<IObserver<IEntityChange<FirstEntity, FirstEntityProperties>>>();
+        var secondObserver = A.Fake<IObserver<IEntityChange<FirstEntity, FirstEntityProperties>>>();
 
-        collectionSubscription.Bind(entity, firstBinding);
-        collectionSubscription.Bind(entity, secondBinding);
+        collectionSubscription.Bind(entity, firstObserver);
+        collectionSubscription.Bind(entity, secondObserver);
 
         collectionSubscription.Publish(CreateChanges(entity));
 
-        A.CallTo(() => firstBinding.OnEntityChanged(A<FirstEntityProperties>.Ignored, A<FirstEntityProperties>.Ignored)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => secondBinding.OnEntityChanged(A<FirstEntityProperties>.Ignored, A<FirstEntityProperties>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => firstObserver.OnNext(A<IEntityChange<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => secondObserver.OnNext(A<IEntityChange<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -112,12 +111,12 @@ internal class CollectionSubscriptionTests
         var onEntityChanged1Called = false;
         var onEntityChanged2Called = false;
 
-        var entityBinding = CreateEntityBinding(() => onEntityChanged1Called = !onEntityChanged1Called);
+        var entityObserver = CreateEntityObserver(() => onEntityChanged1Called = !onEntityChanged1Called);
         var entity = new FirstEntity();
-        var collectionBinding = CreateCollectionBinding(() => onEntityChanged2Called = true);
+        var collectionObserver = CreateCollectionChangeObserver(() => onEntityChanged2Called = true);
 
-        collectionSubscription.Bind(entity, entityBinding);
-        collectionSubscription.Bind(collectionBinding);
+        collectionSubscription.Bind(entity, entityObserver);
+        collectionSubscription.Bind(collectionObserver);
 
         collectionSubscription.Publish(CreateChanges(entity));
         collectionSubscription.Publish(CreateChanges(entity, CollectionAction.Remove));
@@ -131,27 +130,27 @@ internal class CollectionSubscriptionTests
         CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties> collectionSubscription,
         Action action)
     {
-        var binding = CreateCollectionBinding(action);
+        var observer = CreateCollectionChangeObserver(action);
 
-        collectionSubscription.Bind(binding);
+        collectionSubscription.Bind(observer);
 
         collectionSubscription.Publish(CreateChanges(new()));
 
-        // binding is dropped here
-        binding = null;
+        // observer is dropped here
+        observer = null;
     }
 
     private FirstEntity BindToEntity(
         CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties> collectionSubscription,
         Action action)
     {
-        var binding = CreateEntityBinding(action);
+        var observer = CreateEntityObserver(action);
         var entity = new FirstEntity();
 
-        collectionSubscription.Bind(entity, binding);
+        collectionSubscription.Bind(entity, observer);
 
-        // binding is dropped here
-        binding = null;
+        // observer is dropped here
+        observer = null;
         return entity;
     }
 
@@ -170,21 +169,21 @@ internal class CollectionSubscriptionTests
         return new Change<IFakeChangesFrame>(A.Fake<IModel>(), A.Fake<IModel>(), changesFrame);
     }
 
-    private IEntityBinding<FirstEntity, FirstEntityProperties> CreateEntityBinding(Action action)
+    private IObserver<IEntityChange<FirstEntity, FirstEntityProperties>> CreateEntityObserver(Action action)
     {
-        var binding = A.Fake<IEntityBinding<FirstEntity, FirstEntityProperties>>();
+        var observer = A.Fake<IObserver<IEntityChange<FirstEntity, FirstEntityProperties>>>();
 
-        A.CallTo(() => binding.OnEntityChanged(A<FirstEntityProperties>.Ignored, A<FirstEntityProperties>.Ignored)).Invokes(action);
+        A.CallTo(() => observer.OnNext(A<IEntityChange<FirstEntity, FirstEntityProperties>>.Ignored)).Invokes(action);
 
-        return binding;
+        return observer;
     }
 
-    private ICollectionBinding<FirstEntity, FirstEntityProperties> CreateCollectionBinding(Action action)
+    private IObserver<BindingChanges<FirstEntity, FirstEntityProperties>> CreateCollectionChangeObserver(Action action)
     {
-        var binding = A.Fake<ICollectionBinding<FirstEntity, FirstEntityProperties>>();
+        var observer = A.Fake<IObserver<BindingChanges<FirstEntity, FirstEntityProperties>>>();
 
-        A.CallTo(() => binding.OnCollectionChanged(A<BindingChanges<FirstEntity, FirstEntityProperties>>.Ignored)).Invokes(action);
+        A.CallTo(() => observer.OnNext(A<BindingChanges<FirstEntity, FirstEntityProperties>>.Ignored)).Invokes(action);
 
-        return binding;
+        return observer;
     }
 }

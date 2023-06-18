@@ -117,7 +117,7 @@ internal class ModelShardSubscriptionTests
         var modelChanges = CreateFakeModelChanges();
 
         var subscriptionWasCalled = false;
-        var disposable = subscription.Subscribe(new AnonymousObserver<IFakeChangesFrame>(m => subscriptionWasCalled = true));
+        var disposable = subscription.Subscribe(new AnonymousObserver<Change<IFakeChangesFrame>>(m => subscriptionWasCalled = true));
 
         subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
@@ -132,7 +132,7 @@ internal class ModelShardSubscriptionTests
         var modelChanges = CreateFakeModelChanges(frameHasChanges: false);
 
         var subscriptionWasCalled = false;
-        var disposable = subscription.Subscribe(new AnonymousObserver<IFakeChangesFrame>(m => subscriptionWasCalled = true));
+        var disposable = subscription.Subscribe(new AnonymousObserver<Change<IFakeChangesFrame>>(m => subscriptionWasCalled = true));
 
         subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
@@ -147,7 +147,7 @@ internal class ModelShardSubscriptionTests
         var modelChanges = CreateFakeModelChanges(hasChangesFrame: false);
 
         var subscriptionWasCalled = false;
-        var disposable = subscription.Subscribe(new AnonymousObserver<IFakeChangesFrame>(m => subscriptionWasCalled = true));
+        var disposable = subscription.Subscribe(new AnonymousObserver<Change<IFakeChangesFrame>>(m => subscriptionWasCalled = true));
 
         subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), modelChanges));
 
@@ -161,7 +161,7 @@ internal class ModelShardSubscriptionTests
         var subscription = new ModelShardSubscription<IFakeChangesFrame>();
 
         var subscriptionWasCalled = false;
-        var disposable = subscription.With(x => x.FirstCollection).Subscribe(new AnonymousObserver<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>(m => subscriptionWasCalled = true));
+        var disposable = subscription.With(x => x.FirstCollection).Subscribe(new AnonymousObserver<Change<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>>(m => subscriptionWasCalled = true));
         var fakeCollectionChanges = A.Fake<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>();
         var frame = A.Fake<IFakeChangesFrame>();
         var modelChanges = CreateFakeModelChanges(frame);
@@ -182,7 +182,7 @@ internal class ModelShardSubscriptionTests
         var subscription = new ModelShardSubscription<IFakeChangesFrame>();
 
         var subscriptionWasCalled = false;
-        var disposable = subscription.With(x => x.OneToOneRelation).Subscribe(new AnonymousObserver<IRelationChangeSet<FirstEntity, SecondEntity>>(m => subscriptionWasCalled = true));
+        var disposable = subscription.With(x => x.OneToOneRelation).Subscribe(new AnonymousObserver<Change<IRelationChangeSet<FirstEntity, SecondEntity>>>(m => subscriptionWasCalled = true));
         var fakeRelationChanges = A.Fake<IRelationChangeSet<FirstEntity, SecondEntity>>();
         var frame = A.Fake<IFakeChangesFrame>();
         var modelChanges = CreateFakeModelChanges(frame);
