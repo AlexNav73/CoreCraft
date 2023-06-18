@@ -9,7 +9,7 @@ public class AnonymousObserverTests
     public void GetHashCodeOfObserverIsTheSameAsOfHandlerTest()
     {
         Action<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>> handler = changes => { };
-        var observer = new AnonymousObserver<ICollectionChange<FirstEntity, FirstEntityProperties>>(handler);
+        var observer = new AnonymousObserver<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>>(handler);
 
         Assert.That(observer.GetHashCode(), Is.EqualTo(handler.GetHashCode()));
     }
@@ -18,8 +18,8 @@ public class AnonymousObserverTests
     public void EqualsOverloadComparesHandlersAndNotObserversThemSelfTest()
     {
         Action<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>> handler = changes => { };
-        var observer = new AnonymousObserver<ICollectionChange<FirstEntity, FirstEntityProperties>>(handler);
-        var anotherObserver = new AnonymousObserver<ICollectionChange<FirstEntity, FirstEntityProperties>>(handler);
+        var observer = new AnonymousObserver<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>>(handler);
+        var anotherObserver = new AnonymousObserver<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>>(handler);
 
         Assert.That(observer.Equals(anotherObserver), Is.True);
     }
@@ -28,7 +28,7 @@ public class AnonymousObserverTests
     public void EqualsReturnsFalseIfComparedWithNullTest()
     {
         Action<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>> handler = changes => { };
-        var observer = new AnonymousObserver<ICollectionChange<FirstEntity, FirstEntityProperties>>(handler);
+        var observer = new AnonymousObserver<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>>(handler);
 
         Assert.That(observer.Equals(null), Is.False);
     }
@@ -37,7 +37,7 @@ public class AnonymousObserverTests
     public void OnCompletedDoesNotThrowTest()
     {
         Action<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>> handler = changes => { };
-        var observer = new AnonymousObserver<ICollectionChange<FirstEntity, FirstEntityProperties>>(handler);
+        var observer = new AnonymousObserver<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>>(handler);
 
         Assert.DoesNotThrow(observer.OnCompleted);
     }
@@ -46,7 +46,7 @@ public class AnonymousObserverTests
     public void OnErrorDoesNotThrowTest()
     {
         Action<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>> handler = changes => { };
-        var observer = new AnonymousObserver<ICollectionChange<FirstEntity, FirstEntityProperties>>(handler);
+        var observer = new AnonymousObserver<Change<ICollectionChange<FirstEntity, FirstEntityProperties>>>(handler);
 
         Assert.DoesNotThrow(() => observer.OnError(new Exception()));
     }

@@ -5,7 +5,7 @@
 /// </summary>
 /// <typeparam name="TEntity">An entity type</typeparam>
 /// <typeparam name="TProperties">A type of a properties</typeparam>
-public interface ICollectionChange<TEntity, TProperties>
+public interface ICollectionChange<TEntity, TProperties> : IEntityChange<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties
 {
@@ -13,21 +13,6 @@ public interface ICollectionChange<TEntity, TProperties>
     ///     Action which was performed on the collection
     /// </summary>
     CollectionAction Action { get; }
-
-    /// <summary>
-    ///     An entity which was modified
-    /// </summary>
-    TEntity Entity { get; }
-
-    /// <summary>
-    ///     An old properties of an entity
-    /// </summary>
-    TProperties? OldData { get; }
-
-    /// <summary>
-    ///     A new properties of an entity
-    /// </summary>
-    TProperties? NewData { get; }
 
     /// <summary>
     ///     Inverts a change

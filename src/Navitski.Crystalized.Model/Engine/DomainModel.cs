@@ -46,7 +46,7 @@ public abstract class DomainModel : IDomainModel
     /// <inheritdoc cref="IDomainModel.Subscribe(Action{Change{IModelChanges}})"/>
     public IDisposable Subscribe(Action<Change<IModelChanges>> onModelChanges)
     {
-        var subscription = _modelSubscription.Subscribe(new AnonymousObserver<IModelChanges>(onModelChanges));
+        var subscription = _modelSubscription.Subscribe(new AnonymousObserver<Change<IModelChanges>>(onModelChanges));
 
         if (_currentChanges != null)
         {

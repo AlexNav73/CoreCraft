@@ -35,7 +35,7 @@ internal class ModelSubscriptionTests
         var subscription = new ModelSubscription();
 
         var subscriptionWasCalled = false;
-        var disposable = subscription.Subscribe(new AnonymousObserver<IModelChanges>(m => subscriptionWasCalled = true));
+        var disposable = subscription.Subscribe(new AnonymousObserver<Change<IModelChanges>>(m => subscriptionWasCalled = true));
 
         subscription.Publish(new Change<IModelChanges>(A.Fake<IModel>(), A.Fake<IModel>(), A.Fake<IModelChanges>()));
 
@@ -49,7 +49,7 @@ internal class ModelSubscriptionTests
         var subscription = new ModelSubscription();
 
         var subscriptionWasCalled = false;
-        var disposable = subscription.GetOrCreateSubscriptionFor<IFakeChangesFrame>().Subscribe(new AnonymousObserver<IFakeChangesFrame>(m => subscriptionWasCalled = true));
+        var disposable = subscription.GetOrCreateSubscriptionFor<IFakeChangesFrame>().Subscribe(new AnonymousObserver<Change<IFakeChangesFrame>>(m => subscriptionWasCalled = true));
         var modelChanges = A.Fake<IModelChanges>();
         IFakeChangesFrame? ignore = null;
         var frame = A.Fake<IFakeChangesFrame>();

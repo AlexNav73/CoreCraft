@@ -1,7 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Subscription;
-using Navitski.Crystalized.Model.Engine.Subscription.Binding;
 using Navitski.Crystalized.Model.Engine.Subscription.Builders;
 using Navitski.Crystalized.Model.Engine.Subscription.Extensions;
 
@@ -26,12 +25,12 @@ internal class CollectionSubscriptionBuilderTests
     public void BindToEntityTest(bool withChanges, int handlerCalledTimes)
     {
         var subscriptionBuilder = CreateTestee(withChanges);
-        var binding = A.Fake<IEntityBinding<FirstEntity, FirstEntityProperties>>();
+        var binding = A.Fake<IObserver<IEntityChange<FirstEntity, FirstEntityProperties>>>();
         var entity = new FirstEntity();
 
         subscriptionBuilder.Bind(entity, binding);
 
-        A.CallTo(() => binding.OnEntityChanged(A<FirstEntityProperties>.Ignored, A<FirstEntityProperties>.Ignored)).MustHaveHappened(handlerCalledTimes, Times.Exactly);
+        A.CallTo(() => binding.OnNext(A<IEntityChange<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappened(handlerCalledTimes, Times.Exactly);
     }
 
     [TestCase(false, 0, CollectionAction.Modify)]
@@ -41,11 +40,11 @@ internal class CollectionSubscriptionBuilderTests
     public void BindToCollectionTest(bool withChanges, int handlerCalledTimes, CollectionAction action)
     {
         var subscriptionBuilder = CreateTestee(withChanges, action);
-        var binding = A.Fake<ICollectionBinding<FirstEntity, FirstEntityProperties>>();
+        var binding = A.Fake<IObserver<BindingChanges<FirstEntity, FirstEntityProperties>>>();
 
         subscriptionBuilder.Bind(binding);
 
-        A.CallTo(() => binding.OnCollectionChanged(A<BindingChanges<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappened(handlerCalledTimes, Times.Exactly);
+        A.CallTo(() => binding.OnNext(A<BindingChanges<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappened(handlerCalledTimes, Times.Exactly);
     }
 
     private CollectionSubscriptionBuilder<IFakeChangesFrame, FirstEntity, FirstEntityProperties> CreateTestee(bool withChanges, CollectionAction collectionAction = CollectionAction.Modify)

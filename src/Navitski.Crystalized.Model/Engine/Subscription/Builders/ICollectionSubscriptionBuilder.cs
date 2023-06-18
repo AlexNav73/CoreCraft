@@ -1,5 +1,4 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Subscription.Binding;
 
 namespace Navitski.Crystalized.Model.Engine.Subscription.Builders;
 
@@ -15,15 +14,15 @@ public interface ICollectionSubscriptionBuilder<TEntity, TProperties> : ISubscri
     /// <summary>
     ///     Binds an object to a specific collection to receive notifications about the collection's changes
     /// </summary>
-    /// <param name="binding">The collection binding to be bound</param>
+    /// <param name="observer">An observer of collection changes</param>
     /// <returns>A subscription</returns>
-    IDisposable Bind(ICollectionBinding<TEntity, TProperties> binding);
+    IDisposable Bind(IObserver<BindingChanges<TEntity, TProperties>> observer);
 
     /// <summary>
     ///     Binds an object to the specified entity to receive notifications about the entity's changes
     /// </summary>
     /// <param name="entity">An entity to which an object will be bound</param>
-    /// <param name="binding">An object which will receive notifications about entity changes</param>
+    /// <param name="observer">An observer of entity changes</param>
     /// <returns>A subscription</returns>
-    IDisposable Bind(TEntity entity, IEntityBinding<TEntity, TProperties> binding);
+    IDisposable Bind(TEntity entity, IObserver<IEntityChange<TEntity, TProperties>> observer);
 }

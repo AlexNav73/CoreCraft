@@ -1,13 +1,15 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Navitski.Crystalized.Model.Engine;
-using System.Threading.Tasks;
+using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using WpfDemoApp.Model;
 using WpfDemoApp.Model.Entities;
 
 namespace WpfDemoApp.ViewModels;
 
-internal partial class ItemViewModel : ObservableObject
+internal partial class ItemViewModel : ObservableObject, IObserver<IEntityChange<ToDoItem, ToDoItemProperties>>
 {
     private readonly UndoRedoDomainModel _model;
 
@@ -19,20 +21,33 @@ internal partial class ItemViewModel : ObservableObject
         _model = model;
         _name = props.Name;
 
-        Item = item;
+        Entity = item;
     }
 
-    public ToDoItem Item { get; }
+    public ToDoItem Entity { get; }
+
+    public void OnNext(IEntityChange<ToDoItem, ToDoItemProperties> value)
+    {
+        Name = value.NewData!.Name;
+    }
+
+    public void OnCompleted()
+    {
+    }
+
+    public void OnError(Exception error)
+    {
+    }
 
     partial void OnNameChanged(string value)
     {
-        _model.Run<IMutableToDoModelShard>(
-            (shard, _) => shard.Items.Modify(Item, p => p with { Name = value }));
+        var _ = _model.Run<IMutableToDoModelShard>(
+            (shard, _) => shard.Items.Modify(Entity, p => p with { Name = value }));
     }
 
     [RelayCommand]
     private async Task Remove()
     {
-        await _model.Run<IMutableToDoModelShard>((shard, _) => shard.Items.Remove(Item));
+        await _model.Run<IMutableToDoModelShard>((shard, _) => shard.Items.Remove(Entity));
     }
 }

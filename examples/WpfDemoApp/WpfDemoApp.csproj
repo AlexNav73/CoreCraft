@@ -17,6 +17,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
     <PackageReference Include="MahApps.Metro.IconPacks" Version="4.11.0" />
+    <PackageReference Include="System.Reactive" Version="6.0.0" />
 
     <ProjectReference Include="..\..\src\Navitski.Crystalized.Model.Generators\Navitski.Crystalized.Model.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\src\Navitski.Crystalized.Model.Storage.Sqlite\Navitski.Crystalized.Model.Storage.Sqlite.csproj" />

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 using WpfDemoApp.Model;
@@ -28,16 +29,46 @@ internal partial class MainWindowViewModel : ObservableObject
     public MainWindowViewModel(UndoRedoDomainModel model)
     {
         _model = model;
+
         Items = new ObservableCollection<ItemViewModel>();
         Logs = new ObservableCollection<string>();
 
-        _subscription = _model.For<IToDoChangesFrame>().With(x => x.Items).Subscribe(OnItemChanged);
+        //_subscription = _model.For<IToDoChangesFrame>().With(x => x.Items).Subscribe(OnItemChanged);
+        _subscription = _model
+            .For<IToDoChangesFrame>()
+            .With(x => x.Items)
+            .Bind(Observer.Create<BindingChanges<ToDoItem, ToDoItemProperties>>(OnNext));
         _model.Changed += OnModelChanged; // unsubscribe
     }
 
     public ObservableCollection<ItemViewModel> Items { get; }
 
     public ObservableCollection<string> Logs { get; }
+
+    public void OnNext(BindingChanges<ToDoItem, ToDoItemProperties> changes)
+    {
+        foreach (var c in changes.Added)
+        {
+            var viewModel = new ItemViewModel(c.Entity, c.NewData!, _model);
+
+            _model.For<IToDoChangesFrame>().With(x => x.Items).Bind(c.Entity, viewModel);
+
+            Items.Add(viewModel);
+        }
+
+        foreach (var c in changes.Removed)
+        {
+            Items.Remove(Items.Single(x => x.Entity == c.Entity));
+        }
+    }
+
+    [RelayCommand]
+    private void GCClean()
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+    }
 
     [RelayCommand]
     private async Task Add()
@@ -96,12 +127,12 @@ internal partial class MainWindowViewModel : ObservableObject
 
         foreach (var c in hunk.Where(x => x.Action == CollectionAction.Remove))
         {
-            Items.Remove(Items.Single(x => x.Item == c.Entity));
+            Items.Remove(Items.Single(x => x.Entity == c.Entity));
         }
 
         foreach (var c in hunk.Where(x => x.Action == CollectionAction.Modify))
         {
-            Items.Single(x => x.Item == c.Entity).Name = c.NewData!.Name;
+            Items.Single(x => x.Entity == c.Entity).Name = c.NewData!.Name;
         }
     }
 

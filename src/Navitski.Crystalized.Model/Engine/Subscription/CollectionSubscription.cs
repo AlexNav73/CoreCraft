@@ -1,5 +1,4 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Subscription.Binding;
 
 namespace Navitski.Crystalized.Model.Engine.Subscription;
 
@@ -10,8 +9,8 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
     where TEntity : Entity
     where TProperties : Properties
 {
-    private readonly List<WeakReference<ICollectionBinding<TEntity, TProperties>>> _collectionBindings;
-    private readonly Dictionary<TEntity, List<WeakReference<IEntityBinding<TEntity, TProperties>>>> _entityBindings;
+    private readonly List<WeakReference<IObserver<BindingChanges<TEntity, TProperties>>>> _collectionBindings;
+    private readonly Dictionary<TEntity, List<WeakReference<IObserver<IEntityChange<TEntity, TProperties>>>>> _entityBindings;
 
     public CollectionSubscription(Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> accessor)
     {
@@ -22,27 +21,27 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
 
     public Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> Accessor { get; }
 
-    public IDisposable Bind(ICollectionBinding<TEntity, TProperties> binding)
+    public IDisposable Bind(IObserver<BindingChanges<TEntity, TProperties>> observer)
     {
-        var reference = new WeakReference<ICollectionBinding<TEntity, TProperties>>(binding);
+        var reference = new WeakReference<IObserver<BindingChanges<TEntity, TProperties>>>(observer);
         _collectionBindings.Add(reference);
 
-        return new UnsubscribeOnDispose<WeakReference<ICollectionBinding<TEntity, TProperties>>>(reference, r => _collectionBindings.Remove(r));
+        return new UnsubscribeOnDispose<WeakReference<IObserver<BindingChanges<TEntity, TProperties>>>>(reference, r => _collectionBindings.Remove(r));
     }
 
-    public IDisposable Bind(TEntity entity, IEntityBinding<TEntity, TProperties> binding)
+    public IDisposable Bind(TEntity entity, IObserver<IEntityChange<TEntity, TProperties>> observer)
     {
-        var reference = new WeakReference<IEntityBinding<TEntity, TProperties>>(binding);
+        var reference = new WeakReference<IObserver<IEntityChange<TEntity, TProperties>>>(observer);
         if (_entityBindings.TryGetValue(entity, out var bindings))
         {
             bindings.Add(reference);
         }
         else
         {
-            _entityBindings.Add(entity, new List<WeakReference<IEntityBinding<TEntity, TProperties>>>() { reference });
+            _entityBindings.Add(entity, new List<WeakReference<IObserver<IEntityChange<TEntity, TProperties>>>>() { reference });
         }
 
-        return new UnsubscribeOnDispose<WeakReference<IEntityBinding<TEntity, TProperties>>>(reference, r => RemoveEntityBinding(entity, r));
+        return new UnsubscribeOnDispose<WeakReference<IObserver<IEntityChange<TEntity, TProperties>>>>(reference, r => RemoveEntityBinding(entity, r));
     }
 
     public void Publish(Change<TChangesFrame> change)
@@ -98,7 +97,7 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
         {
             if (bindings[i].TryGetTarget(out var target))
             {
-                target.OnCollectionChanged(bindingChanges);
+                target.OnNext(bindingChanges);
             }
             else
             {
@@ -115,7 +114,7 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
             {
                 if (reference.TryGetTarget(out var target))
                 {
-                    target.OnEntityChanged(change.OldData!, change.NewData!);
+                    target.OnNext(change);
                 }
                 else
                 {
@@ -130,7 +129,7 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
         }
     }
 
-    private void RemoveEntityBinding(TEntity entity, WeakReference<IEntityBinding<TEntity, TProperties>> reference)
+    private void RemoveEntityBinding(TEntity entity, WeakReference<IObserver<IEntityChange<TEntity, TProperties>>> reference)
     {
         if (_entityBindings.TryGetValue(entity, out var references))
         {

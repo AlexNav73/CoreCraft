@@ -1,5 +1,4 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Subscription.Binding;
 
 namespace Navitski.Crystalized.Model.Engine.Subscription.Builders;
 
@@ -17,29 +16,29 @@ internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : I
         _changes = changes;
     }
 
-    public IDisposable Bind(ICollectionBinding<TEntity, TProperties> binding)
+    public IDisposable Bind(IObserver<BindingChanges<TEntity, TProperties>> observer)
     {
-        var subscription = _root.Bind(binding);
+        var subscription = _root.Bind(observer);
 
         NotifyIfHasChanges(collection =>
         {
             var changes = CreateBindingChanges(_changes!.OldModel, _changes.NewModel, collection);
 
-            binding.OnCollectionChanged(changes);
+            observer.OnNext(changes);
         });
 
         return subscription;
     }
 
-    public IDisposable Bind(TEntity entity, IEntityBinding<TEntity, TProperties> binding)
+    public IDisposable Bind(TEntity entity, IObserver<IEntityChange<TEntity, TProperties>> observer)
     {
-        var subscription = _root.Bind(entity, binding);
+        var subscription = _root.Bind(entity, observer);
 
         NotifyIfHasChanges(collection =>
         {
             foreach (var change in collection.Where(c => c.Action == CollectionAction.Modify))
             {
-                binding.OnEntityChanged(change.OldData!, change.NewData!);
+                observer.OnNext(change);
             }
         });
 
