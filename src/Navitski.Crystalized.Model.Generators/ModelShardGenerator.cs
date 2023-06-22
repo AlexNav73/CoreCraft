@@ -188,7 +188,7 @@ internal partial class ApplicationModelGenerator
         },
         () =>
         {
-            code.WriteLine("IChangesFrame IFeatureContext.GetOrAddFrame(IWritableModelChanges modelChanges)");
+            code.WriteLine("IChangesFrame IFeatureContext.GetOrAddFrame(IMutableModelChanges modelChanges)");
             code.Block(() =>
             {
                 code.WriteLine($"return modelChanges.Register(static () => new {modelShard.Name}ChangesFrame());");
@@ -224,7 +224,7 @@ internal partial class ApplicationModelGenerator
             new[]
             {
                 $"I{modelShard.Name}ChangesFrame",
-                "IWritableChangesFrame"
+                "IChangesFrameEx"
             },
             () =>
             {
@@ -357,7 +357,7 @@ internal partial class ApplicationModelGenerator
 
         void DefineMergeMethod(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine($"public IWritableChangesFrame Merge(IChangesFrame frame)");
+            code.WriteLine($"public IChangesFrame Merge(IChangesFrame frame)");
             code.Block(() =>
             {
                 code.WriteLine($"var typedFrame = ({modelShard.Name}ChangesFrame)frame;");

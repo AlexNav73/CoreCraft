@@ -2,7 +2,7 @@
 
 namespace Navitski.Crystalized.Model.Engine.ChangesTracking;
 
-internal sealed class ModelChanges : IWritableModelChanges
+internal sealed class ModelChanges : IMutableModelChanges
 {
     private readonly IList<IChangesFrame> _frames;
 
@@ -27,7 +27,7 @@ internal sealed class ModelChanges : IWritableModelChanges
 
     /// <inheritdoc />
     public T Register<T>(Func<T> factory)
-        where T : class, IWritableChangesFrame
+        where T : class, IChangesFrameEx
     {
         if (TryGetFrame<T>(out var frame))
         {
@@ -50,18 +50,18 @@ internal sealed class ModelChanges : IWritableModelChanges
     /// <inheritdoc />
     public void Apply(IModel model)
     {
-        foreach (var frame in _frames.Cast<IWritableChangesFrame>())
+        foreach (var frame in _frames.Cast<IChangesFrameEx>())
         {
             frame.Apply(model);
         }
     }
 
-    public IWritableModelChanges Merge(IModelChanges changes)
+    public IMutableModelChanges Merge(IModelChanges changes)
     {
         var changesFrames = changes.ToDictionary(k => k.GetType());
         var result = new List<IChangesFrame>();
 
-        foreach (var frame in _frames.Cast<IWritableChangesFrame>())
+        foreach (var frame in _frames.Cast<IChangesFrameEx>())
         {
             if (changesFrames.TryGetValue(frame.GetType(), out var changesFrame))
             {

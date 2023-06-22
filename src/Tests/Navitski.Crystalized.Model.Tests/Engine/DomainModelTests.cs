@@ -171,15 +171,15 @@ public class DomainModelTests
     [Test]
     public void SaveModelDoMergingOfModelChangesIntoOneChangeTest()
     {
-        var modelChanges1 = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
-        var modelChanges2 = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
+        var modelChanges1 = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
+        var modelChanges2 = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
         var task = model.Save("", new[] { modelChanges1, modelChanges2 });
 
-        A.CallTo(() => ((IWritableModelChanges)modelChanges1).Merge(modelChanges2))
+        A.CallTo(() => ((IMutableModelChanges)modelChanges1).Merge(modelChanges2))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -248,7 +248,7 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
-        var modelChanges = A.Fake<IWritableModelChanges>();
+        var modelChanges = A.Fake<IMutableModelChanges>();
         var notificationSent = false;
 
         A.CallTo(() => modelChanges.HasChanges()).Returns(true);
@@ -331,7 +331,7 @@ public class DomainModelTests
             await Load(_storage, path);
         }
 
-        public async Task Apply(IWritableModelChanges changes)
+        public async Task Apply(IMutableModelChanges changes)
         {
             await Apply(changes, CancellationToken.None);
         }

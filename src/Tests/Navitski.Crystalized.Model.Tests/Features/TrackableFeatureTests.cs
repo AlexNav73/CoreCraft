@@ -9,11 +9,11 @@ public class TrackableFeatureTests
     [Test]
     public void DecorateTest()
     {
-        var feature = new TrackableFeature(A.Fake<IWritableModelChanges>());
+        var feature = new TrackableFeature(A.Fake<IMutableModelChanges>());
         var featureContext = A.Fake<IFeatureContext>();
         var frame = A.Fake<IChangesFrame>();
 
-        A.CallTo(() => featureContext.GetOrAddFrame(A<IWritableModelChanges>.Ignored))
+        A.CallTo(() => featureContext.GetOrAddFrame(A<IMutableModelChanges>.Ignored))
             .Returns(frame);
 
         var collection = feature.Decorate(featureContext, A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>());

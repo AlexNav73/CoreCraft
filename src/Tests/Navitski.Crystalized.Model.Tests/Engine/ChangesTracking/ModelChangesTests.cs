@@ -39,7 +39,7 @@ public class ModelChangesTests
         var value = "test";
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = value });
-        var inverted = changesFrame.Invert();
+        var inverted = ((IChangesFrame)changesFrame).Invert();
         var change = ((IFakeChangesFrame)inverted).FirstCollection.SingleOrDefault();
 
         Assert.That(change, Is.Not.Null);

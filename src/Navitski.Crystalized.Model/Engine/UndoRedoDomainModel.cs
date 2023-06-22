@@ -139,7 +139,7 @@ public class UndoRedoDomainModel : DomainModel
     /// <inheritdoc/>
     protected override void OnModelChanged(Change<IModelChanges> change)
     {
-        _undoStack.Push((IWritableModelChanges)change.Hunk);
+        _undoStack.Push(change.Hunk);
         _redoStack.Clear();
 
         Changed?.Invoke(this, EventArgs.Empty);
