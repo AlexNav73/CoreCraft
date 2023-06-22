@@ -32,6 +32,19 @@ internal class CollectionSubscriptionBuilderTests
         A.CallTo(() => binding.OnNext(A<IEntityChange<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappened(handlerCalledTimes, Times.Exactly);
     }
 
+    [TestCase(false, false)]
+    [TestCase(true, true)]
+    public void BindToEntityUsingExtensionMethodTest(bool withChanges, bool onNextCallIsExpected)
+    {
+        var subscriptionBuilder = CreateTestee(withChanges);
+        var entity = new FirstEntity();
+        var onNextWasCalled = false;
+
+        subscriptionBuilder.Bind(entity, _ => onNextWasCalled = true);
+
+        Assert.That(onNextWasCalled, Is.EqualTo(onNextCallIsExpected));
+    }
+
     [TestCase(false, 0, CollectionAction.Modify)]
     [TestCase(true, 1, CollectionAction.Add)]
     [TestCase(true, 1, CollectionAction.Modify)]
@@ -44,6 +57,20 @@ internal class CollectionSubscriptionBuilderTests
         subscriptionBuilder.Bind(binding);
 
         A.CallTo(() => binding.OnNext(A<BindingChanges<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappened(handlerCalledTimes, Times.Exactly);
+    }
+
+    [TestCase(false, false, CollectionAction.Modify)]
+    [TestCase(true, true, CollectionAction.Add)]
+    [TestCase(true, true, CollectionAction.Modify)]
+    [TestCase(true, true, CollectionAction.Remove)]
+    public void BindToCollectionTest(bool withChanges, bool onNextCallIsExpected, CollectionAction action)
+    {
+        var subscriptionBuilder = CreateTestee(withChanges, action);
+        var onNextWasCalled = false;
+
+        subscriptionBuilder.Bind(_ => onNextWasCalled = true);
+
+        Assert.That(onNextWasCalled, Is.EqualTo(onNextCallIsExpected));
     }
 
     private CollectionSubscriptionBuilder<IFakeChangesFrame, FirstEntity, FirstEntityProperties> CreateTestee(bool withChanges, CollectionAction collectionAction = CollectionAction.Modify)
