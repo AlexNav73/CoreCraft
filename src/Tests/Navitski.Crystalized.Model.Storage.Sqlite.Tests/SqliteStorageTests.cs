@@ -29,7 +29,7 @@ public class SqliteStorageTests
         var shardStorage = A.Fake<IModelShardStorage>();
         A.CallTo(() => shardStorage.Update(A<IRepository>.Ignored, A<IModelChanges>.Ignored))
             .Throws<InvalidOperationException>();
-        var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
+        var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
         var storage = new SqliteStorage(Array.Empty<IMigration>(), new[] { shardStorage }, _factory!);
 
@@ -45,7 +45,7 @@ public class SqliteStorageTests
     {
         var shardStorage = A.Fake<IModelShardStorage>();
         var storage = new SqliteStorage(Array.Empty<IMigration>(), new[] { shardStorage }, _factory!);
-        var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IWritableModelChanges>());
+        var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
         storage.Update("", modelChanges);
 

@@ -20,17 +20,17 @@ public class ModelShardStorageTests
     {
         var storage = new FakeModelShardStorage();
         var modelChanges = new ModelChanges();
-        var changesFrame = A.Fake<IWritableChangesFrame>(c => c.Implements<IFakeChangesFrame>());
-        modelChanges.Register(() => changesFrame);
+        var changesFrame = A.Fake<IFakeChangesFrame>(c => c.Implements<IChangesFrameEx>());
+        modelChanges.Register(() => (IChangesFrameEx)changesFrame);
 
         storage.Update(_repository!, modelChanges);
 
-        A.CallTo(() => ((IFakeChangesFrame)changesFrame).FirstCollection.HasChanges()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => ((IFakeChangesFrame)changesFrame).SecondCollection.HasChanges()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => ((IFakeChangesFrame)changesFrame).OneToOneRelation.HasChanges()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => ((IFakeChangesFrame)changesFrame).OneToManyRelation.HasChanges()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => ((IFakeChangesFrame)changesFrame).ManyToOneRelation.HasChanges()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => ((IFakeChangesFrame)changesFrame).ManyToManyRelation.HasChanges()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.FirstCollection.HasChanges()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.SecondCollection.HasChanges()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.OneToOneRelation.HasChanges()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.OneToManyRelation.HasChanges()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.ManyToOneRelation.HasChanges()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.ManyToManyRelation.HasChanges()).MustHaveHappenedOnceExactly();
     }
 
     [Test]
@@ -199,25 +199,25 @@ public class ModelShardStorageTests
 
     private void SetupModelChanges(ModelChanges modelChanges, CollectionAction action, FirstEntityProperties? oldProps, FirstEntityProperties? newProps)
     {
-        var changesFrame = A.Fake<IWritableChangesFrame>(c => c.Implements<IFakeChangesFrame>());
-        A.CallTo(() => ((IFakeChangesFrame)changesFrame).FirstCollection.HasChanges()).Returns(true);
-        A.CallTo(() => ((IFakeChangesFrame)changesFrame).FirstCollection.GetEnumerator())
+        var changesFrame = A.Fake<IFakeChangesFrame>(c => c.Implements<IChangesFrameEx>());
+        A.CallTo(() => changesFrame.FirstCollection.HasChanges()).Returns(true);
+        A.CallTo(() => changesFrame.FirstCollection.GetEnumerator())
             .Returns(new List<CollectionChange<FirstEntity, FirstEntityProperties>>()
             {
                 new CollectionChange<FirstEntity, FirstEntityProperties>(action, new(), oldProps, newProps)
             }.GetEnumerator());
-        modelChanges.Register(() => changesFrame);
+        modelChanges.Register(() => (IChangesFrameEx)changesFrame);
     }
 
     private void SetupModelChanges(ModelChanges modelChanges, RelationAction action)
     {
-        var changesFrame = A.Fake<IWritableChangesFrame>(c => c.Implements<IFakeChangesFrame>());
-        A.CallTo(() => ((IFakeChangesFrame)changesFrame).OneToManyRelation.HasChanges()).Returns(true);
-        A.CallTo(() => ((IFakeChangesFrame)changesFrame).OneToManyRelation.GetEnumerator())
+        var changesFrame = A.Fake<IFakeChangesFrame>(c => c.Implements<IChangesFrameEx>());
+        A.CallTo(() => changesFrame.OneToManyRelation.HasChanges()).Returns(true);
+        A.CallTo(() => changesFrame.OneToManyRelation.GetEnumerator())
             .Returns(new List<RelationChange<FirstEntity, SecondEntity>>()
             {
                 new RelationChange<FirstEntity, SecondEntity>(action, new(), new())
             }.GetEnumerator());
-        modelChanges.Register(() => changesFrame);
+        modelChanges.Register(() => (IChangesFrameEx)changesFrame);
     }
 }

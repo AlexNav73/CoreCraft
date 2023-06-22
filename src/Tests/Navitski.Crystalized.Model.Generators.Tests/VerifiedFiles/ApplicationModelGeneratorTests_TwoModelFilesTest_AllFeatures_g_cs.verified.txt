@@ -140,7 +140,7 @@ namespace compilation.AllFeatures
 
     internal sealed partial class FakeModelShard : IFeatureContext
     {
-        IChangesFrame IFeatureContext.GetOrAddFrame(IWritableModelChanges modelChanges)
+        IChangesFrame IFeatureContext.GetOrAddFrame(IMutableModelChanges modelChanges)
         {
             return modelChanges.Register(static () => new FakeChangesFrame());
         }
@@ -163,7 +163,7 @@ namespace compilation.AllFeatures
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    file sealed class FakeChangesFrame : IFakeChangesFrame, IWritableChangesFrame
+    file sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx
     {
         public FakeChangesFrame()
         {
@@ -233,7 +233,7 @@ namespace compilation.AllFeatures
             return FirstCollection.HasChanges() || SecondCollection.HasChanges() || OneToOneRelation.HasChanges() || OneToManyRelation.HasChanges() || ManyToOneRelation.HasChanges() || ManyToManyRelation.HasChanges();
         }
 
-        public IWritableChangesFrame Merge(IChangesFrame frame)
+        public IChangesFrame Merge(IChangesFrame frame)
         {
             var typedFrame = (FakeChangesFrame)frame;
 

@@ -4,9 +4,9 @@ namespace Navitski.Crystalized.Model.Engine.Features;
 
 internal class TrackableFeature : IFeature
 {
-    private readonly IWritableModelChanges _modelChanges;
+    private readonly IMutableModelChanges _modelChanges;
 
-    public TrackableFeature(IWritableModelChanges modelChanges)
+    public TrackableFeature(IMutableModelChanges modelChanges)
     {
         _modelChanges = modelChanges;
     }

@@ -11,16 +11,16 @@ public class FakeModel : DomainModel
     public FakeModel(IEnumerable<IModelShard> shards)
         : base(shards, new SyncScheduler())
     {
-        UndoStack = new Stack<IWritableModelChanges>();
+        UndoStack = new Stack<IModelChanges>();
     }
 
     public event EventHandler? Changed;
 
-    public Stack<IWritableModelChanges> UndoStack { get; }
+    public Stack<IModelChanges> UndoStack { get; }
 
     protected override void OnModelChanged(Change<IModelChanges> change)
     {
-        UndoStack.Push((IWritableModelChanges)change.Hunk);
+        UndoStack.Push(change.Hunk);
 
         Changed?.Invoke(this, EventArgs.Empty);
     }

@@ -202,7 +202,7 @@ public abstract class DomainModel : IDomainModel
 
             try
             {
-                await _scheduler.Enqueue(() => ((IWritableModelChanges)changes).Apply(snapshot), token);
+                await _scheduler.Enqueue(() => ((IMutableModelChanges)changes).Apply(snapshot), token);
             }
             catch (Exception ex)
             {
@@ -230,9 +230,9 @@ public abstract class DomainModel : IDomainModel
         return new Change<IModelChanges>(result.OldModel, result.NewModel, changes);
     }
 
-    private static IWritableModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)
+    private static IModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)
     {
-        var merged = (IWritableModelChanges)changes[0];
+        var merged = (IMutableModelChanges)changes[0];
         for (var i = 1; i < changes.Count; i++)
         {
             merged = merged.Merge(changes[i]);
