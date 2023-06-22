@@ -1,7 +1,6 @@
 ﻿using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Subscription.Builders;
 
-namespace Navitski.Crystalized.Model.Engine.Subscription.Extensions;
+namespace Navitski.Crystalized.Model.Engine.Subscription.Builders;
 
 /// <summary>
 ///     A collection of extensions methods for <see cref="ISubscriptionBuilder{T}"/>

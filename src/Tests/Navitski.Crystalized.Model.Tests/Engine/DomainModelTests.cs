@@ -6,7 +6,7 @@ using Navitski.Crystalized.Model.Engine.Exceptions;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
 using Navitski.Crystalized.Model.Engine.Subscription;
-using Navitski.Crystalized.Model.Engine.Subscription.Extensions;
+using Navitski.Crystalized.Model.Engine.Subscription.Builders;
 
 namespace Navitski.Crystalized.Model.Tests.Engine;
 

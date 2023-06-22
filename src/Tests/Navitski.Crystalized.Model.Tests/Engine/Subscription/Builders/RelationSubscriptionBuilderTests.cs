@@ -2,7 +2,6 @@
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Subscription;
 using Navitski.Crystalized.Model.Engine.Subscription.Builders;
-using Navitski.Crystalized.Model.Engine.Subscription.Extensions;
 
 namespace Navitski.Crystalized.Model.Tests.Engine.Subscription.Builders;
 

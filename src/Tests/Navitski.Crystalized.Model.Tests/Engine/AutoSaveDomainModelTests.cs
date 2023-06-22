@@ -3,7 +3,7 @@ using Navitski.Crystalized.Model.Engine.ChangesTracking;
 using Navitski.Crystalized.Model.Engine.Core;
 using Navitski.Crystalized.Model.Engine.Persistence;
 using Navitski.Crystalized.Model.Engine.Scheduling;
-using Navitski.Crystalized.Model.Engine.Subscription.Extensions;
+using Navitski.Crystalized.Model.Engine.Subscription.Builders;
 
 namespace Navitski.Crystalized.Model.Tests.Engine;
 
