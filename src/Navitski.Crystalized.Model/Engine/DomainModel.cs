@@ -12,7 +12,7 @@ namespace Navitski.Crystalized.Model.Engine;
 /// <summary>
 ///     A base class for model implementation
 /// </summary>
-public abstract class DomainModel : IDomainModel
+public class DomainModel : IDomainModel
 {
     private readonly View _view;
     private readonly IScheduler _scheduler;
@@ -23,7 +23,17 @@ public abstract class DomainModel : IDomainModel
     /// <summary>
     ///     Ctor
     /// </summary>
-    protected DomainModel(IEnumerable<IModelShard> shards, IScheduler scheduler)
+    public DomainModel(IEnumerable<IModelShard> shards)
+    {
+        _view = new View(shards);
+        _scheduler = new AsyncScheduler();
+        _modelSubscription = new ModelSubscription();
+    }
+
+    /// <summary>
+    ///     Ctor
+    /// </summary>
+    public DomainModel(IEnumerable<IModelShard> shards, IScheduler scheduler)
     {
         _view = new View(shards);
         _scheduler = scheduler;
@@ -102,6 +112,63 @@ public abstract class DomainModel : IDomainModel
     }
 
     /// <summary>
+    ///     Saves a model as a whole when storage is empty
+    /// </summary>
+    /// <param name="storage">A storage</param>
+    /// <param name="path">A path to a file</param>
+    /// <param name="token">Cancellation token</param>
+    /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
+    public Task Save(IStorage storage, string path, CancellationToken token = default)
+    {
+        // Store a reference to the model before start saving task. It is safe to use UnsafeModel here
+        // because we are storing IModel object in the RunParallel delegate, but not the reference to the
+        // view. When the UnsafeModel stored in the local variable all changes happened after, will not
+        // change stored model (instead a reference to the model in the _view will be replaced with a reference
+        // to the new model, leaving old reference and model untouched). This is exact behavior we need, because
+        // when Save is executed it should save state at that moment, but not when storage.Save is executed.
+        var model = _view.UnsafeModel;
+
+        try
+        {
+            return _scheduler.RunParallel(() => storage.Save(path, model), token);
+        }
+        catch (Exception ex)
+        {
+            throw new ModelSaveException("Model save has failed", ex);
+        }
+    }
+
+    /// <summary>
+    ///     Loads a model
+    /// </summary>
+    /// <param name="storage">A storage</param>
+    /// <param name="path">A path to a file</param>
+    /// <param name="token">Cancellation token</param>
+    /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model</exception>
+    public async Task Load(IStorage storage, string path, CancellationToken token = default)
+    {
+        var changes = new ModelChanges();
+        var snapshot = _view.CreateSnapshot(new IFeature[] { new CoWFeature(), new TrackableFeature(changes) });
+
+        try
+        {
+            await _scheduler.Enqueue(() => storage.Load(path, snapshot), token);
+        }
+        catch (Exception ex)
+        {
+            throw new ModelLoadingException("Model loading has failed", ex);
+        }
+
+        if (changes.HasChanges())
+        {
+            var result = _view.ApplySnapshot(snapshot);
+            var eventArgs = CreateChangeObject(result, changes);
+
+            NotifySubscriptions(eventArgs);
+        }
+    }
+
+    /// <summary>
     ///     Saves a list of model changes
     /// </summary>
     /// <param name="storage">A storage to write</param>
@@ -128,63 +195,6 @@ public abstract class DomainModel : IDomainModel
         catch (Exception ex)
         {
             throw new ModelSaveException("Model save has failed", ex);
-        }
-    }
-
-    /// <summary>
-    ///     Saves a model as a whole when storage is empty
-    /// </summary>
-    /// <param name="storage">A storage</param>
-    /// <param name="path">A path to a file</param>
-    /// <param name="token">Cancellation token</param>
-    /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
-    protected Task Save(IStorage storage, string path, CancellationToken token = default)
-    {
-        // Store a reference to the model before start saving task. It is safe to use UnsafeModel here
-        // because we are storing IModel object in the RunParallel delegate, but not the reference to the
-        // view. When the UnsafeModel stored in the local variable all changes happened after, will not
-        // change stored model (instead a reference to the model in the _view will be replaced with a reference
-        // to the new model, leaving old reference and model untouched). This is exact behavior we need, because
-        // when Save is executed it should save state at this moment, but not when storage.Save is executed.
-        var model = _view.UnsafeModel;
-
-        try
-        {
-            return _scheduler.RunParallel(() => storage.Save(path, model), token);
-        }
-        catch (Exception ex)
-        {
-            throw new ModelSaveException("Model save has failed", ex);
-        }
-    }
-
-    /// <summary>
-    ///     Loads a model
-    /// </summary>
-    /// <param name="storage">A storage</param>
-    /// <param name="path">A path to a file</param>
-    /// <param name="token">Cancellation token</param>
-    /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model</exception>
-    protected async Task Load(IStorage storage, string path, CancellationToken token = default)
-    {
-        var changes = new ModelChanges();
-        var snapshot = _view.CreateSnapshot(new IFeature[] { new CoWFeature(), new TrackableFeature(changes) });
-
-        try
-        {
-            await _scheduler.Enqueue(() => storage.Load(path, snapshot), token);
-        }
-        catch (Exception ex)
-        {
-            throw new ModelLoadingException("Model loading has failed", ex);
-        }
-
-        if (changes.HasChanges())
-        {
-            var result = _view.ApplySnapshot(snapshot);
-            var eventArgs = CreateChangeObject(result, changes);
-
-            NotifySubscriptions(eventArgs);
         }
     }
 
