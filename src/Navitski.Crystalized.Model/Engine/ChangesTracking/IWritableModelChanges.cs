@@ -22,12 +22,6 @@ public interface IWritableModelChanges : IModelChanges
     T Register<T>(Func<T> factory) where T : class, IWritableChangesFrame;
 
     /// <summary>
-    ///     Creates a new <see cref="IWritableModelChanges"/> which holds the changes opposite to the original changes
-    /// </summary>
-    /// <returns>A new inverted changes</returns>
-    IWritableModelChanges Invert();
-
-    /// <summary>
     ///     Applies changes to the given model
     /// </summary>
     /// <param name="model">A target model</param>

@@ -194,7 +194,7 @@ public abstract class DomainModel : IDomainModel
     /// <param name="changes">Changes to apply</param>
     /// <param name="token">Cancellation token</param>
     /// <exception cref="ApplyModelChangesException">Throws when an error occurred while applying changes to the model</exception>
-    protected async Task Apply(IWritableModelChanges changes, CancellationToken token = default)
+    protected async Task Apply(IModelChanges changes, CancellationToken token = default)
     {
         if (changes.HasChanges())
         {
@@ -202,7 +202,7 @@ public abstract class DomainModel : IDomainModel
 
             try
             {
-                await _scheduler.Enqueue(() => changes.Apply(snapshot), token);
+                await _scheduler.Enqueue(() => ((IWritableModelChanges)changes).Apply(snapshot), token);
             }
             catch (Exception ex)
             {
@@ -225,7 +225,7 @@ public abstract class DomainModel : IDomainModel
         _currentChanges = null;
     }
 
-    private static Change<IModelChanges> CreateChangeObject(ModelChangeResult result, IWritableModelChanges changes)
+    private static Change<IModelChanges> CreateChangeObject(ModelChangeResult result, IModelChanges changes)
     {
         return new Change<IModelChanges>(result.OldModel, result.NewModel, changes);
     }

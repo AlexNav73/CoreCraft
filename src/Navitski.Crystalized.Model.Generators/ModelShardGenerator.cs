@@ -305,7 +305,7 @@ internal partial class ApplicationModelGenerator
 
         void DefineInvertMethod(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine($"public IWritableChangesFrame Invert()");
+            code.WriteLine($"IChangesFrame IChangesFrame.Invert()");
             code.Block(() =>
             {
                 code.WriteLine($"return new {modelShard.Name}ChangesFrame()");
