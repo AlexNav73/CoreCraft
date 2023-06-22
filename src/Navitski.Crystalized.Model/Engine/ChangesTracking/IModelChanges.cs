@@ -30,4 +30,10 @@ public interface IModelChanges : IEnumerable<IChangesFrame>
     /// </summary>
     /// <returns>True - if model has changes</returns>
     bool HasChanges();
+
+    /// <summary>
+    ///     Creates a new <see cref="IModelChanges"/> which holds the changes opposite to the original changes
+    /// </summary>
+    /// <returns>A new inverted changes</returns>
+    IModelChanges Invert();
 }

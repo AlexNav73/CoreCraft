@@ -14,6 +14,12 @@
 public interface IChangesFrame
 {
     /// <summary>
+    ///     Does the changes frame contain any changes
+    /// </summary>
+    /// <returns>True - if there are some changes inside the <see cref="IChangesFrame"/></returns>
+    bool HasChanges();
+
+    /// <summary>
     ///     Retrieves a collection's changes set
     /// </summary>
     /// <typeparam name="TEntity">A type of a collection's entity</typeparam>
@@ -36,8 +42,8 @@ public interface IChangesFrame
         where TChild : Entity;
 
     /// <summary>
-    ///     Does the changes frame contain any changes
+    ///     Creates a new <see cref="IChangesFrame"/> which holds the changes opposite to the original changes
     /// </summary>
-    /// <returns>True - if there are some changes inside the <see cref="IChangesFrame"/></returns>
-    bool HasChanges();
+    /// <returns>A new inverted changes</returns>
+    IChangesFrame Invert();
 }

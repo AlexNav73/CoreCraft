@@ -40,9 +40,9 @@ internal sealed class ModelChanges : IWritableModelChanges
     }
 
     /// <inheritdoc />
-    public IWritableModelChanges Invert()
+    public IModelChanges Invert()
     {
-        var frames = _frames.Cast<IWritableChangesFrame>().Select(x => x.Invert()).ToArray();
+        var frames = _frames.Select(x => x.Invert()).ToArray();
 
         return new ModelChanges(frames);
     }
@@ -58,7 +58,7 @@ internal sealed class ModelChanges : IWritableModelChanges
 
     public IWritableModelChanges Merge(IModelChanges changes)
     {
-        var changesFrames = changes.Cast<IWritableChangesFrame>().ToDictionary(k => k.GetType());
+        var changesFrames = changes.ToDictionary(k => k.GetType());
         var result = new List<IChangesFrame>();
 
         foreach (var frame in _frames.Cast<IWritableChangesFrame>())

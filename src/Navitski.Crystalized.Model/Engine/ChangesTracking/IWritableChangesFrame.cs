@@ -20,12 +20,6 @@ public interface IWritableChangesFrame : IChangesFrame
     void Apply(IModel model);
 
     /// <summary>
-    ///     Creates a new <see cref="IWritableChangesFrame"/> which holds the changes opposite to the original changes
-    /// </summary>
-    /// <returns>A new inverted changes</returns>
-    IWritableChangesFrame Invert();
-
-    /// <summary>
     ///     Merges two <see cref="IWritableChangesFrame"/>s into one,
     ///     reducing a number of operations (changes) stored in the <see cref="IWritableChangesFrame"/>.
     /// </summary>

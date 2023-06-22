@@ -202,7 +202,7 @@ namespace compilation.AnotherModelFile
             throw new System.InvalidOperationException($"Unable to find relation's change set");
         }
 
-        public IWritableChangesFrame Invert()
+        IChangesFrame IChangesFrame.Invert()
         {
             return new FakeChangesFrame()
             {

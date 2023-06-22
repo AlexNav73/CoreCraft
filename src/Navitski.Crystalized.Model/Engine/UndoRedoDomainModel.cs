@@ -11,8 +11,8 @@ namespace Navitski.Crystalized.Model.Engine;
 public class UndoRedoDomainModel : DomainModel
 {
     private readonly IStorage _storage;
-    private readonly Stack<IWritableModelChanges> _undoStack;
-    private readonly Stack<IWritableModelChanges> _redoStack;
+    private readonly Stack<IModelChanges> _undoStack;
+    private readonly Stack<IModelChanges> _redoStack;
 
     /// <summary>
     ///     Ctor
@@ -24,8 +24,8 @@ public class UndoRedoDomainModel : DomainModel
         : base(modelShards, scheduler)
     {
         _storage = storage;
-        _undoStack = new Stack<IWritableModelChanges>();
-        _redoStack = new Stack<IWritableModelChanges>();
+        _undoStack = new Stack<IModelChanges>();
+        _redoStack = new Stack<IModelChanges>();
     }
 
     /// <summary>
