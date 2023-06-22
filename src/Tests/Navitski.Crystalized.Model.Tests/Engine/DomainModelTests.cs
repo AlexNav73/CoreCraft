@@ -13,6 +13,12 @@ namespace Navitski.Crystalized.Model.Tests.Engine;
 public class DomainModelTests
 {
     [Test]
+    public void CreatingDomainModelWithDefaultSchedulerDoesNotThrowsExceptionsTest()
+    {
+        Assert.DoesNotThrow(() => new DomainModel(Array.Empty<IModelShard>()));
+    }
+
+    [Test]
     public void SubscribeWhenCurrentChangesAreNullTest()
     {
         var storage = A.Fake<IStorage>();
