@@ -3,16 +3,9 @@
 namespace build;
 
 [GitHubActions(
-    "continuous",
-    GitHubActionsImage.WindowsLatest,
-    OnPullRequestBranches = new[] { "master", "release/*" },
-    PublishArtifacts = false,
-    AutoGenerate = false,
-    InvokedTargets = new[] { nameof(RunTests) })]
-[GitHubActions(
     "releasing",
     image: GitHubActionsImage.WindowsLatest,
-    OnPushBranches = new[] { "master" },
+    OnPushBranches = new[] { "master", "release/*" },
     PublishArtifacts = true,
     AutoGenerate = false,
     InvokedTargets = new[] { nameof(Publish) },

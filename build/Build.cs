@@ -16,6 +16,9 @@ internal partial class Build : NukeBuild
     [GitRepository]
     readonly GitRepository GitRepository;
 
+    [GitVersion]
+    readonly GitVersion GitVersion;
+
     [Solution(GenerateProjects = true)]
     readonly Solution Solution;
 
@@ -125,27 +128,41 @@ internal partial class Build : NukeBuild
         {
             PackagesDirectory.CreateOrCleanDirectory();
 
+            string MakePreviewIfNeeded(string version)
+            {
+                if (GitRepository.IsOnMasterBranch())
+                {
+                    return version;
+                }
+
+                return $"{version}-preview";
+            }
+
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model)
                 .Apply(PackSettingsBase)
+                .SetVersion(MakePreviewIfNeeded("0.5.0"))
                 .SetDescription("A core library to build cross-platform and highly customizable domain models")
                 .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model_Generators)
                 .Apply(PackSettingsBase)
+                .SetVersion(MakePreviewIfNeeded("0.5.0"))
                 .SetDescription("Roslyn Source Generators for generating domain models using 'Navitski.Crystalized.Model' library")
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model_Storage_Sqlite)
                 .Apply(PackSettingsBase)
+                .SetVersion(MakePreviewIfNeeded("0.5.0"))
                 .SetDescription("SQLite storage implementation for 'Navitski.Crystalized.Model' library")
                 .AddPackageTags("Model", "Domain", "SQLite"));
 
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model_Storage_Json)
                 .Apply(PackSettingsBase)
+                .SetVersion(MakePreviewIfNeeded("0.1.1"))
                 .SetDescription("Json storage implementation for 'Navitski.Crystalized.Model' library")
                 .AddPackageTags("Model", "Domain", "Json"));
 
@@ -162,7 +179,10 @@ internal partial class Build : NukeBuild
                 .SetRepositoryUrl(GitRepository.HttpsUrl)
                 .SetOutputDirectory(PackagesDirectory)
                 .SetRepositoryType("git")
-                .EnablePackageRequireLicenseAcceptance();
+                .EnablePackageRequireLicenseAcceptance()
+                .SetAssemblyVersion(GitVersion.AssemblySemVer)
+                .SetInformationalVersion(GitVersion.InformationalVersion)
+                .SetFileVersion(GitVersion.AssemblySemFileVer);
         });
 
     Target Publish => _ => _
