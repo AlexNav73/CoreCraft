@@ -9,8 +9,6 @@
         <WarningsAsErrors>CS1591</WarningsAsErrors>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 
-        <PackageVersion>0.1.1-alpha</PackageVersion>
-
         <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     </PropertyGroup>
 
