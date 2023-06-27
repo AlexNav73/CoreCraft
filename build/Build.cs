@@ -16,9 +16,6 @@ internal partial class Build : NukeBuild
     [GitRepository]
     readonly GitRepository GitRepository;
 
-    [GitVersion]
-    readonly GitVersion GitVersion;
-
     [Solution(GenerateProjects = true)]
     readonly Solution Solution;
 
@@ -179,10 +176,7 @@ internal partial class Build : NukeBuild
                 .SetRepositoryUrl(GitRepository.HttpsUrl)
                 .SetOutputDirectory(PackagesDirectory)
                 .SetRepositoryType("git")
-                .EnablePackageRequireLicenseAcceptance()
-                .SetAssemblyVersion(GitVersion.AssemblySemVer)
-                .SetInformationalVersion(GitVersion.InformationalVersion)
-                .SetFileVersion(GitVersion.AssemblySemFileVer);
+                .EnablePackageRequireLicenseAcceptance();
         });
 
     Target Publish => _ => _
