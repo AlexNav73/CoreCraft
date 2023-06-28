@@ -51,7 +51,6 @@ namespace compilation.VisibilityImplementations
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed partial class FakeModelShard : IFakeModelShard
     {
-        [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute()]
         public FakeModelShard()
         {
             FirstCollection = new Collection<FirstEntity, FirstEntityProperties>(
@@ -81,7 +80,6 @@ namespace compilation.VisibilityImplementations
                 new OneToMany<SecondEntity, FirstEntity>());
         }
 
-        [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute()]
         internal FakeModelShard(IMutableFakeModelShard mutable)
         {
             FirstCollection = ((IMutableState<ICollection<FirstEntity, FirstEntityProperties>>)mutable.FirstCollection).AsReadOnly();
@@ -93,13 +91,13 @@ namespace compilation.VisibilityImplementations
             ManyToManyRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToManyRelation).AsReadOnly();
         }
 
-        public required ICollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; }
-        public required ICollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; }
+        public ICollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
+        public ICollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;
 
-        public required IRelation<FirstEntity, SecondEntity> OneToOneRelation { get; init; }
-        public required IRelation<FirstEntity, SecondEntity> OneToManyRelation { get; init; }
-        public required IRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; init; }
-        public required IRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; init; }
+        public IRelation<FirstEntity, SecondEntity> OneToOneRelation { get; init; } = null!;
+        public IRelation<FirstEntity, SecondEntity> OneToManyRelation { get; init; } = null!;
+        public IRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; init; } = null!;
+        public IRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; init; } = null!;
     }
 
     internal sealed partial class FakeModelShard : IReadOnlyState<IMutableFakeModelShard>
@@ -163,7 +161,7 @@ namespace compilation.VisibilityImplementations
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    file sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx
+    internal sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx
     {
         public FakeChangesFrame()
         {
@@ -254,15 +252,15 @@ namespace compilation.VisibilityImplementations
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    file sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
+    internal sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
     {
-        public required IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; }
-        public required IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; }
+        public IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
+        public IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;
 
-        public required IMutableRelation<FirstEntity, SecondEntity> OneToOneRelation { get; init; }
-        public required IMutableRelation<FirstEntity, SecondEntity> OneToManyRelation { get; init; }
-        public required IMutableRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; init; }
-        public required IMutableRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; init; }
+        public IMutableRelation<FirstEntity, SecondEntity> OneToOneRelation { get; init; } = null!;
+        public IMutableRelation<FirstEntity, SecondEntity> OneToManyRelation { get; init; } = null!;
+        public IMutableRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; init; } = null!;
+        public IMutableRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; init; } = null!;
 
         public IFakeModelShard AsReadOnly()
         {

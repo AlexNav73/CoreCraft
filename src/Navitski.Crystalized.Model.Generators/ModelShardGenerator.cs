@@ -60,7 +60,6 @@ internal partial class ApplicationModelGenerator
 
         void DefineCtor(IndentedTextWriter code, ModelShard modelShard, string idBase)
         {
-            code.SetsRequiredMembersAttribute();
             code.WriteLine($"public {modelShard.Name}ModelShard()");
             code.Block(() =>
             {
@@ -91,7 +90,6 @@ internal partial class ApplicationModelGenerator
 
         void DefineConversionCtor(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.SetsRequiredMembersAttribute();
             code.WriteLine($"internal {modelShard.Name}ModelShard(IMutable{modelShard.Name}ModelShard mutable)");
             code.Block(() =>
             {
@@ -112,13 +110,13 @@ internal partial class ApplicationModelGenerator
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public required {Property($"I{Type(collection)}", collection.Name, "get; init;")}");
+                code.WriteLine($"public {Property($"I{Type(collection)}", collection.Name, "get; init;")} = null!;");
             }
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public required {Property($"I{Type(relation)}", relation.Name, "get; init;")}");
+                code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name, "get; init;")} = null!;");
             }
         }
     }
@@ -403,13 +401,13 @@ internal partial class ApplicationModelGenerator
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public required {Property($"IMutable{Type(collection)}", collection.Name, "get; init;")}");
+                code.WriteLine($"public {Property($"IMutable{Type(collection)}", collection.Name, "get; init;")} = null!;");
             }
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public required {Property($"IMutable{Type(relation)}", relation.Name, "get; init;")}");
+                code.WriteLine($"public {Property($"IMutable{Type(relation)}", relation.Name, "get; init;")} = null!;");
             }
         }
 
@@ -428,7 +426,7 @@ internal partial class ApplicationModelGenerator
         return modelShard.Visibility switch
         {
             Visibility.All => "public",
-            _ => "file"
+            _ => "internal"
         };
     }
 }

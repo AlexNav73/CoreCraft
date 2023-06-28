@@ -145,7 +145,7 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.Navitski_Crystalized_Model_Generators)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.5.0"))
+                .SetVersion(MakePreviewIfNeeded("0.5.1"))
                 .SetDescription("Roslyn Source Generators for generating domain models using 'Navitski.Crystalized.Model' library")
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
