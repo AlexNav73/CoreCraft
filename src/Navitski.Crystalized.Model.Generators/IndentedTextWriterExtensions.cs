@@ -119,9 +119,4 @@ internal static class IndentedTextWriterExtensions
     {
         code.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]");
     }
-
-    public static void SetsRequiredMembersAttribute(this IndentedTextWriter code)
-    {
-        code.WriteLine("[global::System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute()]");
-    }
 }
