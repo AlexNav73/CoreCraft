@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Navitski.Crystalized.Model.Engine;
-using Navitski.Crystalized.Model.Engine.ChangesTracking;
+using CoreCraft.Engine;
+using CoreCraft.Engine.ChangesTracking;
 using WpfDemoApp.Model;
 using WpfDemoApp.Model.Entities;
 

@@ -1,9 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
-using Navitski.Crystalized.Model.Engine;
-using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Subscription;
+using CoreCraft.Engine;
+using CoreCraft.Engine.ChangesTracking;
+using CoreCraft.Engine.Subscription;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

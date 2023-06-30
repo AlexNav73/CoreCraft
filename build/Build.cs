@@ -69,7 +69,7 @@ internal partial class Build : NukeBuild
         .Before(Pack, Coverage)
         .Executes(() =>
         {
-            var testProject = Solution.Tests.Navitski_Crystalized_Model_Tests_MemoryLeaks;
+            var testProject = Solution.Tests.CoreCraft_Tests_MemoryLeaks;
             var assemblyName = testProject.Name + ".dll";
             var assemblyPath = testProject.Directory / "bin" / Configuration / assemblyName;
 
@@ -92,7 +92,7 @@ internal partial class Build : NukeBuild
                 .AddProperty("CoverletOutputFormat", "\\\"cobertura,json\\\"")
                 .AddProperty("CoverletOutput", $"{CoverageDirectory}\\")
                 .AddProperty("ExcludeByAttribute", "\\\"Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute\\\"")
-                .AddProperty("Exclude", $"\\\"[{Solution.Tests.Navitski_Crystalized_Model_Tests_Infrastructure.Name}]*,[{Solution.Navitski_Crystalized_Model.Name}]System.*\\\"")
+                .AddProperty("Exclude", $"\\\"[{Solution.Tests.CoreCraft_Tests_Infrastructure.Name}]*,[{Solution.CoreCraft.Name}]System.*\\\"")
                 .AddProperty("MergeWith", CoverageDirectory / "coverage.json")
                 .SetProcessArgumentConfigurator(c => c.Add("-m:1")));
         });
@@ -101,7 +101,7 @@ internal partial class Build : NukeBuild
         .Executes(() =>
         {
             DotNetRun(s => s
-                .SetProjectFile(Solution.Tests.Navitski_Crystalized_Model_Perf)
+                .SetProjectFile(Solution.Tests.CoreCraft_Tests_Perf)
                 .SetConfiguration(Configuration.Release));
         });
 
@@ -136,31 +136,31 @@ internal partial class Build : NukeBuild
             }
 
             DotNetPack(s => s
-                .SetProject(Solution.Navitski_Crystalized_Model)
+                .SetProject(Solution.CoreCraft)
                 .Apply(PackSettingsBase)
                 .SetVersion(MakePreviewIfNeeded("0.5.0"))
                 .SetDescription("A core library to build cross-platform and highly customizable domain models")
                 .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
-                .SetProject(Solution.Navitski_Crystalized_Model_Generators)
+                .SetProject(Solution.CoreCraft_Generators)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.5.1"))
-                .SetDescription("Roslyn Source Generators for generating domain models using 'Navitski.Crystalized.Model' library")
+                .SetVersion(MakePreviewIfNeeded("0.5.0"))
+                .SetDescription("Roslyn Source Generators for generating domain models using 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
-                .SetProject(Solution.Navitski_Crystalized_Model_Storage_Sqlite)
+                .SetProject(Solution.CoreCraft_Storage_Sqlite)
                 .Apply(PackSettingsBase)
                 .SetVersion(MakePreviewIfNeeded("0.5.0"))
-                .SetDescription("SQLite storage implementation for 'Navitski.Crystalized.Model' library")
+                .SetDescription("SQLite storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SQLite"));
 
             DotNetPack(s => s
-                .SetProject(Solution.Navitski_Crystalized_Model_Storage_Json)
+                .SetProject(Solution.CoreCraft_Storage_Json)
                 .Apply(PackSettingsBase)
                 .SetVersion(MakePreviewIfNeeded("0.1.1"))
-                .SetDescription("Json storage implementation for 'Navitski.Crystalized.Model' library")
+                .SetDescription("Json storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "Json"));
 
             ReportSummary(_ => _
