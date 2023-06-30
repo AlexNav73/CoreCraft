@@ -1,13 +1,13 @@
 ﻿using Example.Model;
-using Navitski.Crystalized.Model.Engine;
-using Navitski.Crystalized.Model.Engine.ChangesTracking;
-using Navitski.Crystalized.Model.Engine.Core;
-using Navitski.Crystalized.Model.Engine.Persistence;
-using Navitski.Crystalized.Model.Engine.Scheduling;
-using Navitski.Crystalized.Model.Engine.Subscription;
-using Navitski.Crystalized.Model.Engine.Subscription.Builders;
-using Navitski.Crystalized.Model.Storage.Sqlite;
-using Navitski.Crystalized.Model.Storage.Sqlite.Migrations;
+using CoreCraft.Engine;
+using CoreCraft.Engine.ChangesTracking;
+using CoreCraft.Engine.Core;
+using CoreCraft.Engine.Persistence;
+using CoreCraft.Engine.Scheduling;
+using CoreCraft.Engine.Subscription;
+using CoreCraft.Engine.Subscription.Builders;
+using CoreCraft.Storage.Sqlite;
+using CoreCraft.Storage.Sqlite.Migrations;
 
 namespace Example;
 

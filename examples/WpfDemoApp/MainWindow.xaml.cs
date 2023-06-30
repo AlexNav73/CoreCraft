@@ -1,10 +1,10 @@
 ﻿using Autofac;
 using MahApps.Metro.Controls;
-using Navitski.Crystalized.Model.Engine;
-using Navitski.Crystalized.Model.Engine.Core;
-using Navitski.Crystalized.Model.Engine.Persistence;
-using Navitski.Crystalized.Model.Engine.Scheduling;
-using Navitski.Crystalized.Model.Storage.Sqlite;
+using CoreCraft.Engine;
+using CoreCraft.Engine.Core;
+using CoreCraft.Engine.Persistence;
+using CoreCraft.Engine.Scheduling;
+using CoreCraft.Storage.Sqlite;
 using System.Collections.Generic;
 using WpfDemoApp.Model;
 
