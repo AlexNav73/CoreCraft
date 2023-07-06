@@ -27,6 +27,7 @@ internal partial class Build : NukeBuild
     static AbsolutePath PackagesDirectory => RootDirectory / "packages";
     static AbsolutePath CoverageDirectory => RootDirectory / "coverage";
     static AbsolutePath ReportDirectory => RootDirectory / "coveragereport";
+    static AbsolutePath ImagesDirectory => RootDirectory / "images";
 
     [CI]
     readonly GitHubActions GitHubActions;
@@ -176,7 +177,8 @@ internal partial class Build : NukeBuild
                 .SetRepositoryUrl(GitRepository.HttpsUrl)
                 .SetOutputDirectory(PackagesDirectory)
                 .SetRepositoryType("git")
-                .EnablePackageRequireLicenseAcceptance();
+                .EnablePackageRequireLicenseAcceptance()
+                .SetPackageIconUrl(ImagesDirectory / "icon.png");
         });
 
     Target Publish => _ => _

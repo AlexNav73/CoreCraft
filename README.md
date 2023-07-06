@@ -1,9 +1,9 @@
+<p align="center">
+  <img src="images/logo.png" width="15%" />
+</p>
+
 [![build](https://github.com/AlexNav73/CoreCraft/workflows/releasing/badge.svg)](https://github.com/AlexNav73/CoreCraft/actions)
 [![codecov](https://codecov.io/gh/AlexNav73/CoreCraft/branch/master/graph/badge.svg?token=Q6ZY0WHL9J)](https://codecov.io/gh/AlexNav73/CoreCraft) ![Nuget](https://img.shields.io/nuget/dt/CoreCraft) ![GitHub](https://img.shields.io/github/license/AlexNav73/CoreCraft) ![Lines of code](https://img.shields.io/tokei/lines/github/AlexNav73/CoreCraft)  
-[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft?color=blue&label=CoreCraft)](https://www.nuget.org/packages/CoreCraft)  
-[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Generators?color=blue&label=CoreCraft.Generators)](https://www.nuget.org/packages/CoreCraft.Generators)  
-[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Storage.SQLite?color=blue&label=CoreCraft.Storage.SQLite)](https://www.nuget.org/packages/CoreCraft.Storage.SQLite)  
-[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Storage.Json?color=blue&label=CoreCraft.Storage.Json)](https://www.nuget.org/packages/CoreCraft.Storage.Json)
 
 ## Introduction
 
@@ -28,6 +28,17 @@ The `CoreCraft` provides a wealth of features, including:
 7. **Reactive Extensions (Rx.NET) Integration**: `CoreCraft` incorporates Reactive Extensions ([Rx.NET](https://github.com/dotnet/reactive)) to provide a flexible subscription mechanism. It utilizes the `IObservable` and `IObserver` interfaces, allowing you to leverage the power of Rx.NET for event-driven programming and reactive data processing. This integration enables you to easily subscribe to change events and apply custom logic using the extensive set of operators provided by `Rx.NET`.
 
 `CoreCraft` empowers developers to create robust and scalable domain models with ease. With automatic model generation, change tracking, persistence options, and support for undo/redo operations, `CoreCraft` simplifies application state management and enhances the user experience.
+
+## NuGet Packages
+
+CoreCraft is distributed as NuGet packages.
+
+|Package|Status|
+|:------|:-----:|
+|CoreCraft|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft?color=blue)](https://www.nuget.org/packages/CoreCraft)|
+|CoreCraft.Generators|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Generators?color=blue)](https://www.nuget.org/packages/CoreCraft.Generators)|
+|CoreCraft.Storage.SQLite|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Storage.SQLite?color=blue)](https://www.nuget.org/packages/CoreCraft.Storage.SQLite)|
+|CoreCraft.Storage.Json|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Storage.Json?color=blue)](https://www.nuget.org/packages/CoreCraft.Storage.Json)|
 
 ## Basic usage
 
@@ -113,3 +124,7 @@ model.Save(storage, "my_data.db");
 ```
 
 Please refer to the [documentation](https://github.com/AlexNav73/CoreCraft/wiki/Getting-Started) for comprehensive information on using the `CoreCraft` toolkit and its features.
+
+## License
+
+[MIT](LICENSE).
