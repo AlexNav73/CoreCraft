@@ -173,12 +173,11 @@ internal partial class Build : NukeBuild
                 .SetNoBuild(SucceededTargets.Contains(Compile))
                 .AddAuthors("Aliaksandr Navitski")
                 .SetCopyright("Copyright (c) Aliaksandr Navitski 2023.")
-                //.SetPackageProjectUrl(GitRepository.HttpsUrl)
-                //.SetRepositoryUrl(GitRepository.HttpsUrl)
+                .SetPackageProjectUrl(GitRepository.HttpsUrl)
+                .SetRepositoryUrl(GitRepository.HttpsUrl)
                 .SetOutputDirectory(PackagesDirectory)
-                //.SetRepositoryType("git")
-                .EnablePackageRequireLicenseAcceptance()
-                .SetPackageIconUrl(ImagesDirectory / "icon.png");
+                .SetRepositoryType("git")
+                .EnablePackageRequireLicenseAcceptance();
         });
 
     Target Publish => _ => _
