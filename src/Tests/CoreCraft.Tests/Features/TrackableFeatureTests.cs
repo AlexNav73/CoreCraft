@@ -1,6 +1,6 @@
-﻿using CoreCraft.Engine.ChangesTracking;
-using CoreCraft.Engine.Core;
-using CoreCraft.Engine.Features;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Features;
 
 namespace CoreCraft.Tests.Features;
 

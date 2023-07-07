@@ -48,11 +48,11 @@ internal partial class ApplicationModelGenerator : GeneratorBase
         code.WriteLine($"namespace {@namespace}");
         code.Block(() =>
         {
-            code.WriteLine("using CoreCraft.Engine;");
-            code.WriteLine("using CoreCraft.Engine.Core;");
-            code.WriteLine("using CoreCraft.Engine.ChangesTracking;");
-            code.WriteLine("using CoreCraft.Engine.Lazy;");
-            code.WriteLine("using CoreCraft.Engine.Persistence;");
+            code.WriteLine("using CoreCraft;");
+            code.WriteLine("using CoreCraft.Core;");
+            code.WriteLine("using CoreCraft.ChangesTracking;");
+            code.WriteLine("using CoreCraft.Lazy;");
+            code.WriteLine("using CoreCraft.Persistence;");
             code.WriteLine($"using {@namespace}.Entities;");
             code.EmptyLine();
 

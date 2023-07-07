@@ -1,4 +1,4 @@
-﻿using CoreCraft.Engine.Core;
+﻿using CoreCraft.Core;
 
 namespace CoreCraft.Tests.Infrastructure;
 

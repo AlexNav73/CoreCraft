@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CoreCraft.Engine;
-using CoreCraft.Engine.ChangesTracking;
+using CoreCraft;
+using CoreCraft.ChangesTracking;
 using WpfDemoApp.Model;
 using WpfDemoApp.Model.Entities;
 

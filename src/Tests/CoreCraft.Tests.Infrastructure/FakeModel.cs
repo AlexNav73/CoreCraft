@@ -1,8 +1,8 @@
-﻿using CoreCraft.Engine;
-using CoreCraft.Engine.ChangesTracking;
-using CoreCraft.Engine.Core;
-using CoreCraft.Engine.Scheduling;
-using CoreCraft.Engine.Subscription;
+﻿using CoreCraft;
+using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Scheduling;
+using CoreCraft.Subscription;
 
 namespace CoreCraft.Tests.Infrastructure;
 

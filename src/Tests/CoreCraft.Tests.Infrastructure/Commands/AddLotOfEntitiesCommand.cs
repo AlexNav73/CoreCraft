@@ -1,5 +1,5 @@
-﻿using CoreCraft.Engine.Commands;
-using CoreCraft.Engine.Core;
+﻿using CoreCraft.Commands;
+using CoreCraft.Core;
 
 namespace CoreCraft.Tests.Infrastructure.Commands;
 

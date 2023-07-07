@@ -1,4 +1,4 @@
-﻿using CoreCraft.Engine.Core;
+﻿using CoreCraft.Core;
 using CoreCraft.Tests.Infrastructure;
 using CoreCraft.Tests.Infrastructure.Commands;
 

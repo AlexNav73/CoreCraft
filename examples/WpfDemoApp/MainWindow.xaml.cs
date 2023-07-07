@@ -1,9 +1,9 @@
 ﻿using Autofac;
 using MahApps.Metro.Controls;
-using CoreCraft.Engine;
-using CoreCraft.Engine.Core;
-using CoreCraft.Engine.Persistence;
-using CoreCraft.Engine.Scheduling;
+using CoreCraft;
+using CoreCraft.Core;
+using CoreCraft.Persistence;
+using CoreCraft.Scheduling;
 using CoreCraft.Storage.Sqlite;
 using System.Collections.Generic;
 using WpfDemoApp.Model;

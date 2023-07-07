@@ -12,11 +12,11 @@
 
 namespace compilation.AllFeatures
 {
-    using CoreCraft.Engine;
-    using CoreCraft.Engine.Core;
-    using CoreCraft.Engine.ChangesTracking;
-    using CoreCraft.Engine.Lazy;
-    using CoreCraft.Engine.Persistence;
+    using CoreCraft;
+    using CoreCraft.Core;
+    using CoreCraft.ChangesTracking;
+    using CoreCraft.Lazy;
+    using CoreCraft.Persistence;
     using compilation.AllFeatures.Entities;
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
@@ -327,7 +327,7 @@ namespace compilation.AllFeatures
 
 namespace compilation.AllFeatures.Entities
 {
-    using CoreCraft.Engine.Core;
+    using CoreCraft.Core;
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

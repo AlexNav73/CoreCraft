@@ -1,6 +1,6 @@
-﻿using CoreCraft.Engine.Core;
-using CoreCraft.Engine.Features;
-using CoreCraft.Engine.Lazy;
+﻿using CoreCraft.Core;
+using CoreCraft.Features;
+using CoreCraft.Lazy;
 
 namespace CoreCraft.Tests.Features;
 
