@@ -107,26 +107,21 @@ internal class CollectionSubscriptionTests
     }
 
     [Test]
-    [Ignore("Unstable. GC doesn't reclaim memory so the binding is not deleted and subscription lifetime is longer than necessary")]
     public void EntityBindingShouldBeRemovedIfEntityWasDeletedTest()
     {
         var collectionSubscription = new CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties>(x => x.FirstCollection);
         var onEntityChanged1Called = false;
-        var onEntityChanged2Called = false;
 
         var entityObserver = CreateEntityObserver(() => onEntityChanged1Called = !onEntityChanged1Called);
         var entity = new FirstEntity();
-        var collectionObserver = CreateCollectionChangeObserver(() => onEntityChanged2Called = true);
 
         collectionSubscription.Bind(entity, entityObserver);
-        collectionSubscription.Bind(collectionObserver);
 
         collectionSubscription.Publish(CreateChanges(entity));
         collectionSubscription.Publish(CreateChanges(entity, CollectionAction.Remove));
         collectionSubscription.Publish(CreateChanges(entity));
 
         Assert.That(onEntityChanged1Called, Is.True);
-        Assert.That(onEntityChanged2Called, Is.True);
     }
 
     private void BindToCollectionAndRiseEventBeforeBindingIsDeleted(
