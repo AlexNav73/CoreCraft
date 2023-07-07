@@ -1,11 +1,11 @@
 ﻿using Example.Model;
-using CoreCraft.Engine;
-using CoreCraft.Engine.ChangesTracking;
-using CoreCraft.Engine.Core;
-using CoreCraft.Engine.Persistence;
-using CoreCraft.Engine.Scheduling;
-using CoreCraft.Engine.Subscription;
-using CoreCraft.Engine.Subscription.Builders;
+using CoreCraft;
+using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Persistence;
+using CoreCraft.Scheduling;
+using CoreCraft.Subscription;
+using CoreCraft.Subscription.Builders;
 using CoreCraft.Storage.Sqlite;
 using CoreCraft.Storage.Sqlite.Migrations;
 

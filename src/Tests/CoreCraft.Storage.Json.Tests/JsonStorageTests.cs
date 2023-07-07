@@ -1,5 +1,5 @@
-﻿using CoreCraft.Engine.ChangesTracking;
-using CoreCraft.Engine.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Persistence;
 using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
 

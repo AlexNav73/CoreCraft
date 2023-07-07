@@ -1,2 +1,2 @@
-﻿global using CoreCraft.Engine.Core;
+﻿global using CoreCraft.Core;
 

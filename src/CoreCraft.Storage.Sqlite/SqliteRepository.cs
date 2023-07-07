@@ -1,8 +1,8 @@
 ﻿using System.Data;
 using System.Text;
 using Microsoft.Data.Sqlite;
-using CoreCraft.Engine.ChangesTracking;
-using CoreCraft.Engine.Core;
+using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
 
 namespace CoreCraft.Storage.Sqlite;
 

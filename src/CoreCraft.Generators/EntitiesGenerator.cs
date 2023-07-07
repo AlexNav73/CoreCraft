@@ -4,7 +4,7 @@ internal partial class ApplicationModelGenerator
 {
     public void GenerateEntities(IndentedTextWriter code, IEnumerable<ModelShard> shards)
     {
-        code.WriteLine("using CoreCraft.Engine.Core;");
+        code.WriteLine("using CoreCraft.Core;");
         code.EmptyLine();
 
         foreach (var modelShard in shards)
