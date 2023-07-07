@@ -12,10 +12,12 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="../../LICENSE.md" Pack="true" PackagePath="" />
+    <None Include="../../images/icon.png" Pack="true" PackagePath=""/>
   </ItemGroup>
 
   <ItemGroup>
