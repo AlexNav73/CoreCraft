@@ -38,14 +38,15 @@ internal static class QueryBuilder
         {
             var builder = new StringBuilder();
 
-            builder.Append($"CREATE TABLE IF NOT EXISTS [{InferName(scheme)}] (");
-            builder.Append("[Id] TEXT NOT NULL UNIQUE, ");
+            builder.AppendLine($"CREATE TABLE IF NOT EXISTS [{InferName(scheme)}] (");
+            builder.AppendLine("   [Id] TEXT NOT NULL UNIQUE, ");
             foreach (var property in scheme.Properties)
             {
-                builder.AppendFormat("[{0}] {1}{2}, ", property.Name, SqlTypeMapper.DbTypeName(property.Type), property.IsNullable ? string.Empty : " NOT NULL");
+                builder.AppendFormat("   [{0}] {1}{2}, ", property.Name, SqlTypeMapper.DbTypeName(property.Type), property.IsNullable ? string.Empty : " NOT NULL");
+                builder.AppendLine();
             }
-            builder.Append("PRIMARY KEY([Id])");
-            builder.Append(");");
+            builder.AppendLine("   PRIMARY KEY([Id])");
+            builder.AppendLine(");");
 
             return builder.ToString();
         }
