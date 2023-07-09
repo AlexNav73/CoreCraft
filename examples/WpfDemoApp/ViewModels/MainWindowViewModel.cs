@@ -32,7 +32,6 @@ internal partial class MainWindowViewModel : ObservableObject
         Items = new ObservableCollection<ItemViewModel>();
         Logs = new ObservableCollection<string>();
 
-        //_subscription = _model.For<IToDoChangesFrame>().With(x => x.Items).Subscribe(OnItemChanged);
         _subscription = _model
             .For<IToDoChangesFrame>()
             .With(x => x.Items)
@@ -44,7 +43,7 @@ internal partial class MainWindowViewModel : ObservableObject
 
     public ObservableCollection<string> Logs { get; }
 
-    public void OnNext(BindingChanges<ToDoItem, ToDoItemProperties> changes)
+    private void OnNext(BindingChanges<ToDoItem, ToDoItemProperties> changes)
     {
         foreach (var c in changes.Added)
         {
@@ -59,14 +58,6 @@ internal partial class MainWindowViewModel : ObservableObject
         {
             Items.Remove(Items.Single(x => x.Entity == c.Entity));
         }
-    }
-
-    [RelayCommand]
-    private void GCClean()
-    {
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
     }
 
     [RelayCommand]
@@ -112,26 +103,6 @@ internal partial class MainWindowViewModel : ObservableObject
         if (openFileDialog.ShowDialog() == true)
         {
             await _model.Load(openFileDialog.FileName);
-        }
-    }
-
-    private void OnItemChanged(Change<ICollectionChangeSet<ToDoItem, ToDoItemProperties>> change)
-    {
-        var (_, _, hunk) = change;
-
-        foreach (var c in hunk.Where(x => x.Action == CollectionAction.Add))
-        {
-            Items.Add(new ItemViewModel(c.Entity, c.NewData!, _model));
-        }
-
-        foreach (var c in hunk.Where(x => x.Action == CollectionAction.Remove))
-        {
-            Items.Remove(Items.Single(x => x.Entity == c.Entity));
-        }
-
-        foreach (var c in hunk.Where(x => x.Action == CollectionAction.Modify))
-        {
-            Items.Single(x => x.Entity == c.Entity).Name = c.NewData!.Name;
         }
     }
 
