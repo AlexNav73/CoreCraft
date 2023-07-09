@@ -62,7 +62,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TEntity : Entity
         where TProperties : Properties
     {
-        ExecuteNonQuery(QueryBuilder.Collections.CreateTable(scheme));
+        EnsureTableIsCreated(QueryBuilder.Collections.CreateTable(scheme), items);
         ExecuteCollectionCommand(QueryBuilder.Collections.Insert(scheme), items, scheme);
     }
 
@@ -72,7 +72,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TParent : Entity
         where TChild : Entity
     {
-        ExecuteNonQuery(QueryBuilder.Relations.CreateTable(scheme));
+        EnsureTableIsCreated(QueryBuilder.Relations.CreateTable(scheme), relations);
         ExecuteRelationCommand(QueryBuilder.Relations.Insert(scheme), relations);
     }
 
@@ -211,6 +211,14 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
 
         return false;
+    }
+
+    private void EnsureTableIsCreated<T>(string query, IReadOnlyCollection<T> items)
+    {
+        if (items.Count > 0)
+        {
+            ExecuteNonQuery(query);
+        }
     }
 
     private void ExecuteCollectionCommand<TEntity, TProperties>(string query, IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items, CollectionInfo scheme)
