@@ -1,9 +1,6 @@
 ﻿using Example.Model;
 using CoreCraft;
-using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
-using CoreCraft.Persistence;
-using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Builders;
 using CoreCraft.Storage.Sqlite;
@@ -22,9 +19,13 @@ class Program
             File.Delete(Path);
         }
 
-        var model = new MyModel(new[] { new ExampleModelShard() });
+        var storage = new SqliteStorage(
+            Array.Empty<IMigration>(),
+            new[] { new ExampleModelShardStorage() },
+            Console.WriteLine);
+        var model = new DomainModel(new[] { new ExampleModelShard() });
 
-        using (model.For<IExampleChangesFrame>().With(y => y.FirstCollection).Subscribe(OnCollectionChanged))
+        using (model.For<IExampleChangesFrame>().Subscribe(OnCollectionChanged))
         {
             Console.WriteLine("======================== Modifying ========================");
 
@@ -62,59 +63,33 @@ class Program
         }
 
         Console.WriteLine("======================== Saving ========================");
-        model.Save(Path);
+        await model.Save(storage, Path);
 
-        model = new MyModel(new[] { new ExampleModelShard() });
-        using (model.For<IExampleChangesFrame>().With(y => y.SecondCollection).Subscribe(OnCollectionChanged))
+        model = new DomainModel(new[] { new ExampleModelShard() });
+        using (model.For<IExampleChangesFrame>().Subscribe(OnCollectionChanged))
         {
             Console.WriteLine("======================== Loading ========================");
 
-            await model.Load(Path);
+            await model.Load(storage, Path);
         }
     }
 
-    private static void OnCollectionChanged<TEntity, TProperties>(Change<ICollectionChangeSet<TEntity, TProperties>> change)
-        where TEntity : Entity
-        where TProperties : Properties
+    private static void OnCollectionChanged(Change<IExampleChangesFrame> change)
     {
-        foreach (var c in change.Hunk)
+        foreach (var c in change.Hunk.FirstCollection)
         {
-            Console.WriteLine();
             Console.WriteLine($"Entity [{c.Entity}] has been {c.Action}ed.");
             Console.WriteLine($"   Old data: {c.OldData}");
             Console.WriteLine($"   New data: {c.NewData}");
+            Console.WriteLine();
         }
-    }
-}
 
-class MyModel : DomainModel
-{
-    private readonly IStorage _storage;
-    private readonly List<IModelChanges> _changes;
-
-    public MyModel(IEnumerable<IModelShard> shards)
-        : base(shards, new SyncScheduler())
-    {
-        _storage = new SqliteStorage(
-            Array.Empty<IMigration>(),
-            new[] { new ExampleModelShardStorage() },
-            Console.WriteLine);
-        _changes = new List<IModelChanges>();
-    }
-
-    public void Save(string path)
-    {
-        Save(_storage, path, _changes);
-        _changes.Clear();
-    }
-
-    public async Task Load(string path)
-    {
-        await Load(_storage, path);
-    }
-
-    protected override void OnModelChanged(Change<IModelChanges> change)
-    {
-        _changes.Add(change.Hunk);
+        foreach (var c in change.Hunk.SecondCollection)
+        {
+            Console.WriteLine($"Entity [{c.Entity}] has been {c.Action}ed.");
+            Console.WriteLine($"   Old data: {c.OldData}");
+            Console.WriteLine($"   New data: {c.NewData}");
+            Console.WriteLine();
+        }
     }
 }
