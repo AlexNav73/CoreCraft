@@ -24,10 +24,8 @@ public class DomainModel : IDomainModel
     ///     Ctor
     /// </summary>
     public DomainModel(IEnumerable<IModelShard> shards)
+        : this(shards, new AsyncScheduler())
     {
-        _view = new View(shards);
-        _scheduler = new AsyncScheduler();
-        _modelSubscription = new ModelSubscription();
     }
 
     /// <summary>

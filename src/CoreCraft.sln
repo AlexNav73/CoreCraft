@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCraft.Storage.Sqlite.Te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{D71E401F-1914-40B7-981A-95B60B07D8CC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example", "..\examples\Example\Example.csproj", "{8D8641B6-6F1A-4598-987E-0B0E31DFB2C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleDemoApp", "..\examples\ConsoleDemoApp\ConsoleDemoApp.csproj", "{8D8641B6-6F1A-4598-987E-0B0E31DFB2C3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfDemoApp", "..\examples\WpfDemoApp\WpfDemoApp.csproj", "{E7F5B270-200E-4A04-8E8A-59EA27FC6F30}"
 EndProject
@@ -38,7 +38,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCraft.Tests.Perf", "Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCraft.Storage.Json", "CoreCraft.Storage.Json\CoreCraft.Storage.Json.csproj", "{4F59E02E-3CD7-4EB8-9782-8D8676A6F29A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCraft.Storage.Json.Tests", "Tests\CoreCraft.Storage.Json.Tests\CoreCraft.Storage.Json.Tests.csproj", "{0A3247DC-5E51-4DE4-B25B-C9A016B5EE48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCraft.Storage.Json.Tests", "Tests\CoreCraft.Storage.Json.Tests\CoreCraft.Storage.Json.Tests.csproj", "{0A3247DC-5E51-4DE4-B25B-C9A016B5EE48}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

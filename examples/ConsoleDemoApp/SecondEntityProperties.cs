@@ -1,4 +1,4 @@
-﻿namespace Example.Model.Entities
+﻿namespace ConsoleDemoApp.Model.Entities
 {
     public enum SecondEntityEnum : int
     {

@@ -1,12 +1,11 @@
-﻿using Example.Model;
+﻿using ConsoleDemoApp.Model;
 using CoreCraft;
-using CoreCraft.Core;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Builders;
 using CoreCraft.Storage.Sqlite;
 using CoreCraft.Storage.Sqlite.Migrations;
 
-namespace Example;
+namespace ConsoleDemoApp;
 
 class Program
 {

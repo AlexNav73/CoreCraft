@@ -1,7 +1,6 @@
 packages/
 coverage/
 coveragereport/
-examples/Example/
 **/.vscode/
 **/.vs/
 .nuke/temp/

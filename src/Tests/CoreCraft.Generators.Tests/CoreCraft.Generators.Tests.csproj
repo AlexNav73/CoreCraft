@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="TestFiles\VisibilityImplementations.model.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="TestFiles\VisibilityImplementations.model.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
