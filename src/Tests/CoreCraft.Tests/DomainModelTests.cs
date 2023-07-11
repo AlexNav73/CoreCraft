@@ -6,7 +6,6 @@ using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
-using CoreCraft.Subscription.Builders;
 
 namespace CoreCraft.Tests;
 

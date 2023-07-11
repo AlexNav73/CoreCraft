@@ -35,7 +35,7 @@ internal partial class MainWindowViewModel : ObservableObject
         _subscription = _model
             .For<IToDoChangesFrame>()
             .With(x => x.Items)
-            .Bind(Observer.Create<BindingChanges<ToDoItem, ToDoItemProperties>>(OnNext));
+            .Bind(OnNext);
         _model.Changed += OnModelChanged; // unsubscribe
     }
 

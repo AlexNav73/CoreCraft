@@ -9,8 +9,8 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
     where TEntity : Entity
     where TProperties : Properties
 {
-    private readonly List<WeakReference<IObserver<BindingChanges<TEntity, TProperties>>>> _collectionBindings;
-    private readonly Dictionary<TEntity, List<WeakReference<IObserver<IEntityChange<TEntity, TProperties>>>>> _entityBindings;
+    private readonly List<IObserver<BindingChanges<TEntity, TProperties>>> _collectionBindings;
+    private readonly Dictionary<TEntity, List<IObserver<IEntityChange<TEntity, TProperties>>>> _entityBindings;
 
     public CollectionSubscription(Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> accessor)
     {
@@ -23,25 +23,23 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
 
     public IDisposable Bind(IObserver<BindingChanges<TEntity, TProperties>> observer)
     {
-        var reference = new WeakReference<IObserver<BindingChanges<TEntity, TProperties>>>(observer);
-        _collectionBindings.Add(reference);
+        _collectionBindings.Add(observer);
 
-        return new UnsubscribeOnDispose<WeakReference<IObserver<BindingChanges<TEntity, TProperties>>>>(reference, r => _collectionBindings.Remove(r));
+        return new UnsubscribeOnDispose<IObserver<BindingChanges<TEntity, TProperties>>>(observer, r => _collectionBindings.Remove(r));
     }
 
     public IDisposable Bind(TEntity entity, IObserver<IEntityChange<TEntity, TProperties>> observer)
     {
-        var reference = new WeakReference<IObserver<IEntityChange<TEntity, TProperties>>>(observer);
         if (_entityBindings.TryGetValue(entity, out var bindings))
         {
-            bindings.Add(reference);
+            bindings.Add(observer);
         }
         else
         {
-            _entityBindings.Add(entity, new List<WeakReference<IObserver<IEntityChange<TEntity, TProperties>>>>() { reference });
+            _entityBindings.Add(entity, new List<IObserver<IEntityChange<TEntity, TProperties>>>() { observer });
         }
 
-        return new UnsubscribeOnDispose<WeakReference<IObserver<IEntityChange<TEntity, TProperties>>>>(reference, r => RemoveEntityBinding(entity, r));
+        return new UnsubscribeOnDispose<IObserver<IEntityChange<TEntity, TProperties>>>(observer, r => RemoveEntityBinding(entity, r));
     }
 
     public void Publish(Change<TChangesFrame> change)
@@ -95,14 +93,7 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
 
         for (var i = 0; i < bindings.Length; i++)
         {
-            if (bindings[i].TryGetTarget(out var target))
-            {
-                target.OnNext(bindingChanges);
-            }
-            else
-            {
-                _collectionBindings.RemoveAt(i);
-            }
+            bindings[i].OnNext(bindingChanges);
         }
     }
 
@@ -112,30 +103,18 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
         {
             foreach (var reference in references.ToArray())
             {
-                if (reference.TryGetTarget(out var target))
-                {
-                    target.OnNext(change);
-                }
-                else
-                {
-                    references.Remove(reference);
-                }
-            }
-
-            if (references.Count == 0)
-            {
-                _entityBindings.Remove(change.Entity);
+                reference.OnNext(change);
             }
         }
     }
 
-    private void RemoveEntityBinding(TEntity entity, WeakReference<IObserver<IEntityChange<TEntity, TProperties>>> reference)
+    private void RemoveEntityBinding(TEntity entity, IObserver<IEntityChange<TEntity, TProperties>> observer)
     {
-        if (_entityBindings.TryGetValue(entity, out var references))
+        if (_entityBindings.TryGetValue(entity, out var observers))
         {
-            references.Remove(reference);
+            observers.Remove(observer);
 
-            if (references.Count == 0)
+            if (observers.Count == 0)
             {
                 _entityBindings.Remove(entity);
             }
