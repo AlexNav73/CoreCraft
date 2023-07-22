@@ -66,6 +66,18 @@ public class RelationTests
     }
 
     [Test]
+    public void RelationAreLinkedTest()
+    {
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        _relation!.AreLinked(firstEntity, secondEntity);
+
+        A.CallTo(() => _parentMapping!.AreLinked(firstEntity, secondEntity)).MustHaveHappened();
+        A.CallTo(() => _childMapping!.AreLinked(secondEntity, firstEntity)).MustHaveHappened();
+    }
+
+    [Test]
     public void NotMockedRelationContainsTest()
     {
         var relation = new Relation<FirstEntity, SecondEntity>("", new OneToOne<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());

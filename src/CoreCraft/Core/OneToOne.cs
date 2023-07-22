@@ -45,6 +45,12 @@ public sealed class OneToOne<TParent, TChild> : IMapping<TParent, TChild>
         return _relation.ContainsKey(parent);
     }
 
+    /// <inheritdoc cref="IMapping{TParent, TChild}.AreLinked(TParent, TChild)"/>
+    public bool AreLinked(TParent parent, TChild child)
+    {
+        return _relation.TryGetValue(parent, out var c) && c == child;
+    }
+
     /// <inheritdoc cref="IMapping{TParent, TChild}.Children(TParent)"/>
     public IEnumerable<TChild> Children(TParent parent)
     {

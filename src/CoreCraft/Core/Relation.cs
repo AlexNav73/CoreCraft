@@ -56,6 +56,12 @@ public sealed class Relation<TParent, TChild> :
         return _childToParentRelations.Contains(entity);
     }
 
+    /// <inheritdoc cref="IRelation{TParent, TChild}.AreLinked(TParent, TChild)"/>
+    public bool AreLinked(TParent parent, TChild child)
+    {
+        return _parentToChildRelations.AreLinked(parent, child) || _childToParentRelations.AreLinked(child, parent);
+    }
+
     /// <inheritdoc cref="IRelation{TParent, TChild}.Children(TParent)"/>
     public IEnumerable<TChild> Children(TParent parent)
     {

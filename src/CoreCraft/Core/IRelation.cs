@@ -32,6 +32,14 @@ public interface IRelation<TParent, TChild> : IEnumerable<TParent>, IHaveId, ICo
     bool ContainsChild(TChild entity);
 
     /// <summary>
+    ///     Tests if the parent contains the child entity.
+    /// </summary>
+    /// <param name="parent">A parent entity.</param>
+    /// <param name="child">A child entity.</param>
+    /// <returns>True if the parent is linked to the child.</returns>
+    bool AreLinked(TParent parent, TChild child);
+
+    /// <summary>
     ///     Retrieves all children entities for a given parent entity
     /// </summary>
     /// <param name="parent">A parent entity</param>

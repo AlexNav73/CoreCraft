@@ -163,6 +163,43 @@ public class CoWRelationTests
     }
 
     [Test]
+    public void AreLinkedWhenNotCopiedTest()
+    {
+        var copy = A.Fake<IRelation<FirstEntity, SecondEntity>>(c => c
+            .Implements<IMutableRelation<FirstEntity, SecondEntity>>());
+        var inner = A.Fake<IRelation<FirstEntity, SecondEntity>>();
+        var relation = new CoWRelation<FirstEntity, SecondEntity>(inner);
+
+        A.CallTo(() => inner.Copy()).Returns(copy);
+
+        relation.AreLinked(new(), new());
+
+        A.CallTo(() => inner.AreLinked(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
+            .MustHaveHappened();
+        A.CallTo(() => copy.AreLinked(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
+            .MustNotHaveHappened();
+    }
+
+    [Test]
+    public void AreLinkedWhenCopiedTest()
+    {
+        var copy = A.Fake<IRelation<FirstEntity, SecondEntity>>(c => c
+            .Implements<IMutableRelation<FirstEntity, SecondEntity>>());
+        var inner = A.Fake<IRelation<FirstEntity, SecondEntity>>();
+        var relation = new CoWRelation<FirstEntity, SecondEntity>(inner);
+
+        A.CallTo(() => inner.Copy()).Returns(copy);
+
+        relation.Remove(new(), new());
+        relation.AreLinked(new(), new());
+
+        A.CallTo(() => inner.AreLinked(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
+            .MustNotHaveHappened();
+        A.CallTo(() => copy.AreLinked(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
     public void ContainsChildWhenNotCopiedTest()
     {
         var copy = A.Fake<IRelation<FirstEntity, SecondEntity>>();
