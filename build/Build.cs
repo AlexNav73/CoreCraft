@@ -126,41 +126,41 @@ internal partial class Build : NukeBuild
         {
             PackagesDirectory.CreateOrCleanDirectory();
 
-            string MakePreviewIfNeeded(string version)
+            string MakePreviewIfNeeded(int major, int minor, int build)
             {
                 if (GitRepository.IsOnMasterBranch())
                 {
-                    return version;
+                    return $"{major}.{minor}.0";
                 }
 
-                return $"{version}-preview";
+                return $"{major}.{minor}.{build}-preview";
             }
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.5.0"))
+                .SetVersion(MakePreviewIfNeeded(0, 5, 1))
                 .SetDescription("A core library to build cross-platform and highly customizable domain models")
                 .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Generators)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.5.0"))
+                .SetVersion(MakePreviewIfNeeded(0, 5, 1))
                 .SetDescription("Roslyn Source Generators for generating domain models using 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Sqlite)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.5.0"))
+                .SetVersion(MakePreviewIfNeeded(0, 5, 1))
                 .SetDescription("SQLite storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SQLite"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Json)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.1.1"))
+                .SetVersion(MakePreviewIfNeeded(0, 2, 0))
                 .SetDescription("Json storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "Json"));
 
