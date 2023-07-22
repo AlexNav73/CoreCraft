@@ -102,7 +102,7 @@ public class MappingsTests
     }
 
     [Test]
-    public void OneToOneRemoveFromEmptyReltionTest()
+    public void OneToOneRemoveFromEmptyRelationTest()
     {
         var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
@@ -158,7 +158,7 @@ public class MappingsTests
     }
 
     [Test]
-    public void OneToManyRemoveFromEmptyReltionTest()
+    public void OneToManyRemoveFromEmptyRelationTest()
     {
         var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
@@ -194,6 +194,62 @@ public class MappingsTests
 
         Assert.That(mapping.Contains(firstEntity), Is.True);
         Assert.That(mapping.Contains(new()), Is.False);
+    }
+
+    [Test]
+    public void OneToOneAreLinkedWhenEmptyMappingTest()
+    {
+        var mapping = new OneToOne<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        var result = mapping.AreLinked(firstEntity, secondEntity);
+
+        Assert.That(result, Is.False);
+    }
+
+    [Test]
+    public void OneToOneAreLinkedWhenNonEmptyMappingTest()
+    {
+        var mapping = new OneToOne<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        mapping.Add(firstEntity, secondEntity);
+
+        var result = mapping.AreLinked(firstEntity, secondEntity);
+
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
+    public void OneToManyAreLinkedWhenEmptyMappingTest()
+    {
+        var mapping = new OneToMany<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        var result = mapping.AreLinked(firstEntity, secondEntity);
+
+        Assert.That(result, Is.False);
+    }
+
+    [Test]
+    public void OneToManyAreLinkedWhenNonEmptyMappingTest()
+    {
+        var mapping = new OneToMany<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        mapping.Add(firstEntity, secondEntity);
+
+        var result = mapping.AreLinked(firstEntity, secondEntity);
+
+        Assert.That(result, Is.True);
     }
 
     [Test]

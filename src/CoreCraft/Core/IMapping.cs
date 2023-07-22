@@ -35,11 +35,19 @@ public interface IMapping<TParent, TChild> : IEnumerable<TParent>, ICopy<IMappin
     void Remove(TParent parent, TChild child);
 
     /// <summary>
-    ///     Tests if a mapping contains parent entity
+    ///     Tests if the mapping contains the parent entity
     /// </summary>
     /// <param name="parent">An entity to test</param>
     /// <returns>True - if a relation contains parent entity</returns>
     bool Contains(TParent parent);
+
+    /// <summary>
+    ///     Tests if the parent contains the child entity.
+    /// </summary>
+    /// <param name="parent">A parent entity.</param>
+    /// <param name="child">A child entity.</param>
+    /// <returns>True if the parent is linked to the child.</returns>
+    bool AreLinked(TParent parent, TChild child);
 
     /// <summary>
     ///     Returns all related children for a given parent

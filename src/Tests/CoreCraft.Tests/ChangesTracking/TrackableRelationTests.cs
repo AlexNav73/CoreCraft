@@ -76,6 +76,17 @@ public class TrackableRelationTests
     }
 
     [Test]
+    public void TrackableRelationAreLinkedTest()
+    {
+        var first = new FirstEntity();
+        var second = new SecondEntity();
+
+        _trackable!.AreLinked(first, second);
+
+        A.CallTo(() => _relation!.AreLinked(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored)).MustHaveHappened();
+    }
+
+    [Test]
     public void TrackableRelationParentsTest()
     {
         var second = new SecondEntity();
