@@ -12,10 +12,8 @@
 
 namespace compilation.AllFeatures
 {
-    using CoreCraft;
     using CoreCraft.Core;
     using CoreCraft.ChangesTracking;
-    using CoreCraft.Lazy;
     using CoreCraft.Persistence;
     using compilation.AllFeatures.Entities;
 
@@ -51,31 +49,38 @@ namespace compilation.AllFeatures
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed partial class FakeModelShard : IFakeModelShard
     {
+        public const string FirstCollectionId = "compilation.AllFeatures.Fake.FirstCollection";
+        public const string SecondCollectionId = "compilation.AllFeatures.Fake.SecondCollection";
+        public const string OneToOneRelationId = "compilation.AllFeatures.Fake.OneToOneRelation";
+        public const string OneToManyRelationId = "compilation.AllFeatures.Fake.OneToManyRelation";
+        public const string ManyToOneRelationId = "compilation.AllFeatures.Fake.ManyToOneRelation";
+        public const string ManyToManyRelationId = "compilation.AllFeatures.Fake.ManyToManyRelation";
+
         public FakeModelShard()
         {
             FirstCollection = new Collection<FirstEntity, FirstEntityProperties>(
-                "compilation.AllFeatures.Fake.FirstCollection",
+                FirstCollectionId,
                 static id => new FirstEntity(id),
                 static () => new FirstEntityProperties());
             SecondCollection = new Collection<SecondEntity, SecondEntityProperties>(
-                "compilation.AllFeatures.Fake.SecondCollection",
+                SecondCollectionId,
                 static id => new SecondEntity(id),
                 static () => new SecondEntityProperties());
 
             OneToOneRelation = new Relation<FirstEntity, SecondEntity>(
-                "compilation.AllFeatures.Fake.OneToOneRelation",
+                OneToOneRelationId,
                 new OneToOne<FirstEntity, SecondEntity>(),
                 new OneToOne<SecondEntity, FirstEntity>());
             OneToManyRelation = new Relation<FirstEntity, SecondEntity>(
-                "compilation.AllFeatures.Fake.OneToManyRelation",
+                OneToManyRelationId,
                 new OneToMany<FirstEntity, SecondEntity>(),
                 new OneToOne<SecondEntity, FirstEntity>());
             ManyToOneRelation = new Relation<FirstEntity, SecondEntity>(
-                "compilation.AllFeatures.Fake.ManyToOneRelation",
+                ManyToOneRelationId,
                 new OneToOne<FirstEntity, SecondEntity>(),
                 new OneToMany<SecondEntity, FirstEntity>());
             ManyToManyRelation = new Relation<FirstEntity, SecondEntity>(
-                "compilation.AllFeatures.Fake.ManyToManyRelation",
+                ManyToManyRelationId,
                 new OneToMany<FirstEntity, SecondEntity>(),
                 new OneToMany<SecondEntity, FirstEntity>());
         }
@@ -165,13 +170,13 @@ namespace compilation.AllFeatures
     {
         public FakeChangesFrame()
         {
-            FirstCollection = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("compilation.AllFeatures.Fake.FirstCollection");
-            SecondCollection = new CollectionChangeSet<SecondEntity, SecondEntityProperties>("compilation.AllFeatures.Fake.SecondCollection");
+            FirstCollection = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShard.FirstCollectionId);
+            SecondCollection = new CollectionChangeSet<SecondEntity, SecondEntityProperties>(FakeModelShard.SecondCollectionId);
 
-            OneToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.AllFeatures.Fake.OneToOneRelation");
-            OneToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.AllFeatures.Fake.OneToManyRelation");
-            ManyToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.AllFeatures.Fake.ManyToOneRelation");
-            ManyToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.AllFeatures.Fake.ManyToManyRelation");
+            OneToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShard.OneToOneRelationId);
+            OneToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShard.OneToManyRelationId);
+            ManyToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShard.ManyToOneRelationId);
+            ManyToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShard.ManyToManyRelationId);
         }
 
         public ICollectionChangeSet<FirstEntity, FirstEntityProperties> FirstCollection { get; private set; }

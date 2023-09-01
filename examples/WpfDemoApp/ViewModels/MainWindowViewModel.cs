@@ -36,6 +36,7 @@ internal partial class MainWindowViewModel : ObservableObject
             .For<IToDoChangesFrame>()
             .With(x => x.Items)
             .Bind(OnNext);
+
         _model.Changed += OnModelChanged; // unsubscribe
     }
 

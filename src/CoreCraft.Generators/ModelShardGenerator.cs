@@ -51,12 +51,26 @@ internal partial class ApplicationModelGenerator
         code.GeneratedClassAttributes();
         code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", new[] { $"I{modelShard.Name}ModelShard" }, () =>
         {
+            DefineIds(code, modelShard, idBase);
+            code.EmptyLine();
             DefineCtor(code, modelShard, idBase);
             code.EmptyLine();
             DefineConversionCtor(code, modelShard);
             code.EmptyLine();
             ImplementModelShardInterface(code, modelShard);
         });
+
+        void DefineIds(IndentedTextWriter code, ModelShard modelShard, string idBase)
+        {
+            foreach (var collection in modelShard.Collections)
+            {
+                code.WriteLine($"public const string {collection.Name}Id = \"{idBase}.{modelShard.Name}.{collection.Name}\";");
+            }
+            foreach (var relation in modelShard.Relations)
+            {
+                code.WriteLine($"public const string {relation.Name}Id = \"{idBase}.{modelShard.Name}.{relation.Name}\";");
+            }
+        }
 
         void DefineCtor(IndentedTextWriter code, ModelShard modelShard, string idBase)
         {
@@ -68,7 +82,7 @@ internal partial class ApplicationModelGenerator
                     code.WriteLine($"{collection.Name} = new {Type(collection)}(");
                     code.WithIndent(c =>
                     {
-                        c.WriteLine($"\"{idBase}.{modelShard.Name}.{collection.Name}\",");
+                        c.WriteLine($"{collection.Name}Id,");
                         c.WriteLine($"static id => new {collection.EntityType}(id),");
                         c.WriteLine($"static () => new {collection.EntityType}Properties());");
                     });
@@ -80,7 +94,7 @@ internal partial class ApplicationModelGenerator
                     code.WriteLine($"{relation.Name} = new {Type(relation)}(");
                     code.WithIndent(c =>
                     {
-                        c.WriteLine($"\"{idBase}.{modelShard.Name}.{relation.Name}\",");
+                        c.WriteLine($"{relation.Name}Id,");
                         code.WriteLine($"new {relation.ParentRelationType}<{relation.ParentType}, {relation.ChildType}>(),");
                         code.WriteLine($"new {relation.ChildRelationType}<{relation.ChildType}, {relation.ParentType}>());");
                     });
@@ -248,13 +262,13 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = new {ChangesType(collection)}(\"{idBase}.{modelShard.Name}.{collection.Name}\");");
+                    code.WriteLine($"{collection.Name} = new {ChangesType(collection)}({modelShard.Name}ModelShard.{collection.Name}Id);");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = new {ChangesType(relation)}(\"{idBase}.{modelShard.Name}.{relation.Name}\");");
+                    code.WriteLine($"{relation.Name} = new {ChangesType(relation)}({modelShard.Name}ModelShard.{relation.Name}Id);");
                 }
             });
         }
