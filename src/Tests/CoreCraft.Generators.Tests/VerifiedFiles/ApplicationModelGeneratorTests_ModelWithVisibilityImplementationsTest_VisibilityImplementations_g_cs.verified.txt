@@ -12,10 +12,8 @@
 
 namespace compilation.VisibilityImplementations
 {
-    using CoreCraft;
     using CoreCraft.Core;
     using CoreCraft.ChangesTracking;
-    using CoreCraft.Lazy;
     using CoreCraft.Persistence;
     using compilation.VisibilityImplementations.Entities;
 
@@ -51,31 +49,38 @@ namespace compilation.VisibilityImplementations
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed partial class FakeModelShard : IFakeModelShard
     {
+        public const string FirstCollectionId = "compilation.VisibilityImplementations.Fake.FirstCollection";
+        public const string SecondCollectionId = "compilation.VisibilityImplementations.Fake.SecondCollection";
+        public const string OneToOneRelationId = "compilation.VisibilityImplementations.Fake.OneToOneRelation";
+        public const string OneToManyRelationId = "compilation.VisibilityImplementations.Fake.OneToManyRelation";
+        public const string ManyToOneRelationId = "compilation.VisibilityImplementations.Fake.ManyToOneRelation";
+        public const string ManyToManyRelationId = "compilation.VisibilityImplementations.Fake.ManyToManyRelation";
+
         public FakeModelShard()
         {
             FirstCollection = new Collection<FirstEntity, FirstEntityProperties>(
-                "compilation.VisibilityImplementations.Fake.FirstCollection",
+                FirstCollectionId,
                 static id => new FirstEntity(id),
                 static () => new FirstEntityProperties());
             SecondCollection = new Collection<SecondEntity, SecondEntityProperties>(
-                "compilation.VisibilityImplementations.Fake.SecondCollection",
+                SecondCollectionId,
                 static id => new SecondEntity(id),
                 static () => new SecondEntityProperties());
 
             OneToOneRelation = new Relation<FirstEntity, SecondEntity>(
-                "compilation.VisibilityImplementations.Fake.OneToOneRelation",
+                OneToOneRelationId,
                 new OneToOne<FirstEntity, SecondEntity>(),
                 new OneToOne<SecondEntity, FirstEntity>());
             OneToManyRelation = new Relation<FirstEntity, SecondEntity>(
-                "compilation.VisibilityImplementations.Fake.OneToManyRelation",
+                OneToManyRelationId,
                 new OneToMany<FirstEntity, SecondEntity>(),
                 new OneToOne<SecondEntity, FirstEntity>());
             ManyToOneRelation = new Relation<FirstEntity, SecondEntity>(
-                "compilation.VisibilityImplementations.Fake.ManyToOneRelation",
+                ManyToOneRelationId,
                 new OneToOne<FirstEntity, SecondEntity>(),
                 new OneToMany<SecondEntity, FirstEntity>());
             ManyToManyRelation = new Relation<FirstEntity, SecondEntity>(
-                "compilation.VisibilityImplementations.Fake.ManyToManyRelation",
+                ManyToManyRelationId,
                 new OneToMany<FirstEntity, SecondEntity>(),
                 new OneToMany<SecondEntity, FirstEntity>());
         }
@@ -165,13 +170,13 @@ namespace compilation.VisibilityImplementations
     {
         public FakeChangesFrame()
         {
-            FirstCollection = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("compilation.VisibilityImplementations.Fake.FirstCollection");
-            SecondCollection = new CollectionChangeSet<SecondEntity, SecondEntityProperties>("compilation.VisibilityImplementations.Fake.SecondCollection");
+            FirstCollection = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShard.FirstCollectionId);
+            SecondCollection = new CollectionChangeSet<SecondEntity, SecondEntityProperties>(FakeModelShard.SecondCollectionId);
 
-            OneToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.VisibilityImplementations.Fake.OneToOneRelation");
-            OneToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.VisibilityImplementations.Fake.OneToManyRelation");
-            ManyToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.VisibilityImplementations.Fake.ManyToOneRelation");
-            ManyToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>("compilation.VisibilityImplementations.Fake.ManyToManyRelation");
+            OneToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShard.OneToOneRelationId);
+            OneToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShard.OneToManyRelationId);
+            ManyToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShard.ManyToOneRelationId);
+            ManyToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShard.ManyToManyRelationId);
         }
 
         public ICollectionChangeSet<FirstEntity, FirstEntityProperties> FirstCollection { get; private set; }

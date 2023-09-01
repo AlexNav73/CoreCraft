@@ -23,7 +23,7 @@ class Program
             Console.WriteLine);
         var model = new DomainModel(new[] { new ExampleModelShard() });
 
-        using (model.For<IExampleChangesFrame>().Subscribe(OnCollectionChanged))
+        using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
             Console.WriteLine("======================== Modifying ========================");
 
@@ -64,7 +64,7 @@ class Program
         await model.Save(storage, Path);
 
         model = new DomainModel(new[] { new ExampleModelShard() });
-        using (model.For<IExampleChangesFrame>().Subscribe(OnCollectionChanged))
+        using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
             Console.WriteLine("======================== Loading ========================");
 
@@ -72,7 +72,7 @@ class Program
         }
     }
 
-    private static void OnCollectionChanged(Change<IExampleChangesFrame> change)
+    private static void OnExampleShardChanged(Change<IExampleChangesFrame> change)
     {
         foreach (var c in change.Hunk.FirstCollection)
         {
