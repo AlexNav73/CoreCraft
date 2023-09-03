@@ -25,23 +25,19 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         return _connection.BeginTransaction();
     }
 
-    public long GetDatabaseVersion()
+    public int GetDatabaseVersion()
     {
         using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Migrations.GetDatabaseVersion;
 
         Log(command);
 
-        using var reader = command.ExecuteReader();
-        if (reader.Read())
-        {
-            return reader.GetInt64(0);
-        }
+        var version = (long?)command.ExecuteScalar();
 
-        return 0;
+        return ((int?)version) ?? 0;
     }
 
-    public void SetDatabaseVersion(long version)
+    public void SetDatabaseVersion(int version)
     {
         using var command = _connection.CreateCommand();
         command.CommandText = QueryBuilder.Migrations.SetDatabaseVersion(version);

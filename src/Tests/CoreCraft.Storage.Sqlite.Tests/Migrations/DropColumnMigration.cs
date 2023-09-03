@@ -1,6 +1,6 @@
 ﻿using CoreCraft.Storage.Sqlite.Migrations;
 
-namespace CoreCraft.Storage.Sqlite.Tests.Infrastructure;
+namespace CoreCraft.Storage.Sqlite.Tests.Migrations;
 
 internal sealed class DropColumnMigration : Migration
 {

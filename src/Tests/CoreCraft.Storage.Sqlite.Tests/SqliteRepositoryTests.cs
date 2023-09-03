@@ -5,7 +5,7 @@ namespace CoreCraft.Storage.Sqlite.Tests;
 public class SqliteRepositoryTests
 {
     [Test]
-    public void SetDatabaseVersionTest()
+    public void SetDatabaseVersionInMemoryTest()
     {
         using var repository = new SqliteRepository(":memory:");
 

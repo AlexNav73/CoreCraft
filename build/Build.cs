@@ -152,7 +152,7 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Sqlite)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded(0, 5, 2))
+                .SetVersion(MakePreviewIfNeeded(0, 5, 3))
                 .SetDescription("SQLite storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SQLite"));
 

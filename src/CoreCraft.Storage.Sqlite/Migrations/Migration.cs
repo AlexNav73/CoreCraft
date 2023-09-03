@@ -6,13 +6,13 @@ public abstract class Migration : IMigration
     /// <summary>
     ///     Ctor
     /// </summary>
-    protected Migration(long version)
+    protected Migration(int version)
     {
         Version = version;
     }
 
     /// <inheritdoc />
-    public long Version { get; }
+    public int Version { get; }
 
     /// <inheritdoc />
     public abstract void Migrate(IMigrator migrator);
