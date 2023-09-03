@@ -50,7 +50,7 @@ internal static class IndentedTextWriterExtensions
     {
         var str = visibility switch
         {
-            Visibility.Implementations | Visibility.All => "public",
+            Visibility.Implementations or Visibility.All => "public",
             _ => "internal"
         };
 

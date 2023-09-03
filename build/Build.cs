@@ -145,7 +145,7 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Generators)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded(0, 5, 3))
+                .SetVersion(MakePreviewIfNeeded(0, 5, 4))
                 .SetDescription("Roslyn Source Generators for generating domain models using 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
