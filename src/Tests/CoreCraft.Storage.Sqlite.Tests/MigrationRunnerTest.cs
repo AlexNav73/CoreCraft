@@ -6,11 +6,10 @@ namespace CoreCraft.Storage.Sqlite.Tests;
 internal class MigrationRunnerTest
 {
     [Test]
-    public void RunTest()
+    public void DropCollectionTableMigrationTest()
     {
         using var repository = new SqliteRepository(":memory:");
-        var table = $"{FakeModelShardStorage.FirstCollectionInfo.ShardName}.{FakeModelShardStorage.FirstCollectionInfo.Name}";
-        var runner = new MigrationRunner(new[] { new DropTableMigration(table) });
+        var runner = new MigrationRunner(new[] { new DropCollectionTableMigration(FakeModelShardStorage.FirstCollectionInfo) });
 
         repository.Insert(
             FakeModelShardStorage.FirstCollectionInfo,
@@ -19,13 +18,140 @@ internal class MigrationRunnerTest
                 new KeyValuePair<FirstEntity, FirstEntityProperties>(new(), new())
             });
 
-        Assert.That(repository.Exists(table), Is.True);
+        Assert.That(repository.Exists(FakeModelShardStorage.FirstCollectionInfo), Is.True);
         Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(0));
 
         runner.Run(repository);
 
-        Assert.That(repository.Exists(table), Is.False);
+        Assert.That(repository.Exists(FakeModelShardStorage.FirstCollectionInfo), Is.False);
         Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void DropRelationTableMigrationTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+        var runner = new MigrationRunner(new[] { new DropRelationTableMigration(FakeModelShardStorage.OneToOneRelationInfo) });
+
+        repository.Insert(
+            FakeModelShardStorage.OneToOneRelationInfo,
+            new List<KeyValuePair<FirstEntity, SecondEntity>>()
+            {
+                new KeyValuePair<FirstEntity, SecondEntity>(new(), new())
+            });
+
+        Assert.That(repository.Exists(FakeModelShardStorage.OneToOneRelationInfo), Is.True);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(0));
+
+        runner.Run(repository);
+
+        Assert.That(repository.Exists(FakeModelShardStorage.OneToOneRelationInfo), Is.False);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void AddColumnMigrationTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+        var nonNullColumn = "NonNullInt";
+        var nullColumn = "NullInt";
+        var notNullStringColumn = "NonNullString";
+        var nullStringColumn = "NullString";
+        var runner = new MigrationRunner(new[]
+        {
+            new AddColumnMigration<int>(FakeModelShardStorage.FirstCollectionInfo, nonNullColumn, false, 5) as IMigration,
+            new AddColumnMigration<int>(FakeModelShardStorage.FirstCollectionInfo, nullColumn, true),
+            new AddColumnMigration<string>(FakeModelShardStorage.FirstCollectionInfo, notNullStringColumn, false, "test"),
+            new AddColumnMigration<string>(FakeModelShardStorage.FirstCollectionInfo, nullStringColumn, true),
+        });
+
+        repository.Insert(
+            FakeModelShardStorage.FirstCollectionInfo,
+            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            {
+                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(), new())
+            });
+
+        var columns = repository.QueryTableColumns(FakeModelShardStorage.FirstCollectionInfo).ToArray();
+
+        Assert.That(columns.Any(x => x.Name == nonNullColumn && x.Type == "INTEGER" && x.IsNotNull && string.Equals(x.DefaultValue?.ToString(), "5")), Is.False);
+        Assert.That(columns.Any(x => x.Name == nullColumn && x.Type == "INTEGER" && !x.IsNotNull), Is.False);
+        Assert.That(columns.Any(x => x.Name == notNullStringColumn && x.Type == "TEXT" && x.IsNotNull && string.Equals(x.DefaultValue?.ToString(), "test")), Is.False);
+        Assert.That(columns.Any(x => x.Name == nullStringColumn && x.Type == "TEXT" && !x.IsNotNull), Is.False);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(0));
+
+        runner.Run(repository);
+
+        columns = repository.QueryTableColumns(FakeModelShardStorage.FirstCollectionInfo).ToArray();
+
+        Assert.That(columns.Any(x => x.Name == nonNullColumn && x.Type == "INTEGER" && x.IsNotNull && string.Equals(x.DefaultValue?.ToString(), "5")), Is.True);
+        Assert.That(columns.Any(x => x.Name == nullColumn && x.Type == "INTEGER" && !x.IsNotNull), Is.True);
+        Assert.That(columns.Any(x => x.Name == notNullStringColumn && x.Type == "TEXT" && x.IsNotNull && string.Equals(x.DefaultValue?.ToString(), "\"test\"")), Is.True);
+        Assert.That(columns.Any(x => x.Name == nullStringColumn && x.Type == "TEXT" && !x.IsNotNull), Is.True);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(2));
+    }
+
+    [Test]
+    public void DropColumnMigrationTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+        var columnName = "NonNullableStringProperty";
+        var runner = new MigrationRunner(new[]
+        {
+            new DropColumnMigration(FakeModelShardStorage.FirstCollectionInfo, columnName)
+        });
+
+        repository.Insert(
+            FakeModelShardStorage.FirstCollectionInfo,
+            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            {
+                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(), new())
+            });
+
+        var columns = repository.QueryTableColumns(FakeModelShardStorage.FirstCollectionInfo).ToArray();
+
+        Assert.That(columns.Any(x => x.Name == columnName), Is.True);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(0));
+
+        runner.Run(repository);
+
+        columns = repository.QueryTableColumns(FakeModelShardStorage.FirstCollectionInfo).ToArray();
+
+        Assert.That(columns.Any(x => x.Name == columnName), Is.False);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(3));
+    }
+
+    [Test]
+    public void RenameColumnMigrationTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+        var columnName = "NonNullableStringProperty";
+        var newColumnName = "Test";
+        var runner = new MigrationRunner(new[]
+        {
+            new RenameColumnMigration(FakeModelShardStorage.FirstCollectionInfo, columnName, newColumnName)
+        });
+
+        repository.Insert(
+            FakeModelShardStorage.FirstCollectionInfo,
+            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            {
+                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(), new())
+            });
+
+        var columns = repository.QueryTableColumns(FakeModelShardStorage.FirstCollectionInfo).ToArray();
+
+        Assert.That(columns.Any(x => x.Name == columnName), Is.True);
+        Assert.That(columns.Any(x => x.Name == newColumnName), Is.False);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(0));
+
+        runner.Run(repository);
+
+        columns = repository.QueryTableColumns(FakeModelShardStorage.FirstCollectionInfo).ToArray();
+
+        Assert.That(columns.Any(x => x.Name == columnName), Is.False);
+        Assert.That(columns.Any(x => x.Name == newColumnName), Is.True);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(4));
     }
 
     [Test]
@@ -40,9 +166,9 @@ internal class MigrationRunnerTest
     [Test]
     public void ExecuteRawSqlTest()
     {
-        var table = "Test";
+        var table = new CollectionInfo("Test", "TestCollection");
         using var repository = new SqliteRepository(":memory:");
-        var sql = $"CREATE TABLE [{table}]([Id] INTEGER);";
+        var sql = $"CREATE TABLE [{QueryBuilder.InferName(table)}]([Id] INTEGER);";
         var runner = new MigrationRunner(new[] { new ExecuteRawSqlMigration(sql) });
 
         Assert.That(repository.Exists(table), Is.False);

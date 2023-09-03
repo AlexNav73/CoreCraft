@@ -2,11 +2,11 @@
 
 namespace CoreCraft.Storage.Sqlite.Tests.Infrastructure;
 
-internal class DropTableMigration : Migration
+internal sealed class DropCollectionTableMigration : Migration
 {
-    private readonly string _table;
+    private readonly CollectionInfo _table;
 
-    public DropTableMigration(string table)
+    public DropCollectionTableMigration(CollectionInfo table)
         : base(1)
     {
         _table = table;
@@ -14,6 +14,6 @@ internal class DropTableMigration : Migration
 
     public override void Migrate(IMigrator migrator)
     {
-        migrator.DropTable(_table);
+        migrator.Table(_table).Drop();
     }
 }

@@ -25,6 +25,24 @@ internal static class QueryBuilder
         return $"DROP TABLE IF EXISTS [{name}];";
     }
 
+    internal static string AddColumn(string name, PropertyInfo column, string? defaultValue)
+    {
+        var defaultValueString = defaultValue is not null ? $" DEFAULT {defaultValue} " : " ";
+        var nullable = column.IsNullable ? "NULL" : "NOT NULL";
+
+        return $"ALTER TABLE [{name}] ADD [{column.Name}] {SqlTypeMapper.DbTypeName(column.Type)}{defaultValueString}{nullable};";
+    }
+
+    internal static string RenameColumn(string name, string oldName, string newName)
+    {
+        return $"ALTER TABLE [{name}] RENAME COLUMN [{oldName}] TO [{newName}];";
+    }
+
+    internal static string DropColumn(string name, string column)
+    {
+        return $"ALTER TABLE [{name}] DROP COLUMN [{column}];";
+    }
+
     internal static class Migrations
     {
         internal static string SetDatabaseVersion(long version) => $"PRAGMA user_version = {version};";
@@ -72,7 +90,7 @@ internal static class QueryBuilder
             return builder.ToString();
         }
 
-        internal static string Update(IEnumerable<Property> properties, CollectionInfo scheme)
+        internal static string Update(IEnumerable<PropertyInfo> properties, CollectionInfo scheme)
         {
             var builder = new StringBuilder();
 
