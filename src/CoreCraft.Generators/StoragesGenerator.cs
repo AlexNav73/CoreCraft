@@ -22,13 +22,13 @@ internal partial class ApplicationModelGenerator
                 var properties = entity.Properties.Select(x => $"new(\"{x.Name}\", typeof({x.Type}), {x.IsNullable.ToString().ToLower()})");
                 var array = string.Join(", ", properties);
 
-                code.WriteLine($"internal static readonly CollectionInfo {collection.Name}Info = new(\"{modelShard.Name}\", \"{collection.Name}\", new PropertyInfo[] {{ {array} }});");
+                code.WriteLine($"public static readonly CollectionInfo {collection.Name}Info = new(\"{modelShard.Name}\", \"{collection.Name}\", new PropertyInfo[] {{ {array} }});");
             }
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"internal static readonly RelationInfo {relation.Name}Info = new(\"{modelShard.Name}\", \"{relation.Name}\");");
+                code.WriteLine($"public static readonly RelationInfo {relation.Name}Info = new(\"{modelShard.Name}\", \"{relation.Name}\");");
             }
             code.EmptyLine();
 
