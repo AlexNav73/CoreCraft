@@ -8,7 +8,7 @@ public interface IMigration
     /// <summary>
     ///     Version of a migration
     /// </summary>
-    long Version { get; }
+    int Version { get; }
 
     /// <summary>
     ///     Migrates a database to the specific <see cref="Version"/>

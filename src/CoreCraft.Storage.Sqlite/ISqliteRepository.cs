@@ -24,11 +24,11 @@ public interface ISqliteRepository : IRepository, IDisposable
     ///     Gets latests database version
     /// </summary>
     /// <returns>Version</returns>
-    long GetDatabaseVersion();
+    int GetDatabaseVersion();
 
     /// <summary>
     ///     Sets new database version
     /// </summary>
     /// <param name="version">New version</param>
-    void SetDatabaseVersion(long version);
+    void SetDatabaseVersion(int version);
 }

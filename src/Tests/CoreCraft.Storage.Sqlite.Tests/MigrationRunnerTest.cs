@@ -1,5 +1,5 @@
 ﻿using CoreCraft.Storage.Sqlite.Migrations;
-using CoreCraft.Storage.Sqlite.Tests.Infrastructure;
+using CoreCraft.Storage.Sqlite.Tests.Migrations;
 
 namespace CoreCraft.Storage.Sqlite.Tests;
 
@@ -178,18 +178,5 @@ internal class MigrationRunnerTest
 
         Assert.That(repository.Exists(table), Is.True);
         Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(1));
-    }
-
-    private class FailingMigration : Migration
-    {
-        public FailingMigration()
-            : base(1)
-        {
-        }
-
-        public override void Migrate(IMigrator migrator)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
