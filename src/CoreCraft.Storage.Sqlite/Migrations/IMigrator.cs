@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.Storage.Sqlite.Migrations;
+﻿using CoreCraft.Core;
+
+namespace CoreCraft.Storage.Sqlite.Migrations;
 
 /// <summary>
 ///     An abstraction over the most common database operations
@@ -6,14 +8,22 @@
 public interface IMigrator
 {
     /// <summary>
-    ///     Drops a table by the given key
+    ///     Gets table operations for the specified collection.
     /// </summary>
-    /// <param name="name">Table name</param>
-    void DropTable(string name);
+    /// <param name="collection">The collection information for which table operations are needed.</param>
+    /// <returns>An instance of table operations for the specified collection.</returns>
+    ICollectionTableOperations Table(CollectionInfo collection);
 
     /// <summary>
-    ///     Executes sql statement as is
+    ///     Gets table operations for the specified relation.
     /// </summary>
-    /// <param name="sql">Sql statement</param>
+    /// <param name="relation">The relation information for which table operations are needed.</param>
+    /// <returns>An instance of table operations for the specified relation.</returns>
+    ITableOperations Table(RelationInfo relation);
+
+    /// <summary>
+    ///     Executes raw SQL commands on the database.
+    /// </summary>
+    /// <param name="sql">The SQL command to execute.</param>
     void ExecuteRawSql(string sql);
 }

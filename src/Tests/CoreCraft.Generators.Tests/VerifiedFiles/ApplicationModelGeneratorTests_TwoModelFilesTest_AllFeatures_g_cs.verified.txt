@@ -279,8 +279,8 @@ namespace compilation.AllFeatures
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed class FakeModelShardStorage : ModelShardStorage
     {
-        internal static readonly CollectionInfo FirstCollectionInfo = new("Fake", "FirstCollection", new Property[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
-        internal static readonly CollectionInfo SecondCollectionInfo = new("Fake", "SecondCollection", new Property[] { new("IntProperty", typeof(int), false), new("BoolProperty", typeof(bool), false), new("DoubleProperty", typeof(double), false), new("FloatProperty", typeof(float), false) });
+        internal static readonly CollectionInfo FirstCollectionInfo = new("Fake", "FirstCollection", new PropertyInfo[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
+        internal static readonly CollectionInfo SecondCollectionInfo = new("Fake", "SecondCollection", new PropertyInfo[] { new("IntProperty", typeof(int), false), new("BoolProperty", typeof(bool), false), new("DoubleProperty", typeof(double), false), new("FloatProperty", typeof(float), false) });
 
         internal static readonly RelationInfo OneToOneRelationInfo = new("Fake", "OneToOneRelation");
         internal static readonly RelationInfo OneToManyRelationInfo = new("Fake", "OneToManyRelation");

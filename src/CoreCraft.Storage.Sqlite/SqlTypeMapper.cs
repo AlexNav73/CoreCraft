@@ -17,6 +17,14 @@ internal static class SqlTypeMapper
         throw new NotSupportedException($"Type [{type}] is not supported");
     }
 
+    public static void EnsureSupported(Type type)
+    {
+        if (!_types.ContainsKey(type))
+        {
+            throw new NotSupportedException($"Type [{type}] is not supported");
+        }
+    }
+
     private static readonly IDictionary<Type, string> _types = new Dictionary<Type, string>()
     {
         { typeof(string), _textType },

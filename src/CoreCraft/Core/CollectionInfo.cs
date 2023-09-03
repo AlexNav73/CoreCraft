@@ -9,7 +9,7 @@ namespace CoreCraft.Core;
 /// <param name="Type">Type of a property</param>
 /// <param name="IsNullable">Nullability of a value</param>
 [ExcludeFromCodeCoverage]
-public sealed record Property(string Name, Type Type, bool IsNullable);
+public sealed record PropertyInfo(string Name, Type Type, bool IsNullable);
 
 /// <summary>
 ///     A scheme of a collection's type. This is used instead of reflection
@@ -20,4 +20,15 @@ public sealed record Property(string Name, Type Type, bool IsNullable);
 /// <param name="Properties">A description of each property</param>
 // TODO(#6): Could we use PropertiesBag to generate queries?
 [ExcludeFromCodeCoverage]
-public sealed record CollectionInfo(string ShardName, string Name, IReadOnlyList<Property> Properties);
+public sealed record CollectionInfo(string ShardName, string Name, IReadOnlyList<PropertyInfo> Properties)
+{
+    /// <summary>
+    ///     Ctor
+    /// </summary>
+    /// <param name="shardName">A shard name</param>
+    /// <param name="name">A collection name</param>
+    public CollectionInfo(string shardName, string name)
+        : this(shardName, name, Array.Empty<PropertyInfo>())
+    {
+    }
+}

@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.Data.Sqlite;
 using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
+using static CoreCraft.Storage.Sqlite.QueryBuilder;
 
 namespace CoreCraft.Storage.Sqlite;
 
@@ -62,8 +63,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TEntity : Entity
         where TProperties : Properties
     {
-        EnsureTableIsCreated(QueryBuilder.Collections.CreateTable(scheme), items);
-        ExecuteCollectionCommand(QueryBuilder.Collections.Insert(scheme), items, scheme);
+        EnsureTableIsCreated(Collections.CreateTable(scheme), items);
+        ExecuteCollectionCommand(Collections.Insert(scheme), items, scheme);
     }
 
     public void Insert<TParent, TChild>(
@@ -72,8 +73,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TParent : Entity
         where TChild : Entity
     {
-        EnsureTableIsCreated(QueryBuilder.Relations.CreateTable(scheme), relations);
-        ExecuteRelationCommand(QueryBuilder.Relations.Insert(scheme), relations);
+        EnsureTableIsCreated(Relations.CreateTable(scheme), relations);
+        ExecuteRelationCommand(Relations.Insert(scheme), relations);
     }
 
     public void Update<TEntity, TProperties>(CollectionInfo scheme, IReadOnlyCollection<ICollectionChange<TEntity, TProperties>> changes)
@@ -97,7 +98,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
                 command = _connection.CreateCommand();
 
                 var properties = scheme.Properties.Where(p => modifiedProperties.ContainsProp(p.Name)).ToArray();
-                command.CommandText = QueryBuilder.Collections.Update(properties, scheme);
+                command.CommandText = Collections.Update(properties, scheme);
 
                 CreateParameters(command, properties);
 
@@ -120,7 +121,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TEntity : Entity
     {
         using var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.Collections.Delete(scheme);
+        command.CommandText = Collections.Delete(scheme);
         var parameter = command.CreateParameter();
         parameter.ParameterName = "$Id";
         command.Parameters.Add(parameter);
@@ -138,20 +139,20 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TParent : Entity
         where TChild : Entity
     {
-        ExecuteRelationCommand(QueryBuilder.Relations.Delete(scheme), relations);
+        ExecuteRelationCommand(Relations.Delete(scheme), relations);
     }
 
     public void Select<TEntity, TProperties>(CollectionInfo scheme, IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
-        if (!Exists(QueryBuilder.InferName(scheme)))
+        if (!Exists(InferName(scheme)))
         {
             return;
         }
 
         using var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.Collections.Select(scheme);
+        command.CommandText = Collections.Select(scheme);
 
         Log(command);
 
@@ -174,13 +175,13 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TParent : Entity
         where TChild : Entity
     {
-        if (!Exists(QueryBuilder.InferName(scheme)))
+        if (!Exists(InferName(scheme)))
         {
             return;
         }
 
         using var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.Relations.Select(scheme);
+        command.CommandText = Relations.Select(scheme);
 
         Log(command);
 
@@ -197,10 +198,37 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    internal bool Exists(string name)
+    internal bool Exists(CollectionInfo collection)
+    {
+        return Exists(InferName(collection));
+    }
+
+    internal bool Exists(RelationInfo relation)
+    {
+        return Exists(InferName(relation));
+    }
+
+    internal IEnumerable<SqliteColumnInfo> QueryTableColumns(CollectionInfo collection)
     {
         using var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.IfTableExists(name);
+        command.CommandText = $"PRAGMA table_info([{InferName(collection)}]);";
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var columnName = reader.GetString(1);
+            var columnType = reader.GetString(2);
+            var columnIsNotNullable = reader.GetBoolean(3);
+            var columnDefaultValue = reader.GetValue(4);
+
+            yield return new SqliteColumnInfo(columnName, columnType, columnIsNotNullable, columnDefaultValue);
+        }
+    }
+
+    private bool Exists(string name)
+    {
+        using var command = _connection.CreateCommand();
+        command.CommandText = IfTableExists(name);
 
         Log(command);
 
@@ -280,7 +308,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    private static void CreateParameters(SqliteCommand command, IReadOnlyList<Property> properties)
+    private static void CreateParameters(SqliteCommand command, IReadOnlyList<PropertyInfo> properties)
     {
         var idParameter = command.CreateParameter();
         idParameter.ParameterName = "$Id";

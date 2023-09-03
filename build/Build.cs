@@ -27,7 +27,6 @@ internal partial class Build : NukeBuild
     static AbsolutePath PackagesDirectory => RootDirectory / "packages";
     static AbsolutePath CoverageDirectory => RootDirectory / "coverage";
     static AbsolutePath ReportDirectory => RootDirectory / "coveragereport";
-    static AbsolutePath ImagesDirectory => RootDirectory / "images";
 
     [CI]
     readonly GitHubActions GitHubActions;
@@ -139,21 +138,21 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded(0, 5, 1))
+                .SetVersion(MakePreviewIfNeeded(0, 5, 2))
                 .SetDescription("A core library to build cross-platform and highly customizable domain models")
                 .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Generators)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded(0, 5, 1))
+                .SetVersion(MakePreviewIfNeeded(0, 5, 2))
                 .SetDescription("Roslyn Source Generators for generating domain models using 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Sqlite)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded(0, 5, 1))
+                .SetVersion(MakePreviewIfNeeded(0, 5, 2))
                 .SetDescription("SQLite storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SQLite"));
 
