@@ -26,7 +26,6 @@ public partial class MainWindow : MetroWindow
         builder.RegisterType<ToDoModelShard>().As<IModelShard>();
         builder.Register(c => new UndoRedoDomainModel(
             c.Resolve<IEnumerable<IModelShard>>(),
-            new AsyncScheduler(),
             c.Resolve<IStorage>()));
         builder.RegisterType<MainWindowViewModel>().AsSelf();
 

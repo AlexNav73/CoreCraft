@@ -14,7 +14,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
 
         await ExecuteAddCommand(model);
 
@@ -26,7 +26,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
         var changedEventOccurred = false;
         model.Changed += (s, e) => changedEventOccurred = true;
 
@@ -40,7 +40,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
 
         await ExecuteAddCommand(model);
 
@@ -52,7 +52,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
 
         await ExecuteAddCommand(model);
 
@@ -67,7 +67,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
         var modelHasBeenChanged = false;
 
         await ExecuteAddCommand(model);
@@ -90,7 +90,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
 
         await ExecuteAddCommand(model);
 
@@ -110,7 +110,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
         var modelHasBeenChanged = false;
 
         model.Changed += (s, args) => modelHasBeenChanged = true;
@@ -135,7 +135,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
         var modelHasBeenChanged = false;
 
         model.Changed += (s, args) => modelHasBeenChanged = true;
@@ -160,7 +160,7 @@ public class UndoRedoDomainModelTests
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
         var storage2 = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
         var modelHasBeenChanged = false;
 
         model.Changed += (s, args) => modelHasBeenChanged = true;
@@ -184,7 +184,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
         var firstCollectionChanged = false;
 
         model.For<IFakeChangesFrame>().With(y => y.FirstCollection).Subscribe(c => firstCollectionChanged = true);
@@ -206,7 +206,7 @@ public class UndoRedoDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
         var relationChanged = false;
 
         model.For<IFakeChangesFrame>().With(y => y.OneToOneRelation).Subscribe(c => relationChanged = true);
