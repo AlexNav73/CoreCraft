@@ -15,17 +15,4 @@ internal sealed class Collection<T> : ICollection
     public string Name { get; set; }
 
     public IList<Item<T>> Items { get; set; }
-
-    public void Delete(Guid id)
-    {
-        var item = Items.SingleOrDefault(x => x.Id == id);
-        if (item is not null)
-        {
-            Items.Remove(item);
-        }
-        else
-        {
-            throw new InvalidOperationException($"Unable to delete item with id = [{id}]");
-        }
-    }
 }

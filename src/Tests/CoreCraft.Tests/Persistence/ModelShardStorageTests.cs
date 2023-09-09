@@ -1,6 +1,5 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
-using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
 
 namespace CoreCraft.Tests.Persistence;
@@ -16,7 +15,7 @@ public class ModelShardStorageTests
     }
 
     [Test]
-    public void UpdateWithoutChangesTest()
+    public void AllCollectionsAndRelationsShouldBePassedToRepositoryTest()
     {
         var storage = new FakeModelShardStorage();
         var modelChanges = new ModelChanges();
@@ -25,155 +24,95 @@ public class ModelShardStorageTests
 
         storage.Update(_repository!, modelChanges);
 
-        A.CallTo(() => changesFrame.FirstCollection.HasChanges()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => changesFrame.SecondCollection.HasChanges()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => changesFrame.OneToOneRelation.HasChanges()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => changesFrame.OneToManyRelation.HasChanges()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => changesFrame.ManyToOneRelation.HasChanges()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => changesFrame.ManyToManyRelation.HasChanges()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.FirstCollection).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.SecondCollection).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.OneToOneRelation).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.OneToManyRelation).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.ManyToOneRelation).MustHaveHappenedOnceExactly();
+        A.CallTo(() => changesFrame.ManyToManyRelation).MustHaveHappenedOnceExactly();
     }
 
     [Test]
-    public void UpdateCollectionAddChangeTest()
+    public void UpdateCollectionTest()
     {
         var storage = new FakeModelShardStorage();
         var modelChanges = new ModelChanges();
-        SetupModelChanges(modelChanges, CollectionAction.Add, null, new());
-
-        storage.Update(_repository!, modelChanges);
-
-        A.CallTo(() => _repository!.Insert(
-            A<CollectionInfo>.Ignored,
-            A<IReadOnlyCollection<KeyValuePair<FirstEntity, FirstEntityProperties>>>.Ignored))
-            .MustHaveHappenedOnceExactly();
-    }
-
-    [Test]
-    public void UpdateCollectionRemoveChangeTest()
-    {
-        var storage = new FakeModelShardStorage();
-        var modelChanges = new ModelChanges();
-        SetupModelChanges(modelChanges, CollectionAction.Remove, new(), null);
-
-        storage.Update(_repository!, modelChanges);
-
-        A.CallTo(() => _repository!.Delete(
-            A<CollectionInfo>.Ignored,
-            A<IReadOnlyCollection<FirstEntity>>.Ignored))
-            .MustHaveHappenedOnceExactly();
-    }
-
-    [Test]
-    public void UpdateCollectionModifyChangeTest()
-    {
-        var storage = new FakeModelShardStorage();
-        var modelChanges = new ModelChanges();
-        SetupModelChanges(modelChanges, CollectionAction.Modify, new(), new());
+        SetupModelChanges(modelChanges);
 
         storage.Update(_repository!, modelChanges);
 
         A.CallTo(() => _repository!.Update(
             A<CollectionInfo>.Ignored,
-            A<IReadOnlyCollection<ICollectionChange<FirstEntity, FirstEntityProperties>>>.Ignored))
+            A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
     [Test]
-    public void UpdateRelationLinkChangeTest()
+    public void UpdateRelationTest()
     {
         var storage = new FakeModelShardStorage();
         var modelChanges = new ModelChanges();
-        SetupModelChanges(modelChanges, RelationAction.Linked);
+        SetupModelChanges(modelChanges);
 
         storage.Update(_repository!, modelChanges);
 
-        A.CallTo(() => _repository!.Insert(
+        A.CallTo(() => _repository!.Update(
             A<RelationInfo>.Ignored,
-            A<IReadOnlyCollection<KeyValuePair<FirstEntity, SecondEntity>>>.Ignored))
-            .MustHaveHappenedOnceExactly();
-    }
-
-    [Test]
-    public void UpdateRelationUnlinkChangeTest()
-    {
-        var storage = new FakeModelShardStorage();
-        var modelChanges = new ModelChanges();
-        SetupModelChanges(modelChanges, RelationAction.Unlinked);
-
-        storage.Update(_repository!, modelChanges);
-
-        A.CallTo(() => _repository!.Delete(
-            A<RelationInfo>.Ignored,
-            A<IReadOnlyCollection<KeyValuePair<FirstEntity, SecondEntity>>>.Ignored))
-            .MustHaveHappenedOnceExactly();
-    }
-
-    [Test]
-    public void SaveCollectionChangeTest()
-    {
-        var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
-
-        storage.Save(_repository!, model);
-
-        A.CallTo(() => _repository!.Insert(
-            A<CollectionInfo>.Ignored,
-            A<IReadOnlyCollection<KeyValuePair<FirstEntity, FirstEntityProperties>>>.Ignored))
-            .MustHaveHappenedOnceExactly();
-    }
-
-    [Test]
-    public void SaveRelationChangeTest()
-    {
-        var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
-
-        storage.Save(_repository!, model);
-
-        A.CallTo(() => _repository!.Insert(
-            A<RelationInfo>.Ignored,
-            A<IReadOnlyCollection<KeyValuePair<FirstEntity, SecondEntity>>>.Ignored))
+            A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
             .MustHaveHappened(4, Times.Exactly);
     }
 
     [Test]
-    public void LoadCollectionChangeTest()
+    public void SaveCollectionTest()
+    {
+        var storage = new FakeModelShardStorage();
+        var model = A.Fake<IModel>();
+
+        storage.Save(_repository!, model);
+
+        A.CallTo(() => _repository!.Save(
+            A<CollectionInfo>.Ignored,
+            A<ICollection<FirstEntity, FirstEntityProperties>>.Ignored))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public void SaveRelationTest()
+    {
+        var storage = new FakeModelShardStorage();
+        var model = A.Fake<IModel>();
+
+        storage.Save(_repository!, model);
+
+        A.CallTo(() => _repository!.Save(
+            A<RelationInfo>.Ignored,
+            A<IRelation<FirstEntity, SecondEntity>>.Ignored))
+            .MustHaveHappened(4, Times.Exactly);
+    }
+
+    [Test]
+    public void LoadCollectionTest()
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
 
         storage.Load(_repository!, model);
 
-        A.CallTo(() => _repository!.Select(
+        A.CallTo(() => _repository!.Load(
             A<CollectionInfo>.Ignored,
             A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
     [Test]
-    public void LoadCollectionDataToNonEmptyModelTest()
-    {
-        var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
-        var shard = A.Fake<IMutableFakeModelShard>();
-        var collection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
-
-        A.CallTo(() => model.Shard<IMutableFakeModelShard>()).Returns(shard);
-        A.CallTo(() => shard.FirstCollection).Returns(collection);
-        A.CallTo(() => collection.Count).Returns(1);
-
-        Assert.Throws<NonEmptyModelException>(() => storage.Load(_repository!, model));
-    }
-
-    [Test]
-    public void LoadRelationChangeTest()
+    public void LoadRelationTest()
     {
         var storage = new FakeModelShardStorage();
         var model = A.Fake<IModel>();
 
         storage.Load(_repository!, model);
 
-        A.CallTo(() => _repository!.Select(
+        A.CallTo(() => _repository!.Load(
             A<RelationInfo>.Ignored,
             A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored,
             A<IEnumerable<FirstEntity>>.Ignored,
@@ -181,43 +120,9 @@ public class ModelShardStorageTests
             .MustHaveHappened(4, Times.Exactly);
     }
 
-    [Test]
-    public void LoadRelationDataToNonEmptyModelTest()
-    {
-        var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
-        var shard = A.Fake<IMutableFakeModelShard>();
-        var relation = A.Fake<IMutableRelation<FirstEntity, SecondEntity>>();
-        var relations = new List<FirstEntity>() { new FirstEntity() };
-
-        A.CallTo(() => model.Shard<IMutableFakeModelShard>()).Returns(shard);
-        A.CallTo(() => shard.OneToOneRelation).Returns(relation);
-        A.CallTo(() => relation.GetEnumerator()).Returns(relations.GetEnumerator());
-
-        Assert.Throws<NonEmptyModelException>(() => storage.Load(_repository!, model));
-    }
-
-    private void SetupModelChanges(ModelChanges modelChanges, CollectionAction action, FirstEntityProperties? oldProps, FirstEntityProperties? newProps)
+    private void SetupModelChanges(ModelChanges modelChanges)
     {
         var changesFrame = A.Fake<IFakeChangesFrame>(c => c.Implements<IChangesFrameEx>());
-        A.CallTo(() => changesFrame.FirstCollection.HasChanges()).Returns(true);
-        A.CallTo(() => changesFrame.FirstCollection.GetEnumerator())
-            .Returns(new List<CollectionChange<FirstEntity, FirstEntityProperties>>()
-            {
-                new CollectionChange<FirstEntity, FirstEntityProperties>(action, new(), oldProps, newProps)
-            }.GetEnumerator());
-        modelChanges.Register(() => (IChangesFrameEx)changesFrame);
-    }
-
-    private void SetupModelChanges(ModelChanges modelChanges, RelationAction action)
-    {
-        var changesFrame = A.Fake<IFakeChangesFrame>(c => c.Implements<IChangesFrameEx>());
-        A.CallTo(() => changesFrame.OneToManyRelation.HasChanges()).Returns(true);
-        A.CallTo(() => changesFrame.OneToManyRelation.GetEnumerator())
-            .Returns(new List<RelationChange<FirstEntity, SecondEntity>>()
-            {
-                new RelationChange<FirstEntity, SecondEntity>(action, new(), new())
-            }.GetEnumerator());
         modelChanges.Register(() => (IChangesFrameEx)changesFrame);
     }
 }

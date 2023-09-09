@@ -277,7 +277,7 @@ namespace compilation.AnotherModelFile
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed class FakeModelShardStorage : ModelShardStorage
+    public sealed class FakeModelShardStorage : IModelShardStorage
     {
         public static readonly CollectionInfo FirstCollectionInfo = new("Fake", "FirstCollection", new PropertyInfo[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
         public static readonly CollectionInfo SecondCollectionInfo = new("Fake", "SecondCollection", new PropertyInfo[] { new("IntProperty", typeof(int), false), new("BoolProperty", typeof(bool), false), new("DoubleProperty", typeof(double), false), new("FloatProperty", typeof(float), false) });
@@ -287,44 +287,44 @@ namespace compilation.AnotherModelFile
         public static readonly RelationInfo ManyToOneRelationInfo = new("Fake", "ManyToOneRelation");
         public static readonly RelationInfo ManyToManyRelationInfo = new("Fake", "ManyToManyRelation");
 
-        public override void Update(IRepository repository, IModelChanges changes)
+        public void Update(IRepository repository, IModelChanges changes)
         {
             if (changes.TryGetFrame<IFakeChangesFrame>(out var frame))
             {
-                Update(repository, FirstCollectionInfo, frame.FirstCollection);
-                Update(repository, SecondCollectionInfo, frame.SecondCollection);
+                repository.Update(FirstCollectionInfo, frame.FirstCollection);
+                repository.Update(SecondCollectionInfo, frame.SecondCollection);
 
-                Update(repository, OneToOneRelationInfo, frame.OneToOneRelation);
-                Update(repository, OneToManyRelationInfo, frame.OneToManyRelation);
-                Update(repository, ManyToOneRelationInfo, frame.ManyToOneRelation);
-                Update(repository, ManyToManyRelationInfo, frame.ManyToManyRelation);
+                repository.Update(OneToOneRelationInfo, frame.OneToOneRelation);
+                repository.Update(OneToManyRelationInfo, frame.OneToManyRelation);
+                repository.Update(ManyToOneRelationInfo, frame.ManyToOneRelation);
+                repository.Update(ManyToManyRelationInfo, frame.ManyToManyRelation);
             }
         }
 
-        public override void Save(IRepository repository, IModel model)
+        public void Save(IRepository repository, IModel model)
         {
             var shard = model.Shard<IFakeModelShard>();
 
-            Save(repository, FirstCollectionInfo, shard.FirstCollection);
-            Save(repository, SecondCollectionInfo, shard.SecondCollection);
+            repository.Save(FirstCollectionInfo, shard.FirstCollection);
+            repository.Save(SecondCollectionInfo, shard.SecondCollection);
 
-            Save(repository, OneToOneRelationInfo, shard.OneToOneRelation);
-            Save(repository, OneToManyRelationInfo, shard.OneToManyRelation);
-            Save(repository, ManyToOneRelationInfo, shard.ManyToOneRelation);
-            Save(repository, ManyToManyRelationInfo, shard.ManyToManyRelation);
+            repository.Save(OneToOneRelationInfo, shard.OneToOneRelation);
+            repository.Save(OneToManyRelationInfo, shard.OneToManyRelation);
+            repository.Save(ManyToOneRelationInfo, shard.ManyToOneRelation);
+            repository.Save(ManyToManyRelationInfo, shard.ManyToManyRelation);
         }
 
-        public override void Load(IRepository repository, IModel model)
+        public void Load(IRepository repository, IModel model)
         {
             var shard = model.Shard<IMutableFakeModelShard>();
 
-            Load(repository, FirstCollectionInfo, shard.FirstCollection);
-            Load(repository, SecondCollectionInfo, shard.SecondCollection);
+            repository.Load(FirstCollectionInfo, shard.FirstCollection);
+            repository.Load(SecondCollectionInfo, shard.SecondCollection);
 
-            Load(repository, OneToOneRelationInfo, shard.OneToOneRelation, shard.FirstCollection, shard.SecondCollection);
-            Load(repository, OneToManyRelationInfo, shard.OneToManyRelation, shard.FirstCollection, shard.SecondCollection);
-            Load(repository, ManyToOneRelationInfo, shard.ManyToOneRelation, shard.FirstCollection, shard.SecondCollection);
-            Load(repository, ManyToManyRelationInfo, shard.ManyToManyRelation, shard.FirstCollection, shard.SecondCollection);
+            repository.Load(OneToOneRelationInfo, shard.OneToOneRelation, shard.FirstCollection, shard.SecondCollection);
+            repository.Load(OneToManyRelationInfo, shard.OneToManyRelation, shard.FirstCollection, shard.SecondCollection);
+            repository.Load(ManyToOneRelationInfo, shard.ManyToOneRelation, shard.FirstCollection, shard.SecondCollection);
+            repository.Load(ManyToManyRelationInfo, shard.ManyToManyRelation, shard.FirstCollection, shard.SecondCollection);
         }
     }
 

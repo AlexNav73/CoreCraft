@@ -13,113 +13,132 @@ internal sealed class JsonRepository : IJsonRepository
         _modelShards = modelShards;
     }
 
-    public void Insert<TEntity, TProperties>(CollectionInfo scheme, IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items)
+    public void Update<TEntity, TProperties>(CollectionInfo scheme, ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
+        if (!changes.HasChanges())
+        {
+            return;
+        }
+
         var shard = GetOrCreateModelShard(scheme.ShardName);
         var collection = GetOrCreateCollection<TProperties>(scheme, shard);
 
-        foreach (var item in items)
+        foreach (var change in changes)
         {
-            collection.Items.Add(new Item<TProperties>(item.Key.Id, item.Value));
+            switch (change.Action)
+            {
+                case CollectionAction.Add:
+                    collection.Items.Add(new Item<TProperties>(change.Entity.Id, change.NewData!));
+                    break;
+
+                case CollectionAction.Modify:
+                    var itemToAdd = collection.Items.SingleOrDefault(x => x.Id == change.Entity.Id);
+                    if (itemToAdd is null)
+                    {
+                        throw new InvalidOperationException($"Unable to update item with id [{change.Entity.Id}]");
+                    }
+
+                    itemToAdd.Properties = change.NewData!;
+                    break;
+
+                case CollectionAction.Remove:
+                    var itemToDelete = collection.Items.SingleOrDefault(x => x.Id == change.Entity.Id);
+                    if (itemToDelete is null)
+                    {
+                        throw new InvalidOperationException($"Unable to delete item with id [{change.Entity.Id}]");
+                    }
+
+                    collection.Items.Remove(itemToDelete);
+                    break;
+            }
+        }
+
+        if (collection.Items.Count == 0)
+        {
+            shard.Collections.Remove(collection);
         }
     }
 
-    public void Insert<TParent, TChild>(RelationInfo scheme, IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
+    public void Update<TParent, TChild>(RelationInfo scheme, IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
+        if (!changes.HasChanges())
+        {
+            return;
+        }
+
         var shard = GetOrCreateModelShard(scheme.ShardName);
-        var relation = GetOrCreateRelation(shard, scheme);
-
-        foreach (var pair in relations)
-        {
-            relation.Pairs.Add(new Pair(pair.Key.Id, pair.Value.Id));
-        }
-    }
-
-    public void Update<TEntity, TProperties>(CollectionInfo scheme, IReadOnlyCollection<ICollectionChange<TEntity, TProperties>> changes)
-        where TEntity : Entity
-        where TProperties : Properties
-    {
-        var shard = _modelShards.SingleOrDefault(x => x.Name == scheme.ShardName);
-        if (shard is null)
-        {
-            throw new InvalidOperationException($"Missing [{scheme.ShardName}] model shard");
-        }
-
-        var collection = shard.Collections
-            .OfType<Collection<TProperties>>()
-            .SingleOrDefault(x => x.Name == scheme.Name);
-        if (collection is null)
-        {
-            throw new InvalidOperationException($"Missing [{scheme.Name}] collection");
-        }
+        var relation = GetOrCreateRelation(scheme, shard);
 
         foreach (var change in changes)
         {
-            var item = collection.Items.SingleOrDefault(x => x.Id == change.Entity.Id);
-            if (item is null)
+            switch (change.Action)
             {
-                throw new InvalidOperationException($"Unable to update item with id [{change.Entity.Id}]");
+                case RelationAction.Linked:
+                    relation.Pairs.Add(new Pair(change.Parent.Id, change.Child.Id));
+                    break;
+
+                case RelationAction.Unlinked:
+                    var item = relation.Pairs.SingleOrDefault(x => x.Parent == change.Parent.Id && x.Child == change.Child.Id);
+                    if (item is null)
+                    {
+                        throw new InvalidOperationException($"Unable to remove pair [{change.Parent.Id}, {change.Child.Id}]");
+                    }
+
+                    relation.Pairs.Remove(item);
+                    break;
             }
+        }
 
-            item.Properties = change.NewData!;
+        if (relation.Pairs.Count == 0)
+        {
+            shard.Relations.Remove(relation);
         }
     }
 
-    public void Delete<TEntity>(CollectionInfo scheme, IReadOnlyCollection<TEntity> entities) where TEntity : Entity
+    public void Save<TEntity, TProperties>(CollectionInfo scheme, ICollection<TEntity, TProperties> collection)
+        where TEntity : Entity
+        where TProperties : Properties
     {
-        var shard = _modelShards.SingleOrDefault(x => x.Name == scheme.ShardName);
-        if (shard is null)
+        if (collection.Count == 0)
         {
-            throw new InvalidOperationException($"Missing [{scheme.ShardName}] model shard");
+            return;
         }
 
-        var collection = shard.Collections.SingleOrDefault(x => x.Name == scheme.Name);
-        if (collection is null)
-        {
-            throw new InvalidOperationException($"Missing [{scheme.Name}] collection");
-        }
+        var shard = GetOrCreateModelShard(scheme.ShardName);
+        var jsonCollection = GetOrCreateCollection<TProperties>(scheme, shard);
 
-        foreach (var entity in entities)
+        foreach (var (entity, properties) in collection.Pairs())
         {
-            collection.Delete(entity.Id);
+            jsonCollection.Items.Add(new Item<TProperties>(entity.Id, properties));
         }
     }
 
-    public void Delete<TParent, TChild>(RelationInfo scheme, IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
+    public void Save<TParent, TChild>(RelationInfo scheme, IRelation<TParent, TChild> relation)
         where TParent : Entity
         where TChild : Entity
     {
-        var shard = _modelShards.SingleOrDefault(x => x.Name == scheme.ShardName);
-        if (shard is null)
+        if (!relation.Any())
         {
-            throw new InvalidOperationException($"Missing [{scheme.ShardName}] model shard");
+            return;
         }
 
-        var relation = shard.Relations.SingleOrDefault(x => x.Name == scheme.Name);
-        if (relation is null)
-        {
-            throw new InvalidOperationException($"Missing [{scheme.Name}] relation");
-        }
+        var shard = GetOrCreateModelShard(scheme.ShardName);
+        var jsonRelation = GetOrCreateRelation(scheme, shard);
 
-        foreach (var pair in relations)
+        foreach (var parent in relation)
         {
-            var item = relation.Pairs.SingleOrDefault(x => x.Parent == pair.Key.Id && x.Child == pair.Value.Id);
-            if (item is not null)
+            foreach (var child in relation.Children(parent))
             {
-                relation.Pairs.Remove(item);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Unable to remove pair [{pair.Key.Id}, {pair.Value.Id}]");
+                jsonRelation.Pairs.Add(new Pair(parent.Id, child.Id));
             }
         }
     }
 
-    public void Select<TEntity, TProperties>(CollectionInfo scheme, IMutableCollection<TEntity, TProperties> collection)
+    public void Load<TEntity, TProperties>(CollectionInfo scheme, IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -143,7 +162,7 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public void Select<TParent, TChild>(RelationInfo scheme, IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parentCollection, IEnumerable<TChild> childCollection)
+    public void Load<TParent, TChild>(RelationInfo scheme, IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parents, IEnumerable<TChild> children)
         where TParent : Entity
         where TChild : Entity
     {
@@ -161,8 +180,8 @@ internal sealed class JsonRepository : IJsonRepository
 
         foreach (var pair in rel.Pairs)
         {
-            var parent = parentCollection.SingleOrDefault(x => x.Id == pair.Parent);
-            var child = childCollection.SingleOrDefault(x => x.Id == pair.Child);
+            var parent = parents.SingleOrDefault(x => x.Id == pair.Parent);
+            var child = children.SingleOrDefault(x => x.Id == pair.Child);
 
             if (parent is not null && child is not null)
             {
@@ -199,7 +218,7 @@ internal sealed class JsonRepository : IJsonRepository
         return collection;
     }
 
-    private static Relation GetOrCreateRelation(ModelShard shard, RelationInfo scheme)
+    private static Relation GetOrCreateRelation(RelationInfo scheme, ModelShard shard)
     {
         var relation = shard.Relations.SingleOrDefault(x => x.Name == scheme.Name);
         if (relation is null)

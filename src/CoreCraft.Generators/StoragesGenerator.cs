@@ -14,7 +14,7 @@ internal partial class ApplicationModelGenerator
     private void DefineStorage(IndentedTextWriter code, ModelShard modelShard)
     {
         code.GeneratedClassAttributes();
-        code.Class(modelShard.Visibility, "sealed", $"{modelShard.Name}ModelShardStorage", new[] { $"ModelShardStorage" }, () =>
+        code.Class(modelShard.Visibility, "sealed", $"{modelShard.Name}ModelShardStorage", new[] { $"IModelShardStorage" }, () =>
         {
             foreach (var collection in modelShard.Collections)
             {
@@ -32,7 +32,7 @@ internal partial class ApplicationModelGenerator
             }
             code.EmptyLine();
 
-            code.WriteLine("public override void Update(IRepository repository, IModelChanges changes)");
+            code.WriteLine("public void Update(IRepository repository, IModelChanges changes)");
             code.Block(() =>
             {
                 code.WriteLine($"if (changes.TryGetFrame<I{modelShard.Name}ChangesFrame>(out var frame))");
@@ -40,19 +40,19 @@ internal partial class ApplicationModelGenerator
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"Update(repository, {collection.Name}Info, frame.{collection.Name});");
+                        code.WriteLine($"repository.Update({collection.Name}Info, frame.{collection.Name});");
                     }
                     code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"Update(repository, {relation.Name}Info, frame.{relation.Name});");
+                        code.WriteLine($"repository.Update({relation.Name}Info, frame.{relation.Name});");
                     }
                 });
             });
             code.EmptyLine();
 
-            code.WriteLine("public override void Save(IRepository repository, IModel model)");
+            code.WriteLine("public void Save(IRepository repository, IModel model)");
             code.Block(() =>
             {
                 code.WriteLine($"var shard = model.Shard<I{modelShard.Name}ModelShard>();");
@@ -60,18 +60,18 @@ internal partial class ApplicationModelGenerator
 
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"Save(repository, {collection.Name}Info, shard.{collection.Name});");
+                    code.WriteLine($"repository.Save({collection.Name}Info, shard.{collection.Name});");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"Save(repository, {relation.Name}Info, shard.{relation.Name});");
+                    code.WriteLine($"repository.Save({relation.Name}Info, shard.{relation.Name});");
                 }
             });
             code.EmptyLine();
 
-            code.WriteLine("public override void Load(IRepository repository, IModel model)");
+            code.WriteLine("public void Load(IRepository repository, IModel model)");
             code.Block(() =>
             {
                 code.WriteLine($"var shard = model.Shard<IMutable{modelShard.Name}ModelShard>();");
@@ -79,7 +79,7 @@ internal partial class ApplicationModelGenerator
 
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"Load(repository, {collection.Name}Info, shard.{collection.Name});");
+                    code.WriteLine($"repository.Load({collection.Name}Info, shard.{collection.Name});");
                 }
                 code.EmptyLine();
 
@@ -88,7 +88,7 @@ internal partial class ApplicationModelGenerator
                     var parentCollection = modelShard.Collections.Single(x => x.EntityType == relation.ParentType).Name;
                     var childCollection = modelShard.Collections.Single(x => x.EntityType == relation.ChildType).Name;
 
-                    code.WriteLine($"Load(repository, {relation.Name}Info, shard.{relation.Name}, shard.{parentCollection}, shard.{childCollection});");
+                    code.WriteLine($"repository.Load({relation.Name}Info, shard.{relation.Name}, shard.{parentCollection}, shard.{childCollection});");
                 }
             });
         });

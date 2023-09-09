@@ -1,4 +1,5 @@
-﻿using CoreCraft.Storage.Sqlite.Migrations;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Storage.Sqlite.Migrations;
 using CoreCraft.Storage.Sqlite.Tests.Migrations;
 
 namespace CoreCraft.Storage.Sqlite.Tests;
@@ -11,11 +12,11 @@ internal class MigrationRunnerTest
         using var repository = new SqliteRepository(":memory:");
         var runner = new MigrationRunner(new[] { new DropCollectionTableMigration(FakeModelShardStorage.FirstCollectionInfo) });
 
-        repository.Insert(
+        repository.Update(
             FakeModelShardStorage.FirstCollectionInfo,
-            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
-                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(), new())
+                { CollectionAction.Add, new(), null, new() }
             });
 
         Assert.That(repository.Exists(FakeModelShardStorage.FirstCollectionInfo), Is.True);
@@ -33,11 +34,11 @@ internal class MigrationRunnerTest
         using var repository = new SqliteRepository(":memory:");
         var runner = new MigrationRunner(new[] { new DropRelationTableMigration(FakeModelShardStorage.OneToOneRelationInfo) });
 
-        repository.Insert(
+        repository.Update(
             FakeModelShardStorage.OneToOneRelationInfo,
-            new List<KeyValuePair<FirstEntity, SecondEntity>>()
+            new RelationChangeSet<FirstEntity, SecondEntity>("")
             {
-                new KeyValuePair<FirstEntity, SecondEntity>(new(), new())
+                { RelationAction.Linked, new(), new() }
             });
 
         Assert.That(repository.Exists(FakeModelShardStorage.OneToOneRelationInfo), Is.True);
@@ -65,11 +66,11 @@ internal class MigrationRunnerTest
             new AddColumnMigration<string>(FakeModelShardStorage.FirstCollectionInfo, nullStringColumn, true),
         });
 
-        repository.Insert(
+        repository.Update(
             FakeModelShardStorage.FirstCollectionInfo,
-            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
-                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(), new())
+                { CollectionAction.Add, new(), null, new() }
             });
 
         var columns = repository.QueryTableColumns(FakeModelShardStorage.FirstCollectionInfo).ToArray();
@@ -101,11 +102,11 @@ internal class MigrationRunnerTest
             new DropColumnMigration(FakeModelShardStorage.FirstCollectionInfo, columnName)
         });
 
-        repository.Insert(
+        repository.Update(
             FakeModelShardStorage.FirstCollectionInfo,
-            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
-                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(), new())
+                { CollectionAction.Add, new(), null, new() }
             });
 
         var columns = repository.QueryTableColumns(FakeModelShardStorage.FirstCollectionInfo).ToArray();
@@ -132,11 +133,11 @@ internal class MigrationRunnerTest
             new RenameColumnMigration(FakeModelShardStorage.FirstCollectionInfo, columnName, newColumnName)
         });
 
-        repository.Insert(
+        repository.Update(
             FakeModelShardStorage.FirstCollectionInfo,
-            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
-                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(), new())
+                { CollectionAction.Add, new(), null, new() }
             });
 
         var columns = repository.QueryTableColumns(FakeModelShardStorage.FirstCollectionInfo).ToArray();

@@ -108,13 +108,14 @@ public class CollectionChangeSetTests
     [Test]
     public void AddModifyCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Add, entity, null, newProps);
-        changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Add, entity, null, newProps },
+            { CollectionAction.Modify, entity, oldProps, newProps }
+        };
 
         var change = changes.Single();
 
@@ -127,13 +128,14 @@ public class CollectionChangeSetTests
     [Test]
     public void ModifyRemoveCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
-        changes.Add(CollectionAction.Remove, entity, oldProps, null);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Modify, entity, oldProps, newProps },
+            { CollectionAction.Remove, entity, oldProps, null }
+        };
 
         Assert.That(changes.Count(), Is.EqualTo(0));
     }
@@ -141,13 +143,14 @@ public class CollectionChangeSetTests
     [Test]
     public void RemoveAddCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Remove, entity, oldProps, null);
-        changes.Add(CollectionAction.Add, entity, null, newProps);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Remove, entity, oldProps, null },
+            { CollectionAction.Add, entity, null, newProps }
+        };
 
         var change = changes.Single();
 
@@ -160,13 +163,14 @@ public class CollectionChangeSetTests
     [Test]
     public void ModifyModifyCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
-        changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Modify, entity, oldProps, newProps },
+            { CollectionAction.Modify, entity, oldProps, newProps }
+        };
 
         var change = changes.Single();
 
@@ -179,14 +183,15 @@ public class CollectionChangeSetTests
     [Test]
     public void AddModifyRemoveCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Add, entity, null, newProps);
-        changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
-        changes.Add(CollectionAction.Remove, entity, oldProps, null);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Add, entity, null, newProps },
+            { CollectionAction.Modify, entity, oldProps, newProps },
+            { CollectionAction.Remove, entity, oldProps, null }
+        };
 
         Assert.That(changes.Count(), Is.EqualTo(0));
     }
@@ -194,15 +199,16 @@ public class CollectionChangeSetTests
     [Test]
     public void AddModifyModifyRemoveCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Add, entity, null, newProps);
-        changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
-        changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
-        changes.Add(CollectionAction.Remove, entity, oldProps, null);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Add, entity, null, newProps },
+            { CollectionAction.Modify, entity, oldProps, newProps },
+            { CollectionAction.Modify, entity, oldProps, newProps },
+            { CollectionAction.Remove, entity, oldProps, null }
+        };
 
         Assert.That(changes.Count(), Is.EqualTo(0));
     }
@@ -210,13 +216,14 @@ public class CollectionChangeSetTests
     [Test]
     public void AddRemoveCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Add, entity, null, newProps);
-        changes.Add(CollectionAction.Remove, entity, oldProps, null);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Add, entity, null, newProps },
+            { CollectionAction.Remove, entity, oldProps, null }
+        };
 
         Assert.That(changes.Count(), Is.EqualTo(0));
     }
@@ -224,14 +231,17 @@ public class CollectionChangeSetTests
     [Test]
     public void MergeCollectionChangeSetTest()
     {
-        var changes1 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
-        var changes2 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes1.Add(CollectionAction.Add, entity, null, newProps);
-        changes2.Add(CollectionAction.Remove, entity, oldProps, null);
+        var changes1 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Add, entity, null, newProps }
+        };
+        var changes2 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Remove, entity, oldProps, null }
+        };
 
         var merged = changes1.Merge(changes2);
 
