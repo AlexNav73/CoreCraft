@@ -1,4 +1,5 @@
 ﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Exceptions;
 
 namespace CoreCraft.Storage.Sqlite.Tests;
 
@@ -23,11 +24,11 @@ public class SqliteRepositoryTests
 
         var id = Guid.Parse("f4a0e880-b549-4e9d-a58c-716eab14e9f1");
 
-        repository.Insert(
+        repository.Update(
             FakeModelShardStorage.FirstCollectionInfo,
-            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
-                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(id), new FirstEntityProperties() with { NonNullableStringProperty = "first entity" })
+                { CollectionAction.Add, new(id), null, new FirstEntityProperties() { NonNullableStringProperty = "first entity" } }
             });
 
         Assert.That(query, Is.EqualTo("INSERT INTO [Fake.FirstCollection] ([Id], [NonNullableStringProperty], [NullableStringProperty], [NullableStringWithDefaultValueProperty]) VALUES (f4a0e880-b549-4e9d-a58c-716eab14e9f1, first entity, , );"));
@@ -41,15 +42,15 @@ public class SqliteRepositoryTests
         var value = "first entity";
         var id = Guid.NewGuid();
 
-        repository.Insert(
+        repository.Update(
             FakeModelShardStorage.FirstCollectionInfo,
-            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
-                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(id), new FirstEntityProperties() with { NonNullableStringProperty = value })
+                { CollectionAction.Add, new(id), null, new FirstEntityProperties() { NonNullableStringProperty = value } }
             });
 
         var collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new(id), () => new());
-        repository.Select(FakeModelShardStorage.FirstCollectionInfo, collection);
+        repository.Load(FakeModelShardStorage.FirstCollectionInfo, collection);
 
         Assert.That(collection.Count, Is.EqualTo(1));
         Assert.That(collection.Single().Id, Is.EqualTo(id));
@@ -68,15 +69,15 @@ public class SqliteRepositoryTests
         parentCollection.Add(entity1, new());
         childCollection.Add(entity2, new());
 
-        repository.Insert(
+        repository.Update(
             FakeModelShardStorage.OneToOneRelationInfo,
-            new List<KeyValuePair<FirstEntity, SecondEntity>>()
+            new RelationChangeSet<FirstEntity, SecondEntity>("")
             {
-                new KeyValuePair<FirstEntity, SecondEntity>(entity1, entity2)
+                { RelationAction.Linked, entity1, entity2 }
             });
 
         var relation = new Relation<FirstEntity, SecondEntity>("", new OneToOne<FirstEntity, SecondEntity>(), new OneToOne<SecondEntity, FirstEntity>());
-        repository.Select(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
+        repository.Load(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
 
         Assert.That(relation.Count, Is.EqualTo(1));
         Assert.That(relation.Children(entity1), Is.EquivalentTo(new[] { entity2 }));
@@ -92,21 +93,16 @@ public class SqliteRepositoryTests
         var value2 = "first entity 2";
         var id = Guid.NewGuid();
 
-        repository.Insert(
-            FakeModelShardStorage.FirstCollectionInfo,
-            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
-            {
-                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(id), new FirstEntityProperties() with { NonNullableStringProperty = value })
-            });
         repository.Update(
             FakeModelShardStorage.FirstCollectionInfo,
-            new List<ICollectionChange<FirstEntity, FirstEntityProperties>>()
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
-                new CollectionChange<FirstEntity, FirstEntityProperties>(CollectionAction.Modify, new(id), new(), new FirstEntityProperties() with { NonNullableStringProperty = value2 })
+                { CollectionAction.Add, new(id), null, new FirstEntityProperties() { NonNullableStringProperty = value } },
+                { CollectionAction.Modify, new(id), new(), new FirstEntityProperties() { NonNullableStringProperty = value2 } }
             });
 
         var collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new(id), () => new());
-        repository.Select(FakeModelShardStorage.FirstCollectionInfo, collection);
+        repository.Load(FakeModelShardStorage.FirstCollectionInfo, collection);
 
         Assert.That(collection.Count, Is.EqualTo(1));
         Assert.That(collection.Single().Id, Is.EqualTo(id));
@@ -121,16 +117,16 @@ public class SqliteRepositoryTests
         var value = "first entity";
         var id = Guid.NewGuid();
 
-        repository.Insert(
+        repository.Update(
             FakeModelShardStorage.FirstCollectionInfo,
-            new List<KeyValuePair<FirstEntity, FirstEntityProperties>>()
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
-                new KeyValuePair<FirstEntity, FirstEntityProperties>(new(id), new FirstEntityProperties() with { NonNullableStringProperty = value })
+                { CollectionAction.Add, new FirstEntity(id), null, new FirstEntityProperties() { NonNullableStringProperty = value } },
+                { CollectionAction.Remove, new FirstEntity(id), new FirstEntityProperties() { NonNullableStringProperty = value }, null }
             });
-        repository.Delete(FakeModelShardStorage.FirstCollectionInfo, new[] { new FirstEntity(id) });
 
         var collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new(id), () => new());
-        repository.Select(FakeModelShardStorage.FirstCollectionInfo, collection);
+        repository.Load(FakeModelShardStorage.FirstCollectionInfo, collection);
 
         Assert.That(collection.Count, Is.EqualTo(0));
     }
@@ -147,21 +143,16 @@ public class SqliteRepositoryTests
         parentCollection.Add(entity1, new());
         childCollection.Add(entity2, new());
 
-        repository.Insert(
+        repository.Update(
             FakeModelShardStorage.OneToOneRelationInfo,
-            new List<KeyValuePair<FirstEntity, SecondEntity>>()
+            new RelationChangeSet<FirstEntity, SecondEntity>("")
             {
-                new KeyValuePair<FirstEntity, SecondEntity>(entity1, entity2)
-            });
-        repository.Delete(
-            FakeModelShardStorage.OneToOneRelationInfo,
-            new List<KeyValuePair<FirstEntity, SecondEntity>>()
-            {
-                new KeyValuePair<FirstEntity, SecondEntity>(entity1, entity2)
+                { RelationAction.Linked, entity1, entity2 },
+                { RelationAction.Unlinked, entity1, entity2 }
             });
 
         var relation = new Relation<FirstEntity, SecondEntity>("", new OneToOne<FirstEntity, SecondEntity>(), new OneToOne<SecondEntity, FirstEntity>());
-        repository.Select(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
+        repository.Load(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
 
         Assert.That(relation.Count, Is.EqualTo(0));
     }
@@ -173,7 +164,7 @@ public class SqliteRepositoryTests
 
         var collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new(id), () => new());
 
-        repository.Select(FakeModelShardStorage.FirstCollectionInfo, collection);
+        repository.Load(FakeModelShardStorage.FirstCollectionInfo, collection);
 
         Assert.That(collection.Count, Is.EqualTo(0));
     }
@@ -187,8 +178,38 @@ public class SqliteRepositoryTests
         var childCollection = new Collection<SecondEntity, SecondEntityProperties>("", id => new(id), () => new());
         var relation = new Relation<FirstEntity, SecondEntity>("", new OneToOne<FirstEntity, SecondEntity>(), new OneToOne<SecondEntity, FirstEntity>());
 
-        repository.Select(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
+        repository.Load(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
 
         Assert.That(relation.Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void LoadCollectionDataToNonEmptyModelTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+
+        var collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new(id), () => new())
+        {
+            new()
+        };
+
+        Assert.Throws<NonEmptyModelException>(() => repository.Load(FakeModelShardStorage.FirstCollectionInfo, collection));
+    }
+
+
+
+    [Test]
+    public void LoadRelationDataToNonEmptyModelTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+
+        var parentCollection = new Collection<FirstEntity, FirstEntityProperties>("", id => new(id), () => new());
+        var childCollection = new Collection<SecondEntity, SecondEntityProperties>("", id => new(id), () => new());
+        var relation = new Relation<FirstEntity, SecondEntity>("", new OneToOne<FirstEntity, SecondEntity>(), new OneToOne<SecondEntity, FirstEntity>())
+        {
+            { new(), new() }
+        };
+
+        Assert.Throws<NonEmptyModelException>(() => repository.Load(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection));
     }
 }

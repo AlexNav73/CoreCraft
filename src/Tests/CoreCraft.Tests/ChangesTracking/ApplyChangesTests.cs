@@ -18,11 +18,12 @@ public class ApplyChangesTests
     [Test]
     public void ApplyAddChangeToCollectionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Add, entity, null, props);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Add, entity, null, props }
+        };
 
         changes.Apply(_collection!);
 
@@ -32,11 +33,12 @@ public class ApplyChangesTests
     [Test]
     public void ApplyRemoveChangeToCollectionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Remove, entity, props, null);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Remove, entity, props, null }
+        };
 
         changes.Apply(_collection!);
 
@@ -46,12 +48,13 @@ public class ApplyChangesTests
     [Test]
     public void ApplyModifyChangeToCollectionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Modify, entity, oldProps, newProps }
+        };
 
         changes.Apply(_collection!);
 
@@ -62,11 +65,12 @@ public class ApplyChangesTests
     [Test]
     public void ApplyLinkChangeToRelationTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var parent = new FirstEntity();
         var child = new SecondEntity();
-
-        changes.Add(RelationAction.Linked, parent, child);
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("")
+        {
+            { RelationAction.Linked, parent, child }
+        };
 
         changes.Apply(_relation!);
 
@@ -76,11 +80,12 @@ public class ApplyChangesTests
     [Test]
     public void ApplyUnlinkChangeToRelationTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var parent = new FirstEntity();
         var child = new SecondEntity();
-
-        changes.Add(RelationAction.Unlinked, parent, child);
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("")
+        {
+            { RelationAction.Unlinked, parent, child }
+        };
 
         changes.Apply(_relation!);
 

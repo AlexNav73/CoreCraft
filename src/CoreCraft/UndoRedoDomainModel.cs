@@ -19,8 +19,18 @@ public class UndoRedoDomainModel : DomainModel
     /// </summary>
     public UndoRedoDomainModel(
         IEnumerable<IModelShard> modelShards,
-        IScheduler scheduler,
         IStorage storage)
+        : this(modelShards, storage, new AsyncScheduler())
+    {
+    }
+
+    /// <summary>
+    ///     Ctor
+    /// </summary>
+    public UndoRedoDomainModel(
+        IEnumerable<IModelShard> modelShards,
+        IStorage storage,
+        IScheduler scheduler)
         : base(modelShards, scheduler)
     {
         _storage = storage;

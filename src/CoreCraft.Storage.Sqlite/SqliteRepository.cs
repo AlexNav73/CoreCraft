@@ -4,11 +4,16 @@ using Microsoft.Data.Sqlite;
 using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using static CoreCraft.Storage.Sqlite.QueryBuilder;
+using CoreCraft.Exceptions;
 
 namespace CoreCraft.Storage.Sqlite;
 
 internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 {
+    private const string ParentIdParamName = "$ParentId";
+    private const string ChildIdParamName = "$ChildId";
+    private const string IdParamName = "$Id";
+
     private readonly Action<string>? _loggingAction;
 
     private SqliteConnection _connection;
@@ -53,102 +58,141 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         command.ExecuteNonQuery();
     }
 
-    public void Insert<TEntity, TProperties>(
-        CollectionInfo scheme,
-        IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items)
+    public void Update<TEntity, TProperties>(CollectionInfo scheme, ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
-        EnsureTableIsCreated(Collections.CreateTable(scheme), items);
-        ExecuteCollectionCommand(Collections.Insert(scheme), items, scheme);
-    }
+        if (!changes.HasChanges())
+        {
+            return;
+        }
 
-    public void Insert<TParent, TChild>(
-        RelationInfo scheme,
-        IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
-        where TParent : Entity
-        where TChild : Entity
-    {
-        EnsureTableIsCreated(Relations.CreateTable(scheme), relations);
-        ExecuteRelationCommand(Relations.Insert(scheme), relations);
-    }
+        if (!Exists(scheme))
+        {
+            ExecuteNonQuery(Collections.CreateTable(scheme));
+        }
 
-    public void Update<TEntity, TProperties>(CollectionInfo scheme, IReadOnlyCollection<ICollectionChange<TEntity, TProperties>> changes)
-        where TEntity : Entity
-        where TProperties : Properties
-    {
-        var commandsCache = new Dictionary<int, SqliteCommand>();
+        var updateCommandCache = new Dictionary<int, SqliteCommand>();
+        using var insertCommand = CreateCommand(Collections.Insert(scheme), scheme.Properties);
+        using var deleteCommand = CreateCollectionDeleteCommand(scheme);
 
         foreach (var change in changes)
         {
-            var modifiedProperties = CreatePropertiesBagForChanges(change);
-            var commandKey = CreateCommandKey(modifiedProperties.Select(x => x.Key));
-
-            SqliteCommand command;
-            if (commandsCache.TryGetValue(commandKey, out var cachedCommand))
+            switch (change.Action)
             {
-                command = cachedCommand;
+                case CollectionAction.Add:
+                    Insert(insertCommand, change.Entity, change.NewData!);
+                    break;
+
+                case CollectionAction.Modify:
+                    Update(scheme, change, updateCommandCache);
+                    break;
+
+                case CollectionAction.Remove:
+                    Delete(deleteCommand, change.Entity);
+                    break;
             }
-            else
-            {
-                command = _connection.CreateCommand();
-
-                var properties = scheme.Properties.Where(p => modifiedProperties.ContainsProp(p.Name)).ToArray();
-                command.CommandText = Collections.Update(properties, scheme);
-
-                CreateParameters(command, properties);
-
-                commandsCache.Add(commandKey, command);
-            }
-
-            AssignValuesToParameters(command, change.Entity.Id, modifiedProperties);
-            Log(command);
-
-            command.ExecuteNonQuery();
         }
 
-        foreach (var command in commandsCache.Values)
+        foreach (var command in updateCommandCache.Values)
         {
             command.Dispose();
         }
     }
 
-    public void Delete<TEntity>(CollectionInfo scheme, IReadOnlyCollection<TEntity> entities)
-        where TEntity : Entity
-    {
-        using var command = _connection.CreateCommand();
-        command.CommandText = Collections.Delete(scheme);
-        var parameter = command.CreateParameter();
-        parameter.ParameterName = "$Id";
-        command.Parameters.Add(parameter);
-
-        foreach (var entity in entities)
-        {
-            parameter.Value = entity.Id;
-
-            Log(command);
-            command.ExecuteNonQuery();
-        }
-    }
-
-    public void Delete<TParent, TChild>(RelationInfo scheme, IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
+    public void Update<TParent, TChild>(RelationInfo scheme, IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
-        ExecuteRelationCommand(Relations.Delete(scheme), relations);
-    }
-
-    public void Select<TEntity, TProperties>(CollectionInfo scheme, IMutableCollection<TEntity, TProperties> collection)
-        where TEntity : Entity
-        where TProperties : Properties
-    {
-        if (!Exists(InferName(scheme)))
+        if (!changes.HasChanges())
         {
             return;
         }
 
-        using var command = _connection.CreateCommand();
-        command.CommandText = Collections.Select(scheme);
+        if (!Exists(scheme))
+        {
+            ExecuteNonQuery(Relations.CreateTable(scheme));
+        }
+
+        using var insertCommand = CreateRelationCommand(Relations.Insert(scheme));
+        using var deleteCommand = CreateRelationCommand(Relations.Delete(scheme));
+
+        foreach (var change in changes)
+        {
+            switch (change.Action)
+            {
+                case RelationAction.Linked:
+                    ExecuteRelationCommand(insertCommand, change.Parent, change.Child);
+                    break;
+                case RelationAction.Unlinked:
+                    ExecuteRelationCommand(deleteCommand, change.Parent, change.Child);
+                    break;
+            }
+        }
+    }
+
+    public void Save<TEntity, TProperties>(CollectionInfo scheme, ICollection<TEntity, TProperties> collection)
+        where TEntity : Entity
+        where TProperties : Properties
+    {
+        if (collection.Count == 0)
+        {
+            return;
+        }
+
+        if (!Exists(scheme))
+        {
+            ExecuteNonQuery(Collections.CreateTable(scheme));
+        }
+
+        using var insertCommand = CreateCommand(Collections.Insert(scheme), scheme.Properties);
+
+        foreach (var (entity, properties) in collection.Pairs())
+        {
+            Insert(insertCommand, entity, properties);
+        }
+    }
+
+    public void Save<TParent, TChild>(RelationInfo scheme, IRelation<TParent, TChild> relation)
+        where TParent : Entity
+        where TChild : Entity
+    {
+        if (!relation.Any())
+        {
+            return;
+        }
+
+        if (!Exists(scheme))
+        {
+            ExecuteNonQuery(Relations.CreateTable(scheme));
+        }
+
+        using var insertCommand = CreateRelationCommand(Relations.Insert(scheme));
+
+        foreach (var parent in relation)
+        {
+            foreach (var child in relation.Children(parent))
+            {
+                ExecuteRelationCommand(insertCommand, parent, child);
+            }
+        }
+    }
+
+    public void Load<TEntity, TProperties>(CollectionInfo scheme, IMutableCollection<TEntity, TProperties> collection)
+        where TEntity : Entity
+        where TProperties : Properties
+    {
+        if (collection.Count != 0)
+        {
+            throw new NonEmptyModelException($"The [{scheme.ShardName}.{scheme.Name}] is not empty. Clear or recreate the model before loading data");
+        }
+
+        if (!Exists(scheme))
+        {
+            return;
+        }
+
+        using var command = CreateCommand(Collections.Select(scheme));
 
         Log(command);
 
@@ -167,11 +211,16 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Select<TParent, TChild>(RelationInfo scheme, IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parentCollection, IEnumerable<TChild> childCollection)
+    public void Load<TParent, TChild>(RelationInfo scheme, IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parents, IEnumerable<TChild> children)
         where TParent : Entity
         where TChild : Entity
     {
-        if (!Exists(InferName(scheme)))
+        if (relation.Any())
+        {
+            throw new NonEmptyModelException($"The [{scheme.ShardName}.{scheme.Name}] is not empty. Clear or recreate the model before loading data");
+        }
+
+        if (!Exists(scheme))
         {
             return;
         }
@@ -187,8 +236,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             var parentId = reader.GetGuid(0);
             var childId = reader.GetGuid(1);
 
-            var parent = parentCollection.Single(x => x.Id == parentId);
-            var child = childCollection.Single(x => x.Id == childId);
+            var parent = parents.Single(x => x.Id == parentId);
+            var child = children.Single(x => x.Id == childId);
 
             relation.Add(parent, child);
         }
@@ -221,6 +270,58 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
+    private void Insert<TEntity, TProperties>(SqliteCommand command, TEntity entity, TProperties properties)
+        where TEntity : Entity
+        where TProperties : Properties
+    {
+        var bag = new PropertiesBag();
+        properties.WriteTo(bag);
+
+        AssignValuesToParameters(command, entity.Id, bag);
+
+        Log(command);
+
+        command.ExecuteNonQuery();
+    }
+
+    private void Update<TEntity, TProperties>(CollectionInfo scheme, ICollectionChange<TEntity, TProperties> change, IDictionary<int, SqliteCommand> commandsCache)
+        where TEntity : Entity
+        where TProperties : Properties
+    {
+        var modifiedProperties = CreatePropertiesBagForChanges(change);
+        var commandKey = CreateCommandKey(modifiedProperties.Select(x => x.Key));
+
+        SqliteCommand command;
+        if (commandsCache.TryGetValue(commandKey, out var cachedCommand))
+        {
+            command = cachedCommand;
+        }
+        else
+        {
+            var properties = scheme.Properties.Where(p => modifiedProperties.ContainsProp(p.Name)).ToArray();
+
+            command = CreateCommand(Collections.Update(properties, scheme), properties);
+
+            commandsCache.Add(commandKey, command);
+        }
+
+        AssignValuesToParameters(command, change.Entity.Id, modifiedProperties);
+
+        Log(command);
+
+        command.ExecuteNonQuery();
+    }
+
+    private void Delete<TEntity>(SqliteCommand command, TEntity entity)
+        where TEntity : Entity
+    {
+        command.Parameters[IdParamName].Value = entity.Id;
+
+        Log(command);
+
+        command.ExecuteNonQuery();
+    }
+
     private bool Exists(string name)
     {
         using var command = _connection.CreateCommand();
@@ -237,56 +338,57 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         return false;
     }
 
-    private void EnsureTableIsCreated<T>(string query, IReadOnlyCollection<T> items)
+    private SqliteCommand CreateCommand(string query)
     {
-        if (items.Count > 0)
-        {
-            ExecuteNonQuery(query);
-        }
-    }
-
-    private void ExecuteCollectionCommand<TEntity, TProperties>(string query, IReadOnlyCollection<KeyValuePair<TEntity, TProperties>> items, CollectionInfo scheme)
-        where TEntity : Entity
-        where TProperties : Properties
-    {
-        using var command = _connection.CreateCommand();
+        var command = _connection.CreateCommand();
         command.CommandText = query;
-        CreateParameters(command, scheme.Properties);
 
-        foreach (var pair in items)
-        {
-            var bag = new PropertiesBag();
-            pair.Value.WriteTo(bag);
-
-            AssignValuesToParameters(command, pair.Key.Id, bag);
-
-            Log(command);
-            command.ExecuteNonQuery();
-        }
+        return command;
     }
 
-    private void ExecuteRelationCommand<TParent, TChild>(string query, IReadOnlyCollection<KeyValuePair<TParent, TChild>> relations)
+    private SqliteCommand CreateCommand(string query, IReadOnlyList<PropertyInfo> properties)
+    {
+        var command = CreateCommand(query);
+
+        CreateParameters(command, properties);
+
+        return command;
+    }
+
+    private SqliteCommand CreateRelationCommand(string query)
+    {
+        var command = CreateCommand(query);
+
+        var parentParameter = command.CreateParameter();
+        parentParameter.ParameterName = ParentIdParamName;
+        command.Parameters.Add(parentParameter);
+        var childParameter = command.CreateParameter();
+        childParameter.ParameterName = ChildIdParamName;
+        command.Parameters.Add(childParameter);
+
+        return command;
+    }
+
+    private SqliteCommand CreateCollectionDeleteCommand(CollectionInfo scheme)
+    {
+        var command = CreateCommand(Collections.Delete(scheme));
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = IdParamName;
+        command.Parameters.Add(parameter);
+
+        return command;
+    }
+
+    private void ExecuteRelationCommand<TParent, TChild>(SqliteCommand command, TParent parent, TChild child)
         where TParent : Entity
         where TChild : Entity
     {
-        using var command = _connection.CreateCommand();
-        command.CommandText = query;
+        command.Parameters[ParentIdParamName].Value = parent.Id;
+        command.Parameters[ChildIdParamName].Value = child.Id;
 
-        var parentParameter = command.CreateParameter();
-        parentParameter.ParameterName = "$ParentId";
-        command.Parameters.Add(parentParameter);
-        var childParameter = command.CreateParameter();
-        childParameter.ParameterName = "$ChildId";
-        command.Parameters.Add(childParameter);
+        Log(command);
 
-        foreach (var pair in relations)
-        {
-            parentParameter.Value = pair.Key.Id;
-            childParameter.Value = pair.Value.Id;
-
-            Log(command);
-            command.ExecuteNonQuery();
-        }
+        command.ExecuteNonQuery();
     }
 
     private void Log(SqliteCommand command)
@@ -307,7 +409,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
     private static void CreateParameters(SqliteCommand command, IReadOnlyList<PropertyInfo> properties)
     {
         var idParameter = command.CreateParameter();
-        idParameter.ParameterName = "$Id";
+        idParameter.ParameterName = IdParamName;
         command.Parameters.Add(idParameter);
 
         for (var i = 0; i < properties.Count; i++)

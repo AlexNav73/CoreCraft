@@ -7,11 +7,12 @@ public class ChangesInversionTests
     [Test]
     public void CollectionInvertAddChangeTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Add, entity, null, props);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Add, entity, null, props }
+        };
 
         var inverted = changes.Invert();
 
@@ -24,11 +25,12 @@ public class ChangesInversionTests
     [Test]
     public void CollectionInvertRemoveChangeTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Remove, entity, props, null);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Remove, entity, props, null }
+        };
 
         var inverted = changes.Invert();
 
@@ -41,12 +43,13 @@ public class ChangesInversionTests
     [Test]
     public void CollectionInvertModifyChangeTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { CollectionAction.Modify, entity, oldProps, newProps }
+        };
 
         var inverted = changes.Invert();
 
@@ -59,12 +62,13 @@ public class ChangesInversionTests
     [Test]
     public void CollectionInvertInvalidActionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-
-        changes.Add((CollectionAction)42, entity, oldProps, newProps);
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        {
+            { (CollectionAction)42, entity, oldProps, newProps }
+        };
 
         Assert.Throws<NotSupportedException>(() => changes.Invert());
     }
@@ -72,11 +76,12 @@ public class ChangesInversionTests
     [Test]
     public void RelationInvertLinkChangeTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var first = new FirstEntity();
         var second = new SecondEntity();
-
-        changes.Add(RelationAction.Linked, first, second);
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("")
+        {
+            { RelationAction.Linked, first, second }
+        };
 
         var inverted = changes.Invert();
 
@@ -88,11 +93,12 @@ public class ChangesInversionTests
     [Test]
     public void RelationInvertUnlinkChangeTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var first = new FirstEntity();
         var second = new SecondEntity();
-
-        changes.Add(RelationAction.Unlinked, first, second);
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("")
+        {
+            { RelationAction.Unlinked, first, second }
+        };
 
         var inverted = changes.Invert();
 
@@ -104,11 +110,12 @@ public class ChangesInversionTests
     [Test]
     public void RelationInvertInvalidActionTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
         var first = new FirstEntity();
         var second = new SecondEntity();
-
-        changes.Add((RelationAction)42, first, second);
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("")
+        {
+            { (RelationAction)42, first, second }
+        };
 
         Assert.Throws<NotSupportedException>(() => changes.Invert());
     }
