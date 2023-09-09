@@ -4,8 +4,6 @@ coveragereport/
 **/.vscode/
 **/.vs/
 .nuke/temp/
-*.props
-*.targets
 *.user
 *.log
 

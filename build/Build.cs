@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Tools.ReportGenerator;
+using Serilog;
 
 namespace build;
 
@@ -41,9 +42,13 @@ internal partial class Build : NukeBuild
         .Before(Restore)
         .Executes(() =>
         {
+            Log.Information("Cleaning output folders.");
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
+            Log.Information("Cleaning packages folder.");
             PackagesDirectory.CreateOrCleanDirectory();
+            Log.Information("Cleaning test coverage output folder.");
             CoverageDirectory.CreateOrCleanDirectory();
+            Log.Information("Cleaning test coverage report folder.");
             ReportDirectory.CreateOrCleanDirectory();
         });
 
