@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="_ExactProjectReferencesVersion" AfterTargets="_GetProjectReferenceVersions">
+    <ItemGroup>
+      <_ProjectReferencesWithExactVersions Include="@(_ProjectReferencesWithVersions)">
+        <!-- TODO: Fix the regular expression <ProjectVersion>[%(_ProjectReferencesWithVersions.ProjectVersion), $([System.Int32]::Parse($([System.Text.RegularExpressions.Regex]::Match('%(_ProjectReferencesWithVersions.ProjectVersion)', '^0.(\d+)').Groups[1].Value))))</ProjectVersion> -->
+      </_ProjectReferencesWithExactVersions>
+    </ItemGroup>
+    <ItemGroup>
+      <_ProjectReferencesWithVersions Remove="@(_ProjectReferencesWithVersions)" />
+      <_ProjectReferencesWithVersions Include="@(_ProjectReferencesWithExactVersions)" />
+    </ItemGroup>
+  </Target>
+</Project>
+
+

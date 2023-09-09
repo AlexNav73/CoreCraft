@@ -3,7 +3,6 @@ using MahApps.Metro.Controls;
 using CoreCraft;
 using CoreCraft.Core;
 using CoreCraft.Persistence;
-using CoreCraft.Scheduling;
 using CoreCraft.Storage.Sqlite;
 using System.Collections.Generic;
 using WpfDemoApp.Model;
