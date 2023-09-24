@@ -1,5 +1,4 @@
-﻿using CoreCraft.ChangesTracking;
-using CoreCraft.Persistence;
+﻿using CoreCraft.Persistence;
 using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
 
@@ -10,26 +9,24 @@ public class JsonStorageTests
     [Test]
     public void CtorTest()
     {
-        var modelShardStorage = A.Fake<IModelShardStorage>();
-
-        Assert.DoesNotThrow(() => new JsonStorage(new[] { modelShardStorage }));
+        Assert.DoesNotThrow(() => new JsonStorage());
     }
 
     [Test]
     public void UpdateTest()
     {
-        var modelShardStorage = A.Fake<IModelShardStorage>();
+        var change = A.Fake<ICanBeSaved>();
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
-        var storage = new JsonStorage(new[] { modelShardStorage }, jsonFileHandler);
+        var storage = new JsonStorage(jsonFileHandler);
 
         A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .Returns(new List<ModelShard>());
 
-        storage.Update("", A.Fake<IModelChanges>());
+        storage.Update("", new[] { change });
 
         A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => modelShardStorage.Update(A<IRepository>.Ignored, A<IModelChanges>.Ignored))
+        A.CallTo(() => change.Save(A<IRepository>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => jsonFileHandler.WriteModelShardsToFile(A<string>.Ignored, A<IList<ModelShard>>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -38,13 +35,13 @@ public class JsonStorageTests
     [Test]
     public void SaveTest()
     {
-        var modelShardStorage = A.Fake<IModelShardStorage>();
+        var change = A.Fake<ICanBeSaved>();
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
-        var storage = new JsonStorage(new[] { modelShardStorage }, jsonFileHandler);
+        var storage = new JsonStorage(jsonFileHandler);
 
-        storage.Save("", A.Fake<IModel>());
+        storage.Save("", new[] { change });
 
-        A.CallTo(() => modelShardStorage.Save(A<IRepository>.Ignored, A<IModel>.Ignored))
+        A.CallTo(() => change.Save(A<IRepository>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => jsonFileHandler.WriteModelShardsToFile(A<string>.Ignored, A<IList<ModelShard>>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -53,15 +50,15 @@ public class JsonStorageTests
     [Test]
     public void LoadTest()
     {
-        var modelShardStorage = A.Fake<IModelShardStorage>();
+        var loadable = A.Fake<ICanBeLoaded>();
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
-        var storage = new JsonStorage(new[] { modelShardStorage }, jsonFileHandler);
+        var storage = new JsonStorage(jsonFileHandler);
 
-        storage.Load("", A.Fake<IModel>());
+        storage.Load("", new[] { loadable });
 
         A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => modelShardStorage.Load(A<IRepository>.Ignored, A<IModel>.Ignored))
+        A.CallTo(() => loadable.Load(A<IRepository>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 }

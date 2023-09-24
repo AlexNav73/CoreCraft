@@ -88,7 +88,7 @@ public class DomainModel : IDomainModel
     public async Task Run(Action<IModel, CancellationToken> command, CancellationToken token = default)
     {
         var changes = new ModelChanges();
-        var snapshot = _view.CreateSnapshot(new IFeature[] { new CoWFeature(), new TrackableFeature(changes) });
+        var snapshot = new Snapshot(_view.UnsafeModel, new IFeature[] { new CoWFeature(), new TrackableFeature(changes) });
 
         try
         {
@@ -118,13 +118,13 @@ public class DomainModel : IDomainModel
     /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
     public Task Save(IStorage storage, string path, CancellationToken token = default)
     {
-        // Store a reference to the model before start saving task. It is safe to use UnsafeModel here
-        // because we are storing IModel object in the RunParallel delegate, but not the reference to the
-        // view. When the UnsafeModel stored in the local variable all changes happened after, will not
-        // change stored model (instead a reference to the model in the _view will be replaced with a reference
-        // to the new model, leaving old reference and model untouched). This is exact behavior we need, because
-        // when Save is executed it should save state at that moment, but not when storage.Save is executed.
-        var model = _view.UnsafeModel;
+        // Store a references to model shards before start saving task. It is safe to use UnsafeModel here
+        // because we are storing model shards objects in the RunParallel delegate, but not the reference to the
+        // view. When model shards from UnsafeModel stored in the local variable all changes happened after, will not
+        // change stored model shards (instead a reference to the model in the _view will be replaced with a reference
+        // to the new model, leaving old references and model shards untouched). This is exact behavior we need, because
+        // when Save is executed it should save state at that moment, but not when 'storage.Save' is executed.
+        var model = _view.UnsafeModel.Shards.OfType<ICanBeSaved>().ToArray(); // Do not remove ToArray from here!
 
         try
         {
@@ -146,7 +146,7 @@ public class DomainModel : IDomainModel
     public async Task Load(IStorage storage, string path, CancellationToken token = default)
     {
         var changes = new ModelChanges();
-        var snapshot = _view.CreateSnapshot(new IFeature[] { new CoWFeature(), new TrackableFeature(changes) });
+        var snapshot = new LoadSnapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
 
         try
         {
@@ -184,7 +184,7 @@ public class DomainModel : IDomainModel
 
                 if (merged.HasChanges())
                 {
-                    return _scheduler.RunParallel(() => storage.Update(path, merged), token);
+                    return _scheduler.RunParallel(() => storage.Update(path, merged.OfType<ICanBeSaved>()), token);
                 }
             }
 
@@ -206,7 +206,7 @@ public class DomainModel : IDomainModel
     {
         if (changes.HasChanges())
         {
-            var snapshot = _view.CreateSnapshot(new IFeature[] { new CoWFeature() });
+            var snapshot = new Snapshot(_view.UnsafeModel, new[] { new CoWFeature() });
 
             try
             {

@@ -15,33 +15,13 @@ public class ModelShardStorageTests
     }
 
     [Test]
-    public void AllCollectionsAndRelationsShouldBePassedToRepositoryTest()
-    {
-        var storage = new FakeModelShardStorage();
-        var modelChanges = new ModelChanges();
-        var changesFrame = A.Fake<IFakeChangesFrame>(c => c.Implements<IChangesFrameEx>());
-        modelChanges.Register(() => (IChangesFrameEx)changesFrame);
-
-        storage.Update(_repository!, modelChanges);
-
-        A.CallTo(() => changesFrame.FirstCollection).MustHaveHappenedOnceExactly();
-        A.CallTo(() => changesFrame.SecondCollection).MustHaveHappenedOnceExactly();
-        A.CallTo(() => changesFrame.OneToOneRelation).MustHaveHappenedOnceExactly();
-        A.CallTo(() => changesFrame.OneToManyRelation).MustHaveHappenedOnceExactly();
-        A.CallTo(() => changesFrame.ManyToOneRelation).MustHaveHappenedOnceExactly();
-        A.CallTo(() => changesFrame.ManyToManyRelation).MustHaveHappenedOnceExactly();
-    }
-
-    [Test]
     public void UpdateCollectionTest()
     {
-        var storage = new FakeModelShardStorage();
-        var modelChanges = new ModelChanges();
-        SetupModelChanges(modelChanges);
+        var shard = new FakeChangesFrame();
 
-        storage.Update(_repository!, modelChanges);
+        shard.Save(_repository!);
 
-        A.CallTo(() => _repository!.Update(
+        A.CallTo(() => _repository!.Save(
             A<CollectionInfo>.Ignored,
             A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -50,13 +30,11 @@ public class ModelShardStorageTests
     [Test]
     public void UpdateRelationTest()
     {
-        var storage = new FakeModelShardStorage();
-        var modelChanges = new ModelChanges();
-        SetupModelChanges(modelChanges);
+        var shard = new FakeChangesFrame();
 
-        storage.Update(_repository!, modelChanges);
+        shard.Save(_repository!);
 
-        A.CallTo(() => _repository!.Update(
+        A.CallTo(() => _repository!.Save(
             A<RelationInfo>.Ignored,
             A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
             .MustHaveHappened(4, Times.Exactly);
@@ -65,10 +43,9 @@ public class ModelShardStorageTests
     [Test]
     public void SaveCollectionTest()
     {
-        var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
+        var shard = new FakeModelShard();
 
-        storage.Save(_repository!, model);
+        shard.Save(_repository!);
 
         A.CallTo(() => _repository!.Save(
             A<CollectionInfo>.Ignored,
@@ -79,10 +56,9 @@ public class ModelShardStorageTests
     [Test]
     public void SaveRelationTest()
     {
-        var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
+        var shard = new FakeModelShard();
 
-        storage.Save(_repository!, model);
+        shard.Save(_repository!);
 
         A.CallTo(() => _repository!.Save(
             A<RelationInfo>.Ignored,
@@ -93,10 +69,9 @@ public class ModelShardStorageTests
     [Test]
     public void LoadCollectionTest()
     {
-        var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
+        var storage = new MutableFakeModelShard();
 
-        storage.Load(_repository!, model);
+        storage.Load(_repository!);
 
         A.CallTo(() => _repository!.Load(
             A<CollectionInfo>.Ignored,
@@ -107,10 +82,9 @@ public class ModelShardStorageTests
     [Test]
     public void LoadRelationTest()
     {
-        var storage = new FakeModelShardStorage();
-        var model = A.Fake<IModel>();
+        var storage = new MutableFakeModelShard();
 
-        storage.Load(_repository!, model);
+        storage.Load(_repository!);
 
         A.CallTo(() => _repository!.Load(
             A<RelationInfo>.Ignored,
@@ -118,11 +92,5 @@ public class ModelShardStorageTests
             A<IEnumerable<FirstEntity>>.Ignored,
             A<IEnumerable<SecondEntity>>.Ignored))
             .MustHaveHappened(4, Times.Exactly);
-    }
-
-    private void SetupModelChanges(ModelChanges modelChanges)
-    {
-        var changesFrame = A.Fake<IFakeChangesFrame>(c => c.Implements<IChangesFrameEx>());
-        modelChanges.Register(() => (IChangesFrameEx)changesFrame);
     }
 }

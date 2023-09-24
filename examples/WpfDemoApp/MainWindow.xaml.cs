@@ -20,7 +20,6 @@ public partial class MainWindow : MetroWindow
 
         var builder = new ContainerBuilder();
 
-        builder.RegisterType<ToDoModelShardStorage>().As<IModelShardStorage>();
         builder.RegisterType<SqliteStorage>().As<IStorage>();
         builder.RegisterType<ToDoModelShard>().As<IModelShard>();
         builder.Register(c => new UndoRedoDomainModel(

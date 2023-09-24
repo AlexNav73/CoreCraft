@@ -122,7 +122,7 @@ public class UndoRedoDomainModelTests
 
         await model.Save("fake");
 
-        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModelChanges>.Ignored))
+        A.CallTo(() => storage.Update(A<string>.Ignored, A<IEnumerable<ICanBeSaved>>.Ignored))
             .MustHaveHappenedOnceExactly();
 
         Assert.That(model.UndoStack.Count, Is.EqualTo(0));
@@ -147,7 +147,7 @@ public class UndoRedoDomainModelTests
 
         await model.SaveAs("fake");
 
-        A.CallTo(() => storage.Save(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => storage.Save(A<string>.Ignored, A<IEnumerable<ICanBeSaved>>.Ignored)).MustHaveHappenedOnceExactly();
 
         Assert.That(model.UndoStack.Count, Is.EqualTo(0));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
@@ -172,7 +172,7 @@ public class UndoRedoDomainModelTests
 
         await model.SaveAs("fake", storage2);
 
-        A.CallTo(() => storage2.Save(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => storage2.Save(A<string>.Ignored, A<IEnumerable<ICanBeSaved>>.Ignored)).MustHaveHappenedOnceExactly();
 
         Assert.That(model.UndoStack.Count, Is.EqualTo(0));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
@@ -187,18 +187,25 @@ public class UndoRedoDomainModelTests
         var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
         var firstCollectionChanged = false;
 
-        model.For<IFakeChangesFrame>().With(y => y.FirstCollection).Subscribe(c => firstCollectionChanged = true);
+        using (model.For<IFakeChangesFrame>().With(y => y.FirstCollection).Subscribe(c => firstCollectionChanged = true))
+        {
+            A.CallTo(() => storage.Load(A<string>.Ignored, A<IEnumerable<ICanBeLoaded>>.Ignored))
+                .Invokes(c =>
+                {
+                    var loadables = c.Arguments.Get<IEnumerable<ICanBeLoaded>>(1)!;
+                    var shard = loadables.OfType<IMutableFakeModelShard>().Single();
 
-        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
-            .Invokes(c => c.Arguments.Get<IModel>(1)!.Shard<IMutableFakeModelShard>().FirstCollection.Add(new()));
+                    shard.FirstCollection.Add(new());
+                });
 
-        await model.Load("fake");
+            await model.Load("fake");
 
-        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => storage.Load(A<string>.Ignored, A<IEnumerable<ICanBeLoaded>>.Ignored)).MustHaveHappenedOnceExactly();
 
-        Assert.That(model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
-        Assert.That(model.RedoStack.Count, Is.EqualTo(0));
-        Assert.That(firstCollectionChanged, Is.True);
+            Assert.That(model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
+            Assert.That(model.RedoStack.Count, Is.EqualTo(0));
+            Assert.That(firstCollectionChanged, Is.True);
+        }
     }
 
     [Test]
@@ -209,18 +216,25 @@ public class UndoRedoDomainModelTests
         var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage, scheduler);
         var relationChanged = false;
 
-        model.For<IFakeChangesFrame>().With(y => y.OneToOneRelation).Subscribe(c => relationChanged = true);
+        using (model.For<IFakeChangesFrame>().With(y => y.OneToOneRelation).Subscribe(c => relationChanged = true))
+        {
+            A.CallTo(() => storage.Load(A<string>.Ignored, A<IEnumerable<ICanBeLoaded>>.Ignored))
+                .Invokes(c =>
+                {
+                    var loadables = c.Arguments.Get<IEnumerable<ICanBeLoaded>>(1)!;
+                    var shard = loadables.OfType<IMutableFakeModelShard>().Single();
 
-        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
-            .Invokes(c => c.Arguments.Get<IModel>(1)!.Shard<IMutableFakeModelShard>().OneToOneRelation.Add(new(), new()));
+                    shard.OneToOneRelation.Add(new(), new());
+                });
 
-        await model.Load("fake");
+            await model.Load("fake");
 
-        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => storage.Load(A<string>.Ignored, A<IEnumerable<ICanBeLoaded>>.Ignored)).MustHaveHappenedOnceExactly();
 
-        Assert.That(model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
-        Assert.That(model.RedoStack.Count, Is.EqualTo(0));
-        Assert.That(relationChanged, Is.True);
+            Assert.That(model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
+            Assert.That(model.RedoStack.Count, Is.EqualTo(0));
+            Assert.That(relationChanged, Is.True);
+        }
     }
 
     private static async Task ExecuteAddCommand(IDomainModel model)

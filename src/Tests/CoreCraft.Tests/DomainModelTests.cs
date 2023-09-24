@@ -1,4 +1,5 @@
-﻿using CoreCraft;
+﻿using System.Linq;
+using CoreCraft;
 using CoreCraft.ChangesTracking;
 using CoreCraft.Commands;
 using CoreCraft.Core;
@@ -152,7 +153,7 @@ public class DomainModelTests
     public void SaveChangesThrowsExceptionTest()
     {
         var storage = A.Fake<IStorage>();
-        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModelChanges>.Ignored))
+        A.CallTo(() => storage.Update(A<string>.Ignored, A<IEnumerable<ICanBeSaved>>.Ignored))
             .Throws<InvalidOperationException>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
@@ -167,7 +168,7 @@ public class DomainModelTests
 
         var task = model.Save("", Array.Empty<IModelChanges>());
 
-        A.CallTo(() => storage.Update(A<string>.Ignored, A<IModelChanges>.Ignored))
+        A.CallTo(() => storage.Update(A<string>.Ignored, A<IEnumerable<ICanBeSaved>>.Ignored))
             .MustNotHaveHappened();
         Assert.That(task, Is.Not.Null);
         Assert.That(task.IsCompleted, Is.True);
@@ -192,7 +193,7 @@ public class DomainModelTests
     public void SaveAllThrowsExceptionTest()
     {
         var storage = A.Fake<IStorage>();
-        A.CallTo(() => storage.Save(A<string>.Ignored, A<IModel>.Ignored))
+        A.CallTo(() => storage.Save(A<string>.Ignored, A<IEnumerable<ICanBeSaved>>.Ignored))
             .Throws<InvalidOperationException>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
@@ -208,7 +209,7 @@ public class DomainModelTests
 
         model.Subscribe(c => notificationSent = true);
 
-        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
+        A.CallTo(() => storage.Load(A<string>.Ignored, A<IEnumerable<ICanBeLoaded>>.Ignored))
             .Throws<Exception>();
 
         Assert.ThrowsAsync<ModelLoadingException>(() => model.Load("fake"));
@@ -225,27 +226,28 @@ public class DomainModelTests
             storage,
             m => changesReceived = true);
 
-        A.CallTo(() => storage.Load(A<string>.Ignored, A<IModel>.Ignored))
+        A.CallTo(() => storage.Load(A<string>.Ignored, A<IEnumerable<ICanBeLoaded>>.Ignored))
             .Invokes(c =>
             {
-                // Acquiring mutable shard here we force model to make a shard's copy.
-                // This is needed for shard's reference check. In case when nothing was
-                // changed, copy of the model shard should not become a part of the new
-                // model (it should be just discarded). So, in case when nothing was changed
-                // ApplySnapshot should not be called and model should not be changed
-                var shard = ((IModel)c.Arguments[1]!).Shard<IMutableFakeModelShard>();
+                // In case when nothing was changed, copy of the model shard should not
+                // become a part of the new model (it should be just discarded).
+                // So, in case when nothing was changed ApplySnapshot should not be called
+                // and model should not be changed
+                var loadables = c.Arguments.Get<IEnumerable<ICanBeLoaded>>(1)!;
+                var shard = loadables.OfType<IMutableFakeModelShard>().Single();
 
                 Assert.That(shard, Is.Not.Null);
             });
 
-        model.Subscribe(c => changesReceived = true);
+        using (model.Subscribe(c => changesReceived = true))
+        {
+            var before = model.Shard<IFakeModelShard>();
+            await model.Load("fake");
+            var after = model.Shard<IFakeModelShard>();
 
-        var before = model.Shard<IFakeModelShard>();
-        await model.Load("fake");
-        var after = model.Shard<IFakeModelShard>();
-
-        Assert.That(changesReceived, Is.False);
-        Assert.That(ReferenceEquals(before, after), Is.True);
+            Assert.That(changesReceived, Is.False);
+            Assert.That(ReferenceEquals(before, after), Is.True);
+        }
     }
 
     [Test]

@@ -1,6 +1,4 @@
-﻿using CoreCraft.ChangesTracking;
-using CoreCraft.Core;
-using CoreCraft.Persistence;
+﻿using CoreCraft.Persistence;
 using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
 
@@ -13,66 +11,61 @@ public sealed class JsonStorage : IStorage
 {
     private readonly JsonSerializerSettings? _settings;
     private readonly IJsonFileHandler _jsonFileHandler;
-    private readonly IEnumerable<IModelShardStorage> _storages;
 
     /// <summary>
     ///     Ctor
     /// </summary>
-    public JsonStorage(
-        IEnumerable<IModelShardStorage> storages,
-        JsonSerializerSettings? options = null)
-        : this(storages, new JsonFileHandler(), options)
+    public JsonStorage(JsonSerializerSettings? options = null)
+        : this(new JsonFileHandler(), options)
     {
     }
 
     internal JsonStorage(
-        IEnumerable<IModelShardStorage> storages,
         IJsonFileHandler jsonFileHandler,
         JsonSerializerSettings? options = null)
     {
-        _storages = storages;
         _jsonFileHandler = jsonFileHandler;
         _settings = options;
     }
 
     /// <inheritdoc/>
-    public void Update(string path, IModelChanges changes)
+    public void Update(string path, IEnumerable<ICanBeSaved> modelChanges)
     {
         var shards = _jsonFileHandler.ReadModelShardsFromFile(path, _settings);
         var repository = new JsonRepository(shards);
 
-        foreach (var storage in _storages)
+        foreach (var change in modelChanges)
         {
-            storage.Update(repository, changes);
+            change.Save(repository);
         }
 
         _jsonFileHandler.WriteModelShardsToFile(path, shards, _settings);
     }
 
     /// <inheritdoc/>
-    public void Save(string path, IModel model)
+    public void Save(string path, IEnumerable<ICanBeSaved> modelShards)
     {
         var shards = new List<ModelShard>();
         var repository = new JsonRepository(shards);
 
-        foreach (var storage in _storages)
+        foreach (var shard in modelShards)
         {
-            storage.Save(repository, model);
+            shard.Save(repository);
         }
 
         _jsonFileHandler.WriteModelShardsToFile(path, shards, _settings);
     }
 
     /// <inheritdoc/>
-    public void Load(string path, IModel model)
+    public void Load(string path, IEnumerable<ICanBeLoaded> modelShards)
     {
         var shards = _jsonFileHandler.ReadModelShardsFromFile(path, _settings);
 
         var repository = new JsonRepository(shards);
 
-        foreach (var storage in _storages)
+        foreach (var loadable in modelShards)
         {
-            storage.Load(repository, model);
+            loadable.Load(repository);
         }
     }
 }
