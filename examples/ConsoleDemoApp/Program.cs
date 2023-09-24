@@ -19,7 +19,6 @@ class Program
 
         var storage = new SqliteStorage(
             Array.Empty<IMigration>(),
-            new[] { new ExampleModelShardStorage() },
             Console.WriteLine);
         var model = new DomainModel(new[] { new ExampleModelShard() });
 

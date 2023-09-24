@@ -16,8 +16,8 @@ public class JsonRepositoryTests
         var shards = new List<ModelShard>();
         var repository = new JsonRepository(shards);
 
-        repository.Update(
-            FakeModelShardStorage.FirstCollectionInfo,
+        repository.Save(
+            FakeModelShardInfo.FirstCollectionInfo,
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
                 { CollectionAction.Add, new FirstEntity(entity1Id), null, new() { NullableStringProperty = value1 } },
@@ -25,10 +25,10 @@ public class JsonRepositoryTests
             });
 
         Assert.That(shards.Count, Is.EqualTo(1));
-        Assert.That(shards.Single().Name, Is.EqualTo(FakeModelShardStorage.FirstCollectionInfo.ShardName));
+        Assert.That(shards.Single().Name, Is.EqualTo(FakeModelShardInfo.FirstCollectionInfo.ShardName));
         Assert.That(shards.Single().Collections.Count, Is.EqualTo(1));
         var collection = shards.Single().Collections.OfType<Collection<FirstEntityProperties>>().Single();
-        Assert.That(collection.Name, Is.EqualTo(FakeModelShardStorage.FirstCollectionInfo.Name));
+        Assert.That(collection.Name, Is.EqualTo(FakeModelShardInfo.FirstCollectionInfo.Name));
         Assert.That(collection.Items.Count, Is.EqualTo(2));
         Assert.That(collection.Items.First().Id, Is.EqualTo(entity1Id));
         Assert.That(collection.Items.First().Properties, Is.EqualTo(new FirstEntityProperties() { NullableStringProperty = value1 }));
@@ -47,8 +47,8 @@ public class JsonRepositoryTests
         var shards = new List<ModelShard>();
         var repository = new JsonRepository(shards);
 
-        repository.Update(
-            FakeModelShardStorage.OneToOneRelationInfo,
+        repository.Save(
+            FakeModelShardInfo.OneToOneRelationInfo,
             new RelationChangeSet<FirstEntity, SecondEntity>("")
             {
                 { RelationAction.Linked, new FirstEntity(entity1Id), new SecondEntity(entity2Id) },
@@ -56,10 +56,10 @@ public class JsonRepositoryTests
             });
 
         Assert.That(shards.Count, Is.EqualTo(1));
-        Assert.That(shards.Single().Name, Is.EqualTo(FakeModelShardStorage.OneToOneRelationInfo.ShardName));
+        Assert.That(shards.Single().Name, Is.EqualTo(FakeModelShardInfo.OneToOneRelationInfo.ShardName));
         Assert.That(shards.Single().Relations.Count, Is.EqualTo(1));
         var relation = shards.Single().Relations.Single();
-        Assert.That(relation.Name, Is.EqualTo(FakeModelShardStorage.OneToOneRelationInfo.Name));
+        Assert.That(relation.Name, Is.EqualTo(FakeModelShardInfo.OneToOneRelationInfo.Name));
         Assert.That(relation.Pairs.Count, Is.EqualTo(2));
         Assert.That(relation.Pairs.First().Parent, Is.EqualTo(entity1Id));
         Assert.That(relation.Pairs.First().Child, Is.EqualTo(entity2Id));
@@ -73,8 +73,8 @@ public class JsonRepositoryTests
         var shards = new List<ModelShard>();
         var repository = new JsonRepository(shards);
 
-        Assert.Throws<InvalidOperationException>(() => repository.Update(
-                FakeModelShardStorage.FirstCollectionInfo,
+        Assert.Throws<InvalidOperationException>(() => repository.Save(
+                FakeModelShardInfo.FirstCollectionInfo,
                 new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
                 {
                     { CollectionAction.Modify, new FirstEntity(Guid.Empty), new(), new() }
@@ -86,12 +86,12 @@ public class JsonRepositoryTests
     {
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.FirstCollectionInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.FirstCollectionInfo.ShardName)
         };
         var repository = new JsonRepository(shards);
 
-        Assert.Throws<InvalidOperationException>(() => repository.Update(
-            FakeModelShardStorage.FirstCollectionInfo,
+        Assert.Throws<InvalidOperationException>(() => repository.Save(
+            FakeModelShardInfo.FirstCollectionInfo,
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
                 { CollectionAction.Modify, new FirstEntity(Guid.Empty), new(), new() }
@@ -103,18 +103,18 @@ public class JsonRepositoryTests
     {
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.FirstCollectionInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.FirstCollectionInfo.ShardName)
             {
                 Collections = new[]
                 {
-                    new Collection<FirstEntityProperties>(FakeModelShardStorage.FirstCollectionInfo.Name)
+                    new Collection<FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo.Name)
                 }
             }
         };
         var repository = new JsonRepository(shards);
 
-        Assert.Throws<InvalidOperationException>(() => repository.Update(
-            FakeModelShardStorage.FirstCollectionInfo,
+        Assert.Throws<InvalidOperationException>(() => repository.Save(
+            FakeModelShardInfo.FirstCollectionInfo,
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
                 { CollectionAction.Modify, new FirstEntity(Guid.Empty), new(), new() }
@@ -129,11 +129,11 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.FirstCollectionInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.FirstCollectionInfo.ShardName)
             {
                 Collections = new[]
                 {
-                    new Collection<FirstEntityProperties>(FakeModelShardStorage.FirstCollectionInfo.Name)
+                    new Collection<FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo.Name)
                     {
                         Items = new[]
                         {
@@ -145,8 +145,8 @@ public class JsonRepositoryTests
         };
         var repository = new JsonRepository(shards);
 
-        repository.Update(
-            FakeModelShardStorage.FirstCollectionInfo,
+        repository.Save(
+            FakeModelShardInfo.FirstCollectionInfo,
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
                 { CollectionAction.Modify, new FirstEntity(entityId), new(), new() { NullableStringProperty = value } }
@@ -170,11 +170,11 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.FirstCollectionInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.FirstCollectionInfo.ShardName)
             {
                 Collections = new List<ICollection>()
                 {
-                    new Collection<FirstEntityProperties>(FakeModelShardStorage.FirstCollectionInfo.Name)
+                    new Collection<FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo.Name)
                     {
                         Items = new List<Item<FirstEntityProperties>>()
                         {
@@ -186,8 +186,8 @@ public class JsonRepositoryTests
         };
         var repository = new JsonRepository(shards);
 
-        repository.Update(
-            FakeModelShardStorage.FirstCollectionInfo,
+        repository.Save(
+            FakeModelShardInfo.FirstCollectionInfo,
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
                 { CollectionAction.Remove, new FirstEntity(entityId), null, null }
@@ -206,8 +206,8 @@ public class JsonRepositoryTests
         var shards = new List<ModelShard>();
         var repository = new JsonRepository(shards);
 
-        Assert.Throws<InvalidOperationException>(() => repository.Update(
-            FakeModelShardStorage.FirstCollectionInfo,
+        Assert.Throws<InvalidOperationException>(() => repository.Save(
+            FakeModelShardInfo.FirstCollectionInfo,
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
                  { CollectionAction.Remove, new FirstEntity(entityId), null, null }
@@ -221,12 +221,12 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.FirstCollectionInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.FirstCollectionInfo.ShardName)
         };
         var repository = new JsonRepository(shards);
 
-        Assert.Throws<InvalidOperationException>(() => repository.Update(
-            FakeModelShardStorage.FirstCollectionInfo,
+        Assert.Throws<InvalidOperationException>(() => repository.Save(
+            FakeModelShardInfo.FirstCollectionInfo,
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
                 { CollectionAction.Remove, new FirstEntity(entityId), null, null }
@@ -240,18 +240,18 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.FirstCollectionInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.FirstCollectionInfo.ShardName)
             {
                 Collections = new List<ICollection>()
                 {
-                    new Collection<FirstEntityProperties>(FakeModelShardStorage.FirstCollectionInfo.Name)
+                    new Collection<FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo.Name)
                 }
             }
         };
         var repository = new JsonRepository(shards);
 
-        Assert.Throws<InvalidOperationException>(() => repository.Update(
-            FakeModelShardStorage.FirstCollectionInfo,
+        Assert.Throws<InvalidOperationException>(() => repository.Save(
+            FakeModelShardInfo.FirstCollectionInfo,
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
             {
                 { CollectionAction.Remove, new FirstEntity(entityId), null, null }
@@ -266,11 +266,11 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.OneToOneRelationInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.OneToOneRelationInfo.ShardName)
             {
                 Relations = new List<Relation>()
                 {
-                    new Relation(FakeModelShardStorage.OneToOneRelationInfo.Name)
+                    new Relation(FakeModelShardInfo.OneToOneRelationInfo.Name)
                     {
                         Pairs = new List<Pair>()
                         {
@@ -282,8 +282,8 @@ public class JsonRepositoryTests
         };
         var repository = new JsonRepository(shards);
 
-        repository.Update(
-            FakeModelShardStorage.OneToOneRelationInfo,
+        repository.Save(
+            FakeModelShardInfo.OneToOneRelationInfo,
             new RelationChangeSet<FirstEntity, SecondEntity>("")
             {
                 { RelationAction.Unlinked, new FirstEntity(parentId), new SecondEntity(childId) }
@@ -301,8 +301,8 @@ public class JsonRepositoryTests
         var shards = new List<ModelShard>();
         var repository = new JsonRepository(shards);
 
-        Assert.Throws<InvalidOperationException>(() => repository.Update(
-            FakeModelShardStorage.OneToOneRelationInfo,
+        Assert.Throws<InvalidOperationException>(() => repository.Save(
+            FakeModelShardInfo.OneToOneRelationInfo,
             new RelationChangeSet<FirstEntity, SecondEntity>("")
             {
                 { RelationAction.Unlinked, new FirstEntity(parentId), new SecondEntity(childId) }
@@ -317,12 +317,12 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.OneToOneRelationInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.OneToOneRelationInfo.ShardName)
         };
         var repository = new JsonRepository(shards);
 
-        Assert.Throws<InvalidOperationException>(() => repository.Update(
-            FakeModelShardStorage.OneToOneRelationInfo,
+        Assert.Throws<InvalidOperationException>(() => repository.Save(
+            FakeModelShardInfo.OneToOneRelationInfo,
             new RelationChangeSet<FirstEntity, SecondEntity>("")
             {
                 { RelationAction.Unlinked, new FirstEntity(parentId), new SecondEntity(childId) }
@@ -337,18 +337,18 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.OneToOneRelationInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.OneToOneRelationInfo.ShardName)
             {
                 Relations = new List<Relation>()
                 {
-                    new Relation(FakeModelShardStorage.OneToOneRelationInfo.Name)
+                    new Relation(FakeModelShardInfo.OneToOneRelationInfo.Name)
                 }
             }
         };
         var repository = new JsonRepository(shards);
 
-        Assert.Throws<InvalidOperationException>(() => repository.Update(
-            FakeModelShardStorage.OneToOneRelationInfo,
+        Assert.Throws<InvalidOperationException>(() => repository.Save(
+            FakeModelShardInfo.OneToOneRelationInfo,
             new RelationChangeSet<FirstEntity, SecondEntity>("")
             {
                 { RelationAction.Unlinked, new FirstEntity(parentId), new SecondEntity(childId) }
@@ -365,7 +365,7 @@ public class JsonRepositoryTests
         var repository = new JsonRepository(shards);
         var collection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
 
-        repository.Load(FakeModelShardStorage.FirstCollectionInfo, collection);
+        repository.Load(FakeModelShardInfo.FirstCollectionInfo, collection);
 
         A.CallTo(() => collection.Add(A<Guid>.Ignored, A<Func<FirstEntityProperties, FirstEntityProperties>>.Ignored))
             .MustNotHaveHappened();
@@ -379,12 +379,12 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.FirstCollectionInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.FirstCollectionInfo.ShardName)
         };
         var repository = new JsonRepository(shards);
         var collection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
 
-        repository.Load(FakeModelShardStorage.FirstCollectionInfo, collection);
+        repository.Load(FakeModelShardInfo.FirstCollectionInfo, collection);
 
         A.CallTo(() => collection.Add(A<Guid>.Ignored, A<Func<FirstEntityProperties, FirstEntityProperties>>.Ignored))
             .MustNotHaveHappened();
@@ -398,18 +398,18 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.FirstCollectionInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.FirstCollectionInfo.ShardName)
             {
                 Collections = new List<ICollection>()
                 {
-                    new Collection<FirstEntityProperties>(FakeModelShardStorage.FirstCollectionInfo.Name)
+                    new Collection<FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo.Name)
                 }
             }
         };
         var repository = new JsonRepository(shards);
         var collection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
 
-        repository.Load(FakeModelShardStorage.FirstCollectionInfo, collection);
+        repository.Load(FakeModelShardInfo.FirstCollectionInfo, collection);
 
         A.CallTo(() => collection.Add(A<Guid>.Ignored, A<Func<FirstEntityProperties, FirstEntityProperties>>.Ignored))
             .MustNotHaveHappened();
@@ -423,11 +423,11 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.FirstCollectionInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.FirstCollectionInfo.ShardName)
             {
                 Collections = new List<ICollection>()
                 {
-                    new Collection<FirstEntityProperties>(FakeModelShardStorage.FirstCollectionInfo.Name)
+                    new Collection<FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo.Name)
                     {
                         Items = new List<Item<FirstEntityProperties>>()
                         {
@@ -440,7 +440,7 @@ public class JsonRepositoryTests
         var repository = new JsonRepository(shards);
         var collection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
 
-        repository.Load(FakeModelShardStorage.FirstCollectionInfo, collection);
+        repository.Load(FakeModelShardInfo.FirstCollectionInfo, collection);
 
         A.CallTo(() => collection.Add(A<Guid>.Ignored, A<Func<FirstEntityProperties, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -458,7 +458,7 @@ public class JsonRepositoryTests
         var parentCollection = new[] { new FirstEntity(parentId) };
         var childCollection = new[] { new SecondEntity(childId) };
 
-        repository.Load(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
+        repository.Load(FakeModelShardInfo.OneToOneRelationInfo, relation, parentCollection, childCollection);
 
         A.CallTo(() => relation.Add(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored)).MustNotHaveHappened();
     }
@@ -471,14 +471,14 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.OneToOneRelationInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.OneToOneRelationInfo.ShardName)
         };
         var repository = new JsonRepository(shards);
         var relation = A.Fake<IMutableRelation<FirstEntity, SecondEntity>>();
         var parentCollection = new[] { new FirstEntity(parentId) };
         var childCollection = new[] { new SecondEntity(childId) };
 
-        repository.Load(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
+        repository.Load(FakeModelShardInfo.OneToOneRelationInfo, relation, parentCollection, childCollection);
 
         A.CallTo(() => relation.Add(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored)).MustNotHaveHappened();
     }
@@ -491,11 +491,11 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.OneToOneRelationInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.OneToOneRelationInfo.ShardName)
             {
                 Relations = new List<Relation>()
                 {
-                    new Relation(FakeModelShardStorage.OneToOneRelationInfo.Name)
+                    new Relation(FakeModelShardInfo.OneToOneRelationInfo.Name)
                 }
             }
         };
@@ -504,7 +504,7 @@ public class JsonRepositoryTests
         var parentCollection = new[] { new FirstEntity(parentId) };
         var childCollection = new[] { new SecondEntity(childId) };
 
-        repository.Load(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
+        repository.Load(FakeModelShardInfo.OneToOneRelationInfo, relation, parentCollection, childCollection);
 
         A.CallTo(() => relation.Add(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored)).MustNotHaveHappened();
     }
@@ -517,11 +517,11 @@ public class JsonRepositoryTests
 
         var shards = new List<ModelShard>()
         {
-            new ModelShard(FakeModelShardStorage.OneToOneRelationInfo.ShardName)
+            new ModelShard(FakeModelShardInfo.OneToOneRelationInfo.ShardName)
             {
                 Relations = new List<Relation>()
                 {
-                    new Relation(FakeModelShardStorage.OneToOneRelationInfo.Name)
+                    new Relation(FakeModelShardInfo.OneToOneRelationInfo.Name)
                     {
                         Pairs = new List<Pair>() { new Pair(parentId, childId) }
                     }
@@ -533,7 +533,7 @@ public class JsonRepositoryTests
         var parentCollection = new[] { new FirstEntity(parentId) };
         var childCollection = new[] { new SecondEntity(childId) };
 
-        repository.Load(FakeModelShardStorage.OneToOneRelationInfo, relation, parentCollection, childCollection);
+        repository.Load(FakeModelShardInfo.OneToOneRelationInfo, relation, parentCollection, childCollection);
 
         A.CallTo(() => relation.Add(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored)).MustHaveHappenedOnceExactly();
     }

@@ -47,6 +47,21 @@ namespace compilation.VisibilityImplementations
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
+    public static class FakeModelShardInfo
+    {
+        public static readonly CollectionInfo FirstCollectionInfo = new("Fake", "FirstCollection", new PropertyInfo[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
+        public static readonly CollectionInfo SecondCollectionInfo = new("Fake", "SecondCollection", new PropertyInfo[] { new("IntProperty", typeof(int), false), new("BoolProperty", typeof(bool), false), new("DoubleProperty", typeof(double), false), new("FloatProperty", typeof(float), false) });
+
+        public static readonly RelationInfo OneToOneRelationInfo = new("Fake", "OneToOneRelation");
+        public static readonly RelationInfo OneToManyRelationInfo = new("Fake", "OneToManyRelation");
+        public static readonly RelationInfo ManyToOneRelationInfo = new("Fake", "ManyToOneRelation");
+        public static readonly RelationInfo ManyToManyRelationInfo = new("Fake", "ManyToManyRelation");
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed partial class FakeModelShard : IFakeModelShard
     {
         public const string FirstCollectionId = "compilation.VisibilityImplementations.Fake.FirstCollection";
@@ -141,6 +156,20 @@ namespace compilation.VisibilityImplementations
         }
     }
 
+    public sealed partial class FakeModelShard : ICanBeSaved
+    {
+        public void Save(IRepository repository)
+        {
+            repository.Save(FakeModelShardInfo.FirstCollectionInfo, FirstCollection);
+            repository.Save(FakeModelShardInfo.SecondCollectionInfo, SecondCollection);
+
+            repository.Save(FakeModelShardInfo.OneToOneRelationInfo, OneToOneRelation);
+            repository.Save(FakeModelShardInfo.OneToManyRelationInfo, OneToManyRelation);
+            repository.Save(FakeModelShardInfo.ManyToOneRelationInfo, ManyToOneRelation);
+            repository.Save(FakeModelShardInfo.ManyToManyRelationInfo, ManyToManyRelation);
+        }
+    }
+
     public sealed partial class FakeModelShard : IFeatureContext
     {
         IChangesFrame IFeatureContext.GetOrAddFrame(IMutableModelChanges modelChanges)
@@ -166,7 +195,7 @@ namespace compilation.VisibilityImplementations
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx
+    public sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx, ICanBeSaved
     {
         public FakeChangesFrame()
         {
@@ -251,13 +280,25 @@ namespace compilation.VisibilityImplementations
                 ManyToManyRelation = ManyToManyRelation.Merge(typedFrame.ManyToManyRelation),
             };
         }
+
+        public void Save(IRepository repository)
+        {
+            repository.Save(FakeModelShardInfo.FirstCollectionInfo, FirstCollection);
+            repository.Save(FakeModelShardInfo.SecondCollectionInfo, SecondCollection);
+
+            repository.Save(FakeModelShardInfo.OneToOneRelationInfo, OneToOneRelation);
+            repository.Save(FakeModelShardInfo.OneToManyRelationInfo, OneToManyRelation);
+            repository.Save(FakeModelShardInfo.ManyToOneRelationInfo, ManyToOneRelation);
+            repository.Save(FakeModelShardInfo.ManyToManyRelationInfo, ManyToManyRelation);
+        }
+
     }
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
+    public sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>, ICanBeLoaded
     {
         public IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
         public IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;
@@ -271,60 +312,16 @@ namespace compilation.VisibilityImplementations
         {
             return new FakeModelShard(this);
         }
-    }
 
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
-    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed class FakeModelShardStorage : IModelShardStorage
-    {
-        public static readonly CollectionInfo FirstCollectionInfo = new("Fake", "FirstCollection", new PropertyInfo[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
-        public static readonly CollectionInfo SecondCollectionInfo = new("Fake", "SecondCollection", new PropertyInfo[] { new("IntProperty", typeof(int), false), new("BoolProperty", typeof(bool), false), new("DoubleProperty", typeof(double), false), new("FloatProperty", typeof(float), false) });
-
-        public static readonly RelationInfo OneToOneRelationInfo = new("Fake", "OneToOneRelation");
-        public static readonly RelationInfo OneToManyRelationInfo = new("Fake", "OneToManyRelation");
-        public static readonly RelationInfo ManyToOneRelationInfo = new("Fake", "ManyToOneRelation");
-        public static readonly RelationInfo ManyToManyRelationInfo = new("Fake", "ManyToManyRelation");
-
-        public void Update(IRepository repository, IModelChanges changes)
+        public void Load(IRepository repository)
         {
-            if (changes.TryGetFrame<IFakeChangesFrame>(out var frame))
-            {
-                repository.Update(FirstCollectionInfo, frame.FirstCollection);
-                repository.Update(SecondCollectionInfo, frame.SecondCollection);
+            repository.Load(FakeModelShardInfo.FirstCollectionInfo, FirstCollection);
+            repository.Load(FakeModelShardInfo.SecondCollectionInfo, SecondCollection);
 
-                repository.Update(OneToOneRelationInfo, frame.OneToOneRelation);
-                repository.Update(OneToManyRelationInfo, frame.OneToManyRelation);
-                repository.Update(ManyToOneRelationInfo, frame.ManyToOneRelation);
-                repository.Update(ManyToManyRelationInfo, frame.ManyToManyRelation);
-            }
-        }
-
-        public void Save(IRepository repository, IModel model)
-        {
-            var shard = model.Shard<IFakeModelShard>();
-
-            repository.Save(FirstCollectionInfo, shard.FirstCollection);
-            repository.Save(SecondCollectionInfo, shard.SecondCollection);
-
-            repository.Save(OneToOneRelationInfo, shard.OneToOneRelation);
-            repository.Save(OneToManyRelationInfo, shard.OneToManyRelation);
-            repository.Save(ManyToOneRelationInfo, shard.ManyToOneRelation);
-            repository.Save(ManyToManyRelationInfo, shard.ManyToManyRelation);
-        }
-
-        public void Load(IRepository repository, IModel model)
-        {
-            var shard = model.Shard<IMutableFakeModelShard>();
-
-            repository.Load(FirstCollectionInfo, shard.FirstCollection);
-            repository.Load(SecondCollectionInfo, shard.SecondCollection);
-
-            repository.Load(OneToOneRelationInfo, shard.OneToOneRelation, shard.FirstCollection, shard.SecondCollection);
-            repository.Load(OneToManyRelationInfo, shard.OneToManyRelation, shard.FirstCollection, shard.SecondCollection);
-            repository.Load(ManyToOneRelationInfo, shard.ManyToOneRelation, shard.FirstCollection, shard.SecondCollection);
-            repository.Load(ManyToManyRelationInfo, shard.ManyToManyRelation, shard.FirstCollection, shard.SecondCollection);
+            repository.Load(FakeModelShardInfo.OneToOneRelationInfo, OneToOneRelation, FirstCollection, SecondCollection);
+            repository.Load(FakeModelShardInfo.OneToManyRelationInfo, OneToManyRelation, FirstCollection, SecondCollection);
+            repository.Load(FakeModelShardInfo.ManyToOneRelationInfo, ManyToOneRelation, FirstCollection, SecondCollection);
+            repository.Load(FakeModelShardInfo.ManyToManyRelationInfo, ManyToManyRelation, FirstCollection, SecondCollection);
         }
     }
 

@@ -1,6 +1,4 @@
-﻿using CoreCraft.ChangesTracking;
-
-namespace CoreCraft.Persistence;
+﻿namespace CoreCraft.Persistence;
 
 /// <summary>
 ///     A top level storage for a whole model
@@ -16,8 +14,8 @@ public interface IStorage
     ///     Updates existing stored data by applying new changes to them
     /// </summary>
     /// <param name="path">A path to the file</param>
-    /// <param name="changes">A model changes happened since model creation or last save</param>
-    void Update(string path, IModelChanges changes);
+    /// <param name="modelChanges">A model shards' changes happened since model creation or last save</param>
+    void Update(string path, IEnumerable<ICanBeSaved> modelChanges);
 
     /// <summary>
     ///     Saves the whole model
@@ -26,8 +24,8 @@ public interface IStorage
     ///     Use this method to save model data to the empty storage (for example SQLite database)
     /// </remarks>
     /// <param name="path">A path to the file</param>
-    /// <param name="model">A model to store</param>
-    void Save(string path, IModel model);
+    /// <param name="modelShards">A collection of model shards to store</param>
+    void Save(string path, IEnumerable<ICanBeSaved> modelShards);
 
     /// <summary>
     ///     Loads all data to the model
@@ -37,6 +35,6 @@ public interface IStorage
     ///     that the application can react on loaded data
     /// </remarks>
     /// <param name="path">A path to the file</param>
-    /// <param name="model">A mutable model</param>
-    void Load(string path, IModel model);
+    /// <param name="modelShards">A collection of model shards which can be loaded</param>
+    void Load(string path, IEnumerable<ICanBeLoaded> modelShards);
 }

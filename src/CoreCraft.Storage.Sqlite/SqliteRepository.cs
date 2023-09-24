@@ -58,7 +58,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         command.ExecuteNonQuery();
     }
 
-    public void Update<TEntity, TProperties>(CollectionInfo scheme, ICollectionChangeSet<TEntity, TProperties> changes)
+    public void Save<TEntity, TProperties>(CollectionInfo scheme, ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -100,7 +100,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Update<TParent, TChild>(RelationInfo scheme, IRelationChangeSet<TParent, TChild> changes)
+    public void Save<TParent, TChild>(RelationInfo scheme, IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {

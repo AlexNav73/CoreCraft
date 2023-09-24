@@ -1,5 +1,4 @@
 ﻿using CoreCraft.ChangesTracking;
-using CoreCraft.Core;
 using CoreCraft.Persistence;
 using CoreCraft.Scheduling;
 
@@ -15,7 +14,7 @@ public class ModelSwapTests
 
         var task = model.Save(m =>
         {
-            var shard = m.Shard<IFakeModelShard>();
+            var shard = m.OfType<IFakeModelShard>().Single();
 
             Assert.That(shard.FirstCollection.Count, Is.EqualTo(0));
         });
@@ -44,7 +43,7 @@ class TestDomainModel : DomainModel
     {
     }
 
-    public Task Save(Action<IModel> assert)
+    public Task Save(Action<IEnumerable<ICanBeSaved>> assert)
     {
         return Save(new TestStorage(assert), "test.txt");
     }
@@ -52,24 +51,24 @@ class TestDomainModel : DomainModel
 
 class TestStorage : IStorage
 {
-    private readonly Action<IModel> _assert;
+    private readonly Action<IEnumerable<ICanBeSaved>> _assert;
 
-    public TestStorage(Action<IModel> assert)
+    public TestStorage(Action<IEnumerable<ICanBeSaved>> assert)
     {
         _assert = assert;
     }
 
-    public void Update(string path, IModelChanges changes)
+    public void Update(string path, IEnumerable<ICanBeSaved> modelChanges)
     {
         throw new NotImplementedException();
     }
 
-    public void Save(string path, IModel model)
+    public void Save(string path, IEnumerable<ICanBeSaved> modelShards)
     {
-        _assert(model);
+        _assert(modelShards);
     }
 
-    public void Load(string path, IModel model)
+    public void Load(string path, IEnumerable<ICanBeLoaded> modelShards)
     {
         throw new NotImplementedException();
     }

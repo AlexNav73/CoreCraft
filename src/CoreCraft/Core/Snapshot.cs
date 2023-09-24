@@ -1,6 +1,6 @@
 ﻿namespace CoreCraft.Core;
 
-internal sealed class Snapshot : IModel
+internal sealed class Snapshot : IModel, ISnapshot
 {
     private readonly Model _model;
     private readonly IEnumerable<IFeature> _features;

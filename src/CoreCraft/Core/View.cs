@@ -9,14 +9,9 @@ internal sealed class View
         _model = new Model(shards);
     }
 
-    public IModel UnsafeModel => _model;
+    public Model UnsafeModel => _model;
 
-    public Snapshot CreateSnapshot(IEnumerable<IFeature> features)
-    {
-        return new Snapshot(_model, features);
-    }
-
-    public ModelChangeResult ApplySnapshot(Snapshot snapshot)
+    public ModelChangeResult ApplySnapshot(ISnapshot snapshot)
     {
         var newModel = snapshot.ToModel();
         var oldModel = Interlocked.Exchange(ref _model, newModel);
