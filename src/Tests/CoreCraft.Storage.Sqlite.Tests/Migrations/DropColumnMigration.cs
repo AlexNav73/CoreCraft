@@ -16,6 +16,6 @@ internal sealed class DropColumnMigration : Migration
 
     public override void Migrate(IMigrator migrator)
     {
-        migrator.Table(_table).DropColumn(_column);
+        migrator.Table(NameOf(_table)).DropColumn(_column);
     }
 }

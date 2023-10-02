@@ -20,6 +20,6 @@ internal sealed class AddColumnMigration<T> : Migration
 
     public override void Migrate(IMigrator migrator)
     {
-        migrator.Table(_table).AddColumn(_column, _isNullable, _defaultValue);
+        migrator.Table(NameOf(_table)).AddColumn(_column, _isNullable, _defaultValue);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace CoreCraft.Storage.Sqlite.Migrations;
 
-internal sealed class TableOperations : ICollectionTableOperations
+internal sealed class TableOperations : ITableOperations
 {
     private readonly string _table;
     private readonly ISqliteRepository _repository;

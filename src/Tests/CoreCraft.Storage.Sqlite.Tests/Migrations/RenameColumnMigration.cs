@@ -18,6 +18,6 @@ internal sealed class RenameColumnMigration : Migration
 
     public override void Migrate(IMigrator migrator)
     {
-        migrator.Table(_table).RenameColumn(_oldName, _newName);
+        migrator.Table(NameOf(_table)).RenameColumn(_oldName, _newName);
     }
 }
