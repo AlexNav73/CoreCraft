@@ -6,6 +6,67 @@ namespace CoreCraft.Storage.Json.Tests;
 public class JsonRepositoryTests
 {
     [Test]
+    public void SaveCollectionWithItemsTest()
+    {
+        var entity1Id = Guid.NewGuid();
+        var entity2Id = Guid.NewGuid();
+        var value1 = "value1";
+        var value2 = "value2";
+
+        var collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new FirstEntity(id), () => new())
+        {
+            { new FirstEntity(entity1Id), new() { NullableStringProperty = value1 } },
+            { new FirstEntity(entity2Id), new() { NullableStringProperty = value2 } }
+        };
+
+        var shards = new List<ModelShard>();
+        var repository = new JsonRepository(shards);
+
+        repository.Save(FakeModelShardInfo.FirstCollectionInfo, collection);
+
+        Assert.That(shards.Count, Is.EqualTo(1));
+        Assert.That(shards.Single().Name, Is.EqualTo(FakeModelShardInfo.FirstCollectionInfo.ShardName));
+        Assert.That(shards.Single().Collections.Count, Is.EqualTo(1));
+        var jsonCollection = shards.Single().Collections.OfType<Collection<FirstEntityProperties>>().Single();
+        Assert.That(jsonCollection.Name, Is.EqualTo(FakeModelShardInfo.FirstCollectionInfo.Name));
+        Assert.That(jsonCollection.Items.Count, Is.EqualTo(2));
+        Assert.That(jsonCollection.Items.First().Id, Is.EqualTo(entity1Id));
+        Assert.That(jsonCollection.Items.First().Properties, Is.EqualTo(new FirstEntityProperties() { NullableStringProperty = value1 }));
+        Assert.That(jsonCollection.Items.Last().Id, Is.EqualTo(entity2Id));
+        Assert.That(jsonCollection.Items.Last().Properties, Is.EqualTo(new FirstEntityProperties() { NullableStringProperty = value2 }));
+    }
+
+    [Test]
+    public void SaveRelationWithItemsTest()
+    {
+        var entity1Id = Guid.NewGuid();
+        var entity2Id = Guid.NewGuid();
+        var entity3Id = Guid.NewGuid();
+        var entity4Id = Guid.NewGuid();
+
+        var shards = new List<ModelShard>();
+        var repository = new JsonRepository(shards);
+        var relation = new Relation<FirstEntity, SecondEntity>("", new OneToOne<FirstEntity, SecondEntity>(), new OneToOne<SecondEntity, FirstEntity>())
+        {
+            { new FirstEntity(entity1Id), new SecondEntity(entity2Id) },
+            { new FirstEntity(entity3Id), new SecondEntity(entity4Id) }
+        };
+
+        repository.Save(FakeModelShardInfo.OneToOneRelationInfo, relation);
+
+        Assert.That(shards.Count, Is.EqualTo(1));
+        Assert.That(shards.Single().Name, Is.EqualTo(FakeModelShardInfo.OneToOneRelationInfo.ShardName));
+        Assert.That(shards.Single().Relations.Count, Is.EqualTo(1));
+        var jsonRelation = shards.Single().Relations.Single();
+        Assert.That(jsonRelation.Name, Is.EqualTo(FakeModelShardInfo.OneToOneRelationInfo.Name));
+        Assert.That(jsonRelation.Pairs.Count, Is.EqualTo(2));
+        Assert.That(jsonRelation.Pairs.First().Parent, Is.EqualTo(entity1Id));
+        Assert.That(jsonRelation.Pairs.First().Child, Is.EqualTo(entity2Id));
+        Assert.That(jsonRelation.Pairs.Last().Parent, Is.EqualTo(entity3Id));
+        Assert.That(jsonRelation.Pairs.Last().Child, Is.EqualTo(entity4Id));
+    }
+
+    [Test]
     public void InsertForCollectionTest()
     {
         var entity1Id = Guid.NewGuid();

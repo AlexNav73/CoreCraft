@@ -1,7 +1,4 @@
-﻿using CoreCraft;
-using CoreCraft.ChangesTracking;
-using CoreCraft.Core;
-using CoreCraft.Persistence;
+﻿using CoreCraft.Persistence;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
 
@@ -9,6 +6,19 @@ namespace CoreCraft.Tests;
 
 public class UndoRedoDomainModelTests
 {
+    [Test]
+    public async Task DefaultSchedulerIsAsyncTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage);
+        var workerThread = -1;
+
+        await model.Run<IMutableFakeModelShard>((shard, _) => workerThread = Environment.CurrentManagedThreadId);
+
+        Assert.That(workerThread, Is.Not.EqualTo(-1));
+        Assert.That(workerThread, Is.Not.EqualTo(Environment.CurrentManagedThreadId));
+    }
+
     [Test]
     public async Task HasChangesTest()
     {
