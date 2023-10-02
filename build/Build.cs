@@ -143,7 +143,7 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded(0, 5, 5))
+                .SetVersion(MakePreviewIfNeeded(0, 5, 6))
                 .SetDescription("A core library to build cross-platform and highly customizable domain models")
                 .AddPackageTags("Model", "Domain"));
 

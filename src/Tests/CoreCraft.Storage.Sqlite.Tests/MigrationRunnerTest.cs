@@ -165,6 +165,45 @@ internal class MigrationRunnerTest
     }
 
     [Test]
+    public void RunFailsOnApplyingInvalidMigrationTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+        var runner = new MigrationRunner(new[] { new ColumnWithUnsupportedTypeMigration(FakeModelShardInfo.FirstCollectionInfo, "test") });
+
+        Assert.Throws<NotSupportedException>(() => runner.Run(repository));
+    }
+
+    [Test]
+    public void AddNonNullColumnWithEmptyDefaultValueMigrationTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+        var columnName = "NonNullWithEmptyDefault";
+        var runner = new MigrationRunner(new[]
+        {
+            new NonNullTypeWithEmptyDefaultValueMigration(FakeModelShardInfo.FirstCollectionInfo, columnName)
+        });
+
+        repository.Save(
+            FakeModelShardInfo.FirstCollectionInfo,
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+            {
+                { CollectionAction.Add, new(), null, new() }
+            });
+
+        var columns = repository.QueryTableColumns(FakeModelShardInfo.FirstCollectionInfo).ToArray();
+
+        Assert.That(columns.Any(x => x.Name == columnName), Is.False);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(0));
+
+        runner.Run(repository);
+
+        columns = repository.QueryTableColumns(FakeModelShardInfo.FirstCollectionInfo).ToArray();
+
+        Assert.That(columns.Any(x => x.Name == columnName), Is.True);
+        Assert.That(repository.GetDatabaseVersion(), Is.EqualTo(1));
+    }
+
+    [Test]
     public void ExecuteRawSqlTest()
     {
         var table = new CollectionInfo("Test", "TestCollection");

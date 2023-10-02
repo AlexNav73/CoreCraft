@@ -7,6 +7,13 @@ namespace CoreCraft.Tests;
 public class UndoRedoDomainModelTests
 {
     [Test]
+    public void ConstructorDoesNotThrowTest()
+    {
+        var storage = A.Fake<IStorage>();
+        Assert.DoesNotThrow(() => new UndoRedoDomainModel(new[] { new FakeModelShard() }, storage));
+    }
+
+    [Test]
     [Ignore("In CI, worker thread has the same ID as test thread")]
     public async Task DefaultSchedulerIsAsyncTest()
     {
