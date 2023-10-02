@@ -1,6 +1,4 @@
-﻿using CoreCraft.Core;
-
-namespace CoreCraft.Storage.Sqlite.Migrations;
+﻿namespace CoreCraft.Storage.Sqlite.Migrations;
 
 internal class SqliteMigrator : IMigrator
 {
@@ -11,14 +9,9 @@ internal class SqliteMigrator : IMigrator
         _repository = repository;
     }
 
-    public ICollectionTableOperations Table(CollectionInfo collection)
+    public ITableOperations Table(string name)
     {
-        return new TableOperations(QueryBuilder.InferName(collection), _repository);
-    }
-
-    public ITableOperations Table(RelationInfo relation)
-    {
-        return new TableOperations(QueryBuilder.InferName(relation), _repository);
+        return new TableOperations(name, _repository);
 
     }
 

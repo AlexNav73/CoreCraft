@@ -14,6 +14,6 @@ internal sealed class DropCollectionTableMigration : Migration
 
     public override void Migrate(IMigrator migrator)
     {
-        migrator.Table(_table).Drop();
+        migrator.Table(NameOf(_table)).Drop();
     }
 }

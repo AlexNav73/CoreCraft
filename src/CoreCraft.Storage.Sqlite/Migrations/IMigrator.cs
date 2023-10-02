@@ -1,6 +1,4 @@
-﻿using CoreCraft.Core;
-
-namespace CoreCraft.Storage.Sqlite.Migrations;
+﻿namespace CoreCraft.Storage.Sqlite.Migrations;
 
 /// <summary>
 ///     An abstraction over the most common database operations
@@ -8,18 +6,11 @@ namespace CoreCraft.Storage.Sqlite.Migrations;
 public interface IMigrator
 {
     /// <summary>
-    ///     Gets table operations for the specified collection.
-    /// </summary>
-    /// <param name="collection">The collection information for which table operations are needed.</param>
-    /// <returns>An instance of table operations for the specified collection.</returns>
-    ICollectionTableOperations Table(CollectionInfo collection);
-
-    /// <summary>
     ///     Gets table operations for the specified relation.
     /// </summary>
-    /// <param name="relation">The relation information for which table operations are needed.</param>
+    /// <param name="name">The table name for which operations are needed.</param>
     /// <returns>An instance of table operations for the specified relation.</returns>
-    ITableOperations Table(RelationInfo relation);
+    ITableOperations Table(string name);
 
     /// <summary>
     ///     Executes raw SQL commands on the database.
