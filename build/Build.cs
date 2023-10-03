@@ -130,41 +130,31 @@ internal partial class Build : NukeBuild
         {
             PackagesDirectory.CreateOrCleanDirectory();
 
-            string MakePreviewIfNeeded(int major, int minor, int build)
-            {
-                if (GitRepository.IsOnMasterBranch())
-                {
-                    return $"{major}.{minor}.0";
-                }
-
-                return $"{major}.{minor}.{build}-preview";
-            }
-
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded(0, 5, 6))
+                .SetVersion(MakePreviewIfNeeded("0.6.0", "0.5.6"))
                 .SetDescription("A core library to build cross-platform and highly customizable domain models")
                 .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Generators)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded(0, 5, 6))
+                .SetVersion(MakePreviewIfNeeded("0.6.0", "0.5.6"))
                 .SetDescription("Roslyn Source Generators for generating domain models using 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Sqlite)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded(0, 5, 6))
+                .SetVersion(MakePreviewIfNeeded("0.6.0", "0.5.6"))
                 .SetDescription("SQLite storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SQLite"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Json)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded(0, 2, 2))
+                .SetVersion(MakePreviewIfNeeded("0.3.0", "0.2.2"))
                 .SetDescription("Json storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "Json"));
 
@@ -182,6 +172,16 @@ internal partial class Build : NukeBuild
                 .SetOutputDirectory(PackagesDirectory)
                 .SetRepositoryType("git")
                 .EnablePackageRequireLicenseAcceptance();
+
+            string MakePreviewIfNeeded(string masterVersion, string previewVersion)
+            {
+                if (GitRepository.IsOnMasterBranch())
+                {
+                    return masterVersion;
+                }
+
+                return $"{previewVersion}-preview";
+            }
         });
 
     Target Publish => _ => _
