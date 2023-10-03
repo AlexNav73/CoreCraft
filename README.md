@@ -116,9 +116,7 @@ model.Run<IMutableToDoModelShard>(
 Save the domain model to an SQLite database file.
 
 ```cs
-var storage = new SqliteStorage(
-    Array.Empty<IMigration>(),
-    new[] { new ToDoModelShardStorage() });
+var storage = new SqliteStorage(Array.Empty<IMigration>());
 
 model.Save(storage, "my_data.db");
 ```
