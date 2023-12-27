@@ -1,5 +1,4 @@
-﻿using CoreCraft.ChangesTracking;
-using CoreCraft.Persistence;
+﻿using CoreCraft.Persistence;
 using CoreCraft.Scheduling;
 
 namespace CoreCraft.Tests;
@@ -45,7 +44,7 @@ class TestDomainModel : DomainModel
 
     public Task Save(Action<IEnumerable<ICanBeSaved>> assert)
     {
-        return Save(new TestStorage(assert), "test.txt");
+        return Save(new TestStorage(assert));
     }
 }
 
@@ -58,17 +57,17 @@ class TestStorage : IStorage
         _assert = assert;
     }
 
-    public void Update(string path, IEnumerable<ICanBeSaved> modelChanges)
+    public void Update(IEnumerable<ICanBeSaved> modelChanges)
     {
         throw new NotImplementedException();
     }
 
-    public void Save(string path, IEnumerable<ICanBeSaved> modelShards)
+    public void Save(IEnumerable<ICanBeSaved> modelShards)
     {
         _assert(modelShards);
     }
 
-    public void Load(string path, IEnumerable<ICanBeLoaded> modelShards)
+    public void Load(IEnumerable<ICanBeLoaded> modelShards)
     {
         throw new NotImplementedException();
     }

@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
 
 namespace CoreCraft.Exceptions;
 
@@ -33,14 +32,6 @@ public class InvalidChangeSequenceException : Exception
     {
         PreviousChange = previousChange;
         NextChange = nextChange;
-    }
-
-    /// <inheritdoc />
-    protected InvalidChangeSequenceException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-        PreviousChange = null!;
-        NextChange = null!;
     }
 
     /// <summary>

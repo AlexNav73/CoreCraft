@@ -9,7 +9,7 @@ public class JsonStorageTests
     [Test]
     public void CtorTest()
     {
-        Assert.DoesNotThrow(() => new JsonStorage());
+        Assert.DoesNotThrow(() => new JsonStorage("test.json"));
     }
 
     [Test]
@@ -17,12 +17,12 @@ public class JsonStorageTests
     {
         var change = A.Fake<ICanBeSaved>();
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
-        var storage = new JsonStorage(jsonFileHandler);
+        var storage = new JsonStorage("test.json", jsonFileHandler);
 
         A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .Returns(new List<ModelShard>());
 
-        storage.Update("", new[] { change });
+        storage.Update(new[] { change });
 
         A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -37,9 +37,9 @@ public class JsonStorageTests
     {
         var change = A.Fake<ICanBeSaved>();
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
-        var storage = new JsonStorage(jsonFileHandler);
+        var storage = new JsonStorage("test.json", jsonFileHandler);
 
-        storage.Save("", new[] { change });
+        storage.Save(new[] { change });
 
         A.CallTo(() => change.Save(A<IRepository>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -52,9 +52,9 @@ public class JsonStorageTests
     {
         var loadable = A.Fake<ICanBeLoaded>();
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
-        var storage = new JsonStorage(jsonFileHandler);
+        var storage = new JsonStorage("test.json", jsonFileHandler);
 
-        storage.Load("", new[] { loadable });
+        storage.Load(new[] { loadable });
 
         A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();

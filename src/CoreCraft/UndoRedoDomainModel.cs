@@ -10,7 +10,6 @@ namespace CoreCraft;
 /// </summary>
 public class UndoRedoDomainModel : DomainModel
 {
-    private readonly IStorage _storage;
     private readonly Stack<IModelChanges> _undoStack;
     private readonly Stack<IModelChanges> _redoStack;
 
@@ -18,9 +17,8 @@ public class UndoRedoDomainModel : DomainModel
     ///     Ctor
     /// </summary>
     public UndoRedoDomainModel(
-        IEnumerable<IModelShard> modelShards,
-        IStorage storage)
-        : this(modelShards, storage, new AsyncScheduler())
+        IEnumerable<IModelShard> modelShards)
+        : this(modelShards, new AsyncScheduler())
     {
     }
 
@@ -29,11 +27,9 @@ public class UndoRedoDomainModel : DomainModel
     /// </summary>
     public UndoRedoDomainModel(
         IEnumerable<IModelShard> modelShards,
-        IStorage storage,
         IScheduler scheduler)
         : base(modelShards, scheduler)
     {
-        _storage = storage;
         _undoStack = new Stack<IModelChanges>();
         _redoStack = new Stack<IModelChanges>();
     }
@@ -56,14 +52,14 @@ public class UndoRedoDomainModel : DomainModel
     /// <summary>
     ///     Saves changes happened since the last save operation
     /// </summary>
-    /// <param name="path">A path to file</param>
-    public async Task Save(string path)
+    /// <param name="storage">A storage where a model will be saved</param>
+    public async Task Save(IStorage storage)
     {
         var changes = _undoStack.Reverse().ToArray();
 
         if (changes.Any())
         {
-            await Save(_storage, path, changes);
+            await Save(storage, changes);
 
             // TODO(#8): saving operation executes in thread pool
             // and launched by 'async void' methods. If two
@@ -81,10 +77,9 @@ public class UndoRedoDomainModel : DomainModel
     ///     Saves model as a whole (if the data should be stored from the scratch)
     /// </summary>
     /// <param name="storage">A storage where a model will be saved</param>
-    /// <param name="path">A path to a file</param>
-    public async Task SaveAs(string path, IStorage? storage = null)
+    public async Task SaveAs(IStorage storage)
     {
-        await Save(storage ?? _storage, path);
+        await base.Save(storage);
 
         // TODO(#8): saving operation executes in thread pool
         // and launched by 'async void' methods. If two
@@ -95,16 +90,6 @@ public class UndoRedoDomainModel : DomainModel
         _redoStack.Clear();
 
         Changed?.Invoke(this, EventArgs.Empty);
-    }
-
-    /// <summary>
-    ///     Loads the model
-    /// </summary>
-    /// <param name="storage">A storage from which a model will be loaded</param>
-    /// <param name="path">A path to a file</param>
-    public async Task Load(string path, IStorage? storage = null)
-    {
-        await Load(storage ?? _storage, path);
     }
 
     /// <summary>

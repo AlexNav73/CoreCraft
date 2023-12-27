@@ -30,9 +30,9 @@ public class SqliteStorageTests
         A.CallTo(() => change.Save(A<IRepository>.Ignored)).Throws<InvalidOperationException>();
         var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
-        var storage = new SqliteStorage(Array.Empty<IMigration>(), _factory!);
+        var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
 
-        Assert.Throws<InvalidOperationException>(() => storage.Update("", new[] { change }));
+        Assert.Throws<InvalidOperationException>(() => storage.Update(new[] { change }));
 
         A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _transaction!.Commit()).MustNotHaveHappened();
@@ -43,20 +43,20 @@ public class SqliteStorageTests
     public void UpdateIsCalledOnModelShardStorageTest()
     {
         var change = A.Fake<ICanBeSaved>();
-        var storage = new SqliteStorage(Array.Empty<IMigration>(), _factory!);
+        var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
         var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
-        storage.Update("", new[] { change });
+        storage.Update(new[] { change });
 
         A.CallTo(() => change.Save(A<IRepository>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Test]
-    public void SaveTransactionCreatedSuccessfullyAndCommitedTest()
+    public void SaveTransactionCreatedSuccessfullyAndCommittedTest()
     {
-        var storage = new SqliteStorage(Array.Empty<IMigration>(), _factory!);
+        var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
 
-        storage.Save("", A.Fake<IEnumerable<ICanBeSaved>>());
+        storage.Save(A.Fake<IEnumerable<ICanBeSaved>>());
 
         A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _transaction!.Commit()).MustHaveHappenedOnceExactly();
@@ -69,9 +69,9 @@ public class SqliteStorageTests
         var shard = A.Fake<ICanBeSaved>();
         A.CallTo(() => shard.Save(A<IRepository>.Ignored)).Throws<InvalidOperationException>();
 
-        var storage = new SqliteStorage(Array.Empty<IMigration>(), _factory!);
+        var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
 
-        Assert.Throws<InvalidOperationException>(() => storage.Save("", new[] { shard }));
+        Assert.Throws<InvalidOperationException>(() => storage.Save(new[] { shard }));
 
         A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _transaction!.Commit()).MustNotHaveHappened();
@@ -82,9 +82,9 @@ public class SqliteStorageTests
     public void SaveIsCalledOnModelShardStorageTest()
     {
         var shard = A.Fake<ICanBeSaved>();
-        var storage = new SqliteStorage(Array.Empty<IMigration>(), _factory!);
+        var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
 
-        storage.Save("", new[] { shard });
+        storage.Save(new[] { shard });
 
         A.CallTo(() => shard.Save(A<IRepository>.Ignored)).MustHaveHappenedOnceExactly();
     }
@@ -97,9 +97,9 @@ public class SqliteStorageTests
         var migration2 = A.Fake<IMigration>();
         A.CallTo(() => migration1.Version).Returns(1);
         A.CallTo(() => migration2.Version).Returns(2);
-        var storage = new SqliteStorage(new[] { migration1, migration2 }, _factory!);
+        var storage = new SqliteStorage("", new[] { migration1, migration2 }, _factory!);
 
-        storage.Save("", new[] { shard });
+        storage.Save(new[] { shard });
 
         A.CallTo(() => _repo!.SetDatabaseVersion(2))
             .MustHaveHappenedOnceExactly();
@@ -115,9 +115,9 @@ public class SqliteStorageTests
         var migration2 = A.Fake<IMigration>();
         A.CallTo(() => migration1.Version).Returns(1);
         A.CallTo(() => migration2.Version).Returns(2);
-        var storage = new SqliteStorage(new[] { migration1, migration2 }, _factory!);
+        var storage = new SqliteStorage("", new[] { migration1, migration2 }, _factory!);
 
-        storage.Load("", new[] { shard });
+        storage.Load(new[] { shard });
 
         A.CallTo(() => _repo!.GetDatabaseVersion()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _repo!.SetDatabaseVersion(1)).MustHaveHappenedOnceExactly();

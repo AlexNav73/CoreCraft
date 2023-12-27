@@ -9,34 +9,38 @@ namespace CoreCraft.Storage.Sqlite;
 /// </summary>
 public sealed class SqliteStorage : IStorage
 {
+    private readonly string _path;
     private readonly MigrationRunner _migrationRunner;
     private readonly ISqliteRepositoryFactory _sqliteRepositoryFactory;
-    private readonly Action<string>? _logginAction;
+    private readonly Action<string>? _loggingAction;
 
     /// <summary>
     ///     Ctor
     /// </summary>
     public SqliteStorage(
+        string path,
         IEnumerable<IMigration> migrations,
-        Action<string>? logginAction = null)
-        : this(migrations, new SqliteRepositoryFactory(), logginAction)
+        Action<string>? loggingAction = null)
+        : this(path, migrations, new SqliteRepositoryFactory(), loggingAction)
     {
     }
 
     internal SqliteStorage(
+        string path,
         IEnumerable<IMigration> migrations,
         ISqliteRepositoryFactory sqliteRepositoryFactory,
-        Action<string>? logginAction = null)
+        Action<string>? loggingAction = null)
     {
+        _path = path;
         _migrationRunner = new MigrationRunner(migrations);
         _sqliteRepositoryFactory = sqliteRepositoryFactory;
-        _logginAction = logginAction;
+        _loggingAction = loggingAction;
     }
 
-    /// <inheritdoc cref="IStorage.Update(string, IEnumerable{ICanBeSaved})"/>
-    public void Update(string path, IEnumerable<ICanBeSaved> modelChanges)
+    /// <inheritdoc cref="IStorage.Update(IEnumerable{ICanBeSaved})"/>
+    public void Update(IEnumerable<ICanBeSaved> modelChanges)
     {
-        Transaction(path, repository =>
+        Transaction(_path, repository =>
         {
             foreach (var change in modelChanges)
             {
@@ -45,10 +49,10 @@ public sealed class SqliteStorage : IStorage
         });
     }
 
-    /// <inheritdoc cref="IStorage.Save(string, IEnumerable{ICanBeSaved})"/>
-    public void Save(string path, IEnumerable<ICanBeSaved> modelShards)
+    /// <inheritdoc cref="IStorage.Save(IEnumerable{ICanBeSaved})"/>
+    public void Save(IEnumerable<ICanBeSaved> modelShards)
     {
-        Transaction(path, repository =>
+        Transaction(_path, repository =>
         {
             _migrationRunner.UpdateDatabaseVersion(repository);
 
@@ -59,10 +63,10 @@ public sealed class SqliteStorage : IStorage
         });
     }
 
-    /// <inheritdoc cref="IStorage.Load(string, IEnumerable{ICanBeLoaded})"/>
-    public void Load(string path, IEnumerable<ICanBeLoaded> modelShards)
+    /// <inheritdoc cref="IStorage.Load(IEnumerable{ICanBeLoaded})"/>
+    public void Load(IEnumerable<ICanBeLoaded> modelShards)
     {
-        using var repository = _sqliteRepositoryFactory.Create(path, _logginAction);
+        using var repository = _sqliteRepositoryFactory.Create(_path, _loggingAction);
 
         _migrationRunner.Run(repository);
 
@@ -79,7 +83,7 @@ public sealed class SqliteStorage : IStorage
 
         try
         {
-            repository = _sqliteRepositoryFactory.Create(path, _logginAction);
+            repository = _sqliteRepositoryFactory.Create(path, _loggingAction);
             transaction = repository.BeginTransaction();
 
             action(repository);
@@ -89,8 +93,8 @@ public sealed class SqliteStorage : IStorage
         catch (Exception ex)
         {
             transaction?.Rollback();
-            _logginAction?.Invoke($"Exception was thrown with message: {ex.Message}");
-            _logginAction?.Invoke($"Stack trace: {ex.StackTrace}");
+            _loggingAction?.Invoke($"Exception was thrown with message: {ex.Message}");
+            _loggingAction?.Invoke($"Stack trace: {ex.StackTrace}");
             throw;
         }
         finally
