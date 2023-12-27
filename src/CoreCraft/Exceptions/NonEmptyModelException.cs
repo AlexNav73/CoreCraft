@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
 
 namespace CoreCraft.Exceptions;
 
@@ -32,12 +31,6 @@ public class NonEmptyModelException : Exception
     /// <inheritdoc />
     public NonEmptyModelException(string message, Exception innerException)
         : base(message, innerException)
-    {
-    }
-
-    /// <inheritdoc />
-    protected NonEmptyModelException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
     {
     }
 }

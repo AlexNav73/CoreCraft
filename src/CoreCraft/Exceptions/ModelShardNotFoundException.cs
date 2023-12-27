@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
 
 namespace CoreCraft.Exceptions;
 
@@ -25,12 +24,6 @@ public class ModelShardNotFoundException : Exception
     /// <inheritdoc />
     public ModelShardNotFoundException(string? message, Exception? innerException)
         : base(message, innerException)
-    {
-    }
-
-    /// <inheritdoc />
-    protected ModelShardNotFoundException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
     {
     }
 }

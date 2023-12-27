@@ -18,6 +18,7 @@ class Program
         }
 
         var storage = new SqliteStorage(
+            Path,
             Array.Empty<IMigration>(),
             Console.WriteLine);
         var model = new DomainModel(new[] { new ExampleModelShard() });
@@ -60,14 +61,14 @@ class Program
         }
 
         Console.WriteLine("======================== Saving ========================");
-        await model.Save(storage, Path);
+        await model.Save(storage);
 
         model = new DomainModel(new[] { new ExampleModelShard() });
         using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
             Console.WriteLine("======================== Loading ========================");
 
-            await model.Load(storage, Path);
+            await model.Load(storage);
         }
     }
 

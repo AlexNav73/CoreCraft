@@ -113,10 +113,9 @@ public class DomainModel : IDomainModel
     ///     Saves a model as a whole when storage is empty
     /// </summary>
     /// <param name="storage">A storage</param>
-    /// <param name="path">A path to a file</param>
     /// <param name="token">Cancellation token</param>
     /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
-    public Task Save(IStorage storage, string path, CancellationToken token = default)
+    public Task Save(IStorage storage, CancellationToken token = default)
     {
         // Store a references to model shards before start saving task. It is safe to use UnsafeModel here
         // because we are storing model shards objects in the RunParallel delegate, but not the reference to the
@@ -128,7 +127,36 @@ public class DomainModel : IDomainModel
 
         try
         {
-            return _scheduler.RunParallel(() => storage.Save(path, model), token);
+            return _scheduler.RunParallel(() => storage.Save(model), token);
+        }
+        catch (Exception ex)
+        {
+            throw new ModelSaveException("Model save has failed", ex);
+        }
+    }
+
+    /// <summary>
+    ///     Saves a list of model changes
+    /// </summary>
+    /// <param name="storage">A storage to write</param>
+    /// <param name="changes">A list of changes</param>
+    /// <param name="token">Cancellation token</param>
+    /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
+    protected Task Save(IStorage storage, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
+    {
+        try
+        {
+            if (changes.Count > 0)
+            {
+                var merged = MergeChanges(changes);
+
+                if (merged.HasChanges())
+                {
+                    return _scheduler.RunParallel(() => storage.Update(merged.OfType<ICanBeSaved>()), token);
+                }
+            }
+
+            return Task.CompletedTask;
         }
         catch (Exception ex)
         {
@@ -140,17 +168,16 @@ public class DomainModel : IDomainModel
     ///     Loads a model
     /// </summary>
     /// <param name="storage">A storage</param>
-    /// <param name="path">A path to a file</param>
     /// <param name="token">Cancellation token</param>
     /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model</exception>
-    public async Task Load(IStorage storage, string path, CancellationToken token = default)
+    public async Task Load(IStorage storage, CancellationToken token = default)
     {
         var changes = new ModelChanges();
         var snapshot = new LoadSnapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
 
         try
         {
-            await _scheduler.Enqueue(() => storage.Load(path, snapshot), token);
+            await _scheduler.Enqueue(() => storage.Load(snapshot), token);
         }
         catch (Exception ex)
         {
@@ -163,36 +190,6 @@ public class DomainModel : IDomainModel
             var eventArgs = CreateChangeObject(result, changes);
 
             NotifySubscriptions(eventArgs);
-        }
-    }
-
-    /// <summary>
-    ///     Saves a list of model changes
-    /// </summary>
-    /// <param name="storage">A storage to write</param>
-    /// <param name="path">A path of a file</param>
-    /// <param name="changes">A list of changes</param>
-    /// <param name="token">Cancellation token</param>
-    /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
-    protected Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
-    {
-        try
-        {
-            if (changes.Count > 0)
-            {
-                var merged = MergeChanges(changes);
-
-                if (merged.HasChanges())
-                {
-                    return _scheduler.RunParallel(() => storage.Update(path, merged.OfType<ICanBeSaved>()), token);
-                }
-            }
-
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            throw new ModelSaveException("Model save has failed", ex);
         }
     }
 

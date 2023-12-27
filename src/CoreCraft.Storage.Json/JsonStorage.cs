@@ -9,29 +9,32 @@ namespace CoreCraft.Storage.Json;
 /// </summary>
 public sealed class JsonStorage : IStorage
 {
+    private readonly string _path;
     private readonly JsonSerializerSettings? _settings;
     private readonly IJsonFileHandler _jsonFileHandler;
 
     /// <summary>
     ///     Ctor
     /// </summary>
-    public JsonStorage(JsonSerializerSettings? options = null)
-        : this(new JsonFileHandler(), options)
+    public JsonStorage(string path, JsonSerializerSettings? options = null)
+        : this(path, new JsonFileHandler(), options)
     {
     }
 
     internal JsonStorage(
+        string path,
         IJsonFileHandler jsonFileHandler,
         JsonSerializerSettings? options = null)
     {
+        _path = path;
         _jsonFileHandler = jsonFileHandler;
         _settings = options;
     }
 
     /// <inheritdoc/>
-    public void Update(string path, IEnumerable<ICanBeSaved> modelChanges)
+    public void Update(IEnumerable<ICanBeSaved> modelChanges)
     {
-        var shards = _jsonFileHandler.ReadModelShardsFromFile(path, _settings);
+        var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
         var repository = new JsonRepository(shards);
 
         foreach (var change in modelChanges)
@@ -39,11 +42,11 @@ public sealed class JsonStorage : IStorage
             change.Save(repository);
         }
 
-        _jsonFileHandler.WriteModelShardsToFile(path, shards, _settings);
+        _jsonFileHandler.WriteModelShardsToFile(_path, shards, _settings);
     }
 
     /// <inheritdoc/>
-    public void Save(string path, IEnumerable<ICanBeSaved> modelShards)
+    public void Save(IEnumerable<ICanBeSaved> modelShards)
     {
         var shards = new List<ModelShard>();
         var repository = new JsonRepository(shards);
@@ -53,13 +56,13 @@ public sealed class JsonStorage : IStorage
             shard.Save(repository);
         }
 
-        _jsonFileHandler.WriteModelShardsToFile(path, shards, _settings);
+        _jsonFileHandler.WriteModelShardsToFile(_path, shards, _settings);
     }
 
     /// <inheritdoc/>
-    public void Load(string path, IEnumerable<ICanBeLoaded> modelShards)
+    public void Load(IEnumerable<ICanBeLoaded> modelShards)
     {
-        var shards = _jsonFileHandler.ReadModelShardsFromFile(path, _settings);
+        var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
 
         var repository = new JsonRepository(shards);
 

@@ -6,6 +6,8 @@ using CoreCraft.Persistence;
 using CoreCraft.Storage.Sqlite;
 using System.Collections.Generic;
 using WpfDemoApp.Model;
+using System;
+using CoreCraft.Storage.Sqlite.Migrations;
 
 namespace WpfDemoApp;
 
@@ -20,11 +22,16 @@ public partial class MainWindow : MetroWindow
 
         var builder = new ContainerBuilder();
 
-        builder.RegisterType<SqliteStorage>().As<IStorage>();
+        builder.Register<Func<string, IStorage>>(c =>
+        {
+            return path =>
+            {
+                return new SqliteStorage(path, c.Resolve<IEnumerable<IMigration>>());
+            };
+        });
         builder.RegisterType<ToDoModelShard>().As<IModelShard>();
         builder.Register(c => new UndoRedoDomainModel(
-            c.Resolve<IEnumerable<IModelShard>>(),
-            c.Resolve<IStorage>()));
+            c.Resolve<IEnumerable<IModelShard>>()));
         builder.RegisterType<MainWindowViewModel>().AsSelf();
 
         var container = builder.Build();
