@@ -22,7 +22,6 @@ public class ModelShardStorageTests
         shard.Save(_repository!);
 
         A.CallTo(() => _repository!.Save(
-            A<CollectionInfo>.Ignored,
             A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
@@ -35,7 +34,6 @@ public class ModelShardStorageTests
         shard.Save(_repository!);
 
         A.CallTo(() => _repository!.Save(
-            A<RelationInfo>.Ignored,
             A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
             .MustHaveHappened(4, Times.Exactly);
     }
@@ -48,7 +46,6 @@ public class ModelShardStorageTests
         shard.Save(_repository!);
 
         A.CallTo(() => _repository!.Save(
-            A<CollectionInfo>.Ignored,
             A<ICollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
@@ -61,7 +58,6 @@ public class ModelShardStorageTests
         shard.Save(_repository!);
 
         A.CallTo(() => _repository!.Save(
-            A<RelationInfo>.Ignored,
             A<IRelation<FirstEntity, SecondEntity>>.Ignored))
             .MustHaveHappened(4, Times.Exactly);
     }
@@ -74,7 +70,6 @@ public class ModelShardStorageTests
         storage.Load(_repository!);
 
         A.CallTo(() => _repository!.Load(
-            A<CollectionInfo>.Ignored,
             A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
@@ -87,7 +82,6 @@ public class ModelShardStorageTests
         storage.Load(_repository!);
 
         A.CallTo(() => _repository!.Load(
-            A<RelationInfo>.Ignored,
             A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored,
             A<IEnumerable<FirstEntity>>.Ignored,
             A<IEnumerable<SecondEntity>>.Ignored))

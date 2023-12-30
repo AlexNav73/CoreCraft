@@ -58,7 +58,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         command.ExecuteNonQuery();
     }
 
-    public void Save<TEntity, TProperties>(CollectionInfo scheme, ICollectionChangeSet<TEntity, TProperties> changes)
+    public void Save<TEntity, TProperties>(ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -67,14 +67,14 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             return;
         }
 
-        if (!Exists(scheme))
+        if (!Exists(changes.Info))
         {
-            ExecuteNonQuery(Collections.CreateTable(scheme));
+            ExecuteNonQuery(Collections.CreateTable(changes.Info));
         }
 
         var updateCommandCache = new Dictionary<int, SqliteCommand>();
-        using var insertCommand = CreateCommand(Collections.Insert(scheme), scheme.Properties);
-        using var deleteCommand = CreateCollectionDeleteCommand(scheme);
+        using var insertCommand = CreateCommand(Collections.Insert(changes.Info), changes.Info.Properties);
+        using var deleteCommand = CreateCollectionDeleteCommand(changes.Info);
 
         foreach (var change in changes)
         {
@@ -85,7 +85,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
                     break;
 
                 case CollectionAction.Modify:
-                    Update(scheme, change, updateCommandCache);
+                    Update(changes.Info, change, updateCommandCache);
                     break;
 
                 case CollectionAction.Remove:
@@ -100,7 +100,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Save<TParent, TChild>(RelationInfo scheme, IRelationChangeSet<TParent, TChild> changes)
+    public void Save<TParent, TChild>(IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
@@ -109,13 +109,13 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             return;
         }
 
-        if (!Exists(scheme))
+        if (!Exists(changes.Info))
         {
-            ExecuteNonQuery(Relations.CreateTable(scheme));
+            ExecuteNonQuery(Relations.CreateTable(changes.Info));
         }
 
-        using var insertCommand = CreateRelationCommand(Relations.Insert(scheme));
-        using var deleteCommand = CreateRelationCommand(Relations.Delete(scheme));
+        using var insertCommand = CreateRelationCommand(Relations.Insert(changes.Info));
+        using var deleteCommand = CreateRelationCommand(Relations.Delete(changes.Info));
 
         foreach (var change in changes)
         {
@@ -131,7 +131,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Save<TEntity, TProperties>(CollectionInfo scheme, ICollection<TEntity, TProperties> collection)
+    public void Save<TEntity, TProperties>(ICollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -140,12 +140,12 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             return;
         }
 
-        if (!Exists(scheme))
+        if (!Exists(collection.Info))
         {
-            ExecuteNonQuery(Collections.CreateTable(scheme));
+            ExecuteNonQuery(Collections.CreateTable(collection.Info));
         }
 
-        using var insertCommand = CreateCommand(Collections.Insert(scheme), scheme.Properties);
+        using var insertCommand = CreateCommand(Collections.Insert(collection.Info), collection.Info.Properties);
 
         foreach (var (entity, properties) in collection.Pairs())
         {
@@ -153,7 +153,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Save<TParent, TChild>(RelationInfo scheme, IRelation<TParent, TChild> relation)
+    public void Save<TParent, TChild>(IRelation<TParent, TChild> relation)
         where TParent : Entity
         where TChild : Entity
     {
@@ -162,12 +162,12 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             return;
         }
 
-        if (!Exists(scheme))
+        if (!Exists(relation.Info))
         {
-            ExecuteNonQuery(Relations.CreateTable(scheme));
+            ExecuteNonQuery(Relations.CreateTable(relation.Info));
         }
 
-        using var insertCommand = CreateRelationCommand(Relations.Insert(scheme));
+        using var insertCommand = CreateRelationCommand(Relations.Insert(relation.Info));
 
         foreach (var parent in relation)
         {
@@ -178,21 +178,21 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Load<TEntity, TProperties>(CollectionInfo scheme, IMutableCollection<TEntity, TProperties> collection)
+    public void Load<TEntity, TProperties>(IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
         if (collection.Count != 0)
         {
-            throw new NonEmptyModelException($"The [{scheme.ShardName}.{scheme.Name}] is not empty. Clear or recreate the model before loading data");
+            throw new NonEmptyModelException($"The [{collection.Info.ShardName}.{collection.Info.Name}] is not empty. Clear or recreate the model before loading data");
         }
 
-        if (!Exists(scheme))
+        if (!Exists(collection.Info))
         {
             return;
         }
 
-        using var command = CreateCommand(Collections.Select(scheme));
+        using var command = CreateCommand(Collections.Select(collection.Info));
 
         Log(command);
 
@@ -202,31 +202,31 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             var bag = new PropertiesBag();
             var id = reader.GetGuid(0);
 
-            for (var i = 0; i < scheme.Properties.Count; i++)
+            for (var i = 0; i < collection.Info.Properties.Count; i++)
             {
-                bag.Write(scheme.Properties[i].Name, Convert.ChangeType(reader.GetValue(i + 1), scheme.Properties[i].Type));
+                bag.Write(collection.Info.Properties[i].Name, Convert.ChangeType(reader.GetValue(i + 1), collection.Info.Properties[i].Type));
             }
 
             collection.Add(id, p => (TProperties)p.ReadFrom(bag));
         }
     }
 
-    public void Load<TParent, TChild>(RelationInfo scheme, IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parents, IEnumerable<TChild> children)
+    public void Load<TParent, TChild>(IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parents, IEnumerable<TChild> children)
         where TParent : Entity
         where TChild : Entity
     {
         if (relation.Any())
         {
-            throw new NonEmptyModelException($"The [{scheme.ShardName}.{scheme.Name}] is not empty. Clear or recreate the model before loading data");
+            throw new NonEmptyModelException($"The [{relation.Info.ShardName}.{relation.Info.Name}] is not empty. Clear or recreate the model before loading data");
         }
 
-        if (!Exists(scheme))
+        if (!Exists(relation.Info))
         {
             return;
         }
 
         using var command = _connection.CreateCommand();
-        command.CommandText = Relations.Select(scheme);
+        command.CommandText = Relations.Select(relation.Info);
 
         Log(command);
 

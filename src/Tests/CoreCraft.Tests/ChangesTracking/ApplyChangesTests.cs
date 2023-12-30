@@ -20,7 +20,7 @@ public class ApplyChangesTests
     {
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Add, entity, null, props }
         };
@@ -35,7 +35,7 @@ public class ApplyChangesTests
     {
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Remove, entity, props, null }
         };
@@ -51,7 +51,7 @@ public class ApplyChangesTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Modify, entity, oldProps, newProps }
         };
@@ -67,7 +67,7 @@ public class ApplyChangesTests
     {
         var parent = new FirstEntity();
         var child = new SecondEntity();
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("")
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo)
         {
             { RelationAction.Linked, parent, child }
         };
@@ -82,7 +82,7 @@ public class ApplyChangesTests
     {
         var parent = new FirstEntity();
         var child = new SecondEntity();
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("")
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo)
         {
             { RelationAction.Unlinked, parent, child }
         };

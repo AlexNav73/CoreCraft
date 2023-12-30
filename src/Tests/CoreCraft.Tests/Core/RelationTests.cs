@@ -14,7 +14,7 @@ public class RelationTests
         _parentMapping = A.Fake<IMapping<FirstEntity, SecondEntity>>();
         _childMapping = A.Fake<IMapping<SecondEntity, FirstEntity>>();
 
-        _relation = new Relation<FirstEntity, SecondEntity>("", _parentMapping, _childMapping);
+        _relation = new Relation<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo, _parentMapping, _childMapping);
     }
 
     [Test]
@@ -80,7 +80,7 @@ public class RelationTests
     [Test]
     public void NotMockedRelationContainsTest()
     {
-        var relation = new Relation<FirstEntity, SecondEntity>("", new OneToOne<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
+        var relation = new Relation<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo, new OneToOne<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
         var firstEntity = new FirstEntity();
         var secondEntity = new SecondEntity();
 

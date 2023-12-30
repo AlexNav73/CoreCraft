@@ -15,20 +15,20 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
     /// <summary>
     ///     Ctor
     /// </summary>
-    public CollectionChangeSet(string id)
-        : this(id, new List<ICollectionChange<TEntity, TProperties>>())
+    public CollectionChangeSet(CollectionInfo info)
+        : this(info, new List<ICollectionChange<TEntity, TProperties>>())
     {
     }
 
-    private CollectionChangeSet(string id, IList<ICollectionChange<TEntity, TProperties>> changes)
+    private CollectionChangeSet(CollectionInfo info, IList<ICollectionChange<TEntity, TProperties>> changes)
     {
         _changes = changes;
 
-        Id = id;
+        Info = info;
     }
 
     /// <inheritdoc />
-    public string Id { get; }
+    public CollectionInfo Info { get; }
 
     /// <inheritdoc />
     public void Add(CollectionAction action, TEntity entity, TProperties? oldData, TProperties? newData)
@@ -83,7 +83,7 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
     public ICollectionChangeSet<TEntity, TProperties> Invert()
     {
         var inverted = _changes.Reverse().Select(x => x.Invert()).ToList();
-        return new CollectionChangeSet<TEntity, TProperties>(Id, inverted);
+        return new CollectionChangeSet<TEntity, TProperties>(Info, inverted);
     }
 
     /// <inheritdoc />
@@ -120,7 +120,7 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
     /// <inheritdoc cref="ICollectionChangeSet{TEntity, TProperties}.Merge(ICollectionChangeSet{TEntity, TProperties})"/>
     public ICollectionChangeSet<TEntity, TProperties> Merge(ICollectionChangeSet<TEntity, TProperties> changeSet)
     {
-        var result = new CollectionChangeSet<TEntity, TProperties>(Id, _changes.ToList());
+        var result = new CollectionChangeSet<TEntity, TProperties>(Info, _changes.ToList());
 
         foreach (var change in changeSet)
         {

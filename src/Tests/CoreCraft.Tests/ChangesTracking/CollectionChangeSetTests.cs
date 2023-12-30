@@ -9,7 +9,7 @@ public class CollectionChangeSetTests
     [Test]
     public void AddMultipleTimesShouldThrowExceptionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
 
@@ -33,7 +33,7 @@ public class CollectionChangeSetTests
     [Test]
     public void ModifyAddCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -58,7 +58,7 @@ public class CollectionChangeSetTests
     [Test]
     public void RemoveModifyCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -83,7 +83,7 @@ public class CollectionChangeSetTests
     [Test]
     public void RemoveMultipleTimesShouldThrowExceptionTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
@@ -111,7 +111,7 @@ public class CollectionChangeSetTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Add, entity, null, newProps },
             { CollectionAction.Modify, entity, oldProps, newProps }
@@ -131,7 +131,7 @@ public class CollectionChangeSetTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Modify, entity, oldProps, newProps },
             { CollectionAction.Remove, entity, oldProps, null }
@@ -146,7 +146,7 @@ public class CollectionChangeSetTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Remove, entity, oldProps, null },
             { CollectionAction.Add, entity, null, newProps }
@@ -166,7 +166,7 @@ public class CollectionChangeSetTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Modify, entity, oldProps, newProps },
             { CollectionAction.Modify, entity, oldProps, newProps }
@@ -186,7 +186,7 @@ public class CollectionChangeSetTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Add, entity, null, newProps },
             { CollectionAction.Modify, entity, oldProps, newProps },
@@ -202,7 +202,7 @@ public class CollectionChangeSetTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Add, entity, null, newProps },
             { CollectionAction.Modify, entity, oldProps, newProps },
@@ -219,7 +219,7 @@ public class CollectionChangeSetTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Add, entity, null, newProps },
             { CollectionAction.Remove, entity, oldProps, null }
@@ -234,11 +234,11 @@ public class CollectionChangeSetTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes1 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes1 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Add, entity, null, newProps }
         };
-        var changes2 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes2 = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Remove, entity, oldProps, null }
         };
@@ -252,7 +252,7 @@ public class CollectionChangeSetTests
     [Test]
     public void GetEnumeratorCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
 
         var enumerator = changes.GetEnumerator();
 
@@ -262,7 +262,7 @@ public class CollectionChangeSetTests
     [Test]
     public void GetNonGenericEnumeratorCollectionChangeSetTest()
     {
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
 
         var enumerator = ((IEnumerable)changes).GetEnumerator();
 
