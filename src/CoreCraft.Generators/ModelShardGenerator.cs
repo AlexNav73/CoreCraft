@@ -2,7 +2,7 @@
 
 internal partial class ApplicationModelGenerator
 {
-    public void GenerateModelShards(IndentedTextWriter code, IEnumerable<ModelShard> shards, string idBase)
+    public void GenerateModelShards(IndentedTextWriter code, IEnumerable<ModelShard> shards)
     {
         foreach (var modelShard in shards)
         {
@@ -12,7 +12,7 @@ internal partial class ApplicationModelGenerator
             code.EmptyLine();
             DefineModelShardInfoClass(code, modelShard);
             code.EmptyLine();
-            DefineModelShardClass(code, modelShard, idBase);
+            DefineModelShardClass(code, modelShard);
             code.EmptyLine();
             DefineModelShardClassAsReadOnlyState(code, modelShard);
             code.EmptyLine();
@@ -22,7 +22,7 @@ internal partial class ApplicationModelGenerator
             code.EmptyLine();
             DefineChangesFrameInterface(code, modelShard);
             code.EmptyLine();
-            DefineChangesFrameClass(code, modelShard, idBase);
+            DefineChangesFrameClass(code, modelShard);
             code.EmptyLine();
             DefineMutableModelShardClass(code, modelShard);
             code.EmptyLine();
@@ -75,33 +75,19 @@ internal partial class ApplicationModelGenerator
             });
     }
 
-    private void DefineModelShardClass(IndentedTextWriter code, ModelShard modelShard, string idBase)
+    private void DefineModelShardClass(IndentedTextWriter code, ModelShard modelShard)
     {
         code.GeneratedClassAttributes();
         code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", new[] { $"I{modelShard.Name}ModelShard" }, () =>
         {
-            DefineIds(code, modelShard, idBase);
-            code.EmptyLine();
-            DefineCtor(code, modelShard, idBase);
+            DefineCtor(code, modelShard);
             code.EmptyLine();
             DefineConversionCtor(code, modelShard);
             code.EmptyLine();
             ImplementModelShardInterface(code, modelShard);
         });
 
-        void DefineIds(IndentedTextWriter code, ModelShard modelShard, string idBase)
-        {
-            foreach (var collection in modelShard.Collections)
-            {
-                code.WriteLine($"public const string {collection.Name}Id = \"{idBase}.{modelShard.Name}.{collection.Name}\";");
-            }
-            foreach (var relation in modelShard.Relations)
-            {
-                code.WriteLine($"public const string {relation.Name}Id = \"{idBase}.{modelShard.Name}.{relation.Name}\";");
-            }
-        }
-
-        void DefineCtor(IndentedTextWriter code, ModelShard modelShard, string idBase)
+        void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
         {
             code.WriteLine($"public {modelShard.Name}ModelShard()");
             code.Block(() =>
@@ -111,7 +97,7 @@ internal partial class ApplicationModelGenerator
                     code.WriteLine($"{collection.Name} = new {Type(collection)}(");
                     code.WithIndent(c =>
                     {
-                        c.WriteLine($"{collection.Name}Id,");
+                        c.WriteLine($"{modelShard.Name}ModelShardInfo.{collection.Name}Info,");
                         c.WriteLine($"static id => new {collection.EntityType}(id),");
                         c.WriteLine($"static () => new {collection.EntityType}Properties());");
                     });
@@ -123,7 +109,7 @@ internal partial class ApplicationModelGenerator
                     code.WriteLine($"{relation.Name} = new {Type(relation)}(");
                     code.WithIndent(c =>
                     {
-                        c.WriteLine($"{relation.Name}Id,");
+                        c.WriteLine($"{modelShard.Name}ModelShardInfo.{relation.Name}Info,");
                         code.WriteLine($"new {relation.ParentRelationType}<{relation.ParentType}, {relation.ChildType}>(),");
                         code.WriteLine($"new {relation.ChildRelationType}<{relation.ChildType}, {relation.ParentType}>());");
                     });
@@ -235,13 +221,13 @@ internal partial class ApplicationModelGenerator
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"repository.Save({modelShard.Name}ModelShardInfo.{collection.Name}Info, {collection.Name});");
+                        code.WriteLine($"repository.Save({collection.Name});");
                     }
                     code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"repository.Save({modelShard.Name}ModelShardInfo.{relation.Name}Info, {relation.Name});");
+                        code.WriteLine($"repository.Save({relation.Name});");
                     }
                 });
             });
@@ -282,7 +268,7 @@ internal partial class ApplicationModelGenerator
         });
     }
 
-    private void DefineChangesFrameClass(IndentedTextWriter code, ModelShard modelShard, string idBase)
+    private void DefineChangesFrameClass(IndentedTextWriter code, ModelShard modelShard)
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
@@ -296,7 +282,7 @@ internal partial class ApplicationModelGenerator
             },
             () =>
             {
-                DefineCtor(code, modelShard, idBase);
+                DefineCtor(code, modelShard);
                 code.EmptyLine();
                 ImplementModelShardChangesFrameInterface(code, modelShard);
                 code.EmptyLine();
@@ -314,20 +300,20 @@ internal partial class ApplicationModelGenerator
                 code.EmptyLine();
             });
 
-        void DefineCtor(IndentedTextWriter code, ModelShard modelShard, string idBase)
+        void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
         {
             code.WriteLine($"public {modelShard.Name}ChangesFrame()");
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = new {ChangesType(collection)}({modelShard.Name}ModelShard.{collection.Name}Id);");
+                    code.WriteLine($"{collection.Name} = new {ChangesType(collection)}({modelShard.Name}ModelShardInfo.{collection.Name}Info);");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = new {ChangesType(relation)}({modelShard.Name}ModelShard.{relation.Name}Id);");
+                    code.WriteLine($"{relation.Name} = new {ChangesType(relation)}({modelShard.Name}ModelShardInfo.{relation.Name}Info);");
                 }
             });
         }
@@ -353,7 +339,7 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"if ({collection.Name}.Id == collection.Id) return {collection.Name} as ICollectionChangeSet<TEntity, TProperty>;");
+                    code.WriteLine($"if ({collection.Name}.Info == collection.Info) return {collection.Name} as ICollectionChangeSet<TEntity, TProperty>;");
                 }
                 code.EmptyLine();
 
@@ -366,7 +352,7 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"if ({relation.Name}.Id == relation.Id) return {relation.Name} as IRelationChangeSet<TParent, TChild>;");
+                    code.WriteLine($"if ({relation.Name}.Info == relation.Info) return {relation.Name} as IRelationChangeSet<TParent, TChild>;");
                 }
                 code.EmptyLine();
 
@@ -458,13 +444,13 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"repository.Save({modelShard.Name}ModelShardInfo.{collection.Name}Info, {collection.Name});");
+                    code.WriteLine($"repository.Save({collection.Name});");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"repository.Save({modelShard.Name}ModelShardInfo.{relation.Name}Info, {relation.Name});");
+                    code.WriteLine($"repository.Save({relation.Name});");
                 }
             });
         }
@@ -521,7 +507,7 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"repository.Load({modelShard.Name}ModelShardInfo.{collection.Name}Info, {collection.Name});");
+                    code.WriteLine($"repository.Load({collection.Name});");
                 }
                 code.EmptyLine();
 
@@ -530,7 +516,7 @@ internal partial class ApplicationModelGenerator
                     var parentCollection = modelShard.Collections.Single(x => x.EntityType == relation.ParentType).Name;
                     var childCollection = modelShard.Collections.Single(x => x.EntityType == relation.ChildType).Name;
 
-                    code.WriteLine($"repository.Load({modelShard.Name}ModelShardInfo.{relation.Name}Info, {relation.Name}, {parentCollection}, {childCollection});");
+                    code.WriteLine($"repository.Load({relation.Name}, {parentCollection}, {childCollection});");
                 }
             });
         }

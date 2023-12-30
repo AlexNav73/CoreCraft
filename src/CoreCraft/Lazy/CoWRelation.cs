@@ -29,8 +29,8 @@ public sealed class CoWRelation<TParent, TChild> :
         _relation = relation;
     }
 
-    /// <inheritdoc cref="IHaveId.Id" />
-    public string Id => _relation.Id;
+    /// <inheritdoc cref="IHaveInfo{T}.Info" />
+    public RelationInfo Info => _relation.Info;
 
     /// <inheritdoc cref="IMutableState{T}.AsReadOnly()" />
     public IRelation<TParent, TChild> AsReadOnly()

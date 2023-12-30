@@ -15,16 +15,16 @@ public class TrackableRelationTests
     {
         _relation = A.Fake<IMutableRelation<FirstEntity, SecondEntity>>();
 
-        _changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
+        _changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
         _trackable = new TrackableRelation<FirstEntity, SecondEntity>(_changes, _relation);
     }
 
     [Test]
-    public void TrackableRelationIdTest()
+    public void TrackableRelationInfoTest()
     {
-        var id = _trackable!.Id;
+        var info = _trackable!.Info;
 
-        A.CallTo(() => _relation!.Id).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _relation!.Info).MustHaveHappenedOnceExactly();
     }
 
     [Test]

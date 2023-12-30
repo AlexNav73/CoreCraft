@@ -15,7 +15,7 @@ public class TrackableCollectionTests
     {
         _collection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
 
-        _changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("");
+        _changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
         _trackable = new TrackableCollection<FirstEntity, FirstEntityProperties>(_changes, _collection);
     }
 
@@ -78,11 +78,11 @@ public class TrackableCollectionTests
     }
 
     [Test]
-    public void TrackableCollectionIdTest()
+    public void TrackableCollectionInfoTest()
     {
-        var id = _trackable!.Id;
+        var info = _trackable!.Info;
 
-        A.CallTo(() => _collection!.Id).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _collection!.Info).MustHaveHappenedOnceExactly();
     }
 
     [Test]

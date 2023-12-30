@@ -13,7 +13,7 @@ internal sealed class JsonRepository : IJsonRepository
         _modelShards = modelShards;
     }
 
-    public void Save<TEntity, TProperties>(CollectionInfo scheme, ICollectionChangeSet<TEntity, TProperties> changes)
+    public void Save<TEntity, TProperties>(ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -22,8 +22,8 @@ internal sealed class JsonRepository : IJsonRepository
             return;
         }
 
-        var shard = GetOrCreateModelShard(scheme.ShardName);
-        var collection = GetOrCreateCollection<TProperties>(scheme, shard);
+        var shard = GetOrCreateModelShard(changes.Info.ShardName);
+        var collection = GetOrCreateCollection<TProperties>(changes.Info, shard);
 
         foreach (var change in changes)
         {
@@ -61,7 +61,7 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public void Save<TParent, TChild>(RelationInfo scheme, IRelationChangeSet<TParent, TChild> changes)
+    public void Save<TParent, TChild>(IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
@@ -70,8 +70,8 @@ internal sealed class JsonRepository : IJsonRepository
             return;
         }
 
-        var shard = GetOrCreateModelShard(scheme.ShardName);
-        var relation = GetOrCreateRelation(scheme, shard);
+        var shard = GetOrCreateModelShard(changes.Info.ShardName);
+        var relation = GetOrCreateRelation(changes.Info, shard);
 
         foreach (var change in changes)
         {
@@ -99,7 +99,7 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public void Save<TEntity, TProperties>(CollectionInfo scheme, ICollection<TEntity, TProperties> collection)
+    public void Save<TEntity, TProperties>(ICollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -108,8 +108,8 @@ internal sealed class JsonRepository : IJsonRepository
             return;
         }
 
-        var shard = GetOrCreateModelShard(scheme.ShardName);
-        var jsonCollection = GetOrCreateCollection<TProperties>(scheme, shard);
+        var shard = GetOrCreateModelShard(collection.Info.ShardName);
+        var jsonCollection = GetOrCreateCollection<TProperties>(collection.Info, shard);
 
         foreach (var (entity, properties) in collection.Pairs())
         {
@@ -117,7 +117,7 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public void Save<TParent, TChild>(RelationInfo scheme, IRelation<TParent, TChild> relation)
+    public void Save<TParent, TChild>(IRelation<TParent, TChild> relation)
         where TParent : Entity
         where TChild : Entity
     {
@@ -126,8 +126,8 @@ internal sealed class JsonRepository : IJsonRepository
             return;
         }
 
-        var shard = GetOrCreateModelShard(scheme.ShardName);
-        var jsonRelation = GetOrCreateRelation(scheme, shard);
+        var shard = GetOrCreateModelShard(relation.Info.ShardName);
+        var jsonRelation = GetOrCreateRelation(relation.Info, shard);
 
         foreach (var parent in relation)
         {
@@ -138,11 +138,11 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public void Load<TEntity, TProperties>(CollectionInfo scheme, IMutableCollection<TEntity, TProperties> collection)
+    public void Load<TEntity, TProperties>(IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
-        var shard = _modelShards.SingleOrDefault(x => x.Name == scheme.ShardName);
+        var shard = _modelShards.SingleOrDefault(x => x.Name == collection.Info.ShardName);
         if (shard is null)
         {
             return;
@@ -150,7 +150,7 @@ internal sealed class JsonRepository : IJsonRepository
 
         var col = shard.Collections
             .OfType<Collection<TProperties>>()
-            .SingleOrDefault(x => x.Name == scheme.Name);
+            .SingleOrDefault(x => x.Name == collection.Info.Name);
         if (col is null)
         {
             return;
@@ -162,17 +162,17 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public void Load<TParent, TChild>(RelationInfo scheme, IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parents, IEnumerable<TChild> children)
+    public void Load<TParent, TChild>(IMutableRelation<TParent, TChild> relation, IEnumerable<TParent> parents, IEnumerable<TChild> children)
         where TParent : Entity
         where TChild : Entity
     {
-        var shard = _modelShards.SingleOrDefault(x => x.Name == scheme.ShardName);
+        var shard = _modelShards.SingleOrDefault(x => x.Name == relation.Info.ShardName);
         if (shard is null)
         {
             return;
         }
 
-        var rel = shard.Relations.SingleOrDefault(x => x.Name == scheme.Name);
+        var rel = shard.Relations.SingleOrDefault(x => x.Name == relation.Info.Name);
         if (rel is null)
         {
             return;

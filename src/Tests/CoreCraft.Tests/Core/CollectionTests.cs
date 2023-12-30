@@ -10,7 +10,7 @@ public class CollectionTests
     [SetUp]
     public void Setup()
     {
-        _collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new FirstEntity(id), () => new FirstEntityProperties());
+        _collection = new Collection<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo, id => new FirstEntity(id), () => new FirstEntityProperties());
     }
 
     [Test]

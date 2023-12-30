@@ -13,8 +13,7 @@ internal class MigrationRunnerTest
         var runner = new MigrationRunner(new[] { new DropCollectionTableMigration(FakeModelShardInfo.FirstCollectionInfo) });
 
         repository.Save(
-            FakeModelShardInfo.FirstCollectionInfo,
-            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
             });
@@ -35,8 +34,7 @@ internal class MigrationRunnerTest
         var runner = new MigrationRunner(new[] { new DropRelationTableMigration(FakeModelShardInfo.OneToOneRelationInfo) });
 
         repository.Save(
-            FakeModelShardInfo.OneToOneRelationInfo,
-            new RelationChangeSet<FirstEntity, SecondEntity>("")
+            new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo)
             {
                 { RelationAction.Linked, new(), new() }
             });
@@ -67,8 +65,7 @@ internal class MigrationRunnerTest
         });
 
         repository.Save(
-            FakeModelShardInfo.FirstCollectionInfo,
-            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
             });
@@ -103,8 +100,7 @@ internal class MigrationRunnerTest
         });
 
         repository.Save(
-            FakeModelShardInfo.FirstCollectionInfo,
-            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
             });
@@ -134,8 +130,7 @@ internal class MigrationRunnerTest
         });
 
         repository.Save(
-            FakeModelShardInfo.FirstCollectionInfo,
-            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
             });
@@ -184,8 +179,7 @@ internal class MigrationRunnerTest
         });
 
         repository.Save(
-            FakeModelShardInfo.FirstCollectionInfo,
-            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
             });
