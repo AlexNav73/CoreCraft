@@ -114,13 +114,13 @@ namespace compilation.AllFeatures
 
         public void Save(IRepository repository)
         {
-            repository.Save(FirstCollection);
-            repository.Save(SecondCollection);
+            FirstCollection.Save(repository);
+            SecondCollection.Save(repository);
 
-            repository.Save(OneToOneRelation);
-            repository.Save(OneToManyRelation);
-            repository.Save(ManyToOneRelation);
-            repository.Save(ManyToManyRelation);
+            OneToOneRelation.Save(repository);
+            OneToManyRelation.Save(repository);
+            ManyToOneRelation.Save(repository);
+            ManyToManyRelation.Save(repository);
         }
     }
 
@@ -305,24 +305,24 @@ namespace compilation.AllFeatures
 
         public void Load(IRepository repository)
         {
-            repository.Load(FirstCollection);
-            repository.Load(SecondCollection);
+            FirstCollection.Load(repository);
+            SecondCollection.Load(repository);
 
-            repository.Load(OneToOneRelation, FirstCollection, SecondCollection);
-            repository.Load(OneToManyRelation, FirstCollection, SecondCollection);
-            repository.Load(ManyToOneRelation, FirstCollection, SecondCollection);
-            repository.Load(ManyToManyRelation, FirstCollection, SecondCollection);
+            OneToOneRelation.Load(repository, FirstCollection, SecondCollection);
+            OneToManyRelation.Load(repository, FirstCollection, SecondCollection);
+            ManyToOneRelation.Load(repository, FirstCollection, SecondCollection);
+            ManyToManyRelation.Load(repository, FirstCollection, SecondCollection);
         }
 
         public void Save(IRepository repository)
         {
-            repository.Save(FirstCollection);
-            repository.Save(SecondCollection);
+            FirstCollection.Save(repository);
+            SecondCollection.Save(repository);
 
-            repository.Save(OneToOneRelation);
-            repository.Save(OneToManyRelation);
-            repository.Save(ManyToOneRelation);
-            repository.Save(ManyToManyRelation);
+            OneToOneRelation.Save(repository);
+            OneToManyRelation.Save(repository);
+            ManyToOneRelation.Save(repository);
+            ManyToManyRelation.Save(repository);
         }
     }
 

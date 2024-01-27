@@ -1,5 +1,6 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
+using CoreCraft.Features.CoW;
 using CoreCraft.Persistence;
 
 namespace CoreCraft.Tests.Persistence;
@@ -65,9 +66,9 @@ public class ModelShardStorageTests
     [Test]
     public void LoadCollectionTest()
     {
-        var storage = new MutableFakeModelShard();
+        var shard = new FakeModelShard().AsMutable([new CoWFeature()]);
 
-        storage.Load(_repository!);
+        shard.Load(_repository!);
 
         A.CallTo(() => _repository!.Load(
             A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
@@ -77,9 +78,9 @@ public class ModelShardStorageTests
     [Test]
     public void LoadRelationTest()
     {
-        var storage = new MutableFakeModelShard();
+        var shard = new FakeModelShard().AsMutable([new CoWFeature()]);
 
-        storage.Load(_repository!);
+        shard.Load(_repository!);
 
         A.CallTo(() => _repository!.Load(
             A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored,

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics;
 using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Core;
 
@@ -124,6 +125,17 @@ public sealed class Collection<TEntity, TProperties> :
         }
     }
 
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Load(IRepository)"/>
+    public void Load(IRepository repository)
+    {
+        if (_relation.Count != 0)
+        {
+            throw new NonEmptyModelException($"The [{Info.ShardName}.{Info.Name}] is not empty. Clear or recreate the model before loading data");
+        }
+
+        repository.Load(this);
+    }
+
     /// <inheritdoc cref="ICopy{T}.Copy()"/>
     public ICollection<TEntity, TProperties> Copy()
     {
@@ -132,6 +144,21 @@ public sealed class Collection<TEntity, TProperties> :
             new Dictionary<TEntity, TProperties>(_relation),
             _entityFactory,
             _propsFactory);
+    }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs()" />
+    public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
+    {
+        foreach (var pair in _relation)
+        {
+            yield return (pair.Key, pair.Value);
+        }
+    }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Save(IRepository)" />
+    public void Save(IRepository repository)
+    {
+        repository.Save(this);
     }
 
     /// <inheritdoc />
@@ -144,14 +171,5 @@ public sealed class Collection<TEntity, TProperties> :
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs()" />
-    public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
-    {
-        foreach (var pair in _relation)
-        {
-            yield return (pair.Key, pair.Value);
-        }
     }
 }

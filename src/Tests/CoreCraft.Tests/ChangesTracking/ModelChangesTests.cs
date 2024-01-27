@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
-using CoreCraft.Features;
+using CoreCraft.Features.CoW;
 
 namespace CoreCraft.Tests.ChangesTracking;
 

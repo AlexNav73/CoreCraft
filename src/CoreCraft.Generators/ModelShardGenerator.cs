@@ -156,13 +156,13 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"repository.Save({collection.Name});");
+                    code.WriteLine($"{collection.Name}.Save(repository);");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"repository.Save({relation.Name});");
+                    code.WriteLine($"{relation.Name}.Save(repository);");
                 }
             });
         }
@@ -493,7 +493,7 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"repository.Load({collection.Name});");
+                    code.WriteLine($"{collection.Name}.Load(repository);");
                 }
                 code.EmptyLine();
 
@@ -502,7 +502,7 @@ internal partial class ApplicationModelGenerator
                     var parentCollection = modelShard.Collections.Single(x => x.EntityType == relation.ParentType).Name;
                     var childCollection = modelShard.Collections.Single(x => x.EntityType == relation.ChildType).Name;
 
-                    code.WriteLine($"repository.Load({relation.Name}, {parentCollection}, {childCollection});");
+                    code.WriteLine($"{relation.Name}.Load(repository, {parentCollection}, {childCollection});");
                 }
             });
         }
@@ -514,13 +514,13 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"repository.Save({collection.Name});");
+                    code.WriteLine($"{collection.Name}.Save(repository);");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"repository.Save({relation.Name});");
+                    code.WriteLine($"{relation.Name}.Save(repository);");
                 }
             });
         }

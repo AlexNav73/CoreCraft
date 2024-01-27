@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics;
 using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.ChangesTracking;
 
@@ -128,6 +129,12 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
         }
 
         return result;
+    }
+
+    /// <inheritdoc cref="ICollectionChangeSet{TEntity, TProperties}.Save(IRepository)"/>
+    public void Save(IRepository repository)
+    {
+        repository.Save(this);
     }
 
     /// <inheritdoc />

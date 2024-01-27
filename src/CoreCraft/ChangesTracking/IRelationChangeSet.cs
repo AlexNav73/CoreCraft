@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.ChangesTracking;
+﻿using CoreCraft.Persistence;
+
+namespace CoreCraft.ChangesTracking;
 
 /// <summary>
 ///     A container of changes performed on the relation
@@ -55,4 +57,10 @@ public interface IRelationChangeSet<TParent, TChild> : IHaveInfo<RelationInfo>, 
     /// <param name="changeSet">Changes, that have happened after the current ones</param>
     /// <returns>Merged changes by combining current changes with the newest</returns>
     IRelationChangeSet<TParent, TChild> Merge(IRelationChangeSet<TParent, TChild> changeSet);
+
+    /// <summary>
+    ///     Saves the changes in the relation change set to the specified repository.
+    /// </summary>
+    /// <param name="repository">The repository where the changes will be saved.</param>
+    void Save(IRepository repository);
 }

@@ -1,6 +1,4 @@
-﻿using CoreCraft.Lazy;
-
-namespace CoreCraft.Features;
+﻿namespace CoreCraft.Features.CoW;
 
 internal class CoWFeature : IFeature
 {

@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.Core;
+﻿using CoreCraft.Persistence;
+
+namespace CoreCraft.Core;
 
 /// <summary>
 ///     A read-only collection of entity-properties pairs
@@ -34,4 +36,10 @@ public interface ICollection<TEntity, TProperties> : IEnumerable<TEntity>, IHave
     /// </summary>
     /// <returns>An iterator over entity-property pairs</returns>
     IEnumerable<(TEntity entity, TProperties properties)> Pairs();
+
+    /// <summary>
+    ///     Saves the collection to the specified repository.
+    /// </summary>
+    /// <param name="repository">The repository where the entities will be saved.</param>
+    void Save(IRepository repository);
 }

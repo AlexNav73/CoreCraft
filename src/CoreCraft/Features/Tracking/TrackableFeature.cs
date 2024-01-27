@@ -1,6 +1,6 @@
 ﻿using CoreCraft.ChangesTracking;
 
-namespace CoreCraft.Features;
+namespace CoreCraft.Features.Tracking;
 
 internal class TrackableFeature : IFeature
 {

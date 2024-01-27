@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.Persistence;
 
-namespace CoreCraft.Lazy;
+namespace CoreCraft.Features.CoW;
 
 /// <summary>
 ///     Relation wrapper which will copy inner relation only before write action
@@ -54,6 +55,14 @@ public sealed class CoWRelation<TParent, TChild> :
         _copy.Remove(parent, child);
     }
 
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Load(IRepository, IEnumerable{TParent}, IEnumerable{TChild})" />
+    public void Load(IRepository repository, IEnumerable<TParent> parents, IEnumerable<TChild> children)
+    {
+        _copy ??= (IMutableRelation<TParent, TChild>)_relation.Copy();
+        
+        _copy.Load(repository, parents, children);
+    }
+
     /// <inheritdoc cref="IRelation{TParent, TChild}.ContainsParent(TParent)" />
     public bool ContainsParent(TParent entity)
     {
@@ -88,6 +97,12 @@ public sealed class CoWRelation<TParent, TChild> :
     public IRelation<TParent, TChild> Copy()
     {
         throw new InvalidOperationException("Cannot copy a CoW Relation.");
+    }
+
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Save(IRepository)" />
+    public void Save(IRepository repository)
+    {
+        _relation.Save(repository);
     }
 
     /// <inheritdoc cref="IEnumerable{T}.GetEnumerator" />

@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using CoreCraft.Core;
-using CoreCraft.Lazy;
+using CoreCraft.Features.CoW;
 
 namespace CoreCraft.Tests.Lazy;
 
