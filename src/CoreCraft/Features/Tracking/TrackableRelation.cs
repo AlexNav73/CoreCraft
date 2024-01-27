@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.ChangesTracking;
+using CoreCraft.Persistence;
 
-namespace CoreCraft.ChangesTracking;
+namespace CoreCraft.Features.Tracking;
 
 /// <inheritdoc cref="IMutableRelation{TParent, TChild}"/>
 [DebuggerDisplay("{_relation}")]
@@ -48,6 +50,12 @@ public sealed class TrackableRelation<TParent, TChild> :
         _changes.Add(RelationAction.Unlinked, parent, child);
     }
 
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Load(IRepository, IEnumerable{TParent}, IEnumerable{TChild})" />
+    public void Load(IRepository repository, IEnumerable<TParent> parents, IEnumerable<TChild> children)
+    {
+        repository.Load(this, parents, children);
+    }
+
     /// <inheritdoc cref="IRelation{TParent, TChild}.ContainsParent(TParent)" />
     public bool ContainsParent(TParent entity)
     {
@@ -82,6 +90,12 @@ public sealed class TrackableRelation<TParent, TChild> :
     public IRelation<TParent, TChild> Copy()
     {
         throw new InvalidOperationException("Relation can't be copied because it is attached to changes tracking system");
+    }
+
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Save(IRepository)" />
+    public void Save(IRepository repository)
+    {
+        _relation.Save(repository);
     }
 
     /// <inheritdoc cref="IEnumerable{T}.GetEnumerator" />

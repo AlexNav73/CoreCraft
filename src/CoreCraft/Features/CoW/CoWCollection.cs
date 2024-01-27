@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.Persistence;
 
-namespace CoreCraft.Lazy;
+namespace CoreCraft.Features.CoW;
 
 /// <summary>
 ///     Collection wrapper which will copy inner collection only before write action
@@ -93,6 +94,14 @@ public sealed class CoWCollection<TEntity, TProperties> :
         _copy.Remove(entity);
     }
 
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Load(IRepository)"/>
+    public void Load(IRepository repository)
+    {
+        _copy ??= (IMutableCollection<TEntity, TProperties>)_collection.Copy();
+        
+        _copy.Load(repository);
+    }
+
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs()"/>
     public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
     {
@@ -103,6 +112,12 @@ public sealed class CoWCollection<TEntity, TProperties> :
     public ICollection<TEntity, TProperties> Copy()
     {
         throw new InvalidOperationException("Cannot copy a CoW Collection.");
+    }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Save(IRepository)"/>
+    public void Save(IRepository repository)
+    {
+        _collection.Save(repository);
     }
 
     /// <inheritdoc />

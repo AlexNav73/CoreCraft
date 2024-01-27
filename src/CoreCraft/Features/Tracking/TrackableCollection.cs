@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.ChangesTracking;
+using CoreCraft.Persistence;
 
-namespace CoreCraft.ChangesTracking;
+namespace CoreCraft.Features.Tracking;
 
 /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}"/>
 [DebuggerDisplay("{_collection}")]
@@ -96,10 +98,28 @@ public sealed class TrackableCollection<TEntity, TProperties> :
         _collection.Remove(entity);
     }
 
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Load(IRepository)" />
+    public void Load(IRepository repository)
+    {
+        repository.Load(this);
+    }
+
     /// <inheritdoc cref="ICopy{T}.Copy" />
     public ICollection<TEntity, TProperties> Copy()
     {
         throw new InvalidOperationException("Collection can't be copied because it is attached to changes tracking system");
+    }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs" />
+    public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
+    {
+        return _collection.Pairs();
+    }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Save(IRepository)" />
+    public void Save(IRepository repository)
+    {
+        _collection.Save(repository);
     }
 
     /// <inheritdoc cref="IEnumerable{T}.GetEnumerator" />
@@ -112,11 +132,5 @@ public sealed class TrackableCollection<TEntity, TProperties> :
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs" />
-    public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
-    {
-        return _collection.Pairs();
     }
 }

@@ -1,5 +1,5 @@
 ﻿using CoreCraft.Core;
-using CoreCraft.Features;
+using CoreCraft.Features.CoW;
 
 namespace CoreCraft.Tests.Core;
 

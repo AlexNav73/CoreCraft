@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Core;
 
@@ -81,6 +83,19 @@ public sealed class Relation<TParent, TChild> :
         _childToParentRelations.Remove(child, parent);
     }
 
+
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Load(IRepository, IEnumerable{TParent}, IEnumerable{TChild})"/>
+    public void Load(IRepository repository, IEnumerable<TParent> parents, IEnumerable<TChild> children)
+    {
+        if (_parentToChildRelations.Any() ||
+            _childToParentRelations.Any())
+        {
+            throw new NonEmptyModelException($"The [{Info.ShardName}.{Info.Name}] is not empty. Clear or recreate the model before loading data");
+        }
+
+        repository.Load(this, parents, children);
+    }
+
     /// <inheritdoc cref="ICopy{T}.Copy"/>
     public IRelation<TParent, TChild> Copy()
     {
@@ -88,6 +103,12 @@ public sealed class Relation<TParent, TChild> :
             Info,
             _parentToChildRelations.Copy(),
             _childToParentRelations.Copy());
+    }
+
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Save(IRepository)"/>
+    public void Save(IRepository repository)
+    {
+        repository.Save(this);
     }
 
     /// <inheritdoc />

@@ -253,10 +253,8 @@ public class SqliteRepositoryTests
             new()
         };
 
-        Assert.Throws<NonEmptyModelException>(() => repository.Load(collection));
+        Assert.Throws<NonEmptyModelException>(() => collection.Load(repository));
     }
-
-
 
     [Test]
     public void LoadRelationDataToNonEmptyModelTest()
@@ -270,6 +268,6 @@ public class SqliteRepositoryTests
             { new(), new() }
         };
 
-        Assert.Throws<NonEmptyModelException>(() => repository.Load(relation, parentCollection, childCollection));
+        Assert.Throws<NonEmptyModelException>(() => relation.Load(repository, parentCollection, childCollection));
     }
 }

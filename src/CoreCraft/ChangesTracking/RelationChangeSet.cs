@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics;
 using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.ChangesTracking;
 
@@ -108,6 +109,12 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
         }
 
         return result;
+    }
+
+    /// <inheritdoc cref="IRelationChangeSet{TParent, TChild}.Save(IRepository)" />
+    public void Save(IRepository repository)
+    {
+        repository.Save(this);
     }
 
     /// <inheritdoc />

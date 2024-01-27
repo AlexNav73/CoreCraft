@@ -2,7 +2,6 @@
 using System.Text;
 using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
-using CoreCraft.Exceptions;
 using Microsoft.Data.Sqlite;
 using static CoreCraft.Storage.Sqlite.QueryBuilder;
 
@@ -182,11 +181,6 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TEntity : Entity
         where TProperties : Properties
     {
-        if (collection.Count != 0)
-        {
-            throw new NonEmptyModelException($"The [{collection.Info.ShardName}.{collection.Info.Name}] is not empty. Clear or recreate the model before loading data");
-        }
-
         if (!Exists(collection.Info))
         {
             return;
@@ -215,11 +209,6 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         where TParent : Entity
         where TChild : Entity
     {
-        if (relation.Any())
-        {
-            throw new NonEmptyModelException($"The [{relation.Info.ShardName}.{relation.Info.Name}] is not empty. Clear or recreate the model before loading data");
-        }
-
         if (!Exists(relation.Info))
         {
             return;

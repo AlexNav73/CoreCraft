@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.Core;
+﻿using CoreCraft.Persistence;
+
+namespace CoreCraft.Core;
 
 /// <summary>
 ///     An mutable counterpart of a <see cref="ICollection{TEntity, TProperties}"/> interface
@@ -55,4 +57,10 @@ public interface IMutableCollection<TEntity, TProperties> : ICollection<TEntity,
     /// <param name="entity">An entity</param>
     /// <exception cref="KeyNotFoundException">Throws when trying to remove an entity which is not present in the collection</exception>
     void Remove(TEntity entity);
+
+    /// <summary>
+    ///     Loads entities and their properties from the specified repository into the collection.
+    /// </summary>
+    /// <param name="repository">The repository from which to load entities and properties.</param>
+    void Load(IRepository repository);
 }
