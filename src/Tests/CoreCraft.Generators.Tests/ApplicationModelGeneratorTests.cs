@@ -23,11 +23,11 @@ namespace CoreCraft.Generators.Tests
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result.Diagnostics.Count(), Is.EqualTo(0));
             },
-            files: new[]
-            {
+            files:
+            [
                 "AllFeatures.model.json",
                 "AnotherModelFile.model.json"
-            });
+            ]);
         }
 
         [Test]

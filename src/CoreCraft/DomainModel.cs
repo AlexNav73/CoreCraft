@@ -123,7 +123,7 @@ public class DomainModel : IDomainModel
         // change stored model shards (instead a reference to the model in the _view will be replaced with a reference
         // to the new model, leaving old references and model shards untouched). This is exact behavior we need, because
         // when Save is executed it should save state at that moment, but not when 'storage.Save' is executed.
-        var model = _view.UnsafeModel.Shards.OfType<ICanBeSaved>().ToArray(); // Do not remove ToArray from here!
+        var model = _view.UnsafeModel.Shards.ToArray(); // Do not remove ToArray from here!
 
         try
         {
@@ -152,7 +152,7 @@ public class DomainModel : IDomainModel
 
                 if (merged.HasChanges())
                 {
-                    return _scheduler.RunParallel(() => storage.Update(merged.OfType<ICanBeSaved>()), token);
+                    return _scheduler.RunParallel(() => storage.Update(merged), token);
                 }
             }
 

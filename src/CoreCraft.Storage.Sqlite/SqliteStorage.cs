@@ -1,4 +1,6 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Persistence;
 using CoreCraft.Storage.Sqlite.Migrations;
 using System.Data;
 
@@ -37,8 +39,8 @@ public sealed class SqliteStorage : IStorage
         _loggingAction = loggingAction;
     }
 
-    /// <inheritdoc cref="IStorage.Update(IEnumerable{ICanBeSaved})"/>
-    public void Update(IEnumerable<ICanBeSaved> modelChanges)
+    /// <inheritdoc cref="IStorage.Update(IEnumerable{IChangesFrame})"/>
+    public void Update(IEnumerable<IChangesFrame> modelChanges)
     {
         Transaction(_path, repository =>
         {
@@ -49,8 +51,8 @@ public sealed class SqliteStorage : IStorage
         });
     }
 
-    /// <inheritdoc cref="IStorage.Save(IEnumerable{ICanBeSaved})"/>
-    public void Save(IEnumerable<ICanBeSaved> modelShards)
+    /// <inheritdoc cref="IStorage.Save(IEnumerable{IModelShard})"/>
+    public void Save(IEnumerable<IModelShard> modelShards)
     {
         Transaction(_path, repository =>
         {
@@ -63,16 +65,16 @@ public sealed class SqliteStorage : IStorage
         });
     }
 
-    /// <inheritdoc cref="IStorage.Load(IEnumerable{ICanBeLoaded})"/>
-    public void Load(IEnumerable<ICanBeLoaded> modelShards)
+    /// <inheritdoc cref="IStorage.Load(IEnumerable{IMutableModelShard})"/>
+    public void Load(IEnumerable<IMutableModelShard> modelShards)
     {
         using var repository = _sqliteRepositoryFactory.Create(_path, _loggingAction);
 
         _migrationRunner.Run(repository);
 
-        foreach (var loadable in modelShards)
+        foreach (var shard in modelShards)
         {
-            loadable.Load(repository);
+            shard.Load(repository);
         }
     }
 

@@ -24,10 +24,9 @@ public partial class MainWindow : MetroWindow
 
         builder.Register<Func<string, IStorage>>(c =>
         {
-            return path =>
-            {
-                return new SqliteStorage(path, c.Resolve<IEnumerable<IMigration>>());
-            };
+            var migrations = c.Resolve<IEnumerable<IMigration>>();
+
+            return path => new SqliteStorage(path, migrations);
         });
         builder.RegisterType<ToDoModelShard>().As<IModelShard>();
         builder.Register(c => new UndoRedoDomainModel(

@@ -16,8 +16,6 @@ internal partial class ApplicationModelGenerator
             code.EmptyLine();
             DefineModelShardClassAsReadOnlyState(code, modelShard);
             code.EmptyLine();
-            DefineModelShardClassAsCanBeSaved(code, modelShard);
-            code.EmptyLine();
             DefineModelShardClassAsIFeatureContext(code, modelShard);
             code.EmptyLine();
             DefineChangesFrameInterface(code, modelShard);
@@ -34,7 +32,7 @@ internal partial class ApplicationModelGenerator
         var mutability = isMutable ? "Mutable" : string.Empty;
 
         code.GeneratedInterfaceAttributes();
-        code.Interface($"I{mutability}{modelShard.Name}ModelShard", new[] { "IModelShard" }, () =>
+        code.Interface($"I{mutability}{modelShard.Name}ModelShard", [isMutable ? "IMutableModelShard" : "IModelShard"], () =>
         {
             foreach (var collection in modelShard.Collections)
             {
@@ -78,13 +76,15 @@ internal partial class ApplicationModelGenerator
     private void DefineModelShardClass(IndentedTextWriter code, ModelShard modelShard)
     {
         code.GeneratedClassAttributes();
-        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", new[] { $"I{modelShard.Name}ModelShard" }, () =>
+        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", [$"I{modelShard.Name}ModelShard"], () =>
         {
             DefineCtor(code, modelShard);
             code.EmptyLine();
             DefineConversionCtor(code, modelShard);
             code.EmptyLine();
             ImplementModelShardInterface(code, modelShard);
+            code.EmptyLine();
+            ImplementSaveMethod(code, modelShard);
         });
 
         void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
@@ -148,14 +148,32 @@ internal partial class ApplicationModelGenerator
                 code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name, "get; init;")} = null!;");
             }
         }
+
+        void ImplementSaveMethod(IndentedTextWriter code, ModelShard modelShard)
+        {
+            code.WriteLine("public void Save(IRepository repository)");
+            code.Block(() =>
+            {
+                foreach (var collection in modelShard.Collections)
+                {
+                    code.WriteLine($"repository.Save({collection.Name});");
+                }
+                code.EmptyLine();
+
+                foreach (var relation in modelShard.Relations)
+                {
+                    code.WriteLine($"repository.Save({relation.Name});");
+                }
+            });
+        }
     }
 
     private void DefineModelShardClassAsReadOnlyState(IndentedTextWriter code, ModelShard modelShard)
     {
-        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", new[]
-        {
+        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard",
+        [
             $"IReadOnlyState<IMutable{modelShard.Name}ModelShard>"
-        },
+        ],
         () =>
         {
             code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)");
@@ -207,38 +225,9 @@ internal partial class ApplicationModelGenerator
         });
     }
 
-    private void DefineModelShardClassAsCanBeSaved(IndentedTextWriter code, ModelShard modelShard)
-    {
-        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard",
-            new[]
-            {
-                "ICanBeSaved"
-            },
-            () =>
-            {
-                code.WriteLine("public void Save(IRepository repository)");
-                code.Block(() =>
-                {
-                    foreach (var collection in modelShard.Collections)
-                    {
-                        code.WriteLine($"repository.Save({collection.Name});");
-                    }
-                    code.EmptyLine();
-
-                    foreach (var relation in modelShard.Relations)
-                    {
-                        code.WriteLine($"repository.Save({relation.Name});");
-                    }
-                });
-            });
-    }
-
     private void DefineModelShardClassAsIFeatureContext(IndentedTextWriter code, ModelShard modelShard)
     {
-        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", new[]
-        {
-            $"IFeatureContext"
-        },
+        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", ["IFeatureContext"],
         () =>
         {
             code.WriteLine("IChangesFrame IFeatureContext.GetOrAddFrame(IMutableModelChanges modelChanges)");
@@ -252,7 +241,7 @@ internal partial class ApplicationModelGenerator
     private void DefineChangesFrameInterface(IndentedTextWriter code, ModelShard modelShard)
     {
         code.GeneratedInterfaceAttributes();
-        code.Interface($"I{modelShard.Name}ChangesFrame", new[] { "IChangesFrame" }, () =>
+        code.Interface($"I{modelShard.Name}ChangesFrame", ["IChangesFrame"], () =>
         {
             foreach (var collection in modelShard.Collections)
             {
@@ -274,12 +263,9 @@ internal partial class ApplicationModelGenerator
 
         code.GeneratedClassAttributes();
         code.Class(visibility, "sealed", $"{modelShard.Name}ChangesFrame",
-            new[]
-            {
-                $"I{modelShard.Name}ChangesFrame",
-                "IChangesFrameEx",
-                "ICanBeSaved"
-            },
+            [
+                $"I{modelShard.Name}ChangesFrame", "IChangesFrameEx"
+            ],
             () =>
             {
                 DefineCtor(code, modelShard);
@@ -296,7 +282,7 @@ internal partial class ApplicationModelGenerator
                 code.EmptyLine();
                 DefineMergeMethod(code, modelShard);
                 code.EmptyLine();
-                DefineCanBeSavedInterface(code, modelShard);
+                ImplementSaveMethod(code, modelShard);
                 code.EmptyLine();
             });
 
@@ -437,7 +423,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void DefineCanBeSavedInterface(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementSaveMethod(IndentedTextWriter code, ModelShard modelShard)
         {
             code.WriteLine($"public void Save(IRepository repository)");
             code.Block(() =>
@@ -462,19 +448,19 @@ internal partial class ApplicationModelGenerator
 
         code.GeneratedClassAttributes();
         code.Class(visibility, "sealed", $"Mutable{modelShard.Name}ModelShard",
-            new[]
-            {
+            [
                 $"IMutable{modelShard.Name}ModelShard",
-                $"IMutableState<I{modelShard.Name}ModelShard>",
-                "ICanBeLoaded"
-            },
+                $"IMutableState<I{modelShard.Name}ModelShard>"
+            ],
             () =>
             {
                 ImplementModelShardInterface(code, modelShard);
                 code.EmptyLine();
                 ImplementMutableStateInterface(code, modelShard);
                 code.EmptyLine();
-                ImplementCanBeLoadedInterface(code, modelShard);
+                ImplementLoadMethod(code, modelShard);
+                code.EmptyLine();
+                ImplementSaveMethod(code, modelShard);
             });
 
         void ImplementModelShardInterface(IndentedTextWriter code, ModelShard modelShard)
@@ -500,7 +486,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void ImplementCanBeLoadedInterface(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementLoadMethod(IndentedTextWriter code, ModelShard modelShard)
         {
             code.WriteLine("public void Load(IRepository repository)");
             code.Block(() =>
@@ -517,6 +503,24 @@ internal partial class ApplicationModelGenerator
                     var childCollection = modelShard.Collections.Single(x => x.EntityType == relation.ChildType).Name;
 
                     code.WriteLine($"repository.Load({relation.Name}, {parentCollection}, {childCollection});");
+                }
+            });
+        }
+
+        void ImplementSaveMethod(IndentedTextWriter code, ModelShard modelShard)
+        {
+            code.WriteLine("public void Save(IRepository repository)");
+            code.Block(() =>
+            {
+                foreach (var collection in modelShard.Collections)
+                {
+                    code.WriteLine($"repository.Save({collection.Name});");
+                }
+                code.EmptyLine();
+
+                foreach (var relation in modelShard.Relations)
+                {
+                    code.WriteLine($"repository.Save({relation.Name});");
                 }
             });
         }

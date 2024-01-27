@@ -32,7 +32,7 @@ namespace compilation.VisibilityImplementations
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public interface IMutableFakeModelShard : IModelShard
+    public interface IMutableFakeModelShard : IMutableModelShard
     {
         IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; }
         IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; }
@@ -111,6 +111,17 @@ namespace compilation.VisibilityImplementations
         public IRelation<FirstEntity, SecondEntity> OneToManyRelation { get; init; } = null!;
         public IRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; init; } = null!;
         public IRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; init; } = null!;
+
+        public void Save(IRepository repository)
+        {
+            repository.Save(FirstCollection);
+            repository.Save(SecondCollection);
+
+            repository.Save(OneToOneRelation);
+            repository.Save(OneToManyRelation);
+            repository.Save(ManyToOneRelation);
+            repository.Save(ManyToManyRelation);
+        }
     }
 
     public sealed partial class FakeModelShard : IReadOnlyState<IMutableFakeModelShard>
@@ -149,20 +160,6 @@ namespace compilation.VisibilityImplementations
         }
     }
 
-    public sealed partial class FakeModelShard : ICanBeSaved
-    {
-        public void Save(IRepository repository)
-        {
-            repository.Save(FirstCollection);
-            repository.Save(SecondCollection);
-
-            repository.Save(OneToOneRelation);
-            repository.Save(OneToManyRelation);
-            repository.Save(ManyToOneRelation);
-            repository.Save(ManyToManyRelation);
-        }
-    }
-
     public sealed partial class FakeModelShard : IFeatureContext
     {
         IChangesFrame IFeatureContext.GetOrAddFrame(IMutableModelChanges modelChanges)
@@ -188,7 +185,7 @@ namespace compilation.VisibilityImplementations
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx, ICanBeSaved
+    public sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx
     {
         public FakeChangesFrame()
         {
@@ -291,7 +288,7 @@ namespace compilation.VisibilityImplementations
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>, ICanBeLoaded
+    public sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
     {
         public IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
         public IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;
@@ -315,6 +312,17 @@ namespace compilation.VisibilityImplementations
             repository.Load(OneToManyRelation, FirstCollection, SecondCollection);
             repository.Load(ManyToOneRelation, FirstCollection, SecondCollection);
             repository.Load(ManyToManyRelation, FirstCollection, SecondCollection);
+        }
+
+        public void Save(IRepository repository)
+        {
+            repository.Save(FirstCollection);
+            repository.Save(SecondCollection);
+
+            repository.Save(OneToOneRelation);
+            repository.Save(OneToManyRelation);
+            repository.Save(ManyToOneRelation);
+            repository.Save(ManyToManyRelation);
         }
     }
 

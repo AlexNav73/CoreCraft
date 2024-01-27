@@ -1,4 +1,6 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Persistence;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
 
@@ -15,7 +17,7 @@ public class AutoSaveDomainModelTests
 
         await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
 
-        A.CallTo(() => storage.Update(A<IEnumerable<ICanBeSaved>>.Ignored))
+        A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -29,10 +31,10 @@ public class AutoSaveDomainModelTests
 
         using (model.For<IFakeChangesFrame>().With(y => y.FirstCollection).Subscribe(c => firstCollectionChanged = true))
         {
-            A.CallTo(() => storage.Load(A<IEnumerable<ICanBeLoaded>>.Ignored))
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
                 .Invokes(c =>
                 {
-                    var loadables = c.Arguments.Get<IEnumerable<ICanBeLoaded>>(0)!;
+                    var loadables = c.Arguments.Get<IEnumerable<IMutableModelShard>>(0)!;
                     var shard = loadables.OfType<IMutableFakeModelShard>().Single();
 
                     shard.FirstCollection.Add(new());
@@ -40,7 +42,7 @@ public class AutoSaveDomainModelTests
 
             await model.Load();
 
-            A.CallTo(() => storage.Load(A<IEnumerable<ICanBeLoaded>>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
 
             Assert.That(firstCollectionChanged, Is.True);
         }
@@ -56,10 +58,10 @@ public class AutoSaveDomainModelTests
 
         using (model.For<IFakeChangesFrame>().With(y => y.OneToOneRelation).Subscribe(c => relationChanged = true))
         {
-            A.CallTo(() => storage.Load(A<IEnumerable<ICanBeLoaded>>.Ignored))
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
                 .Invokes(c =>
                 {
-                    var loadables = c.Arguments.Get<IEnumerable<ICanBeLoaded>>(0)!;
+                    var loadables = c.Arguments.Get<IEnumerable<IMutableModelShard>>(0)!;
                     var shard = loadables.OfType<IMutableFakeModelShard>().Single();
 
                     shard.OneToOneRelation.Add(new(), new());
@@ -67,7 +69,7 @@ public class AutoSaveDomainModelTests
 
             await model.Load();
 
-            A.CallTo(() => storage.Load(A<IEnumerable<ICanBeLoaded>>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
 
             Assert.That(relationChanged, Is.True);
         }

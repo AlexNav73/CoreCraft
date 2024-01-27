@@ -2,48 +2,33 @@
 
 namespace CoreCraft.Persistence;
 
-internal sealed class LoadSnapshot : ISnapshot, IEnumerable<ICanBeLoaded>
+internal sealed class LoadSnapshot : ISnapshot, IEnumerable<IMutableModelShard>
 {
-    private readonly Model _model;
-    private readonly IEnumerable<IFeature> _features;
-    private readonly List<ICanBeLoaded> _loaded;
-    private readonly List<IModelShard> _cantBeLoaded;
+    private readonly IReadOnlyCollection<IMutableModelShard> _mutableModelShards;
 
     public LoadSnapshot(Model model, IEnumerable<IFeature> features)
     {
-        _model = model;
-        _features = features;
-        _loaded = new List<ICanBeLoaded>();
-        _cantBeLoaded = new List<IModelShard>();
+        _mutableModelShards = model.Shards
+            .Select(s => ((IReadOnlyState<IMutableModelShard>)s).AsMutable(features))
+            .ToArray();
     }
 
     public Model ToModel()
     {
-        var modelShardsAfterLoading = _loaded.Cast<IMutableState<IModelShard>>().Select(x => x.AsReadOnly());
+        var modelShardsAfterLoading = _mutableModelShards
+            .Cast<IMutableState<IModelShard>>()
+            .Select(x => x.AsReadOnly());
 
-        return new Model(modelShardsAfterLoading.Concat(_cantBeLoaded));
+        return new Model(modelShardsAfterLoading);
     }
 
-    public IEnumerator<ICanBeLoaded> GetEnumerator()
+    public IEnumerator<IMutableModelShard> GetEnumerator()
     {
-        foreach (var shard in _model.Shards)
-        {
-            var mutableShard = ((IReadOnlyState<IModelShard>)shard).AsMutable(_features);
-            if (mutableShard is ICanBeLoaded loadable)
-            {
-                _loaded.Add(loadable);
-
-                yield return loadable;
-            }
-            else
-            {
-                _cantBeLoaded.Add(shard);
-            }
-        }
+        return _mutableModelShards.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return GetEnumerator();
+        return _mutableModelShards.GetEnumerator();
     }
 }
