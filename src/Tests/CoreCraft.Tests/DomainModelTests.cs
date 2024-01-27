@@ -151,7 +151,7 @@ public class DomainModelTests
     public void SaveChangesThrowsExceptionTest()
     {
         var storage = A.Fake<IStorage>();
-        A.CallTo(() => storage.Update(A<IEnumerable<ICanBeSaved>>.Ignored))
+        A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .Throws<InvalidOperationException>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
@@ -166,7 +166,7 @@ public class DomainModelTests
 
         var task = model.Save(Array.Empty<IModelChanges>());
 
-        A.CallTo(() => storage.Update(A<IEnumerable<ICanBeSaved>>.Ignored))
+        A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustNotHaveHappened();
         Assert.That(task, Is.Not.Null);
         Assert.That(task.IsCompleted, Is.True);
@@ -191,7 +191,7 @@ public class DomainModelTests
     public void SaveAllThrowsExceptionTest()
     {
         var storage = A.Fake<IStorage>();
-        A.CallTo(() => storage.Save(A<IEnumerable<ICanBeSaved>>.Ignored))
+        A.CallTo(() => storage.Save(A<IEnumerable<IModelShard>>.Ignored))
             .Throws<InvalidOperationException>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
@@ -207,7 +207,7 @@ public class DomainModelTests
 
         model.Subscribe(c => notificationSent = true);
 
-        A.CallTo(() => storage.Load(A<IEnumerable<ICanBeLoaded>>.Ignored))
+        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
             .Throws<Exception>();
 
         Assert.ThrowsAsync<ModelLoadingException>(() => model.Load());
@@ -224,14 +224,14 @@ public class DomainModelTests
             storage,
             m => changesReceived = true);
 
-        A.CallTo(() => storage.Load(A<IEnumerable<ICanBeLoaded>>.Ignored))
+        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
             .Invokes(c =>
             {
                 // In case when nothing was changed, copy of the model shard should not
                 // become a part of the new model (it should be just discarded).
                 // So, in case when nothing was changed ApplySnapshot should not be called
                 // and model should not be changed
-                var loadables = c.Arguments.Get<IEnumerable<ICanBeLoaded>>(0)!;
+                var loadables = c.Arguments.Get<IEnumerable<IMutableModelShard>>(0)!;
                 var shard = loadables.OfType<IMutableFakeModelShard>().Single();
 
                 Assert.That(shard, Is.Not.Null);

@@ -1,10 +1,10 @@
 ﻿using System.Data;
 using System.Text;
-using Microsoft.Data.Sqlite;
 using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
-using static CoreCraft.Storage.Sqlite.QueryBuilder;
 using CoreCraft.Exceptions;
+using Microsoft.Data.Sqlite;
+using static CoreCraft.Storage.Sqlite.QueryBuilder;
 
 namespace CoreCraft.Storage.Sqlite;
 

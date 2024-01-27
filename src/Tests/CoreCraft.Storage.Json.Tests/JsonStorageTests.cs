@@ -1,4 +1,5 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Persistence;
 using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
 
@@ -15,7 +16,7 @@ public class JsonStorageTests
     [Test]
     public void UpdateTest()
     {
-        var change = A.Fake<ICanBeSaved>();
+        var change = A.Fake<IChangesFrame>();
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
         var storage = new JsonStorage("test.json", jsonFileHandler);
 
@@ -35,7 +36,7 @@ public class JsonStorageTests
     [Test]
     public void SaveTest()
     {
-        var change = A.Fake<ICanBeSaved>();
+        var change = A.Fake<IModelShard>();
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
         var storage = new JsonStorage("test.json", jsonFileHandler);
 
@@ -50,7 +51,7 @@ public class JsonStorageTests
     [Test]
     public void LoadTest()
     {
-        var loadable = A.Fake<ICanBeLoaded>();
+        var loadable = A.Fake<IMutableModelShard>();
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
         var storage = new JsonStorage("test.json", jsonFileHandler);
 

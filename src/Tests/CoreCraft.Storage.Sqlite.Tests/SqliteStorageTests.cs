@@ -26,7 +26,7 @@ public class SqliteStorageTests
     [Test]
     public void UpdateTransactionRollbackOnExceptionTest()
     {
-        var change = A.Fake<ICanBeSaved>();
+        var change = A.Fake<IChangesFrame>();
         A.CallTo(() => change.Save(A<IRepository>.Ignored)).Throws<InvalidOperationException>();
         var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
@@ -42,7 +42,7 @@ public class SqliteStorageTests
     [Test]
     public void UpdateIsCalledOnModelShardStorageTest()
     {
-        var change = A.Fake<ICanBeSaved>();
+        var change = A.Fake<IChangesFrame>();
         var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
         var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
@@ -56,7 +56,7 @@ public class SqliteStorageTests
     {
         var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
 
-        storage.Save(A.Fake<IEnumerable<ICanBeSaved>>());
+        storage.Save(A.Fake<IEnumerable<IModelShard>>());
 
         A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _transaction!.Commit()).MustHaveHappenedOnceExactly();
@@ -66,7 +66,7 @@ public class SqliteStorageTests
     [Test]
     public void SaveTransactionRollbackOnExceptionTest()
     {
-        var shard = A.Fake<ICanBeSaved>();
+        var shard = A.Fake<IModelShard>();
         A.CallTo(() => shard.Save(A<IRepository>.Ignored)).Throws<InvalidOperationException>();
 
         var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
@@ -81,7 +81,7 @@ public class SqliteStorageTests
     [Test]
     public void SaveIsCalledOnModelShardStorageTest()
     {
-        var shard = A.Fake<ICanBeSaved>();
+        var shard = A.Fake<IModelShard>();
         var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
 
         storage.Save(new[] { shard });
@@ -92,7 +92,7 @@ public class SqliteStorageTests
     [Test]
     public void SaveMigrationRunnerUpdatedDatabaseVersionTest()
     {
-        var shard = A.Fake<ICanBeSaved>();
+        var shard = A.Fake<IModelShard>();
         var migration1 = A.Fake<IMigration>();
         var migration2 = A.Fake<IMigration>();
         A.CallTo(() => migration1.Version).Returns(1);
@@ -110,7 +110,7 @@ public class SqliteStorageTests
     [Test]
     public void LoadModelTest()
     {
-        var shard = A.Fake<ICanBeLoaded>();
+        var shard = A.Fake<IMutableModelShard>();
         var migration1 = A.Fake<IMigration>();
         var migration2 = A.Fake<IMigration>();
         A.CallTo(() => migration1.Version).Returns(1);

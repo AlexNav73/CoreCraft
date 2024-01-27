@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.ChangesTracking;
+﻿using CoreCraft.Persistence;
+
+namespace CoreCraft.ChangesTracking;
 
 /// <summary>
 ///     A common interface for all change frames for each model shard.
@@ -46,4 +48,10 @@ public interface IChangesFrame
     /// </summary>
     /// <returns>A new inverted changes</returns>
     IChangesFrame Invert();
+
+    /// <summary>
+    ///     Saves the implementing object using the provided repository.
+    /// </summary>
+    /// <param name="repository">The repository used to save the object.</param>
+    void Save(IRepository repository);
 }

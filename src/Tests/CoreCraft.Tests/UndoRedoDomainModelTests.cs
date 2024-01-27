@@ -1,4 +1,6 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Persistence;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
 
@@ -133,7 +135,7 @@ public class UndoRedoDomainModelTests
 
         await model.Save(storage);
 
-        A.CallTo(() => storage.Update(A<IEnumerable<ICanBeSaved>>.Ignored))
+        A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustHaveHappenedOnceExactly();
 
         Assert.That(model.UndoStack.Count, Is.EqualTo(0));
@@ -158,7 +160,7 @@ public class UndoRedoDomainModelTests
 
         await model.SaveAs(storage);
 
-        A.CallTo(() => storage.Save(A<IEnumerable<ICanBeSaved>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => storage.Save(A<IEnumerable<IModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
 
         Assert.That(model.UndoStack.Count, Is.EqualTo(0));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
@@ -182,7 +184,7 @@ public class UndoRedoDomainModelTests
 
         await model.SaveAs(storage);
 
-        A.CallTo(() => storage.Save(A<IEnumerable<ICanBeSaved>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => storage.Save(A<IEnumerable<IModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
 
         Assert.That(model.UndoStack.Count, Is.EqualTo(0));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
@@ -199,10 +201,10 @@ public class UndoRedoDomainModelTests
 
         using (model.For<IFakeChangesFrame>().With(y => y.FirstCollection).Subscribe(c => firstCollectionChanged = true))
         {
-            A.CallTo(() => storage.Load(A<IEnumerable<ICanBeLoaded>>.Ignored))
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
                 .Invokes(c =>
                 {
-                    var loadables = c.Arguments.Get<IEnumerable<ICanBeLoaded>>(0)!;
+                    var loadables = c.Arguments.Get<IEnumerable<IMutableModelShard>>(0)!;
                     var shard = loadables.OfType<IMutableFakeModelShard>().Single();
 
                     shard.FirstCollection.Add(new());
@@ -210,7 +212,7 @@ public class UndoRedoDomainModelTests
 
             await model.Load(storage);
 
-            A.CallTo(() => storage.Load(A<IEnumerable<ICanBeLoaded>>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
 
             Assert.That(model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
             Assert.That(model.RedoStack.Count, Is.EqualTo(0));
@@ -228,10 +230,10 @@ public class UndoRedoDomainModelTests
 
         using (model.For<IFakeChangesFrame>().With(y => y.OneToOneRelation).Subscribe(c => relationChanged = true))
         {
-            A.CallTo(() => storage.Load(A<IEnumerable<ICanBeLoaded>>.Ignored))
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
                 .Invokes(c =>
                 {
-                    var loadables = c.Arguments.Get<IEnumerable<ICanBeLoaded>>(0)!;
+                    var loadables = c.Arguments.Get<IEnumerable<IMutableModelShard>>(0)!;
                     var shard = loadables.OfType<IMutableFakeModelShard>().Single();
 
                     shard.OneToOneRelation.Add(new(), new());
@@ -239,7 +241,7 @@ public class UndoRedoDomainModelTests
 
             await model.Load(storage);
 
-            A.CallTo(() => storage.Load(A<IEnumerable<ICanBeLoaded>>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
 
             Assert.That(model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
             Assert.That(model.RedoStack.Count, Is.EqualTo(0));

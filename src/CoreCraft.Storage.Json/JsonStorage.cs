@@ -1,4 +1,6 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Persistence;
 using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
 
@@ -32,7 +34,7 @@ public sealed class JsonStorage : IStorage
     }
 
     /// <inheritdoc/>
-    public void Update(IEnumerable<ICanBeSaved> modelChanges)
+    public void Update(IEnumerable<IChangesFrame> modelChanges)
     {
         var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
         var repository = new JsonRepository(shards);
@@ -46,7 +48,7 @@ public sealed class JsonStorage : IStorage
     }
 
     /// <inheritdoc/>
-    public void Save(IEnumerable<ICanBeSaved> modelShards)
+    public void Save(IEnumerable<IModelShard> modelShards)
     {
         var shards = new List<ModelShard>();
         var repository = new JsonRepository(shards);
@@ -60,7 +62,7 @@ public sealed class JsonStorage : IStorage
     }
 
     /// <inheritdoc/>
-    public void Load(IEnumerable<ICanBeLoaded> modelShards)
+    public void Load(IEnumerable<IMutableModelShard> modelShards)
     {
         var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
 
