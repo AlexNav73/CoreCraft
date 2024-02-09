@@ -98,9 +98,18 @@ public sealed class TrackableCollection<TEntity, TProperties> :
         _collection.Remove(entity);
     }
 
-    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Load(IRepository)" />
+    /// <inheritdoc cref="ILoadable.Load(IRepository)" />
     public void Load(IRepository repository)
     {
+        if (_collection.Count > 0)
+        {
+            // Multiple independent parts of an application can be dependent on the same data.
+            // These application parts should not know, whether the other parts already had been
+            // loaded the data, so they can try to load the same data multiple times. In this case
+            // load data only once and the subsequent loads should be a noop.
+            return;
+        }
+
         repository.Load(this);
     }
 

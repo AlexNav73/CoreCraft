@@ -5,18 +5,21 @@ namespace CoreCraft.Generators.Tests
     public class ApplicationModelGeneratorTests : GeneratorTestsBase
     {
         [Test]
-        public Task ModelWithAllFeaturesTest()
+        [TestCase("AllFeatures.model.json")]
+        [TestCase("VisibilityImplementations.model.json")]
+        [TestCase("DeferLoading.model.json")]
+        public Task OneModelFileSnapshotTest(string file)
         {
             return Run(verification: result =>
             {
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result.Diagnostics.Count(), Is.EqualTo(0));
             },
-            files: "AllFeatures.model.json");
+            files: file);
         }
 
         [Test]
-        public Task TwoModelFilesTest()
+        public Task TwoModelFilesSnapshotTest()
         {
             return Run(verification: result =>
             {
@@ -28,17 +31,6 @@ namespace CoreCraft.Generators.Tests
                 "AllFeatures.model.json",
                 "AnotherModelFile.model.json"
             ]);
-        }
-
-        [Test]
-        public Task ModelWithVisibilityImplementationsTest()
-        {
-            return Run(verification: result =>
-            {
-                Assert.That(result, Is.Not.Null);
-                Assert.That(result.Diagnostics.Count(), Is.EqualTo(0));
-            },
-            files: "VisibilityImplementations.model.json");
         }
     }
 }

@@ -10,12 +10,12 @@
 
 #nullable enable
 
-namespace compilation.AnotherModelFile
+namespace compilation.DeferLoading
 {
     using CoreCraft.Core;
     using CoreCraft.ChangesTracking;
     using CoreCraft.Persistence;
-    using compilation.AnotherModelFile.Entities;
+    using compilation.DeferLoading.Entities;
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -23,11 +23,9 @@ namespace compilation.AnotherModelFile
     {
         ICollection<FirstEntity, FirstEntityProperties> FirstCollection { get; }
         ICollection<SecondEntity, SecondEntityProperties> SecondCollection { get; }
+        ICollection<ThirdEntity, ThirdEntityProperties> ThirdCollection { get; }
 
         IRelation<FirstEntity, SecondEntity> OneToOneRelation { get; }
-        IRelation<FirstEntity, SecondEntity> OneToManyRelation { get; }
-        IRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; }
-        IRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; }
     }
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
@@ -36,33 +34,27 @@ namespace compilation.AnotherModelFile
     {
         IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; }
         IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; }
+        IMutableCollection<ThirdEntity, ThirdEntityProperties> ThirdCollection { get; }
 
         IMutableRelation<FirstEntity, SecondEntity> OneToOneRelation { get; }
-        IMutableRelation<FirstEntity, SecondEntity> OneToManyRelation { get; }
-        IMutableRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; }
-        IMutableRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; }
     }
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public static class FakeModelShardInfo
+    internal static class FakeModelShardInfo
     {
-        public static readonly CollectionInfo FirstCollectionInfo = new("Fake", "FirstCollection", new PropertyInfo[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
-        public static readonly CollectionInfo SecondCollectionInfo = new("Fake", "SecondCollection", new PropertyInfo[] { new("IntProperty", typeof(int), false), new("BoolProperty", typeof(bool), false), new("DoubleProperty", typeof(double), false), new("FloatProperty", typeof(float), false) });
+        public static readonly CollectionInfo FirstCollectionInfo = new("Fake", "FirstCollection", new PropertyInfo[] { new("NonNullableStringProperty", typeof(string), false) });
+        public static readonly CollectionInfo SecondCollectionInfo = new("Fake", "SecondCollection", new PropertyInfo[] { new("IntProperty", typeof(int), false) });
+        public static readonly CollectionInfo ThirdCollectionInfo = new("Fake", "ThirdCollection", new PropertyInfo[] { new("IntProperty", typeof(int), false) });
 
         public static readonly RelationInfo OneToOneRelationInfo = new("Fake", "OneToOneRelation");
-        public static readonly RelationInfo OneToManyRelationInfo = new("Fake", "OneToManyRelation");
-        public static readonly RelationInfo ManyToOneRelationInfo = new("Fake", "ManyToOneRelation");
-        public static readonly RelationInfo ManyToManyRelationInfo = new("Fake", "ManyToManyRelation");
     }
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed partial class FakeModelShard : IFakeModelShard
+    internal sealed partial class FakeModelShard : IFakeModelShard
     {
         public FakeModelShard()
         {
@@ -74,93 +66,73 @@ namespace compilation.AnotherModelFile
                 FakeModelShardInfo.SecondCollectionInfo,
                 static id => new SecondEntity(id),
                 static () => new SecondEntityProperties());
+            ThirdCollection = new Collection<ThirdEntity, ThirdEntityProperties>(
+                FakeModelShardInfo.ThirdCollectionInfo,
+                static id => new ThirdEntity(id),
+                static () => new ThirdEntityProperties());
 
             OneToOneRelation = new Relation<FirstEntity, SecondEntity>(
                 FakeModelShardInfo.OneToOneRelationInfo,
                 new OneToOne<FirstEntity, SecondEntity>(),
                 new OneToOne<SecondEntity, FirstEntity>());
-            OneToManyRelation = new Relation<FirstEntity, SecondEntity>(
-                FakeModelShardInfo.OneToManyRelationInfo,
-                new OneToMany<FirstEntity, SecondEntity>(),
-                new OneToOne<SecondEntity, FirstEntity>());
-            ManyToOneRelation = new Relation<FirstEntity, SecondEntity>(
-                FakeModelShardInfo.ManyToOneRelationInfo,
-                new OneToOne<FirstEntity, SecondEntity>(),
-                new OneToMany<SecondEntity, FirstEntity>());
-            ManyToManyRelation = new Relation<FirstEntity, SecondEntity>(
-                FakeModelShardInfo.ManyToManyRelationInfo,
-                new OneToMany<FirstEntity, SecondEntity>(),
-                new OneToMany<SecondEntity, FirstEntity>());
         }
 
         internal FakeModelShard(IMutableFakeModelShard mutable)
         {
             FirstCollection = ((IMutableState<ICollection<FirstEntity, FirstEntityProperties>>)mutable.FirstCollection).AsReadOnly();
             SecondCollection = ((IMutableState<ICollection<SecondEntity, SecondEntityProperties>>)mutable.SecondCollection).AsReadOnly();
+            ThirdCollection = ((IMutableState<ICollection<ThirdEntity, ThirdEntityProperties>>)mutable.ThirdCollection).AsReadOnly();
 
             OneToOneRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.OneToOneRelation).AsReadOnly();
-            OneToManyRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.OneToManyRelation).AsReadOnly();
-            ManyToOneRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToOneRelation).AsReadOnly();
-            ManyToManyRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToManyRelation).AsReadOnly();
         }
 
         public ICollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
         public ICollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;
+        public ICollection<ThirdEntity, ThirdEntityProperties> ThirdCollection { get; init; } = null!;
 
         public IRelation<FirstEntity, SecondEntity> OneToOneRelation { get; init; } = null!;
-        public IRelation<FirstEntity, SecondEntity> OneToManyRelation { get; init; } = null!;
-        public IRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; init; } = null!;
-        public IRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; init; } = null!;
 
         public void Save(IRepository repository)
         {
             FirstCollection.Save(repository);
             SecondCollection.Save(repository);
+            ThirdCollection.Save(repository);
 
             OneToOneRelation.Save(repository);
-            OneToManyRelation.Save(repository);
-            ManyToOneRelation.Save(repository);
-            ManyToManyRelation.Save(repository);
         }
     }
 
-    public sealed partial class FakeModelShard : IReadOnlyState<IMutableFakeModelShard>
+    internal sealed partial class FakeModelShard : IReadOnlyState<IMutableFakeModelShard>
     {
         public IMutableFakeModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)
         {
             var firstCollection = (IMutableCollection<FirstEntity, FirstEntityProperties>)FirstCollection;
             var secondCollection = (IMutableCollection<SecondEntity, SecondEntityProperties>)SecondCollection;
+            var thirdCollection = (IMutableCollection<ThirdEntity, ThirdEntityProperties>)ThirdCollection;
 
             var oneToOneRelation = (IMutableRelation<FirstEntity, SecondEntity>)OneToOneRelation;
-            var oneToManyRelation = (IMutableRelation<FirstEntity, SecondEntity>)OneToManyRelation;
-            var manyToOneRelation = (IMutableRelation<FirstEntity, SecondEntity>)ManyToOneRelation;
-            var manyToManyRelation = (IMutableRelation<FirstEntity, SecondEntity>)ManyToManyRelation;
 
             foreach (var feature in features)
             {
                 firstCollection = feature.Decorate(this, firstCollection);
                 secondCollection = feature.Decorate(this, secondCollection);
+                thirdCollection = feature.Decorate(this, thirdCollection);
 
                 oneToOneRelation = feature.Decorate(this, oneToOneRelation);
-                oneToManyRelation = feature.Decorate(this, oneToManyRelation);
-                manyToOneRelation = feature.Decorate(this, manyToOneRelation);
-                manyToManyRelation = feature.Decorate(this, manyToManyRelation);
             }
 
             return new MutableFakeModelShard()
             {
                 FirstCollection = firstCollection,
                 SecondCollection = secondCollection,
+                ThirdCollection = thirdCollection,
 
                 OneToOneRelation = oneToOneRelation,
-                OneToManyRelation = oneToManyRelation,
-                ManyToOneRelation = manyToOneRelation,
-                ManyToManyRelation = manyToManyRelation,
             };
         }
     }
 
-    public sealed partial class FakeModelShard : IFeatureContext
+    internal sealed partial class FakeModelShard : IFeatureContext
     {
         IChangesFrame IFeatureContext.GetOrAddFrame(IMutableModelChanges modelChanges)
         {
@@ -174,42 +146,36 @@ namespace compilation.AnotherModelFile
     {
         ICollectionChangeSet<FirstEntity, FirstEntityProperties> FirstCollection { get; }
         ICollectionChangeSet<SecondEntity, SecondEntityProperties> SecondCollection { get; }
+        ICollectionChangeSet<ThirdEntity, ThirdEntityProperties> ThirdCollection { get; }
 
         IRelationChangeSet<FirstEntity, SecondEntity> OneToOneRelation { get; }
-        IRelationChangeSet<FirstEntity, SecondEntity> OneToManyRelation { get; }
-        IRelationChangeSet<FirstEntity, SecondEntity> ManyToOneRelation { get; }
-        IRelationChangeSet<FirstEntity, SecondEntity> ManyToManyRelation { get; }
     }
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx
+    internal sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx
     {
         public FakeChangesFrame()
         {
             FirstCollection = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
             SecondCollection = new CollectionChangeSet<SecondEntity, SecondEntityProperties>(FakeModelShardInfo.SecondCollectionInfo);
+            ThirdCollection = new CollectionChangeSet<ThirdEntity, ThirdEntityProperties>(FakeModelShardInfo.ThirdCollectionInfo);
 
             OneToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
-            OneToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToManyRelationInfo);
-            ManyToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.ManyToOneRelationInfo);
-            ManyToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.ManyToManyRelationInfo);
         }
 
         public ICollectionChangeSet<FirstEntity, FirstEntityProperties> FirstCollection { get; private set; }
         public ICollectionChangeSet<SecondEntity, SecondEntityProperties> SecondCollection { get; private set; }
+        public ICollectionChangeSet<ThirdEntity, ThirdEntityProperties> ThirdCollection { get; private set; }
 
         public IRelationChangeSet<FirstEntity, SecondEntity> OneToOneRelation { get; private set; }
-        public IRelationChangeSet<FirstEntity, SecondEntity> OneToManyRelation { get; private set; }
-        public IRelationChangeSet<FirstEntity, SecondEntity> ManyToOneRelation { get; private set; }
-        public IRelationChangeSet<FirstEntity, SecondEntity> ManyToManyRelation { get; private set; }
 
         ICollectionChangeSet<TEntity, TProperty>? IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
         {
             if (FirstCollection.Info == collection.Info) return FirstCollection as ICollectionChangeSet<TEntity, TProperty>;
             if (SecondCollection.Info == collection.Info) return SecondCollection as ICollectionChangeSet<TEntity, TProperty>;
+            if (ThirdCollection.Info == collection.Info) return ThirdCollection as ICollectionChangeSet<TEntity, TProperty>;
 
             throw new System.InvalidOperationException("Unable to find collection's changes set");
         }
@@ -217,9 +183,6 @@ namespace compilation.AnotherModelFile
         IRelationChangeSet<TParent, TChild>? IChangesFrame.Get<TParent, TChild>(IRelation<TParent, TChild> relation)
         {
             if (OneToOneRelation.Info == relation.Info) return OneToOneRelation as IRelationChangeSet<TParent, TChild>;
-            if (OneToManyRelation.Info == relation.Info) return OneToManyRelation as IRelationChangeSet<TParent, TChild>;
-            if (ManyToOneRelation.Info == relation.Info) return ManyToOneRelation as IRelationChangeSet<TParent, TChild>;
-            if (ManyToManyRelation.Info == relation.Info) return ManyToManyRelation as IRelationChangeSet<TParent, TChild>;
 
             throw new System.InvalidOperationException($"Unable to find relation's change set");
         }
@@ -230,11 +193,9 @@ namespace compilation.AnotherModelFile
             {
                 FirstCollection = FirstCollection.Invert(),
                 SecondCollection = SecondCollection.Invert(),
+                ThirdCollection = ThirdCollection.Invert(),
 
                 OneToOneRelation = OneToOneRelation.Invert(),
-                OneToManyRelation = OneToManyRelation.Invert(),
-                ManyToOneRelation = ManyToOneRelation.Invert(),
-                ManyToManyRelation = ManyToManyRelation.Invert(),
             };
         }
 
@@ -243,16 +204,14 @@ namespace compilation.AnotherModelFile
             var modelShard = model.Shard<IMutableFakeModelShard>();
 
             OneToOneRelation.Apply(modelShard.OneToOneRelation);
-            OneToManyRelation.Apply(modelShard.OneToManyRelation);
-            ManyToOneRelation.Apply(modelShard.ManyToOneRelation);
-            ManyToManyRelation.Apply(modelShard.ManyToManyRelation);
             FirstCollection.Apply(modelShard.FirstCollection);
             SecondCollection.Apply(modelShard.SecondCollection);
+            ThirdCollection.Apply(modelShard.ThirdCollection);
         }
 
         public bool HasChanges()
         {
-            return FirstCollection.HasChanges() || SecondCollection.HasChanges() || OneToOneRelation.HasChanges() || OneToManyRelation.HasChanges() || ManyToOneRelation.HasChanges() || ManyToManyRelation.HasChanges();
+            return FirstCollection.HasChanges() || SecondCollection.HasChanges() || ThirdCollection.HasChanges() || OneToOneRelation.HasChanges();
         }
 
         public IChangesFrame Merge(IChangesFrame frame)
@@ -263,11 +222,9 @@ namespace compilation.AnotherModelFile
             {
                 FirstCollection = FirstCollection.Merge(typedFrame.FirstCollection),
                 SecondCollection = SecondCollection.Merge(typedFrame.SecondCollection),
+                ThirdCollection = ThirdCollection.Merge(typedFrame.ThirdCollection),
 
                 OneToOneRelation = OneToOneRelation.Merge(typedFrame.OneToOneRelation),
-                OneToManyRelation = OneToManyRelation.Merge(typedFrame.OneToManyRelation),
-                ManyToOneRelation = ManyToOneRelation.Merge(typedFrame.ManyToOneRelation),
-                ManyToManyRelation = ManyToManyRelation.Merge(typedFrame.ManyToManyRelation),
             };
         }
 
@@ -275,28 +232,23 @@ namespace compilation.AnotherModelFile
         {
             repository.Save(FirstCollection);
             repository.Save(SecondCollection);
+            repository.Save(ThirdCollection);
 
             repository.Save(OneToOneRelation);
-            repository.Save(OneToManyRelation);
-            repository.Save(ManyToOneRelation);
-            repository.Save(ManyToManyRelation);
         }
 
     }
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
+    internal sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
     {
         public IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
         public IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;
+        public IMutableCollection<ThirdEntity, ThirdEntityProperties> ThirdCollection { get; init; } = null!;
 
         public IMutableRelation<FirstEntity, SecondEntity> OneToOneRelation { get; init; } = null!;
-        public IMutableRelation<FirstEntity, SecondEntity> OneToManyRelation { get; init; } = null!;
-        public IMutableRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; init; } = null!;
-        public IMutableRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; init; } = null!;
 
         public IFakeModelShard AsReadOnly()
         {
@@ -306,35 +258,28 @@ namespace compilation.AnotherModelFile
         public void Load(IRepository repository)
         {
             FirstCollection.Load(repository);
-            SecondCollection.Load(repository);
+            ThirdCollection.Load(repository);
 
-            OneToOneRelation.Load(repository, FirstCollection, SecondCollection);
-            OneToManyRelation.Load(repository, FirstCollection, SecondCollection);
-            ManyToOneRelation.Load(repository, FirstCollection, SecondCollection);
-            ManyToManyRelation.Load(repository, FirstCollection, SecondCollection);
         }
 
         public void Save(IRepository repository)
         {
             FirstCollection.Save(repository);
             SecondCollection.Save(repository);
+            ThirdCollection.Save(repository);
 
             OneToOneRelation.Save(repository);
-            OneToManyRelation.Save(repository);
-            ManyToOneRelation.Save(repository);
-            ManyToManyRelation.Save(repository);
         }
     }
 
 }
 
-namespace compilation.AnotherModelFile.Entities
+namespace compilation.DeferLoading.Entities
 {
     using CoreCraft.Core;
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed record FirstEntity(global::System.Guid Id) : Entity(Id)
     {
@@ -345,7 +290,6 @@ namespace compilation.AnotherModelFile.Entities
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed partial record FirstEntityProperties : Properties
     {
@@ -355,8 +299,6 @@ namespace compilation.AnotherModelFile.Entities
         }
 
         public string NonNullableStringProperty { get; init; }
-        public string? NullableStringProperty { get; init; }
-        public string? NullableStringWithDefaultValueProperty { get; init; }
 
 #if NET5_0_OR_GREATER
         public override FirstEntityProperties ReadFrom(IPropertiesBag bag)
@@ -367,23 +309,18 @@ namespace compilation.AnotherModelFile.Entities
             return new FirstEntityProperties()
             {
                 NonNullableStringProperty = bag.Read<string>("NonNullableStringProperty"),
-                NullableStringProperty = bag.Read<string>("NullableStringProperty"),
-                NullableStringWithDefaultValueProperty = bag.Read<string>("NullableStringWithDefaultValueProperty"),
             };
         }
 
         public override void WriteTo(IPropertiesBag bag)
         {
             bag.Write("NonNullableStringProperty", NonNullableStringProperty);
-            bag.Write("NullableStringProperty", NullableStringProperty);
-            bag.Write("NullableStringWithDefaultValueProperty", NullableStringWithDefaultValueProperty);
         }
 
     }
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed record SecondEntity(global::System.Guid Id) : Entity(Id)
     {
@@ -394,7 +331,6 @@ namespace compilation.AnotherModelFile.Entities
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed partial record SecondEntityProperties : Properties
     {
@@ -403,9 +339,6 @@ namespace compilation.AnotherModelFile.Entities
         }
 
         public int IntProperty { get; init; }
-        public bool BoolProperty { get; init; }
-        public double DoubleProperty { get; init; }
-        public float FloatProperty { get; init; }
 
 #if NET5_0_OR_GREATER
         public override SecondEntityProperties ReadFrom(IPropertiesBag bag)
@@ -416,18 +349,52 @@ namespace compilation.AnotherModelFile.Entities
             return new SecondEntityProperties()
             {
                 IntProperty = bag.Read<int>("IntProperty"),
-                BoolProperty = bag.Read<bool>("BoolProperty"),
-                DoubleProperty = bag.Read<double>("DoubleProperty"),
-                FloatProperty = bag.Read<float>("FloatProperty"),
             };
         }
 
         public override void WriteTo(IPropertiesBag bag)
         {
             bag.Write("IntProperty", IntProperty);
-            bag.Write("BoolProperty", BoolProperty);
-            bag.Write("DoubleProperty", DoubleProperty);
-            bag.Write("FloatProperty", FloatProperty);
+        }
+
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
+    public sealed record ThirdEntity(global::System.Guid Id) : Entity(Id)
+    {
+        internal ThirdEntity() : this(global::System.Guid.NewGuid())
+        {
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
+    public sealed partial record ThirdEntityProperties : Properties
+    {
+        public ThirdEntityProperties()
+        {
+        }
+
+        public int IntProperty { get; init; }
+
+#if NET5_0_OR_GREATER
+        public override ThirdEntityProperties ReadFrom(IPropertiesBag bag)
+#else
+        public override Properties ReadFrom(IPropertiesBag bag)
+#endif
+        {
+            return new ThirdEntityProperties()
+            {
+                IntProperty = bag.Read<int>("IntProperty"),
+            };
+        }
+
+        public override void WriteTo(IPropertiesBag bag)
+        {
+            bag.Write("IntProperty", IntProperty);
         }
 
     }

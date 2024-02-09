@@ -16,7 +16,7 @@ namespace CoreCraft.Core;
 /// </remarks>
 /// <typeparam name="TEntity">A type of an entity</typeparam>
 /// <typeparam name="TProperties">A type of a properties</typeparam>
-public interface IMutableCollection<TEntity, TProperties> : ICollection<TEntity, TProperties>
+public interface IMutableCollection<TEntity, TProperties> : ICollection<TEntity, TProperties>, ILoadable
     where TEntity : Entity
     where TProperties : Properties
 {
@@ -57,10 +57,4 @@ public interface IMutableCollection<TEntity, TProperties> : ICollection<TEntity,
     /// <param name="entity">An entity</param>
     /// <exception cref="KeyNotFoundException">Throws when trying to remove an entity which is not present in the collection</exception>
     void Remove(TEntity entity);
-
-    /// <summary>
-    ///     Loads entities and their properties from the specified repository into the collection.
-    /// </summary>
-    /// <param name="repository">The repository from which to load entities and properties.</param>
-    void Load(IRepository repository);
 }

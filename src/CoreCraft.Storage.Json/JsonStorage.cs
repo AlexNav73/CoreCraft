@@ -1,6 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.Lazy;
 using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
 
@@ -72,5 +73,13 @@ public sealed class JsonStorage : IStorage
         {
             loadable.Load(repository);
         }
+    }
+
+    /// <inheritdoc/>
+    public void Load(ILazyLoader loader)
+    {
+        var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
+
+        loader.Load(new JsonRepository(shards));
     }
 }

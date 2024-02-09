@@ -10,12 +10,12 @@
 
 #nullable enable
 
-namespace compilation.AllFeatures
+namespace compilation.VisibilityImplementations
 {
     using CoreCraft.Core;
     using CoreCraft.ChangesTracking;
     using CoreCraft.Persistence;
-    using compilation.AllFeatures.Entities;
+    using compilation.VisibilityImplementations.Entities;
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -45,9 +45,8 @@ namespace compilation.AllFeatures
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    internal static class FakeModelShardInfo
+    public static class FakeModelShardInfo
     {
         public static readonly CollectionInfo FirstCollectionInfo = new("Fake", "FirstCollection", new PropertyInfo[] { new("NonNullableStringProperty", typeof(string), false), new("NullableStringProperty", typeof(string), true), new("NullableStringWithDefaultValueProperty", typeof(string), true) });
         public static readonly CollectionInfo SecondCollectionInfo = new("Fake", "SecondCollection", new PropertyInfo[] { new("IntProperty", typeof(int), false), new("BoolProperty", typeof(bool), false), new("DoubleProperty", typeof(double), false), new("FloatProperty", typeof(float), false) });
@@ -60,9 +59,8 @@ namespace compilation.AllFeatures
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    internal sealed partial class FakeModelShard : IFakeModelShard
+    public sealed partial class FakeModelShard : IFakeModelShard
     {
         public FakeModelShard()
         {
@@ -124,7 +122,7 @@ namespace compilation.AllFeatures
         }
     }
 
-    internal sealed partial class FakeModelShard : IReadOnlyState<IMutableFakeModelShard>
+    public sealed partial class FakeModelShard : IReadOnlyState<IMutableFakeModelShard>
     {
         public IMutableFakeModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)
         {
@@ -160,7 +158,7 @@ namespace compilation.AllFeatures
         }
     }
 
-    internal sealed partial class FakeModelShard : IFeatureContext
+    public sealed partial class FakeModelShard : IFeatureContext
     {
         IChangesFrame IFeatureContext.GetOrAddFrame(IMutableModelChanges modelChanges)
         {
@@ -183,9 +181,8 @@ namespace compilation.AllFeatures
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    internal sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx
+    public sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx
     {
         public FakeChangesFrame()
         {
@@ -286,9 +283,8 @@ namespace compilation.AllFeatures
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    internal sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
+    public sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
     {
         public IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
         public IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;
@@ -328,13 +324,12 @@ namespace compilation.AllFeatures
 
 }
 
-namespace compilation.AllFeatures.Entities
+namespace compilation.VisibilityImplementations.Entities
 {
     using CoreCraft.Core;
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed record FirstEntity(global::System.Guid Id) : Entity(Id)
     {
@@ -345,7 +340,6 @@ namespace compilation.AllFeatures.Entities
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed partial record FirstEntityProperties : Properties
     {
@@ -383,7 +377,6 @@ namespace compilation.AllFeatures.Entities
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed record SecondEntity(global::System.Guid Id) : Entity(Id)
     {
@@ -394,7 +387,6 @@ namespace compilation.AllFeatures.Entities
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed partial record SecondEntityProperties : Properties
     {

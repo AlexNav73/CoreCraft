@@ -53,6 +53,11 @@ public sealed class TrackableRelation<TParent, TChild> :
     /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Load(IRepository, IEnumerable{TParent}, IEnumerable{TChild})" />
     public void Load(IRepository repository, IEnumerable<TParent> parents, IEnumerable<TChild> children)
     {
+        if (_relation.Any())
+        {
+            return;
+        }
+
         repository.Load(this, parents, children);
     }
 

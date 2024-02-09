@@ -3,6 +3,7 @@ using CoreCraft.Commands;
 using CoreCraft.Core;
 using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.Lazy;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
 
@@ -210,7 +211,7 @@ public class DomainModelTests
         A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
             .Throws<Exception>();
 
-        Assert.ThrowsAsync<ModelLoadingException>(() => model.Load());
+        Assert.ThrowsAsync<ModelLoadingException>(model.Load);
         Assert.That(notificationSent, Is.False);
     }
 
@@ -246,6 +247,92 @@ public class DomainModelTests
             Assert.That(changesReceived, Is.False);
             Assert.That(ReferenceEquals(before, after), Is.True);
         }
+    }
+
+    [Test]
+    public async Task LoadShouldNotThrowExceptionWhenCollectionLoadsMultipleTimesTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var repo = A.Fake<IRepository>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var entityId = Guid.NewGuid();
+
+        A.CallTo(() => repo.Load(A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
+            .Invokes(c =>
+            {
+                var collection = c.Arguments[0] as IMutableCollection<FirstEntity, FirstEntityProperties>;
+                collection!.Add(entityId, p => p with { NonNullableStringProperty = "a" });
+            });
+        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
+            .Invokes(c =>
+            {
+                var modelShards = c.Arguments[0] as IEnumerable<IMutableModelShard>;
+
+                foreach (var shard in modelShards!)
+                {
+                    shard.Load(repo);
+                }
+            });
+        A.CallTo(() => storage.Load(A<ILazyLoader>.Ignored))
+            .Invokes(c =>
+            {
+                var loader = c.Arguments[0] as ILazyLoader;
+                loader!.Load(repo);
+            });
+
+        await model.Load();
+
+        Assert.DoesNotThrowAsync(() => model.Load<IMutableFakeModelShard>(x => x.Collection(y => y.FirstCollection)));
+    }
+
+    [Test]
+    public async Task LoadShouldNotThrowExceptionWhenRelationLoadsMultipleTimesTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var repo = A.Fake<IRepository>();
+        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var entityId1 = new FirstEntity();
+        var entityId2 = new SecondEntity();
+
+        A.CallTo(() => repo.Load(A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
+            .Invokes(c =>
+            {
+                var collection = c.Arguments[0] as IMutableCollection<FirstEntity, FirstEntityProperties>;
+                collection!.Add(entityId1, new() { NonNullableStringProperty = "a" });
+            });
+        A.CallTo(() => repo.Load(A<IMutableCollection<SecondEntity, SecondEntityProperties>>.Ignored))
+            .Invokes(c =>
+            {
+                var collection = c.Arguments[0] as IMutableCollection<SecondEntity, SecondEntityProperties>;
+                collection!.Add(entityId2, new() { IntProperty = 42 });
+            });
+        A.CallTo(() => repo.Load(A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored, A<IEnumerable<FirstEntity>>.Ignored, A<IEnumerable<SecondEntity>>.Ignored))
+            .Invokes(c =>
+            {
+                var relation = c.Arguments[0] as IMutableRelation<FirstEntity, SecondEntity>;
+                relation!.Add(entityId1, entityId2);
+            });
+        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
+            .Invokes(c =>
+            {
+                var modelShards = c.Arguments[0] as IEnumerable<IMutableModelShard>;
+
+                foreach (var shard in modelShards!)
+                {
+                    shard.Load(repo);
+                }
+            });
+        A.CallTo(() => storage.Load(A<ILazyLoader>.Ignored))
+            .Invokes(c =>
+            {
+                var loader = c.Arguments[0] as ILazyLoader;
+                loader!.Load(repo);
+            });
+
+        await model.Load();
+
+        Assert.DoesNotThrowAsync(() => model.Load<IMutableFakeModelShard>(x => x
+            .Relation(y => y.OneToOneRelation, y => y.FirstCollection, y => y.SecondCollection)));
     }
 
     [Test]
@@ -334,6 +421,12 @@ public class DomainModelTests
         public async Task Load()
         {
             await Load(_storage);
+        }
+
+        public async Task Load<T>(Func<IModelShardLoader<T>, ILazyLoader> configure)
+            where T : IMutableModelShard
+        {
+            await Load(_storage, configure);
         }
 
         public async Task Apply(IMutableModelChanges changes)
