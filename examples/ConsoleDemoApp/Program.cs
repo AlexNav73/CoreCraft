@@ -3,6 +3,7 @@ using CoreCraft;
 using CoreCraft.Subscription;
 using CoreCraft.Storage.Sqlite;
 using CoreCraft.Storage.Sqlite.Migrations;
+using ConsoleDemoApp.Model.Entities;
 
 namespace ConsoleDemoApp;
 
@@ -30,7 +31,7 @@ class Program
             await model.Run<IMutableExampleModelShard>((shard, _) =>
             {
                 var first = shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
-                var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5, EnumProperty = Model.Entities.SecondEntityEnum.First });
+                var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5, EnumProperty = SecondEntityEnum.First });
 
                 shard.OneToOneRelation.Add(first, second);
             });
@@ -48,7 +49,7 @@ class Program
             {
                 var entity = shard.SecondCollection.First();
 
-                shard.SecondCollection.Modify(entity, props => props with { EnumProperty = Model.Entities.SecondEntityEnum.Second });
+                shard.SecondCollection.Modify(entity, props => props with { EnumProperty = SecondEntityEnum.Second });
             });
 
             await model.Run<IMutableExampleModelShard>((shard, _) =>
@@ -87,6 +88,12 @@ class Program
             Console.WriteLine($"Entity [{c.Entity}] has been {c.Action}ed.");
             Console.WriteLine($"   Old data: {c.OldData}");
             Console.WriteLine($"   New data: {c.NewData}");
+            Console.WriteLine();
+        }
+
+        foreach (var c in change.Hunk.OneToOneRelation)
+        {
+            Console.WriteLine($"Parent [{c.Parent}] and Child [{c.Child}] has been {c.Action}.");
             Console.WriteLine();
         }
     }

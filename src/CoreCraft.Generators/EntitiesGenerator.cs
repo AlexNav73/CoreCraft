@@ -16,7 +16,7 @@ internal partial class ApplicationModelGenerator
 
     private void DefineEntities(IndentedTextWriter code, ModelShard modelShard)
     {
-        foreach (var entity in modelShard.Entities)
+        foreach (var entity in modelShard.Collections.Select(x => x.Entity))
         {
             DefineEntityType(code, entity);
             code.EmptyLine();
@@ -41,7 +41,7 @@ internal partial class ApplicationModelGenerator
     private void DefineEntityPropertiesClass(IndentedTextWriter code, Entity entity)
     {
         code.GeneratedClassAttributes();
-        code.WriteLine($"public sealed partial record {PropertiesType(entity)} : Properties");
+        code.WriteLine($"public sealed partial record {entity.PropertiesType} : Properties");
         code.Block(() =>
         {
             DefineCtor(code, entity);
@@ -49,7 +49,7 @@ internal partial class ApplicationModelGenerator
 
             foreach (var prop in entity.Properties)
             {
-                code.WriteLine($"public {DefineProperty(prop, "get; init;")}");
+                code.WriteLine($"public {prop.Define("get; init;")}");
             }
             code.EmptyLine();
 
@@ -59,7 +59,7 @@ internal partial class ApplicationModelGenerator
 
         void DefineCtor(IndentedTextWriter code, Entity entity)
         {
-            code.WriteLine($"public {PropertiesType(entity)}()");
+            code.WriteLine($"public {entity.PropertiesType}()");
             code.Block(() =>
             {
                 foreach (var prop in entity.Properties.Where(x => !x.IsNullable && !string.IsNullOrEmpty(x.DefaultValue)))
@@ -72,13 +72,13 @@ internal partial class ApplicationModelGenerator
         void ImplementEntityPropertiesMethods(IndentedTextWriter code, Entity entity)
         {
             code.NoIndent(c => c.WriteLine("#if NET5_0_OR_GREATER"));
-            code.WriteLine($"public override {PropertiesType(entity)} ReadFrom(IPropertiesBag bag)");
+            code.WriteLine($"public override {entity.PropertiesType} ReadFrom(IPropertiesBag bag)");
             code.NoIndent(c => c.WriteLine("#else"));
             code.WriteLine("public override Properties ReadFrom(IPropertiesBag bag)");
             code.NoIndent(c => c.WriteLine("#endif"));
             code.Block(() =>
             {
-                code.WriteLine($"return new {PropertiesType(entity)}()");
+                code.WriteLine($"return new {entity.PropertiesType}()");
                 code.Block(() =>
                 {
                     foreach (var prop in entity.Properties)

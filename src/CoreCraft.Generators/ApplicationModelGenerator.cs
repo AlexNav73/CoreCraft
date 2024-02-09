@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using CoreCraft.Generators.Dto;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 
@@ -22,7 +23,7 @@ internal partial class ApplicationModelGenerator : GeneratorBase
             using (var stringStream = new StringReader(file.content))
             using (var reader = new JsonTextReader(stringStream))
             {
-                modelScheme = serializer.Deserialize<ModelScheme>(reader);
+                modelScheme = DtoConverter.Convert(serializer.Deserialize<ModelSchemeDto>(reader));
             }
 
             if (modelScheme == null)
@@ -65,22 +66,10 @@ internal partial class ApplicationModelGenerator : GeneratorBase
         });
     }
 
-    private string DefineProperty(Property prop, string accessors)
+    private static string DefineProperty(string type, string name, string accessors = "get; private set;")
     {
-        return Property(prop.IsNullable ? $"{prop.Type}?" : prop.Type, prop.Name, accessors);
+        return string.Join(" ", type, name, "{", accessors, "}").Trim();
     }
-
-    private static string Type(Collection collection) => $"Collection<{collection.EntityType}, {PropertiesType(collection.EntityType)}>";
-
-    private static string Type(Relation relation) => $"Relation<{relation.ParentType}, {relation.ChildType}>";
-
-    private static string ChangesType(Collection collection) => $"CollectionChangeSet<{collection.EntityType}, {PropertiesType(collection.EntityType)}>";
-
-    private static string ChangesType(Relation relation) => $"RelationChangeSet<{relation.ParentType}, {relation.ChildType}>";
-
-    private static string PropertiesType(Entity entitiy) => PropertiesType(entitiy.Name);
-
-    private static string PropertiesType(string type) => $"{type}Properties";
 
     private static string ToCamelCase(string value)
     {

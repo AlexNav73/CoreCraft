@@ -1,6 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.Lazy;
 using CoreCraft.Scheduling;
 
 namespace CoreCraft.Tests;
@@ -70,6 +71,11 @@ class TestStorage : IStorage
     }
 
     public void Load(IEnumerable<IMutableModelShard> modelShards)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Load(ILazyLoader loader)
     {
         throw new NotImplementedException();
     }

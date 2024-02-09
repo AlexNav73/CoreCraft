@@ -125,7 +125,7 @@ public sealed class Collection<TEntity, TProperties> :
         }
     }
 
-    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Load(IRepository)"/>
+    /// <inheritdoc cref="ILoadable.Load(IRepository)"/>
     public void Load(IRepository repository)
     {
         if (_relation.Count != 0)

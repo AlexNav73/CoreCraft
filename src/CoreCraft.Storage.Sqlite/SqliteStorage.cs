@@ -1,6 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.Lazy;
 using CoreCraft.Storage.Sqlite.Migrations;
 using System.Data;
 
@@ -76,6 +77,16 @@ public sealed class SqliteStorage : IStorage
         {
             shard.Load(repository);
         }
+    }
+
+    /// <inheritdoc />
+    public void Load(ILazyLoader loader)
+    {
+        using var repository = _sqliteRepositoryFactory.Create(_path, _loggingAction);
+
+        _migrationRunner.Run(repository);
+
+        loader.Load(repository);
     }
 
     private void Transaction(string path, Action<ISqliteRepository> action)

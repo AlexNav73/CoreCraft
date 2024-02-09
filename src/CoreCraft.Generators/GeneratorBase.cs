@@ -58,9 +58,4 @@ public abstract class GeneratorBase : IIncrementalGenerator
     {
         context.AddSource($"{fileName}.g.cs", SourceText.From(content, Encoding.UTF8));
     }
-
-    protected string Property(string type, string name, string accessors = "get; private set;")
-    {
-        return string.Join(" ", type, name, "{", accessors, "}").Trim();
-    }
 }

@@ -36,14 +36,14 @@ internal partial class ApplicationModelGenerator
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine(Property($"I{mutability}{Type(collection)}", collection.Name, "get;"));
+                code.WriteLine(DefineProperty($"I{mutability}{collection.Type}", collection.Name, "get;"));
             }
 
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine(Property($"I{mutability}{Type(relation)}", relation.Name, "get;"));
+                code.WriteLine(DefineProperty($"I{mutability}{relation.Type}", relation.Name, "get;"));
             }
         });
     }
@@ -58,8 +58,7 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    var entity = modelShard.Entities.Single(x => x.Name == collection.EntityType);
-                    var properties = entity.Properties.Select(x => $"new(\"{x.Name}\", typeof({x.Type}), {x.IsNullable.ToString().ToLower()})");
+                    var properties = collection.Entity.Properties.Select(x => $"new(\"{x.Name}\", typeof({x.Type}), {x.IsNullable.ToString().ToLower()})");
                     var array = string.Join(", ", properties);
 
                     code.WriteLine($"public static readonly CollectionInfo {collection.Name}Info = new(\"{modelShard.Name}\", \"{collection.Name}\", new PropertyInfo[] {{ {array} }});");
@@ -94,24 +93,24 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = new {Type(collection)}(");
+                    code.WriteLine($"{collection.Name} = new {collection.Type}(");
                     code.WithIndent(c =>
                     {
                         c.WriteLine($"{modelShard.Name}ModelShardInfo.{collection.Name}Info,");
-                        c.WriteLine($"static id => new {collection.EntityType}(id),");
-                        c.WriteLine($"static () => new {collection.EntityType}Properties());");
+                        c.WriteLine($"static id => new {collection.Entity.Name}(id),");
+                        c.WriteLine($"static () => new {collection.Entity.PropertiesType}());");
                     });
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = new {Type(relation)}(");
+                    code.WriteLine($"{relation.Name} = new {relation.Type}(");
                     code.WithIndent(c =>
                     {
                         c.WriteLine($"{modelShard.Name}ModelShardInfo.{relation.Name}Info,");
-                        code.WriteLine($"new {relation.ParentRelationType}<{relation.ParentType}, {relation.ChildType}>(),");
-                        code.WriteLine($"new {relation.ChildRelationType}<{relation.ChildType}, {relation.ParentType}>());");
+                        code.WriteLine($"new {relation.ParentRelationType}<{relation.Parent.Entity.Name}, {relation.Child.Entity.Name}>(),");
+                        code.WriteLine($"new {relation.ChildRelationType}<{relation.Child.Entity.Name}, {relation.Parent.Entity.Name}>());");
                     });
                 }
             });
@@ -124,13 +123,13 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = ((IMutableState<I{Type(collection)}>)mutable.{collection.Name}).AsReadOnly();");
+                    code.WriteLine($"{collection.Name} = ((IMutableState<I{collection.Type}>)mutable.{collection.Name}).AsReadOnly();");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = ((IMutableState<I{Type(relation)}>)mutable.{relation.Name}).AsReadOnly();");
+                    code.WriteLine($"{relation.Name} = ((IMutableState<I{relation.Type}>)mutable.{relation.Name}).AsReadOnly();");
                 }
             });
         }
@@ -139,13 +138,13 @@ internal partial class ApplicationModelGenerator
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public {Property($"I{Type(collection)}", collection.Name, "get; init;")} = null!;");
+                code.WriteLine($"public {DefineProperty($"I{collection.Type}", collection.Name, "get; init;")} = null!;");
             }
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public {Property($"I{Type(relation)}", relation.Name, "get; init;")} = null!;");
+                code.WriteLine($"public {DefineProperty($"I{relation.Type}", relation.Name, "get; init;")} = null!;");
             }
         }
 
@@ -181,13 +180,13 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"var {ToCamelCase(collection.Name)} = (IMutable{Type(collection)}){collection.Name};");
+                    code.WriteLine($"var {ToCamelCase(collection.Name)} = (I{collection.MutableType}){collection.Name};");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"var {ToCamelCase(relation.Name)} = (IMutable{Type(relation)}){relation.Name};");
+                    code.WriteLine($"var {ToCamelCase(relation.Name)} = (I{relation.MutableType}){relation.Name};");
                 }
                 code.EmptyLine();
 
@@ -245,14 +244,14 @@ internal partial class ApplicationModelGenerator
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine(Property($"I{ChangesType(collection)}", collection.Name, "get;"));
+                code.WriteLine(DefineProperty($"I{collection.ChangesType}", collection.Name, "get;"));
             }
 
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine(Property($"I{ChangesType(relation)}", relation.Name, "get;"));
+                code.WriteLine(DefineProperty($"I{relation.ChangesType}", relation.Name, "get;"));
             }
         });
     }
@@ -293,13 +292,13 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = new {ChangesType(collection)}({modelShard.Name}ModelShardInfo.{collection.Name}Info);");
+                    code.WriteLine($"{collection.Name} = new {collection.ChangesType}({modelShard.Name}ModelShardInfo.{collection.Name}Info);");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = new {ChangesType(relation)}({modelShard.Name}ModelShardInfo.{relation.Name}Info);");
+                    code.WriteLine($"{relation.Name} = new {relation.ChangesType}({modelShard.Name}ModelShardInfo.{relation.Name}Info);");
                 }
             });
         }
@@ -308,13 +307,13 @@ internal partial class ApplicationModelGenerator
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public {Property($"I{ChangesType(collection)}", collection.Name)}");
+                code.WriteLine($"public {DefineProperty($"I{collection.ChangesType}", collection.Name)}");
             }
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public {Property($"I{ChangesType(relation)}", relation.Name)}");
+                code.WriteLine($"public {DefineProperty($"I{relation.ChangesType}", relation.Name)}");
             }
         }
 
@@ -467,13 +466,13 @@ internal partial class ApplicationModelGenerator
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public {Property($"IMutable{Type(collection)}", collection.Name, "get; init;")} = null!;");
+                code.WriteLine($"public {DefineProperty($"I{collection.MutableType}", collection.Name, "get; init;")} = null!;");
             }
             code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public {Property($"IMutable{Type(relation)}", relation.Name, "get; init;")} = null!;");
+                code.WriteLine($"public {DefineProperty($"I{relation.MutableType}", relation.Name, "get; init;")} = null!;");
             }
         }
 
@@ -491,18 +490,15 @@ internal partial class ApplicationModelGenerator
             code.WriteLine("public void Load(IRepository repository)");
             code.Block(() =>
             {
-                foreach (var collection in modelShard.Collections)
+                foreach (var collection in modelShard.Collections.Where(x => !x.DeferLoading))
                 {
                     code.WriteLine($"{collection.Name}.Load(repository);");
                 }
                 code.EmptyLine();
 
-                foreach (var relation in modelShard.Relations)
+                foreach (var relation in modelShard.Relations.Where(x => !x.Parent.DeferLoading && !x.Child.DeferLoading))
                 {
-                    var parentCollection = modelShard.Collections.Single(x => x.EntityType == relation.ParentType).Name;
-                    var childCollection = modelShard.Collections.Single(x => x.EntityType == relation.ChildType).Name;
-
-                    code.WriteLine($"{relation.Name}.Load(repository, {parentCollection}, {childCollection});");
+                    code.WriteLine($"{relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
                 }
             });
         }

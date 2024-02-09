@@ -1,0 +1,61 @@
+﻿{
+  "shards": [
+    {
+      "name": "Fake",
+      "entities": [
+        {
+          "name": "FirstEntity",
+          "properties": [
+            {
+              "name": "NonNullableStringProperty",
+              "type": "string",
+              "defaultValue": "string.Empty"
+            }
+          ]
+        },
+        {
+          "name": "SecondEntity",
+          "properties": [
+            {
+              "name": "IntProperty",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "name": "ThirdEntity",
+          "properties": [
+            {
+              "name": "IntProperty",
+              "type": "int"
+            }
+          ]
+        }
+      ],
+      "collections": [
+        {
+          "name": "FirstCollection",
+          "entityType": "FirstEntity"
+        },
+        {
+          "name": "SecondCollection",
+          "entityType": "SecondEntity",
+          "deferLoading": true
+        },
+        {
+          "name": "ThirdCollection",
+          "entityType": "ThirdEntity"
+        }
+      ],
+      "relations": [
+        {
+          "name": "OneToOneRelation",
+          "parentType": "FirstEntity",
+          "childType": "SecondEntity",
+          "parentRelationType": "OneToOne",
+          "childRelationType": "OneToOne"
+        }
+      ]
+    }
+  ]
+}

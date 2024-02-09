@@ -1,5 +1,6 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.Lazy;
 using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
 
@@ -60,6 +61,21 @@ public class JsonStorageTests
         A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => loadable.Load(A<IRepository>.Ignored))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public void LazyLoadTest()
+    {
+        var jsonFileHandler = A.Fake<IJsonFileHandler>();
+        var storage = new JsonStorage("test.json", jsonFileHandler);
+        var loader = A.Fake<ILazyLoader>();
+
+        storage.Load(loader);
+
+        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => loader.Load(A<IRepository>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 }

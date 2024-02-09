@@ -3,6 +3,7 @@ using CoreCraft.ChangesTracking;
 using CoreCraft.Persistence;
 using CoreCraft.Storage.Sqlite.Migrations;
 using System.Data;
+using CoreCraft.Persistence.Lazy;
 
 namespace CoreCraft.Storage.Sqlite.Tests;
 
@@ -123,6 +124,28 @@ public class SqliteStorageTests
         A.CallTo(() => _repo!.SetDatabaseVersion(1)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _repo!.SetDatabaseVersion(2)).MustHaveHappenedOnceExactly();
         A.CallTo(() => shard.Load(A<IRepository>.Ignored)).MustHaveHappenedOnceExactly();
+
+        A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappened(2, Times.Exactly);
+        A.CallTo(() => _transaction!.Commit()).MustHaveHappened(2, Times.Exactly);
+        A.CallTo(() => _transaction!.Rollback()).MustNotHaveHappened();
+    }
+
+    [Test]
+    public void LazyLoadModelTest()
+    {
+        var migration1 = A.Fake<IMigration>();
+        var migration2 = A.Fake<IMigration>();
+        A.CallTo(() => migration1.Version).Returns(1);
+        A.CallTo(() => migration2.Version).Returns(2);
+        var storage = new SqliteStorage("", new[] { migration1, migration2 }, _factory!);
+        var loader = A.Fake<ILazyLoader>();
+
+        storage.Load(loader);
+
+        A.CallTo(() => _repo!.GetDatabaseVersion()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _repo!.SetDatabaseVersion(1)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _repo!.SetDatabaseVersion(2)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => loader.Load(A<IRepository>.Ignored)).MustHaveHappenedOnceExactly();
 
         A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappened(2, Times.Exactly);
         A.CallTo(() => _transaction!.Commit()).MustHaveHappened(2, Times.Exactly);
