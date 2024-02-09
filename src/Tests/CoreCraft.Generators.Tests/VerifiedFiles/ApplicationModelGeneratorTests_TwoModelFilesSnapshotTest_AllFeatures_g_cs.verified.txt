@@ -45,6 +45,7 @@ namespace compilation.AllFeatures
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal static class FakeModelShardInfo
     {
@@ -59,6 +60,7 @@ namespace compilation.AllFeatures
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed partial class FakeModelShard : IFakeModelShard
     {
@@ -181,6 +183,7 @@ namespace compilation.AllFeatures
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed class FakeChangesFrame : IFakeChangesFrame, IChangesFrameEx
     {
@@ -283,6 +286,7 @@ namespace compilation.AllFeatures
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
     {
@@ -330,6 +334,7 @@ namespace compilation.AllFeatures.Entities
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed record FirstEntity(global::System.Guid Id) : Entity(Id)
     {
@@ -340,6 +345,7 @@ namespace compilation.AllFeatures.Entities
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed partial record FirstEntityProperties : Properties
     {
@@ -377,6 +383,7 @@ namespace compilation.AllFeatures.Entities
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed record SecondEntity(global::System.Guid Id) : Entity(Id)
     {
@@ -387,6 +394,7 @@ namespace compilation.AllFeatures.Entities
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed partial record SecondEntityProperties : Properties
     {
