@@ -167,12 +167,59 @@ public class DomainModel : IDomainModel
     }
 
     /// <summary>
+    ///     Loads the domain model data.
+    /// </summary>
+    /// <param name="storage">A storage.</param>
+    /// <param name="force">
+    ///     (Optional) A boolean indicating whether to force loading all model shards (even if they are marked as "lazy")
+    ///     together with their collections and relations (even if they are marked as "deferLoading").
+    /// </param>
+    /// <param name="token">Cancellation token.</param>
+    /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model.</exception>
+    public Task Load(IStorage storage, bool force = false, CancellationToken token = default)
+    {
+        var changes = new ModelChanges();
+        var snapshot = new LoadSnapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
+
+        return Load(snapshot, changes, () => storage.Load(snapshot, force), token);
+    }
+
+    /// <summary>
+    ///     Loads only the specified model shard.
+    /// </summary>
+    /// <remarks>
+    ///     Model shards can be marked as lazy using the "lazy" property.
+    ///     If a model shard is marked as "lazy", it means that the model shard
+    ///     will not be loaded during the regular <see cref="Load(IStorage, bool, CancellationToken)"/> invocation.
+    ///     Instead, the user can decide when to load the model shard.
+    /// </remarks>
+    /// <param name="storage">The storage from which to load the data.</param>
+    /// <param name="force">
+    ///     (Optional) A boolean indicating whether to force loading collections and/or relations
+    ///     even if they are marked as "deferLoading".
+    /// </param>
+    /// <param name="token">The cancellation token.</param>
+    /// <exception cref="ModelLoadingException">Thrown when an error occurs while loading the model.</exception>
+    public Task Load<T>(
+        IStorage storage,
+        bool force = false,
+        CancellationToken token = default)
+        where T : IMutableModelShard
+    {
+        var changes = new ModelChanges();
+        var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
+        var loader = new ModelLoader<T>(snapshot.Shard<T>(), force);
+
+        return Load(snapshot, changes, () => storage.Load(loader), token);
+    }
+
+    /// <summary>
     ///     Loads only the specified part of the domain model data.
     /// </summary>
     /// <remarks>
     ///     Collections can be marked as lazy using the "deferLoading" property.
     ///     If a collection is marked as "deferLoading", it means that the collection
-    ///     will not be loaded during the regular <see cref="Load(IStorage, CancellationToken)"/> invocation.
+    ///     will not be loaded during the regular <see cref="Load(IStorage, bool, CancellationToken)"/> invocation.
     ///     Instead, the user can decide when to load the collection. In the case of relations,
     ///     a relation is marked as "deferLoading" when at least one of the collections (parent or child)
     ///     is marked as "deferLoading" and can only be loaded after the parent and child collections had been
@@ -182,7 +229,7 @@ public class DomainModel : IDomainModel
     /// <param name="configure">An action in which the specific collections and relations can be loaded.</param>
     /// <param name="token">The cancellation token.</param>
     /// <exception cref="ModelLoadingException">Thrown when an error occurs while loading the model.</exception>
-    public async Task Load<T>(
+    public Task Load<T>(
         IStorage storage,
         Func<IModelShardLoader<T>, ILazyLoader> configure,
         CancellationToken token = default)
@@ -193,51 +240,7 @@ public class DomainModel : IDomainModel
         var loader = new ModelShardLoader<T>(snapshot.Shard<T>());
         var configuration = configure(loader);
 
-        try
-        {
-            await _scheduler.Enqueue(() => storage.Load(configuration), token);
-        }
-        catch (Exception ex)
-        {
-            throw new ModelLoadingException("Model loading has failed", ex);
-        }
-
-        if (changes.HasChanges())
-        {
-            var result = _view.ApplySnapshot(snapshot);
-            var eventArgs = CreateChangeObject(result, changes);
-
-            NotifySubscriptions(eventArgs);
-        }
-    }
-
-    /// <summary>
-    ///     Loads the domain model data
-    /// </summary>
-    /// <param name="storage">A storage</param>
-    /// <param name="token">Cancellation token</param>
-    /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model</exception>
-    public async Task Load(IStorage storage, CancellationToken token = default)
-    {
-        var changes = new ModelChanges();
-        var snapshot = new LoadSnapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
-
-        try
-        {
-            await _scheduler.Enqueue(() => storage.Load(snapshot), token);
-        }
-        catch (Exception ex)
-        {
-            throw new ModelLoadingException("Model loading has failed", ex);
-        }
-
-        if (changes.HasChanges())
-        {
-            var result = _view.ApplySnapshot(snapshot);
-            var eventArgs = CreateChangeObject(result, changes);
-
-            NotifySubscriptions(eventArgs);
-        }
+        return Load(snapshot, changes, () => storage.Load(configuration), token);
     }
 
     /// <summary>
@@ -261,6 +264,26 @@ public class DomainModel : IDomainModel
                 throw new ApplyModelChangesException("Applying changes has failed", ex);
             }
 
+            var result = _view.ApplySnapshot(snapshot);
+            var changeObject = CreateChangeObject(result, changes);
+
+            NotifySubscriptions(changeObject);
+        }
+    }
+
+    private async Task Load(ISnapshot snapshot, IModelChanges changes, Action action, CancellationToken token)
+    {
+        try
+        {
+            await _scheduler.Enqueue(action, token);
+        }
+        catch (Exception ex)
+        {
+            throw new ModelLoadingException("Model loading has failed", ex);
+        }
+
+        if (changes.HasChanges())
+        {
             var result = _view.ApplySnapshot(snapshot);
             var changeObject = CreateChangeObject(result, changes);
 

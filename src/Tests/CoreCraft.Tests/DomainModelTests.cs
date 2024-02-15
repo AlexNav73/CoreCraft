@@ -208,7 +208,7 @@ public class DomainModelTests
 
         model.Subscribe(c => notificationSent = true);
 
-        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
+        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
             .Throws<Exception>();
 
         Assert.ThrowsAsync<ModelLoadingException>(model.Load);
@@ -225,7 +225,7 @@ public class DomainModelTests
             storage,
             m => changesReceived = true);
 
-        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
+        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
             .Invokes(c =>
             {
                 // In case when nothing was changed, copy of the model shard should not
@@ -263,7 +263,7 @@ public class DomainModelTests
                 var collection = c.Arguments[0] as IMutableCollection<FirstEntity, FirstEntityProperties>;
                 collection!.Add(entityId, p => p with { NonNullableStringProperty = "a" });
             });
-        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
+        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
             .Invokes(c =>
             {
                 var modelShards = c.Arguments[0] as IEnumerable<IMutableModelShard>;
@@ -312,7 +312,7 @@ public class DomainModelTests
                 var relation = c.Arguments[0] as IMutableRelation<FirstEntity, SecondEntity>;
                 relation!.Add(entityId1, entityId2);
             });
-        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
+        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
             .Invokes(c =>
             {
                 var modelShards = c.Arguments[0] as IEnumerable<IMutableModelShard>;

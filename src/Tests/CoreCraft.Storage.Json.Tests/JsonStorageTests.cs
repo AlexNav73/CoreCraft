@@ -60,7 +60,7 @@ public class JsonStorageTests
 
         A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => loadable.Load(A<IRepository>.Ignored))
+        A.CallTo(() => loadable.Load(A<IRepository>.Ignored, A<bool>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 

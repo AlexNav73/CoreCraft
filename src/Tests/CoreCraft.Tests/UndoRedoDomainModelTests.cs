@@ -201,7 +201,7 @@ public class UndoRedoDomainModelTests
 
         using (model.For<IFakeChangesFrame>().With(y => y.FirstCollection).Subscribe(c => firstCollectionChanged = true))
         {
-            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
                 .Invokes(c =>
                 {
                     var loadables = c.Arguments.Get<IEnumerable<IMutableModelShard>>(0)!;
@@ -212,7 +212,7 @@ public class UndoRedoDomainModelTests
 
             await model.Load(storage);
 
-            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceExactly();
 
             Assert.That(model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
             Assert.That(model.RedoStack.Count, Is.EqualTo(0));
@@ -230,7 +230,7 @@ public class UndoRedoDomainModelTests
 
         using (model.For<IFakeChangesFrame>().With(y => y.OneToOneRelation).Subscribe(c => relationChanged = true))
         {
-            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
                 .Invokes(c =>
                 {
                     var loadables = c.Arguments.Get<IEnumerable<IMutableModelShard>>(0)!;
@@ -241,7 +241,7 @@ public class UndoRedoDomainModelTests
 
             await model.Load(storage);
 
-            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceExactly();
 
             Assert.That(model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
             Assert.That(model.RedoStack.Count, Is.EqualTo(0));

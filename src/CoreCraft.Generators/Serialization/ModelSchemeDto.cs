@@ -1,10 +1,12 @@
-﻿namespace CoreCraft.Generators.Dto;
+﻿namespace CoreCraft.Generators.Serialization;
 
 internal sealed record ModelSchemeDto(IEnumerable<ModelShardDto> Shards);
 
 internal sealed record ModelShardDto
 {
     public string Name { get; init; }
+
+    public bool Lazy { get; init; }
 
     public VisibilityDto Visibility { get; init; }
 

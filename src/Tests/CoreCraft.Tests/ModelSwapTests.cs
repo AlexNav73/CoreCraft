@@ -70,7 +70,7 @@ class TestStorage : IStorage
         _assert(modelShards);
     }
 
-    public void Load(IEnumerable<IMutableModelShard> modelShards)
+    public void Load(IEnumerable<IMutableModelShard> modelShards, bool force = false)
     {
         throw new NotImplementedException();
     }

@@ -1,4 +1,4 @@
-﻿namespace CoreCraft.Generators.Dto;
+﻿namespace CoreCraft.Generators.Serialization;
 
 internal class DtoConverter
 {
@@ -44,7 +44,8 @@ internal class DtoConverter
             Name = modelShard.Name,
             Visibility = Convert(modelShard.Visibility),
             Collections = collections,
-            Relations = relations
+            Relations = relations,
+            Lazy = modelShard.Lazy
         };
     }
 

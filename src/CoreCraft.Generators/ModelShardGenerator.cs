@@ -453,6 +453,8 @@ internal partial class ApplicationModelGenerator
             ],
             () =>
             {
+                DefineExplicitLoadRequiredProperty(code, modelShard);
+                code.EmptyLine();
                 ImplementModelShardInterface(code, modelShard);
                 code.EmptyLine();
                 ImplementMutableStateInterface(code, modelShard);
@@ -461,6 +463,11 @@ internal partial class ApplicationModelGenerator
                 code.EmptyLine();
                 ImplementSaveMethod(code, modelShard);
             });
+
+        void DefineExplicitLoadRequiredProperty(IndentedTextWriter code, ModelShard modelShard)
+        {
+            code.WriteLine($"public bool ExplicitLoadRequired => {modelShard.Lazy.ToString().ToLowerInvariant()};");
+        }
 
         void ImplementModelShardInterface(IndentedTextWriter code, ModelShard modelShard)
         {
@@ -487,18 +494,32 @@ internal partial class ApplicationModelGenerator
 
         void ImplementLoadMethod(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine("public void Load(IRepository repository)");
+            code.WriteLine("public void Load(IRepository repository, bool force = false)");
             code.Block(() =>
             {
-                foreach (var collection in modelShard.Collections.Where(x => !x.DeferLoading))
+                foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name}.Load(repository);");
+                    if (collection.DeferLoading)
+                    {
+                        code.WriteLine($"if (force) {collection.Name}.Load(repository);");
+                    }
+                    else
+                    {
+                        code.WriteLine($"{collection.Name}.Load(repository);");
+                    }
                 }
                 code.EmptyLine();
 
-                foreach (var relation in modelShard.Relations.Where(x => !x.Parent.DeferLoading && !x.Child.DeferLoading))
+                foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
+                    if (relation.Parent.DeferLoading || relation.Child.DeferLoading)
+                    {
+                        code.WriteLine($"if (force) {relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
+                    }
+                    else
+                    {
+                        code.WriteLine($"{relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
+                    }
                 }
             });
         }

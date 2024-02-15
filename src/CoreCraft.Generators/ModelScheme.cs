@@ -6,6 +6,8 @@ internal sealed record ModelShard
 {
     public string Name { get; init; }
 
+    public bool Lazy { get; init; }
+
     public Visibility Visibility { get; init; }
 
     public IEnumerable<Collection> Collections { get; init; }
