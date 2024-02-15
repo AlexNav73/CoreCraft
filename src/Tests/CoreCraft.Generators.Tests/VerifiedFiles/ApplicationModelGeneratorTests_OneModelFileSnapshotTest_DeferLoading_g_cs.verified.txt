@@ -248,6 +248,8 @@ namespace compilation.DeferLoading
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
     {
+        public bool ExplicitLoadRequired => false;
+
         public IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
         public IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;
         public IMutableCollection<ThirdEntity, ThirdEntityProperties> ThirdCollection { get; init; } = null!;
@@ -259,11 +261,13 @@ namespace compilation.DeferLoading
             return new FakeModelShard(this);
         }
 
-        public void Load(IRepository repository)
+        public void Load(IRepository repository, bool force = false)
         {
             FirstCollection.Load(repository);
+            if (force) SecondCollection.Load(repository);
             ThirdCollection.Load(repository);
 
+            if (force) OneToOneRelation.Load(repository, FirstCollection, SecondCollection);
         }
 
         public void Save(IRepository repository)
@@ -273,6 +277,173 @@ namespace compilation.DeferLoading
             ThirdCollection.Save(repository);
 
             OneToOneRelation.Save(repository);
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    public interface ILazyShardModelShard : IModelShard
+    {
+
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    public interface IMutableLazyShardModelShard : IMutableModelShard
+    {
+
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
+    internal static class LazyShardModelShardInfo
+    {
+
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
+    internal sealed partial class LazyShardModelShard : ILazyShardModelShard
+    {
+        public LazyShardModelShard()
+        {
+
+        }
+
+        internal LazyShardModelShard(IMutableLazyShardModelShard mutable)
+        {
+
+        }
+
+
+
+        public void Save(IRepository repository)
+        {
+
+        }
+    }
+
+    internal sealed partial class LazyShardModelShard : IReadOnlyState<IMutableLazyShardModelShard>
+    {
+        public IMutableLazyShardModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)
+        {
+
+
+            foreach (var feature in features)
+            {
+
+            }
+
+            return new MutableLazyShardModelShard()
+            {
+
+            };
+        }
+    }
+
+    internal sealed partial class LazyShardModelShard : IFeatureContext
+    {
+        IChangesFrame IFeatureContext.GetOrAddFrame(IMutableModelChanges modelChanges)
+        {
+            return modelChanges.Register(static () => new LazyShardChangesFrame());
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    public interface ILazyShardChangesFrame : IChangesFrame
+    {
+
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
+    internal sealed class LazyShardChangesFrame : ILazyShardChangesFrame, IChangesFrameEx
+    {
+        public LazyShardChangesFrame()
+        {
+
+        }
+
+
+
+        ICollectionChangeSet<TEntity, TProperty>? IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
+        {
+
+            throw new System.InvalidOperationException("Unable to find collection's changes set");
+        }
+
+        IRelationChangeSet<TParent, TChild>? IChangesFrame.Get<TParent, TChild>(IRelation<TParent, TChild> relation)
+        {
+
+            throw new System.InvalidOperationException($"Unable to find relation's change set");
+        }
+
+        IChangesFrame IChangesFrame.Invert()
+        {
+            return new LazyShardChangesFrame()
+            {
+
+            };
+        }
+
+        public void Apply(IModel model)
+        {
+            var modelShard = model.Shard<IMutableLazyShardModelShard>();
+
+        }
+
+        public bool HasChanges()
+        {
+            return ;
+        }
+
+        public IChangesFrame Merge(IChangesFrame frame)
+        {
+            var typedFrame = (LazyShardChangesFrame)frame;
+
+            return new LazyShardChangesFrame()
+            {
+
+            };
+        }
+
+        public void Save(IRepository repository)
+        {
+
+        }
+
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
+    internal sealed class MutableLazyShardModelShard : IMutableLazyShardModelShard, IMutableState<ILazyShardModelShard>
+    {
+        public bool ExplicitLoadRequired => true;
+
+
+
+        public ILazyShardModelShard AsReadOnly()
+        {
+            return new LazyShardModelShard(this);
+        }
+
+        public void Load(IRepository repository, bool force = false)
+        {
+
+        }
+
+        public void Save(IRepository repository)
+        {
+
         }
     }
 
@@ -408,6 +579,7 @@ namespace compilation.DeferLoading.Entities
         }
 
     }
+
 
 
 }

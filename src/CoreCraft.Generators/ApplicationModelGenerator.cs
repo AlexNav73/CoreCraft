@@ -1,5 +1,5 @@
 ﻿using System.Collections.Immutable;
-using CoreCraft.Generators.Dto;
+using CoreCraft.Generators.Serialization;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 

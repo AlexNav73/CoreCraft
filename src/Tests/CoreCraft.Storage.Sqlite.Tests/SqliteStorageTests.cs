@@ -123,7 +123,7 @@ public class SqliteStorageTests
         A.CallTo(() => _repo!.GetDatabaseVersion()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _repo!.SetDatabaseVersion(1)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _repo!.SetDatabaseVersion(2)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => shard.Load(A<IRepository>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => shard.Load(A<IRepository>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceExactly();
 
         A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappened(2, Times.Exactly);
         A.CallTo(() => _transaction!.Commit()).MustHaveHappened(2, Times.Exactly);

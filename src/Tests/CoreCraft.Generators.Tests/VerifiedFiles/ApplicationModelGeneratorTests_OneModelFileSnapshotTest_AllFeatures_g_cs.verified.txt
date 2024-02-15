@@ -290,6 +290,8 @@ namespace compilation.AllFeatures
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
     {
+        public bool ExplicitLoadRequired => false;
+
         public IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
         public IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;
 
@@ -303,7 +305,7 @@ namespace compilation.AllFeatures
             return new FakeModelShard(this);
         }
 
-        public void Load(IRepository repository)
+        public void Load(IRepository repository, bool force = false)
         {
             FirstCollection.Load(repository);
             SecondCollection.Load(repository);

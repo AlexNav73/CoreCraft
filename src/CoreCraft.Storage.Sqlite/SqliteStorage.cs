@@ -66,16 +66,16 @@ public sealed class SqliteStorage : IStorage
         });
     }
 
-    /// <inheritdoc cref="IStorage.Load(IEnumerable{IMutableModelShard})"/>
-    public void Load(IEnumerable<IMutableModelShard> modelShards)
+    /// <inheritdoc cref="IStorage.Load(IEnumerable{IMutableModelShard}, bool)"/>
+    public void Load(IEnumerable<IMutableModelShard> modelShards, bool force = false)
     {
         using var repository = _sqliteRepositoryFactory.Create(_path, _loggingAction);
 
         _migrationRunner.Run(repository);
 
-        foreach (var shard in modelShards)
+        foreach (var shard in modelShards.Where(x => force || !x.ExplicitLoadRequired))
         {
-            shard.Load(repository);
+            shard.Load(repository, force);
         }
     }
 

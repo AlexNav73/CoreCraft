@@ -31,7 +31,7 @@ public class AutoSaveDomainModelTests
 
         using (model.For<IFakeChangesFrame>().With(y => y.FirstCollection).Subscribe(c => firstCollectionChanged = true))
         {
-            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
                 .Invokes(c =>
                 {
                     var loadables = c.Arguments.Get<IEnumerable<IMutableModelShard>>(0)!;
@@ -42,7 +42,7 @@ public class AutoSaveDomainModelTests
 
             await model.Load();
 
-            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceExactly();
 
             Assert.That(firstCollectionChanged, Is.True);
         }
@@ -58,7 +58,7 @@ public class AutoSaveDomainModelTests
 
         using (model.For<IFakeChangesFrame>().With(y => y.OneToOneRelation).Subscribe(c => relationChanged = true))
         {
-            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored))
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
                 .Invokes(c =>
                 {
                     var loadables = c.Arguments.Get<IEnumerable<IMutableModelShard>>(0)!;
@@ -69,7 +69,7 @@ public class AutoSaveDomainModelTests
 
             await model.Load();
 
-            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceExactly();
 
             Assert.That(relationChanged, Is.True);
         }

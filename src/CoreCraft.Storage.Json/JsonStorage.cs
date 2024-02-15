@@ -63,15 +63,15 @@ public sealed class JsonStorage : IStorage
     }
 
     /// <inheritdoc/>
-    public void Load(IEnumerable<IMutableModelShard> modelShards)
+    public void Load(IEnumerable<IMutableModelShard> modelShards, bool force = false)
     {
         var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
 
         var repository = new JsonRepository(shards);
 
-        foreach (var loadable in modelShards)
+        foreach (var loadable in modelShards.Where(x => force || !x.ExplicitLoadRequired))
         {
-            loadable.Load(repository);
+            loadable.Load(repository, force);
         }
     }
 

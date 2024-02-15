@@ -56,6 +56,13 @@
           "childRelationType": "OneToOne"
         }
       ]
+    },
+    {
+      "name": "LazyShard",
+      "lazy": true,
+      "entities": [],
+      "collections": [],
+      "relations": []
     }
   ]
 }
