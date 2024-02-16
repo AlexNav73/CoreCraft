@@ -1,6 +1,6 @@
 ﻿namespace CoreCraft.Core;
 
-internal sealed class Snapshot : IModel, ISnapshot
+internal sealed class Snapshot : IMutableModel, ISnapshot
 {
     private readonly Model _model;
     private readonly IEnumerable<IFeature> _features;
@@ -13,7 +13,7 @@ internal sealed class Snapshot : IModel, ISnapshot
         _copies = new Dictionary<Type, IMutableState<IModelShard>>();
     }
 
-    public T Shard<T>() where T : IModelShard
+    T IModel.Shard<T>()
     {
         if (_copies.TryGetValue(typeof(T), out var shard))
         {
@@ -26,6 +26,11 @@ internal sealed class Snapshot : IModel, ISnapshot
         _copies.Add(typeof(T), (IMutableState<IModelShard>)mutable);
 
         return mutable;
+    }
+
+    T IMutableModel.Shard<T>()
+    {
+        return ((IModel)this).Shard<T>();
     }
 
     public Model ToModel()

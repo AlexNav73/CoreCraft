@@ -1,16 +1,10 @@
-﻿using CoreCraft.Subscription;
-
-namespace CoreCraft.Core;
+﻿namespace CoreCraft.Core;
 
 /// <summary>
 ///     An interface which provides query mechanism for <see cref="IModelShard"/> retrieval
 /// </summary>
 /// <remarks>
-///     This interface can be used to retrieve both read-only and mutable model shards. It
-///     depends in which context it is used. For example: if the user calls <see cref="Shard{T}"/>
-///     method on <see cref="IDomainModel"/> or <see cref="Change{T}.NewModel"/> instance
-///     - then a read-only model shard can be requested. If the user calls the same method inside of
-///     a command - only mutable model shards can be requested.
+///     This interface can be used to retrieve only read-only model shards.
 /// </remarks>
 public interface IModel
 {

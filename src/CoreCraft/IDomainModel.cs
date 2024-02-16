@@ -35,7 +35,7 @@ public interface IDomainModel : IModel
     /// <param name="token">A cancellation token</param>
     /// <returns>A task to wait till command execution finishes</returns>
     Task Run<T>(Action<T, CancellationToken> command, CancellationToken token = default)
-        where T : IModelShard;
+        where T : IMutableModelShard;
 
     /// <summary>
     ///     Runs an action as a command on a model
@@ -46,7 +46,7 @@ public interface IDomainModel : IModel
     /// <param name="command">An action with business logic</param>
     /// <param name="token">A cancellation token</param>
     /// <returns>A task to wait till command execution finishes</returns>
-    Task Run(Action<IModel, CancellationToken> command, CancellationToken token = default);
+    Task Run(Action<IMutableModel, CancellationToken> command, CancellationToken token = default);
 
     /// <summary>
     ///     Runs a command on a model
