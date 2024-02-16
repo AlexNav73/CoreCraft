@@ -142,7 +142,7 @@ public class DomainModelTests
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
         var command = A.Fake<ICommand>();
 
-        A.CallTo(() => command.Execute(A<IModel>.Ignored, A<CancellationToken>.Ignored))
+        A.CallTo(() => command.Execute(A<IMutableModel>.Ignored, A<CancellationToken>.Ignored))
             .Throws<Exception>();
 
         Assert.ThrowsAsync<CommandInvocationException>(() => model.Run(command));

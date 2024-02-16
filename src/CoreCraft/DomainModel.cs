@@ -75,7 +75,7 @@ public class DomainModel : IDomainModel
 
     /// <inheritdoc cref="IDomainModel.Run{T}(Action{T, CancellationToken}, CancellationToken)"/>
     public async Task Run<T>(Action<T, CancellationToken> command, CancellationToken token = default)
-        where T : IModelShard
+        where T : IMutableModelShard
     {
         await Run((m, t) => command(m.Shard<T>(), t), token);
     }
@@ -86,11 +86,11 @@ public class DomainModel : IDomainModel
         await Run(command.Execute, token);
     }
 
-    /// <inheritdoc cref="IDomainModel.Run(Action{IModel, CancellationToken}, CancellationToken)"/>
-    public async Task Run(Action<IModel, CancellationToken> command, CancellationToken token = default)
+    /// <inheritdoc cref="IDomainModel.Run(Action{IMutableModel, CancellationToken}, CancellationToken)"/>
+    public async Task Run(Action<IMutableModel, CancellationToken> command, CancellationToken token = default)
     {
         var changes = new ModelChanges();
-        var snapshot = new Snapshot(_view.UnsafeModel, new IFeature[] { new CoWFeature(), new TrackableFeature(changes) });
+        var snapshot = new Snapshot(_view.UnsafeModel, [new CoWFeature(), new TrackableFeature(changes)]);
 
         try
         {
@@ -208,7 +208,7 @@ public class DomainModel : IDomainModel
     {
         var changes = new ModelChanges();
         var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
-        var loader = new ModelLoader<T>(snapshot.Shard<T>(), force);
+        var loader = new ModelLoader<T>(((IMutableModel)snapshot).Shard<T>(), force);
 
         return Load(snapshot, changes, () => storage.Load(loader), token);
     }
@@ -237,7 +237,7 @@ public class DomainModel : IDomainModel
     {
         var changes = new ModelChanges();
         var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
-        var loader = new ModelShardLoader<T>(snapshot.Shard<T>());
+        var loader = new ModelShardLoader<T>(((IMutableModel)snapshot).Shard<T>());
         var configuration = configure(loader);
 
         return Load(snapshot, changes, () => storage.Load(configuration), token);
