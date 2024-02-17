@@ -1,5 +1,6 @@
 ﻿using CoreCraft.Core;
 using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Tests.Core;
 
@@ -185,5 +186,13 @@ public class CollectionTests
 
         Assert.That(enumerator, Is.Not.Null);
         Assert.That(enumerator.MoveNext(), Is.False);
+    }
+
+    [Test]
+    public void LoadToNonEmptyCollectionShouldThrowExceptionTest()
+    {
+        _collection!.Add(new() { NullableStringProperty = "a" });
+
+        Assert.Throws<NonEmptyModelException>(() => _collection.Load(A.Fake<IRepository>()));
     }
 }

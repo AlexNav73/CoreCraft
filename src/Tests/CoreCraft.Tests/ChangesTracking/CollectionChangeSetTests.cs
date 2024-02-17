@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
 using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Tests.ChangesTracking;
 
@@ -267,5 +269,34 @@ public class CollectionChangeSetTests
         var enumerator = ((IEnumerable)changes).GetEnumerator();
 
         Assert.That(enumerator, Is.Not.Null);
+    }
+
+    [Test]
+    public void AddChangeWithInvalidActionShouldThrowExceptionTest()
+    {
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
+        var entity = new FirstEntity();
+        var props = new FirstEntityProperties();
+
+        changes.Add((CollectionAction)42, entity, null, props);
+
+        Assert.Throws<NotSupportedException>(() => changes.Apply(A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>()));
+    }
+
+    [Test]
+    public void SaveShouldCallRepositoryTest()
+    {
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
+        var repo = A.Fake<IRepository>();
+
+        changes.Save(repo);
+
+        A.CallTo(() => repo.Save(A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
+            .Invokes(c =>
+            {
+                var changeSet = c.Arguments[0];
+
+                Assert.That(ReferenceEquals(changes, changeSet), Is.True);
+            });
     }
 }

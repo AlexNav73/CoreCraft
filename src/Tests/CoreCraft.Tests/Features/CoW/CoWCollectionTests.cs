@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using CoreCraft.Core;
 using CoreCraft.Features.CoW;
+using CoreCraft.Persistence;
 
-namespace CoreCraft.Tests.Lazy;
+namespace CoreCraft.Tests.Features.CoW;
 
 public class CoWCollectionTests
 {
@@ -423,5 +424,23 @@ public class CoWCollectionTests
         A.CallTo(() => inner.Copy()).MustHaveHappenedOnceExactly();
         A.CallTo(() => inner.GetEnumerator()).MustNotHaveHappened();
         A.CallTo(() => copy.GetEnumerator()).MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public void SaveShouldCallRepositoryTest()
+    {
+        var inner = A.Fake<ICollection<FirstEntity, FirstEntityProperties>>();
+        var collection = new CoWCollection<FirstEntity, FirstEntityProperties>(inner);
+        var repo = A.Fake<IRepository>();
+
+        collection.Save(repo);
+
+        A.CallTo(() => repo.Save(A<ICollection<FirstEntity, FirstEntityProperties>>.Ignored))
+            .Invokes(c =>
+            {
+                var innerCollection = c.Arguments[0];
+
+                Assert.That(ReferenceEquals(inner, innerCollection), Is.True);
+            });
     }
 }
