@@ -40,6 +40,6 @@ public class AutoSaveDomainModel : DomainModel
         // Currently, changes' frequency is low and every change have enough time
         // for saving. In future, changes could be more frequent and it is necessary
         // to queue changes for saving or batch them in one big change
-        await Save(_storage, new[] { change.Hunk });
+        await Save(_storage, [change.Hunk]);
     }
 }

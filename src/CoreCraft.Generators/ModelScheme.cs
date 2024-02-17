@@ -6,7 +6,7 @@ internal sealed record ModelShard
 {
     public string Name { get; init; }
 
-    public bool Lazy { get; init; }
+    public bool LoadManually { get; init; }
 
     public Visibility Visibility { get; init; }
 
@@ -15,7 +15,7 @@ internal sealed record ModelShard
     public IEnumerable<Relation> Relations { get; init; }
 }
 
-internal sealed record Collection(string Name, Entity Entity, bool DeferLoading = false)
+internal sealed record Collection(string Name, Entity Entity, bool LoadManually = false)
 {
     public string Type => $"Collection<{Entity.Name}, {Entity.PropertiesType}>";
 

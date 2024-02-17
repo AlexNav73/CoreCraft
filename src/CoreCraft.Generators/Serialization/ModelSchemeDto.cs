@@ -6,7 +6,7 @@ internal sealed record ModelShardDto
 {
     public string Name { get; init; }
 
-    public bool Lazy { get; init; }
+    public bool LoadManually { get; init; }
 
     public VisibilityDto Visibility { get; init; }
 
@@ -17,7 +17,7 @@ internal sealed record ModelShardDto
     public IEnumerable<RelationDto> Relations { get; init; }
 }
 
-internal sealed record CollectionDto(string Name, string EntityType, bool DeferLoading = false);
+internal sealed record CollectionDto(string Name, string EntityType, bool LoadManually = false);
 
 internal sealed record RelationDto
 {

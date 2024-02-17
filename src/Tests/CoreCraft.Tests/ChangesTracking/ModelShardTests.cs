@@ -12,7 +12,7 @@ public class ModelShardTests
         var feature1 = A.Fake<IFeature>();
         var feature2 = A.Fake<IFeature>();
 
-        var mutable = modelShard.AsMutable(new[] { feature1, feature2 });
+        var mutable = modelShard.AsMutable([feature1, feature2]);
 
         A.CallTo(() => feature1.Decorate(A<IFeatureContext>.Ignored, A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();

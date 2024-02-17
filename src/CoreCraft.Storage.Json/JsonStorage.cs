@@ -69,7 +69,7 @@ public sealed class JsonStorage : IStorage
 
         var repository = new JsonRepository(shards);
 
-        foreach (var loadable in modelShards.Where(x => force || !x.ExplicitLoadRequired))
+        foreach (var loadable in modelShards.Where(x => force || !x.ManualLoadRequired))
         {
             loadable.Load(repository, force);
         }

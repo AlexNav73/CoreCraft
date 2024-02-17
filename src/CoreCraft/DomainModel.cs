@@ -171,8 +171,8 @@ public class DomainModel : IDomainModel
     /// </summary>
     /// <param name="storage">A storage.</param>
     /// <param name="force">
-    ///     (Optional) A boolean indicating whether to force loading all model shards (even if they are marked as "lazy")
-    ///     together with their collections and relations (even if they are marked as "deferLoading").
+    ///     (Optional) A boolean indicating whether to force loading all model shards (even if they are marked as "loadManually")
+    ///     together with their collections and relations (even if they are marked as "loadManually").
     /// </param>
     /// <param name="token">Cancellation token.</param>
     /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model.</exception>
@@ -188,15 +188,15 @@ public class DomainModel : IDomainModel
     ///     Loads only the specified model shard.
     /// </summary>
     /// <remarks>
-    ///     Model shards can be marked as lazy using the "lazy" property.
-    ///     If a model shard is marked as "lazy", it means that the model shard
+    ///     Model shards can be marked as lazy using the "loadManually" property.
+    ///     If a model shard is marked as "loadManually", it means that the model shard
     ///     will not be loaded during the regular <see cref="Load(IStorage, bool, CancellationToken)"/> invocation.
     ///     Instead, the user can decide when to load the model shard.
     /// </remarks>
     /// <param name="storage">The storage from which to load the data.</param>
     /// <param name="force">
     ///     (Optional) A boolean indicating whether to force loading collections and/or relations
-    ///     even if they are marked as "deferLoading".
+    ///     even if they are marked as "loadManually".
     /// </param>
     /// <param name="token">The cancellation token.</param>
     /// <exception cref="ModelLoadingException">Thrown when an error occurs while loading the model.</exception>
@@ -217,12 +217,12 @@ public class DomainModel : IDomainModel
     ///     Loads only the specified part of the domain model data.
     /// </summary>
     /// <remarks>
-    ///     Collections can be marked as lazy using the "deferLoading" property.
-    ///     If a collection is marked as "deferLoading", it means that the collection
+    ///     Collections can be marked as lazy using the "loadManually" property.
+    ///     If a collection is marked as "loadManually", it means that the collection
     ///     will not be loaded during the regular <see cref="Load(IStorage, bool, CancellationToken)"/> invocation.
     ///     Instead, the user can decide when to load the collection. In the case of relations,
-    ///     a relation is marked as "deferLoading" when at least one of the collections (parent or child)
-    ///     is marked as "deferLoading" and can only be loaded after the parent and child collections had been
+    ///     a relation is marked as "loadManually" when at least one of the collections (parent or child)
+    ///     is marked as "loadManually" and can only be loaded after the parent and child collections had been
     ///     loaded.
     /// </remarks>
     /// <param name="storage">The storage from which to load the data.</param>

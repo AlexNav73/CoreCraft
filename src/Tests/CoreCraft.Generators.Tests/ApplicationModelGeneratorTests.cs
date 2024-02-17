@@ -7,7 +7,7 @@ namespace CoreCraft.Generators.Tests
         [Test]
         [TestCase("AllFeatures.model.json")]
         [TestCase("VisibilityImplementations.model.json")]
-        [TestCase("DeferLoading.model.json")]
+        [TestCase("LoadManually.model.json")]
         public Task OneModelFileSnapshotTest(string file)
         {
             return Run(verification: result =>

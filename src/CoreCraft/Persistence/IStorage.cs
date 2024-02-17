@@ -37,8 +37,8 @@ public interface IStorage
     /// </remarks>
     /// <param name="modelShards">A collection of model shards which can be loaded</param>
     /// <param name="force">
-    ///     (Optional) A boolean indicating whether to force loading all model shards (even if they are marked as "lazy")
-    ///     together with their collections and relations (even if they are marked as "deferLoading").
+    ///     (Optional) A boolean indicating whether to force loading all model shards (even if they are marked as "loadManually")
+    ///     together with their collections and relations (even if they are marked as "loadManually").
     /// </param>
     void Load(IEnumerable<IMutableModelShard> modelShards, bool force = false);
 
@@ -46,12 +46,12 @@ public interface IStorage
     ///     Loads only the specified part of the domain model data.
     /// </summary>
     /// <remarks>
-    ///     Collections can be marked as lazy using the "deferLoading" property.
-    ///     If a collection is marked as "deferLoading," it means that the collection
+    ///     Collections can be marked as lazy using the "loadManually" property.
+    ///     If a collection is marked as "loadManually," it means that the collection
     ///     will not be loaded during the regular <see cref="DomainModel.Load(IStorage, bool, CancellationToken)"/> invocation.
     ///     Instead, the user can decide when to load the collection. In the case of relations,
-    ///     a relation is marked as "deferLoading" when at least one of the collections (parent or child)
-    ///     is marked as "deferLoading" and can only be loaded after the parent and child collections have been
+    ///     a relation is marked as "loadManually" when at least one of the collections (parent or child)
+    ///     is marked as "loadManually" and can only be loaded after the parent and child collections have been
     ///     loaded.
     /// </remarks>
     void Load(ILazyLoader loader);

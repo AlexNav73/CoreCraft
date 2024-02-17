@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="TestFiles\DeferLoading.model.json">
+    <Content Include="TestFiles\LoadManually.model.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="TestFiles\VisibilityImplementations.model.json">

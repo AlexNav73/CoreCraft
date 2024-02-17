@@ -56,13 +56,13 @@ internal class MigrationRunnerTest
         var nullColumn = "NullInt";
         var notNullStringColumn = "NonNullString";
         var nullStringColumn = "NullString";
-        var runner = new MigrationRunner(new[]
-        {
+        var runner = new MigrationRunner(
+        [
             new AddColumnMigration<int>(FakeModelShardInfo.FirstCollectionInfo, nonNullColumn, false, 5) as IMigration,
             new AddColumnMigration<int>(FakeModelShardInfo.FirstCollectionInfo, nullColumn, true),
             new AddColumnMigration<string>(FakeModelShardInfo.FirstCollectionInfo, notNullStringColumn, false, "test"),
             new AddColumnMigration<string>(FakeModelShardInfo.FirstCollectionInfo, nullStringColumn, true),
-        });
+        ]);
 
         repository.Save(
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
