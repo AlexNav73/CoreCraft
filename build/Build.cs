@@ -133,28 +133,28 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.6.0", "0.6.4"))
+                .SetVersion(MakePreviewIfNeeded("0.6.0", "0.6.5"))
                 .SetDescription("A core library to build cross-platform and highly customizable domain models")
                 .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Generators)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.6.0", "0.6.4"))
+                .SetVersion(MakePreviewIfNeeded("0.6.0", "0.6.5"))
                 .SetDescription("Roslyn Source Generators for generating domain models using 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Sqlite)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.6.0", "0.6.4"))
+                .SetVersion(MakePreviewIfNeeded("0.6.0", "0.6.5"))
                 .SetDescription("SQLite storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SQLite"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Json)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.3.0", "0.3.4"))
+                .SetVersion(MakePreviewIfNeeded("0.3.0", "0.3.5"))
                 .SetDescription("Json storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "Json"));
 
