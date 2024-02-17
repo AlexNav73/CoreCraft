@@ -1,5 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
 using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Tests.ChangesTracking;
 
@@ -110,5 +112,34 @@ public class RelationChangeSetTests
 
         Assert.That(enumerator, Is.Not.Null);
         Assert.That(enumerator.MoveNext(), Is.False);
+    }
+
+    [Test]
+    public void AddChangeWithInvalidActionShouldThrowExceptionTest()
+    {
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
+        var first = new FirstEntity();
+        var second = new SecondEntity();
+
+        changes.Add((RelationAction)42, first, second);
+
+        Assert.Throws<NotSupportedException>(() => changes.Apply(A.Fake<IMutableRelation<FirstEntity, SecondEntity>>()));
+    }
+
+    [Test]
+    public void SaveShouldCallRepositoryTest()
+    {
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
+        var repo = A.Fake<IRepository>();
+
+        changes.Save(repo);
+
+        A.CallTo(() => repo.Save(A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
+            .Invokes(c =>
+            {
+                var changeSet = c.Arguments[0];
+
+                Assert.That(ReferenceEquals(changes, changeSet), Is.True);
+            });
     }
 }

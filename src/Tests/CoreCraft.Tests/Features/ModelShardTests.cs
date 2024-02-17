@@ -1,7 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 
-namespace CoreCraft.Tests.ChangesTracking;
+namespace CoreCraft.Tests.Features;
 
 public class ModelShardTests
 {

@@ -1,9 +1,10 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using CoreCraft.Features.Tracking;
+using CoreCraft.Persistence;
 using System.Collections;
 
-namespace CoreCraft.Tests.ChangesTracking;
+namespace CoreCraft.Tests.Features.Tracking;
 
 public class TrackableRelationTests
 {
@@ -127,5 +128,21 @@ public class TrackableRelationTests
         var enumerator = ((IEnumerable)_trackable!).GetEnumerator();
 
         A.CallTo(() => _relation!.GetEnumerator()).MustHaveHappened();
+    }
+
+    [Test]
+    public void SaveShouldCallRepositoryTest()
+    {
+        var repo = A.Fake<IRepository>();
+
+        _trackable!.Save(repo);
+
+        A.CallTo(() => repo.Save(A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
+            .Invokes(c =>
+            {
+                var innerRelation = c.Arguments[0];
+
+                Assert.That(ReferenceEquals(_relation, innerRelation), Is.True);
+            });
     }
 }

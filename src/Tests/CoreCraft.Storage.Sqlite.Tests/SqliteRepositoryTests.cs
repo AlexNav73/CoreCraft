@@ -270,4 +270,12 @@ public class SqliteRepositoryTests
 
         Assert.Throws<NonEmptyModelException>(() => relation.Load(repository, parentCollection, childCollection));
     }
+
+    [Test]
+    public void ExistsForNonExistingTableShouldReturnFalseTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+
+        Assert.That(repository.Exists(new CollectionInfo("non", "existing")), Is.False);
+    }
 }

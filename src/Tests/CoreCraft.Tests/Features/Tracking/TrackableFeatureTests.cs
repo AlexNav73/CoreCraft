@@ -2,7 +2,7 @@
 using CoreCraft.Core;
 using CoreCraft.Features.Tracking;
 
-namespace CoreCraft.Tests.Features;
+namespace CoreCraft.Tests.Features.Tracking;
 
 public class TrackableFeatureTests
 {

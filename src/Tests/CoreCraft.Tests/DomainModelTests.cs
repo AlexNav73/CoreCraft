@@ -250,6 +250,91 @@ public class DomainModelTests
     }
 
     [Test]
+    public async Task LoadSpecificModelShardTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var repo = A.Fake<IRepository>();
+        var model = new TestDomainModel([new FakeModelShard()], storage);
+
+        SetUpStorageLoadLazyLoader(storage, repo);
+
+        await model.Load<IMutableFakeModelShard>();
+
+        AssertThatWholeShardIsLoaded(repo);
+    }
+
+    [Test]
+    public async Task LoadShouldSkipManuallyLoadableModelShardsTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var repo = A.Fake<IRepository>();
+        var model = new TestDomainModel([new FakeModelShard()], storage);
+
+        SetUpStorageLoadCollectionOfModelShards(storage, repo);
+
+        await model.Load();
+
+        A.CallTo(() => repo.Load(A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored)).MustNotHaveHappened();
+        A.CallTo(() => repo.Load(A<IMutableCollection<SecondEntity, SecondEntityProperties>>.Ignored)).MustNotHaveHappened();
+        A.CallTo(() => repo.Load(A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored, A<IEnumerable<FirstEntity>>.Ignored, A<IEnumerable<SecondEntity>>.Ignored))
+            .MustNotHaveHappened();
+    }
+
+    [Test]
+    public async Task ForceLoadShouldLoadAllModelShardsAndAllCollectionsAndRelationsTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var repo = A.Fake<IRepository>();
+        var model = new TestDomainModel([new FakeModelShard()], storage);
+        var entityId = Guid.NewGuid();
+
+        SetUpStorageLoadCollectionOfModelShards(storage, repo);
+        SetUpStorageLoadLazyLoader(storage, repo);
+
+        await model.Load(true);
+
+        AssertThatWholeShardIsLoaded(repo);
+    }
+
+    [Test]
+    public async Task LoadingCollectionsWithoutLoadingModelShardTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var repo = A.Fake<IRepository>();
+        var model = new TestDomainModel([new FakeModelShard()], storage);
+        var entityId = Guid.NewGuid();
+
+        SetUpStorageLoadCollectionOfModelShards(storage, repo);
+        SetUpStorageLoadLazyLoader(storage, repo);
+
+        await model.Load<IMutableFakeModelShard>(s => s.Collection(c => c.FirstCollection));
+
+        A.CallTo(() => repo.Load(A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repo.Load(A<IMutableCollection<SecondEntity, SecondEntityProperties>>.Ignored)).MustNotHaveHappened();
+        A.CallTo(() => repo.Load(A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored, A<IEnumerable<FirstEntity>>.Ignored, A<IEnumerable<SecondEntity>>.Ignored))
+            .MustNotHaveHappened();
+    }
+
+    [Test]
+    public async Task LoadingRelationWithoutLoadingModelShardTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var repo = A.Fake<IRepository>();
+        var model = new TestDomainModel([new FakeModelShard()], storage);
+        var entityId = Guid.NewGuid();
+
+        SetUpStorageLoadCollectionOfModelShards(storage, repo);
+        SetUpStorageLoadLazyLoader(storage, repo);
+
+        await model.Load<IMutableFakeModelShard>(s => s.Relation(c => c.OneToOneRelation, p => p.FirstCollection, c => c.SecondCollection));
+
+        A.CallTo(() => repo.Load(A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repo.Load(A<IMutableCollection<SecondEntity, SecondEntityProperties>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repo.Load(A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored, A<IEnumerable<FirstEntity>>.Ignored, A<IEnumerable<SecondEntity>>.Ignored))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
     public async Task LoadShouldNotThrowExceptionWhenCollectionLoadsMultipleTimesTest()
     {
         var storage = A.Fake<IStorage>();
@@ -263,22 +348,9 @@ public class DomainModelTests
                 var collection = c.Arguments[0] as IMutableCollection<FirstEntity, FirstEntityProperties>;
                 collection!.Add(entityId, p => p with { NonNullableStringProperty = "a" });
             });
-        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
-            .Invokes(c =>
-            {
-                var modelShards = c.Arguments[0] as IEnumerable<IMutableModelShard>;
 
-                foreach (var shard in modelShards!)
-                {
-                    shard.Load(repo);
-                }
-            });
-        A.CallTo(() => storage.Load(A<ILazyLoader>.Ignored))
-            .Invokes(c =>
-            {
-                var loader = c.Arguments[0] as ILazyLoader;
-                loader!.Load(repo);
-            });
+        SetUpStorageLoadCollectionOfModelShards(storage, repo);
+        SetUpStorageLoadLazyLoader(storage, repo);
 
         await model.Load();
 
@@ -312,22 +384,9 @@ public class DomainModelTests
                 var relation = c.Arguments[0] as IMutableRelation<FirstEntity, SecondEntity>;
                 relation!.Add(entityId1, entityId2);
             });
-        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
-            .Invokes(c =>
-            {
-                var modelShards = c.Arguments[0] as IEnumerable<IMutableModelShard>;
 
-                foreach (var shard in modelShards!)
-                {
-                    shard.Load(repo);
-                }
-            });
-        A.CallTo(() => storage.Load(A<ILazyLoader>.Ignored))
-            .Invokes(c =>
-            {
-                var loader = c.Arguments[0] as ILazyLoader;
-                loader!.Load(repo);
-            });
+        SetUpStorageLoadCollectionOfModelShards(storage, repo);
+        SetUpStorageLoadLazyLoader(storage, repo);
 
         await model.Load();
 
@@ -418,9 +477,15 @@ public class DomainModelTests
             await Save(_storage);
         }
 
-        public async Task Load()
+        public async Task Load(bool force = false)
         {
-            await Load(_storage);
+            await Load(_storage, force);
+        }
+
+        public async Task Load<T>()
+            where T : IMutableModelShard
+        {
+            await Load<T>(_storage);
         }
 
         public async Task Load<T>(Func<IModelShardLoader<T>, ILazyLoader> configure)
@@ -438,5 +503,37 @@ public class DomainModelTests
         {
             _onModelChanged?.Invoke(change);
         }
+    }
+
+    private static void SetUpStorageLoadLazyLoader(IStorage storage, IRepository repo)
+    {
+        A.CallTo(() => storage.Load(A<ILazyLoader>.Ignored))
+            .Invokes(c =>
+            {
+                var loader = c.Arguments[0] as ILazyLoader;
+                loader!.Load(repo);
+            });
+    }
+
+    private static void SetUpStorageLoadCollectionOfModelShards(IStorage storage, IRepository repo)
+    {
+        A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
+            .Invokes(c =>
+            {
+                var loadables = (IEnumerable<IMutableModelShard>)c.Arguments[0]!;
+                var force = (bool)c.Arguments[1]!;
+                foreach (var shard in loadables.Where(x => force || !x.ManualLoadRequired))
+                {
+                    shard!.Load(repo, force);
+                }
+            });
+    }
+
+    private static void AssertThatWholeShardIsLoaded(IRepository repo)
+    {
+        A.CallTo(() => repo.Load(A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repo.Load(A<IMutableCollection<SecondEntity, SecondEntityProperties>>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => repo.Load(A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored, A<IEnumerable<FirstEntity>>.Ignored, A<IEnumerable<SecondEntity>>.Ignored))
+            .MustHaveHappened(4, Times.Exactly);
     }
 }

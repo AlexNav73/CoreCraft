@@ -1,9 +1,10 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using CoreCraft.Features.Tracking;
+using CoreCraft.Persistence;
 using System.Collections;
 
-namespace CoreCraft.Tests.ChangesTracking;
+namespace CoreCraft.Tests.Features.Tracking;
 
 public class TrackableCollectionTests
 {
@@ -172,5 +173,21 @@ public class TrackableCollectionTests
         var enumerator = _trackable!.Pairs();
 
         A.CallTo(() => _collection!.Pairs()).MustHaveHappened();
+    }
+
+    [Test]
+    public void SaveShouldCallRepositoryTest()
+    {
+        var repo = A.Fake<IRepository>();
+
+        _trackable!.Save(repo);
+
+        A.CallTo(() => repo.Save(A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
+            .Invokes(c =>
+            {
+                var innerCollection = c.Arguments[0];
+
+                Assert.That(ReferenceEquals(_collection, innerCollection), Is.True);
+            });
     }
 }

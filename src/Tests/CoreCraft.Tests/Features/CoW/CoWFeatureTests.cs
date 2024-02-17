@@ -1,7 +1,7 @@
 ﻿using CoreCraft.Core;
 using CoreCraft.Features.CoW;
 
-namespace CoreCraft.Tests.Features;
+namespace CoreCraft.Tests.Features.CoW;
 
 public class CoWFeatureTests
 {
