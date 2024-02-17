@@ -290,7 +290,7 @@ namespace compilation.VisibilityImplementations
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     public sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
     {
-        public bool ExplicitLoadRequired => false;
+        public bool ManualLoadRequired => false;
 
         public IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
         public IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;

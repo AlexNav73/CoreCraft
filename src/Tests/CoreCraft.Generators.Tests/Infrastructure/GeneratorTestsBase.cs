@@ -32,7 +32,7 @@ namespace MyCode
                 .Select(x => (file: x, content: File.ReadAllText(@$"./TestFiles/{x}")))
                 .Select(x => new InMemoryAdditionalText(x.file, x.content))
                 .ToImmutableArray();
-            GeneratorDriver driver = CSharpGeneratorDriver.Create(new[] { generator }, additionalTexts: additionalFiles);
+            GeneratorDriver driver = CSharpGeneratorDriver.Create([generator], additionalTexts: additionalFiles);
 
             driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var _, out var _);
 
@@ -56,7 +56,7 @@ namespace MyCode
         {
             return CSharpCompilation.Create(
                 "compilation",
-                new[] { CSharpSyntaxTree.ParseText(source) },
+                [CSharpSyntaxTree.ParseText(source)],
                 new[] { MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location) },
                 new CSharpCompilationOptions(OutputKind.ConsoleApplication));
         }

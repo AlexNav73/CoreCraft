@@ -156,7 +156,7 @@ public class DomainModelTests
             .Throws<InvalidOperationException>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
-        Assert.ThrowsAsync<ModelSaveException>(() => model.Save(new[] { A.Fake<IModelChanges>() }));
+        Assert.ThrowsAsync<ModelSaveException>(() => model.Save([A.Fake<IModelChanges>()]));
     }
 
     [Test]
@@ -165,7 +165,7 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
-        var task = model.Save(Array.Empty<IModelChanges>());
+        var task = model.Save([]);
 
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustNotHaveHappened();
@@ -182,7 +182,7 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
-        var task = model.Save(new[] { modelChanges1, modelChanges2 });
+        var task = model.Save([modelChanges1, modelChanges2]);
 
         A.CallTo(() => ((IMutableModelChanges)modelChanges1).Merge(modelChanges2))
             .MustHaveHappenedOnceExactly();
@@ -211,12 +211,12 @@ public class DomainModelTests
         A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored))
             .Throws<Exception>();
 
-        Assert.ThrowsAsync<ModelLoadingException>(model.Load);
+        Assert.ThrowsAsync<ModelLoadingException>(() => model.Load());
         Assert.That(notificationSent, Is.False);
     }
 
     [Test]
-    public async Task ModelShouldNotBeUpdatedAndNotificationsSentIfNothingLoaded()
+    public async Task ModelShouldNotBeUpdatedAndNotificationsSentIfNothingIsLoaded()
     {
         var storage = A.Fake<IStorage>();
         var changesReceived = false;

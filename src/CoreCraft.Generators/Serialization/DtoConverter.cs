@@ -18,7 +18,7 @@ internal class DtoConverter
         {
             var entity = entities.Single(x => x.Name == collection.EntityType);
 
-            collections.Add(new Collection(collection.Name, entity, collection.DeferLoading));
+            collections.Add(new Collection(collection.Name, entity, collection.LoadManually));
         }
 
         foreach (var relation in modelShard.Relations)
@@ -45,7 +45,7 @@ internal class DtoConverter
             Visibility = Convert(modelShard.Visibility),
             Collections = collections,
             Relations = relations,
-            Lazy = modelShard.Lazy
+            LoadManually = modelShard.LoadManually
         };
     }
 

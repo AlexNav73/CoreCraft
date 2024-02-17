@@ -16,17 +16,16 @@ namespace CoreCraft.Core;
 public interface IMutableModelShard : IModelShard
 {
     /// <summary>
-    ///     Gets a boolean indicating whether explicit loading from the repository is required.
+    ///     Gets a boolean indicating whether manual loading from the repository is required.
     /// </summary>
     /// <remarks>
     ///     This property determines whether the model shard attempts to load data
     ///     when <see cref="DomainModel.Load(IStorage, bool, CancellationToken)"/> is called.
     ///     Setting it to `true` means that all data, including non-lazy collections and relations,
-    ///     must be explicitly loaded using the <see cref="Load(IRepository, bool)"/>  or
-    ///     <see cref="DomainModel.Load{T}(IStorage, Func{Persistence.Lazy.IModelShardLoader{T}, Persistence.Lazy.ILazyLoader}, CancellationToken)"/> method.
+    ///     must be manually loaded using the <see cref="DomainModel.Load{T}(IStorage, bool, CancellationToken)"/> method.
     ///     This can improve performance by avoiding unnecessary loading.
     /// </remarks>
-    bool ExplicitLoadRequired { get; }
+    bool ManualLoadRequired { get; }
 
     /// <summary>
     ///     Loads data into the implementing model shard from the provided repository.
@@ -34,7 +33,7 @@ public interface IMutableModelShard : IModelShard
     /// <param name="repository">The repository used to load the model shard data.</param>
     /// <param name="force">
     ///     (Optional) A boolean indicating whether to force loading collections and/or relations
-    ///     even if they are marked as "deferLoading".
+    ///     even if they are marked as "loadManually".
     /// </param>
     /// <remarks>
     ///     This method retrieves data for the model shard from the specified repository.

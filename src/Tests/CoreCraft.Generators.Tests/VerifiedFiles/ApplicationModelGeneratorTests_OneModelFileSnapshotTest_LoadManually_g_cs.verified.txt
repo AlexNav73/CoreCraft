@@ -10,12 +10,12 @@
 
 #nullable enable
 
-namespace compilation.DeferLoading
+namespace compilation.LoadManually
 {
     using CoreCraft.Core;
     using CoreCraft.ChangesTracking;
     using CoreCraft.Persistence;
-    using compilation.DeferLoading.Entities;
+    using compilation.LoadManually.Entities;
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -248,7 +248,7 @@ namespace compilation.DeferLoading
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed class MutableFakeModelShard : IMutableFakeModelShard, IMutableState<IFakeModelShard>
     {
-        public bool ExplicitLoadRequired => false;
+        public bool ManualLoadRequired => false;
 
         public IMutableCollection<FirstEntity, FirstEntityProperties> FirstCollection { get; init; } = null!;
         public IMutableCollection<SecondEntity, SecondEntityProperties> SecondCollection { get; init; } = null!;
@@ -427,7 +427,7 @@ namespace compilation.DeferLoading
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
     internal sealed class MutableLazyShardModelShard : IMutableLazyShardModelShard, IMutableState<ILazyShardModelShard>
     {
-        public bool ExplicitLoadRequired => true;
+        public bool ManualLoadRequired => true;
 
 
 
@@ -449,7 +449,7 @@ namespace compilation.DeferLoading
 
 }
 
-namespace compilation.DeferLoading.Entities
+namespace compilation.LoadManually.Entities
 {
     using CoreCraft.Core;
 

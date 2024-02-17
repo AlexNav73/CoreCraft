@@ -453,7 +453,7 @@ internal partial class ApplicationModelGenerator
             ],
             () =>
             {
-                DefineExplicitLoadRequiredProperty(code, modelShard);
+                DefineManualLoadRequiredProperty(code, modelShard);
                 code.EmptyLine();
                 ImplementModelShardInterface(code, modelShard);
                 code.EmptyLine();
@@ -464,9 +464,9 @@ internal partial class ApplicationModelGenerator
                 ImplementSaveMethod(code, modelShard);
             });
 
-        void DefineExplicitLoadRequiredProperty(IndentedTextWriter code, ModelShard modelShard)
+        void DefineManualLoadRequiredProperty(IndentedTextWriter code, ModelShard modelShard)
         {
-            code.WriteLine($"public bool ExplicitLoadRequired => {modelShard.Lazy.ToString().ToLowerInvariant()};");
+            code.WriteLine($"public bool ManualLoadRequired => {modelShard.LoadManually.ToString().ToLowerInvariant()};");
         }
 
         void ImplementModelShardInterface(IndentedTextWriter code, ModelShard modelShard)
@@ -499,7 +499,7 @@ internal partial class ApplicationModelGenerator
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    if (collection.DeferLoading)
+                    if (collection.LoadManually)
                     {
                         code.WriteLine($"if (force) {collection.Name}.Load(repository);");
                     }
@@ -512,7 +512,7 @@ internal partial class ApplicationModelGenerator
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    if (relation.Parent.DeferLoading || relation.Child.DeferLoading)
+                    if (relation.Parent.LoadManually || relation.Child.LoadManually)
                     {
                         code.WriteLine($"if (force) {relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
                     }

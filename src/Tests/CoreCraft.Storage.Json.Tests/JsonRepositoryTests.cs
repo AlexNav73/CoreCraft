@@ -191,10 +191,10 @@ public class JsonRepositoryTests
                 {
                     new Collection<FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo.Name)
                     {
-                        Items = new[]
-                        {
+                        Items =
+                        [
                             new Item<FirstEntityProperties>(entityId, new())
-                        }
+                        ]
                     }
                 }
             }

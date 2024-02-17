@@ -73,7 +73,7 @@ public sealed class SqliteStorage : IStorage
 
         _migrationRunner.Run(repository);
 
-        foreach (var shard in modelShards.Where(x => force || !x.ExplicitLoadRequired))
+        foreach (var shard in modelShards.Where(x => force || !x.ManualLoadRequired))
         {
             shard.Load(repository, force);
         }
