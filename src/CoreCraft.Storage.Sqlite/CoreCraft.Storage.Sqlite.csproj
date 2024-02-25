@@ -21,4 +21,9 @@
     <ProjectReference Include="..\CoreCraft\CoreCraft.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+    <InternalsVisibleTo Include="CoreCraft.Storage.Sqlite.Tests" />
+  </ItemGroup>
+
 </Project>

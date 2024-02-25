@@ -1,4 +1,4 @@
-﻿namespace CoreCraft.Generators.Serialization;
+﻿namespace CoreCraft.SourceGeneration.Serialization;
 
 internal class DtoConverter
 {

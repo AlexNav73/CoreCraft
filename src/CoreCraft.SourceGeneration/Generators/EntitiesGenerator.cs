@@ -1,31 +1,33 @@
-﻿namespace CoreCraft.Generators;
+﻿using CoreCraft.SourceGeneration.Extensions;
 
-internal partial class ApplicationModelGenerator
+namespace CoreCraft.SourceGeneration.Generators;
+
+internal sealed class EntitiesGenerator(IndentedTextWriter code) : GeneratorCommon
 {
-    public void GenerateEntities(IndentedTextWriter code, IEnumerable<ModelShard> shards)
+    public void Generate(IEnumerable<ModelShard> shards)
     {
         code.WriteLine("using CoreCraft.Core;");
         code.EmptyLine();
 
         foreach (var modelShard in shards)
         {
-            DefineEntities(code, modelShard);
+            DefineEntities(modelShard);
             code.EmptyLine();
         }
     }
 
-    private void DefineEntities(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineEntities(ModelShard modelShard)
     {
         foreach (var entity in modelShard.Collections.Select(x => x.Entity))
         {
-            DefineEntityType(code, entity);
+            DefineEntityType(entity);
             code.EmptyLine();
-            DefineEntityPropertiesClass(code, entity);
+            DefineEntityPropertiesClass(entity);
             code.EmptyLine();
         }
     }
 
-    private void DefineEntityType(IndentedTextWriter code, Entity entity)
+    private void DefineEntityType(Entity entity)
     {
         code.GeneratedClassAttributes();
         code.WriteLine($"public sealed record {entity.Name}(global::System.Guid Id) : Entity(Id)");
@@ -38,13 +40,13 @@ internal partial class ApplicationModelGenerator
         });
     }
 
-    private void DefineEntityPropertiesClass(IndentedTextWriter code, Entity entity)
+    private void DefineEntityPropertiesClass(Entity entity)
     {
         code.GeneratedClassAttributes();
         code.WriteLine($"public sealed partial record {entity.PropertiesType} : Properties");
         code.Block(() =>
         {
-            DefineCtor(code, entity);
+            DefineCtor(entity);
             code.EmptyLine();
 
             foreach (var prop in entity.Properties)
@@ -53,11 +55,11 @@ internal partial class ApplicationModelGenerator
             }
             code.EmptyLine();
 
-            ImplementEntityPropertiesMethods(code, entity);
+            ImplementEntityPropertiesMethods(entity);
             code.EmptyLine();
         });
 
-        void DefineCtor(IndentedTextWriter code, Entity entity)
+        void DefineCtor(Entity entity)
         {
             code.WriteLine($"public {entity.PropertiesType}()");
             code.Block(() =>
@@ -69,7 +71,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void ImplementEntityPropertiesMethods(IndentedTextWriter code, Entity entity)
+        void ImplementEntityPropertiesMethods(Entity entity)
         {
             code.NoIndent(c => c.WriteLine("#if NET5_0_OR_GREATER"));
             code.WriteLine($"public override {entity.PropertiesType} ReadFrom(IPropertiesBag bag)");

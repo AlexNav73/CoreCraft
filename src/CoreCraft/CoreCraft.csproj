@@ -18,4 +18,11 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+      <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+      <InternalsVisibleTo Include="CoreCraft.Tests" />
+      <InternalsVisibleTo Include="CoreCraft.Storage.Sqlite.Tests" />
+      <InternalsVisibleTo Include="CoreCraft.Storage.Json.Tests" />
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace CoreCraft.Generators;
+﻿namespace CoreCraft.SourceGeneration;
 
 internal sealed record ModelScheme(IEnumerable<ModelShard> Shards);
 
