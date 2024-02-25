@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b11d3e00-59b5-4227-ab86-2f20e5fa330b</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CoreCraft.SourceGeneration</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\IndentedTextWriterExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Generators\EntitiesGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Generators\GeneratorCommon.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)generators\ModelGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Generators\ModelShardGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModelScheme.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\DtoConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)serialization\ModelSchemeReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ModelSchemeDto.cs" />
+  </ItemGroup>
+</Project>

@@ -1,33 +1,35 @@
-﻿namespace CoreCraft.Generators;
+﻿using CoreCraft.SourceGeneration.Extensions;
 
-internal partial class ApplicationModelGenerator
+namespace CoreCraft.SourceGeneration.Generators;
+
+internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCommon
 {
-    public void GenerateModelShards(IndentedTextWriter code, IEnumerable<ModelShard> shards)
+    public void Generate(IEnumerable<ModelShard> shards)
     {
         foreach (var modelShard in shards)
         {
-            DefineModelShardInterface(code, modelShard, false);
+            DefineModelShardInterface(modelShard, false);
             code.EmptyLine();
-            DefineModelShardInterface(code, modelShard, true);
+            DefineModelShardInterface(modelShard, true);
             code.EmptyLine();
-            DefineModelShardInfoClass(code, modelShard);
+            DefineModelShardInfoClass(modelShard);
             code.EmptyLine();
-            DefineModelShardClass(code, modelShard);
+            DefineModelShardClass(modelShard);
             code.EmptyLine();
-            DefineModelShardClassAsReadOnlyState(code, modelShard);
+            DefineModelShardClassAsReadOnlyState(modelShard);
             code.EmptyLine();
-            DefineModelShardClassAsIFeatureContext(code, modelShard);
+            DefineModelShardClassAsIFeatureContext(modelShard);
             code.EmptyLine();
-            DefineChangesFrameInterface(code, modelShard);
+            DefineChangesFrameInterface(modelShard);
             code.EmptyLine();
-            DefineChangesFrameClass(code, modelShard);
+            DefineChangesFrameClass(modelShard);
             code.EmptyLine();
-            DefineMutableModelShardClass(code, modelShard);
+            DefineMutableModelShardClass(modelShard);
             code.EmptyLine();
         }
     }
 
-    private void DefineModelShardInterface(IndentedTextWriter code, ModelShard modelShard, bool isMutable)
+    private void DefineModelShardInterface(ModelShard modelShard, bool isMutable)
     {
         var mutability = isMutable ? "Mutable" : string.Empty;
 
@@ -48,7 +50,7 @@ internal partial class ApplicationModelGenerator
         });
     }
 
-    private void DefineModelShardInfoClass(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineModelShardInfoClass(ModelShard modelShard)
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
@@ -72,21 +74,21 @@ internal partial class ApplicationModelGenerator
             });
     }
 
-    private void DefineModelShardClass(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineModelShardClass(ModelShard modelShard)
     {
         code.GeneratedClassAttributes();
         code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", [$"I{modelShard.Name}ModelShard"], () =>
         {
-            DefineCtor(code, modelShard);
+            DefineCtor(modelShard);
             code.EmptyLine();
-            DefineConversionCtor(code, modelShard);
+            DefineConversionCtor(modelShard);
             code.EmptyLine();
-            ImplementModelShardInterface(code, modelShard);
+            ImplementModelShardInterface(modelShard);
             code.EmptyLine();
-            ImplementSaveMethod(code, modelShard);
+            ImplementSaveMethod(modelShard);
         });
 
-        void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
+        void DefineCtor(ModelShard modelShard)
         {
             code.WriteLine($"public {modelShard.Name}ModelShard()");
             code.Block(() =>
@@ -116,7 +118,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void DefineConversionCtor(IndentedTextWriter code, ModelShard modelShard)
+        void DefineConversionCtor(ModelShard modelShard)
         {
             code.WriteLine($"internal {modelShard.Name}ModelShard(IMutable{modelShard.Name}ModelShard mutable)");
             code.Block(() =>
@@ -134,7 +136,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void ImplementModelShardInterface(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementModelShardInterface(ModelShard modelShard)
         {
             foreach (var collection in modelShard.Collections)
             {
@@ -148,7 +150,7 @@ internal partial class ApplicationModelGenerator
             }
         }
 
-        void ImplementSaveMethod(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementSaveMethod(ModelShard modelShard)
         {
             code.WriteLine("public void Save(IRepository repository)");
             code.Block(() =>
@@ -167,7 +169,7 @@ internal partial class ApplicationModelGenerator
         }
     }
 
-    private void DefineModelShardClassAsReadOnlyState(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineModelShardClassAsReadOnlyState(ModelShard modelShard)
     {
         code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard",
         [
@@ -224,7 +226,7 @@ internal partial class ApplicationModelGenerator
         });
     }
 
-    private void DefineModelShardClassAsIFeatureContext(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineModelShardClassAsIFeatureContext(ModelShard modelShard)
     {
         code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", ["IFeatureContext"],
         () =>
@@ -237,7 +239,7 @@ internal partial class ApplicationModelGenerator
         });
     }
 
-    private void DefineChangesFrameInterface(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineChangesFrameInterface(ModelShard modelShard)
     {
         code.GeneratedInterfaceAttributes();
         code.Interface($"I{modelShard.Name}ChangesFrame", ["IChangesFrame"], () =>
@@ -256,7 +258,7 @@ internal partial class ApplicationModelGenerator
         });
     }
 
-    private void DefineChangesFrameClass(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineChangesFrameClass(ModelShard modelShard)
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
@@ -267,25 +269,25 @@ internal partial class ApplicationModelGenerator
             ],
             () =>
             {
-                DefineCtor(code, modelShard);
+                DefineCtor(modelShard);
                 code.EmptyLine();
-                ImplementModelShardChangesFrameInterface(code, modelShard);
+                ImplementModelShardChangesFrameInterface(modelShard);
                 code.EmptyLine();
-                DefineGetMethod(code, modelShard);
+                DefineGetMethod(modelShard);
                 code.EmptyLine();
-                DefineInvertMethod(code, modelShard);
+                DefineInvertMethod(modelShard);
                 code.EmptyLine();
-                DefineApplyMethod(code, modelShard);
+                DefineApplyMethod(modelShard);
                 code.EmptyLine();
-                ImplementChangesFrameInterface(code, modelShard);
+                ImplementChangesFrameInterface(modelShard);
                 code.EmptyLine();
-                DefineMergeMethod(code, modelShard);
+                DefineMergeMethod(modelShard);
                 code.EmptyLine();
-                ImplementSaveMethod(code, modelShard);
+                ImplementSaveMethod(modelShard);
                 code.EmptyLine();
             });
 
-        void DefineCtor(IndentedTextWriter code, ModelShard modelShard)
+        void DefineCtor(ModelShard modelShard)
         {
             code.WriteLine($"public {modelShard.Name}ChangesFrame()");
             code.Block(() =>
@@ -303,7 +305,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void ImplementModelShardChangesFrameInterface(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementModelShardChangesFrameInterface(ModelShard modelShard)
         {
             foreach (var collection in modelShard.Collections)
             {
@@ -317,7 +319,7 @@ internal partial class ApplicationModelGenerator
             }
         }
 
-        void DefineGetMethod(IndentedTextWriter code, ModelShard modelShard)
+        void DefineGetMethod(ModelShard modelShard)
         {
             code.WriteLine("ICollectionChangeSet<TEntity, TProperty>? IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)");
             code.Block(() =>
@@ -345,7 +347,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void DefineInvertMethod(IndentedTextWriter code, ModelShard modelShard)
+        void DefineInvertMethod(ModelShard modelShard)
         {
             code.WriteLine($"IChangesFrame IChangesFrame.Invert()");
             code.Block(() =>
@@ -367,7 +369,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void DefineApplyMethod(IndentedTextWriter code, ModelShard modelShard)
+        void DefineApplyMethod(ModelShard modelShard)
         {
             code.WriteLine($"public void Apply(IModel model)");
             code.Block(() =>
@@ -385,7 +387,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void ImplementChangesFrameInterface(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementChangesFrameInterface(ModelShard modelShard)
         {
             code.WriteLine($"public bool HasChanges()");
             code.Block(() =>
@@ -397,7 +399,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void DefineMergeMethod(IndentedTextWriter code, ModelShard modelShard)
+        void DefineMergeMethod(ModelShard modelShard)
         {
             code.WriteLine($"public IChangesFrame Merge(IChangesFrame frame)");
             code.Block(() =>
@@ -422,7 +424,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void ImplementSaveMethod(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementSaveMethod(ModelShard modelShard)
         {
             code.WriteLine($"public void Save(IRepository repository)");
             code.Block(() =>
@@ -441,7 +443,7 @@ internal partial class ApplicationModelGenerator
         }
     }
 
-    private void DefineMutableModelShardClass(IndentedTextWriter code, ModelShard modelShard)
+    private void DefineMutableModelShardClass(ModelShard modelShard)
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
@@ -453,23 +455,23 @@ internal partial class ApplicationModelGenerator
             ],
             () =>
             {
-                DefineManualLoadRequiredProperty(code, modelShard);
+                DefineManualLoadRequiredProperty(modelShard);
                 code.EmptyLine();
-                ImplementModelShardInterface(code, modelShard);
+                ImplementModelShardInterface(modelShard);
                 code.EmptyLine();
-                ImplementMutableStateInterface(code, modelShard);
+                ImplementMutableStateInterface(modelShard);
                 code.EmptyLine();
-                ImplementLoadMethod(code, modelShard);
+                ImplementLoadMethod(modelShard);
                 code.EmptyLine();
-                ImplementSaveMethod(code, modelShard);
+                ImplementSaveMethod(modelShard);
             });
 
-        void DefineManualLoadRequiredProperty(IndentedTextWriter code, ModelShard modelShard)
+        void DefineManualLoadRequiredProperty(ModelShard modelShard)
         {
             code.WriteLine($"public bool ManualLoadRequired => {modelShard.LoadManually.ToString().ToLowerInvariant()};");
         }
 
-        void ImplementModelShardInterface(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementModelShardInterface(ModelShard modelShard)
         {
             foreach (var collection in modelShard.Collections)
             {
@@ -483,7 +485,7 @@ internal partial class ApplicationModelGenerator
             }
         }
 
-        void ImplementMutableStateInterface(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementMutableStateInterface(ModelShard modelShard)
         {
             code.WriteLine($"public I{modelShard.Name}ModelShard AsReadOnly()");
             code.Block(() =>
@@ -492,7 +494,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void ImplementLoadMethod(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementLoadMethod(ModelShard modelShard)
         {
             code.WriteLine("public void Load(IRepository repository, bool force = false)");
             code.Block(() =>
@@ -524,7 +526,7 @@ internal partial class ApplicationModelGenerator
             });
         }
 
-        void ImplementSaveMethod(IndentedTextWriter code, ModelShard modelShard)
+        void ImplementSaveMethod(ModelShard modelShard)
         {
             code.WriteLine("public void Save(IRepository repository)");
             code.Block(() =>

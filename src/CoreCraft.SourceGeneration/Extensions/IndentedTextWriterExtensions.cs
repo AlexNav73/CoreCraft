@@ -1,4 +1,4 @@
-﻿namespace CoreCraft.Generators;
+﻿namespace CoreCraft.SourceGeneration.Extensions;
 
 internal static class IndentedTextWriterExtensions
 {
@@ -111,7 +111,7 @@ internal static class IndentedTextWriterExtensions
 
     public static void GeneratedCodeAttribute(this IndentedTextWriter code)
     {
-        code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(\"C# Source Generator\", \"{typeof(GeneratorBase).Assembly.GetName().Version}\")]");
+        code.WriteLine($"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(\"C# Source Generator\", \"{typeof(IndentedTextWriterExtensions).Assembly.GetName().Version}\")]");
     }
 
     public static void CompilerGeneratedCodeAttribute(this IndentedTextWriter code)
