@@ -30,7 +30,7 @@ public interface IFeature
     /// <param name="collection">A base collection which will be wrapped in this method</param>
     /// <returns>A new collection with adjusted behavior</returns>
     IMutableCollection<TEntity, TProperties> Decorate<TEntity, TProperties>(
-        IFeatureContext context,
+        IFrameFactory context,
         IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties;
@@ -44,7 +44,7 @@ public interface IFeature
     /// <param name="relation">A base relation which will be wrapped in this method</param>
     /// <returns>A new relation with adjusted behavior</returns>
     IMutableRelation<TParent, TChild> Decorate<TParent, TChild>(
-        IFeatureContext context,
+        IFrameFactory context,
         IMutableRelation<TParent, TChild> relation)
         where TParent : Entity
         where TChild : Entity;

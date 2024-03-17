@@ -131,10 +131,10 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
         return result;
     }
 
-    /// <inheritdoc cref="ICollectionChangeSet{TEntity, TProperties}.Save(IRepository)"/>
-    public void Save(IRepository repository)
+    /// <inheritdoc cref="ICollectionChangeSet{TEntity, TProperties}.Update(IRepository)"/>
+    public void Update(IRepository repository)
     {
-        repository.Save(this);
+        repository.Update(this);
     }
 
     /// <inheritdoc />

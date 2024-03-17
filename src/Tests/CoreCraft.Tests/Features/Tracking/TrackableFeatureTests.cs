@@ -9,15 +9,16 @@ public class TrackableFeatureTests
     [Test]
     public void DecorateTest()
     {
-        var feature = new TrackableFeature(A.Fake<IMutableModelChanges>());
-        var featureContext = A.Fake<IFeatureContext>();
-        var frame = A.Fake<IChangesFrame>();
+        var modelChanges = A.Fake<IMutableModelChanges>();
+        var feature = new TrackableFeature(modelChanges);
+        var frameFactory = A.Fake<IFrameFactory>();
+        var frame = A.Fake<IChangesFrameEx>();
 
-        A.CallTo(() => featureContext.GetOrAddFrame(A<IMutableModelChanges>.Ignored))
+        A.CallTo(() => modelChanges.AddOrGet(A<IChangesFrame>.Ignored))
             .Returns(frame);
 
-        var collection = feature.Decorate(featureContext, A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>());
-        var relation = feature.Decorate(featureContext, A.Fake<IMutableRelation<FirstEntity, SecondEntity>>());
+        var collection = feature.Decorate(frameFactory, A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>());
+        var relation = feature.Decorate(frameFactory, A.Fake<IMutableRelation<FirstEntity, SecondEntity>>());
 
         A.CallTo(() => frame.Get(A<ICollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -33,11 +34,12 @@ public class TrackableFeatureTests
     [Test]
     public void DecorateWithMissingCollectionOrRelationTest()
     {
-        var feature = new TrackableFeature(A.Fake<IMutableModelChanges>());
-        var featureContext = A.Fake<IFeatureContext>();
-        var frame = A.Fake<IChangesFrame>();
+        var modelChanges = A.Fake<IMutableModelChanges>();
+        var feature = new TrackableFeature(modelChanges);
+        var frameFactory = A.Fake<IFrameFactory>();
+        var frame = A.Fake<IChangesFrameEx>();
 
-        A.CallTo(() => featureContext.GetOrAddFrame(A<IMutableModelChanges>.Ignored))
+        A.CallTo(() => modelChanges.AddOrGet(A<IChangesFrame>.Ignored))
             .Returns(frame);
 
         A.CallTo(() => frame.Get(A<ICollection<FirstEntity, FirstEntityProperties>>.Ignored))
@@ -46,9 +48,9 @@ public class TrackableFeatureTests
             .Returns(null);
 
         var originalCollection = A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>();
-        var collection = feature.Decorate(featureContext, originalCollection);
+        var collection = feature.Decorate(frameFactory, originalCollection);
         var originalRelation = A.Fake<IMutableRelation<FirstEntity, SecondEntity>>();
-        var relation = feature.Decorate(featureContext, originalRelation);
+        var relation = feature.Decorate(frameFactory, originalRelation);
 
         Assert.That(collection, Is.Not.Null);
         Assert.That(ReferenceEquals(collection, originalCollection), Is.True);

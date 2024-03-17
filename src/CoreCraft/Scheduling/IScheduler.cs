@@ -27,6 +27,13 @@ public interface IScheduler
     Task Enqueue(Action job, CancellationToken token);
 
     /// <summary>
+    ///     Enqueues the job to be processed sequentially after all previous jobs will be finished
+    /// </summary>
+    /// <param name="job">A job to run</param>
+    /// <param name="token">Cancellation token</param>
+    Task<T> Enqueue<T>(Func<T> job, CancellationToken token);
+
+    /// <summary>
     ///     Runs the job in parallel to the execution of jobs,
     ///     scheduled by <see cref="Enqueue(Action, CancellationToken)"/> method
     /// </summary>

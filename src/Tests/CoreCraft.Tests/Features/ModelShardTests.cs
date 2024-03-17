@@ -14,9 +14,9 @@ public class ModelShardTests
 
         var mutable = modelShard.AsMutable([feature1, feature2]);
 
-        A.CallTo(() => feature1.Decorate(A<IFeatureContext>.Ignored, A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
+        A.CallTo(() => feature1.Decorate(A<IFrameFactory>.Ignored, A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => feature2.Decorate(A<IFeatureContext>.Ignored, A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
+        A.CallTo(() => feature2.Decorate(A<IFrameFactory>.Ignored, A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
 
         Assert.That(mutable, Is.Not.Null);
@@ -24,25 +24,25 @@ public class ModelShardTests
     }
 
     [Test]
-    public void GetOrAddFrameWithMissingFrameTest()
+    public void AddOrGetFrameWithMissingFrameTest()
     {
-        IFeatureContext modelShard = new FakeModelShard();
+        IFrameFactory modelShard = new FakeModelShard();
         var modelChanges = new ModelChanges();
 
-        var registered = modelShard.GetOrAddFrame(modelChanges);
+        var registered = modelChanges.AddOrGet(modelShard.Create());
 
         Assert.That(registered, Is.Not.Null);
         Assert.That(registered, Is.TypeOf<FakeChangesFrame>());
     }
 
     [Test]
-    public void GetOrAddFrameWithFrameTest()
+    public void AddOrGetFrameWithFrameTest()
     {
-        IFeatureContext modelShard = new FakeModelShard();
+        IFrameFactory modelShard = new FakeModelShard();
         var modelChanges = new ModelChanges();
-        var frame = modelChanges.Register(() => new FakeChangesFrame());
+        var frame = modelChanges.AddOrGet(new FakeChangesFrame());
 
-        var registered = modelShard.GetOrAddFrame(modelChanges);
+        var registered = modelChanges.AddOrGet(modelShard.Create());
 
         Assert.That(registered, Is.Not.Null);
         Assert.That(ReferenceEquals(frame, registered), Is.True);

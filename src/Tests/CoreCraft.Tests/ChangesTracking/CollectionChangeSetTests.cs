@@ -284,14 +284,14 @@ public class CollectionChangeSetTests
     }
 
     [Test]
-    public void SaveShouldCallRepositoryTest()
+    public void UpdateShouldCallRepositoryTest()
     {
         var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo);
         var repo = A.Fake<IRepository>();
 
-        changes.Save(repo);
+        changes.Update(repo);
 
-        A.CallTo(() => repo.Save(A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
+        A.CallTo(() => repo.Update(A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
             .Invokes(c =>
             {
                 var changeSet = c.Arguments[0];

@@ -16,7 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Generators\ModelShardGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModelScheme.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\DtoConverter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)serialization\ModelSchemeReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ModelSchemeReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\ModelSchemeDto.cs" />
   </ItemGroup>
 </Project>

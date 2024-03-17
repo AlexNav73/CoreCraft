@@ -9,7 +9,7 @@ namespace CoreCraft.Scheduling;
 public sealed class AsyncScheduler : IScheduler
 {
     /// <summary>
-    ///     Enqueues join into the common processing queue.
+    ///     Enqueues job into the common processing queue.
     /// </summary>
     /// <remarks>
     ///     Queue ensures that all commands, loading and saving operations
@@ -19,6 +19,21 @@ public sealed class AsyncScheduler : IScheduler
     /// <param name="token">Cancellation token</param>
     /// <returns>A task to await</returns>
     public Task Enqueue(Action job, CancellationToken token)
+    {
+        return Task.Factory.StartNew(
+            job,
+            token,
+            TaskCreationOptions.DenyChildAttach,
+            SequentialTaskScheduler.Instance);
+    }
+
+    /// <summary>
+    ///     Enqueues job into the common processing queue.
+    /// </summary>
+    /// <param name="job">A job to schedule</param>
+    /// <param name="token">Cancellation token</param>
+    /// <returns>A task to await</returns>
+    public Task<T> Enqueue<T>(Func<T> job, CancellationToken token)
     {
         return Task.Factory.StartNew(
             job,

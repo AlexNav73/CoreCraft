@@ -21,7 +21,7 @@ public interface IRepository
     /// <typeparam name="TEntity">A type of an entity</typeparam>
     /// <typeparam name="TProperties">A type of properties</typeparam>
     /// <param name="changes">Changes to apply</param>
-    void Save<TEntity, TProperties>(
+    void Update<TEntity, TProperties>(
         ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties;
@@ -32,7 +32,7 @@ public interface IRepository
     /// <typeparam name="TParent">A type of a parent entity</typeparam>
     /// <typeparam name="TChild">A type of a child entity</typeparam>
     /// <param name="changes">Changes to apply</param>
-    void Save<TParent, TChild>(
+    void Update<TParent, TChild>(
         IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity;

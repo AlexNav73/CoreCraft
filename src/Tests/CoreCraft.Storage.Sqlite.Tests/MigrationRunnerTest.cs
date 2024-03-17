@@ -12,7 +12,7 @@ internal class MigrationRunnerTest
         using var repository = new SqliteRepository(":memory:");
         var runner = new MigrationRunner(new[] { new DropCollectionTableMigration(FakeModelShardInfo.FirstCollectionInfo) });
 
-        repository.Save(
+        repository.Update(
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
@@ -33,7 +33,7 @@ internal class MigrationRunnerTest
         using var repository = new SqliteRepository(":memory:");
         var runner = new MigrationRunner(new[] { new DropRelationTableMigration(FakeModelShardInfo.OneToOneRelationInfo) });
 
-        repository.Save(
+        repository.Update(
             new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo)
             {
                 { RelationAction.Linked, new(), new() }
@@ -64,7 +64,7 @@ internal class MigrationRunnerTest
             new AddColumnMigration<string>(FakeModelShardInfo.FirstCollectionInfo, nullStringColumn, true),
         ]);
 
-        repository.Save(
+        repository.Update(
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
@@ -99,7 +99,7 @@ internal class MigrationRunnerTest
             new DropColumnMigration(FakeModelShardInfo.FirstCollectionInfo, columnName)
         });
 
-        repository.Save(
+        repository.Update(
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
@@ -129,7 +129,7 @@ internal class MigrationRunnerTest
             new RenameColumnMigration(FakeModelShardInfo.FirstCollectionInfo, columnName, newColumnName)
         });
 
-        repository.Save(
+        repository.Update(
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
@@ -178,7 +178,7 @@ internal class MigrationRunnerTest
             new NonNullTypeWithEmptyDefaultValueMigration(FakeModelShardInfo.FirstCollectionInfo, columnName)
         });
 
-        repository.Save(
+        repository.Update(
             new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }

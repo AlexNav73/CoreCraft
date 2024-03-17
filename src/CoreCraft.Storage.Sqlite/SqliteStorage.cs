@@ -1,6 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.History;
 using CoreCraft.Persistence.Lazy;
 using CoreCraft.Storage.Sqlite.Migrations;
 using System.Data;
@@ -10,7 +11,7 @@ namespace CoreCraft.Storage.Sqlite;
 /// <summary>
 ///     A SQLite storage implementation for the domain model
 /// </summary>
-public sealed class SqliteStorage : IStorage
+public sealed class SqliteStorage : IStorage, IHistoryStorage
 {
     private readonly string _path;
     private readonly MigrationRunner _migrationRunner;
@@ -45,9 +46,30 @@ public sealed class SqliteStorage : IStorage
     {
         Transaction(_path, repository =>
         {
-            foreach (var change in modelChanges)
+            foreach (var change in modelChanges.Cast<IChangesFrameEx>())
             {
-                change.Save(repository);
+                change.Update(repository);
+            }
+        });
+    }
+
+    /// <inheritdoc cref="IHistoryStorage.Save(IEnumerable{IModelChanges})"/>
+    public void Save(IEnumerable<IModelChanges> modelChanges)
+    {
+        Transaction(_path, repository =>
+        {
+            _migrationRunner.UpdateDatabaseVersion(repository);
+
+            repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
+            repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
+
+            var baseId = repository.GetMaxChangeId();
+            foreach (var (idx, change) in modelChanges.Select((c, idx) => (idx, c)))
+            {
+                foreach (var frame in change.Cast<IChangesFrameEx>())
+                {
+                    frame.Save(baseId + idx, repository);
+                }
             }
         });
     }
@@ -87,6 +109,42 @@ public sealed class SqliteStorage : IStorage
         _migrationRunner.Run(repository);
 
         loader.Load(repository);
+    }
+
+    /// <inheritdoc />
+    public IEnumerable<IModelChanges> Load(IEnumerable<IModelShard> modelShards)
+    {
+        using var repository = _sqliteRepositoryFactory.Create(_path, _loggingAction);
+
+        _migrationRunner.Run(repository);
+
+        repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
+        repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
+
+        var changes = new List<IModelChanges>();
+        var numOfChanges = repository.GetMaxChangeId();
+
+        for (int i = 0; i <= numOfChanges; i++)
+        {
+            var modelChanges = new ModelChanges();
+
+            foreach (var shard in modelShards.Cast<IFrameFactory>())
+            {
+                var change = (IChangesFrameEx)shard.Create();
+                change.Load(i, repository);
+                if (change.HasChanges())
+                {
+                    modelChanges.AddOrGet(change);
+                }
+            }
+
+            if (modelChanges.Any())
+            {
+                changes.Add(modelChanges);
+            }
+        }
+
+        return changes;
     }
 
     private void Transaction(string path, Action<ISqliteRepository> action)

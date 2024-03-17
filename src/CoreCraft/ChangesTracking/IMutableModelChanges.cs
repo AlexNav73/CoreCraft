@@ -14,12 +14,17 @@
 public interface IMutableModelChanges : IModelChanges
 {
     /// <summary>
-    ///     Registers an empty changes frame which will hold all changes happened with a model shard
+    ///     Adds or retrieves an existing changes frame for the specified model shard.
     /// </summary>
-    /// <typeparam name="T">A concrete type of a changes frame</typeparam>
-    /// <param name="factory">A factory of a empty change frame</param>
-    /// <returns>A mutable part of a changes frame</returns>
-    T Register<T>(Func<T> factory) where T : class, IChangesFrameEx;
+    /// <param name="frame">
+    ///     The <see cref="IChangesFrame"/> instance representing the changes for a specific model shard.
+    ///     If a frame for the same shard already exists, this frame is returned.
+    /// </param>
+    /// <returns>
+    ///     - The provided `frame` if it's a new frame for a shard that wasn't previously tracked.
+    ///     - The existing <see cref="IChangesFrame"/> instance associated with the shard if one already exists.
+    /// </returns>
+    IChangesFrame AddOrGet(IChangesFrame frame);
 
     /// <summary>
     ///     Applies changes to the given model
@@ -28,7 +33,7 @@ public interface IMutableModelChanges : IModelChanges
     void Apply(IModel model);
 
     /// <summary>
-    ///     Merges two <see cref="IMutableModelChanges"/>s into one,
+    ///     Merges two <see cref="IMutableModelChanges"/> into one,
     ///     reducing a number of operations (changes) stored in the <see cref="IMutableModelChanges"/>.
     /// </summary>
     /// <remarks>

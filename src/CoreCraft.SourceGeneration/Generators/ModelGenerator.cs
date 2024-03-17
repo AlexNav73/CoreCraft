@@ -18,6 +18,7 @@ internal static class ModelGenerator
             code.WriteLine("using CoreCraft.Core;");
             code.WriteLine("using CoreCraft.ChangesTracking;");
             code.WriteLine("using CoreCraft.Persistence;");
+            code.WriteLine("using CoreCraft.Persistence.History;");
             code.WriteLine($"using {@namespace}.Entities;");
             code.EmptyLine();
 

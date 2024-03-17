@@ -1,5 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.History;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
 
@@ -53,14 +55,67 @@ public class UndoRedoDomainModel : DomainModel
     ///     Saves changes happened since the last save operation
     /// </summary>
     /// <param name="storage">A storage where a model will be saved</param>
-    public async Task Save(IStorage storage)
+    public async Task Update(IStorage storage, CancellationToken token = default)
     {
         var changes = _undoStack.Reverse().ToArray();
 
-        if (changes.Any())
+        if (changes.Length != 0)
         {
-            await Save(storage, changes);
+            await Update(storage, changes, token);
+        }
+    }
 
+    /// <summary>
+    ///     Saves the model's undo/redo history to the provided storage.
+    /// </summary>
+    /// <param name="storage">A storage to write</param>
+    /// <param name="token">Cancellation token</param>
+    /// <exception cref="ModelSaveException">Throws when an error occurred while saving model changes history</exception>
+    public async Task SaveHistory(IHistoryStorage storage, CancellationToken token = default)
+    {
+        try
+        {
+            var changes = _undoStack.Reverse().ToList();
+            if (changes.Count > 0)
+            {
+                await Scheduler.RunParallel(() => storage.Save(changes), token);
+
+                ClearHistory();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new ModelSaveException("Model changes saving has failed", ex);
+        }
+    }
+
+    /// <summary>
+    ///     Restores the model's undo/redo history from the provided storage.
+    /// </summary>
+    /// <param name="storage">A storage to write</param>
+    /// <param name="token">Cancellation token</param>
+    public async Task RestoreHistory(IHistoryStorage storage, CancellationToken token = default)
+    {
+        if (_undoStack.Count > 0 || _redoStack.Count > 0)
+        {
+            return;
+        }
+
+        var changes = await LoadHistory(storage, token);
+
+        foreach (var change in changes)
+        {
+            _undoStack.Push(change);
+        }
+    }
+
+    /// <summary>
+    ///     Clears the model's undo/redo history
+    /// </summary>
+    public void ClearHistory()
+    {
+        if (_undoStack.Count > 0 || _redoStack.Count > 0)
+        {
             // TODO(#8): saving operation executes in thread pool
             // and launched by 'async void' methods. If two
             // sequential savings happened, clearing of the stacks
@@ -71,25 +126,6 @@ public class UndoRedoDomainModel : DomainModel
 
             Changed?.Invoke(this, EventArgs.Empty);
         }
-    }
-
-    /// <summary>
-    ///     Saves model as a whole (if the data should be stored from the scratch)
-    /// </summary>
-    /// <param name="storage">A storage where a model will be saved</param>
-    public async Task SaveAs(IStorage storage)
-    {
-        await base.Save(storage);
-
-        // TODO(#8): saving operation executes in thread pool
-        // and launched by 'async void' methods. If two
-        // sequential savings happened, clearing of the stacks
-        // can cause data race (just after first save we will clear stack
-        // with new changes, made after first save started).
-        _undoStack.Clear();
-        _redoStack.Clear();
-
-        Changed?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -138,5 +174,19 @@ public class UndoRedoDomainModel : DomainModel
         _redoStack.Clear();
 
         Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+#if NET5_0_OR_GREATER
+    private async ValueTask<IEnumerable<IModelChanges>> LoadHistory(
+#else
+    private async Task<IEnumerable<IModelChanges>> LoadHistory(
+#endif
+        IHistoryStorage storage,
+        CancellationToken token = default)
+    {
+        // TODO: Write explanation why we can use UnsafeModelShards here
+        var model = UnsafeModelShards;
+
+        return await Scheduler.Enqueue(() => storage.Load(model), token);
     }
 }

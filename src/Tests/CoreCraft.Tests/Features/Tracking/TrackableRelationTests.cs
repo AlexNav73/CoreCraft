@@ -137,7 +137,7 @@ public class TrackableRelationTests
 
         _trackable!.Save(repo);
 
-        A.CallTo(() => repo.Save(A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
+        A.CallTo(() => repo.Update(A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
             .Invokes(c =>
             {
                 var innerRelation = c.Arguments[0];

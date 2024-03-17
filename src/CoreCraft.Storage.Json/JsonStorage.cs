@@ -1,6 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.History;
 using CoreCraft.Persistence.Lazy;
 using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
@@ -10,7 +11,7 @@ namespace CoreCraft.Storage.Json;
 /// <summary>
 ///     A Json storage implementation for the domain model
 /// </summary>
-public sealed class JsonStorage : IStorage
+public sealed class JsonStorage : IStorage, IHistoryStorage
 {
     private readonly string _path;
     private readonly JsonSerializerSettings? _settings;
@@ -40,12 +41,18 @@ public sealed class JsonStorage : IStorage
         var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
         var repository = new JsonRepository(shards);
 
-        foreach (var change in modelChanges)
+        foreach (var change in modelChanges.Cast<IChangesFrameEx>())
         {
-            change.Save(repository);
+            change.Update(repository);
         }
 
         _jsonFileHandler.WriteModelShardsToFile(_path, shards, _settings);
+    }
+
+    /// <inheritdoc/>
+    public void Save(IEnumerable<IModelChanges> modelChanges)
+    {
+        throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
@@ -81,5 +88,11 @@ public sealed class JsonStorage : IStorage
         var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
 
         loader.Load(new JsonRepository(shards));
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<IModelChanges> Load(IEnumerable<IModelShard> modelShards)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -176,13 +176,13 @@ public class TrackableCollectionTests
     }
 
     [Test]
-    public void SaveShouldCallRepositoryTest()
+    public void UpdateShouldCallRepositoryTest()
     {
         var repo = A.Fake<IRepository>();
 
         _trackable!.Save(repo);
 
-        A.CallTo(() => repo.Save(A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
+        A.CallTo(() => repo.Update(A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
             .Invokes(c =>
             {
                 var innerCollection = c.Arguments[0];

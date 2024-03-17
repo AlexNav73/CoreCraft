@@ -43,6 +43,71 @@ internal static class QueryBuilder
         return $"ALTER TABLE [{name}] DROP COLUMN [{column}];";
     }
 
+    internal static class History
+    {
+        internal const string CollectionHistory = "__CollectionHistory";
+
+        internal const string RelationHistory = "__RelationHistory";
+
+        internal const string CreateCollectionTable = """
+            CREATE TABLE IF NOT EXISTS [__CollectionHistory] (
+                [Id] INTEGER NOT NULL,
+                [Collection] TEXT NOT NULL,
+                [ChangeId] INTEGER NOT NULL,
+                [Action] INTEGER NOT NULL,
+                [EntityId] TEXT NOT NULL,
+                [OldProperties] TEXT,
+                [NewProperties] TEXT,
+                PRIMARY KEY([Id])
+            );
+            """;
+
+        internal const string SelectMaxChangeId = """
+            SELECT [ChangeId]
+            FROM (
+                SELECT [ChangeId] FROM [__CollectionHistory]
+                UNION ALL
+                SELECT [ChangeId] FROM [__RelationHistory]
+            )
+            ORDER BY [ChangeId] DESC
+            LIMIT 1;
+            """;
+
+        internal const string InsertIntoCollectionTable = """
+            INSERT INTO [__CollectionHistory] ([Collection], [ChangeId], [Action], [EntityId], [OldProperties], [NewProperties])
+            VALUES ($Collection, $ChangeId, $Action, $EntityId, $OldProperties, $NewProperties);
+            """;
+
+        internal const string CreateRelationTable = """
+            CREATE TABLE IF NOT EXISTS [__RelationHistory] (
+                [Id] INTEGER NOT NULL,
+                [Relation] TEXT NOT NULL,
+                [ChangeId] INTEGER NOT NULL,
+                [Action] INTEGER NOT NULL,
+                [ParentId] TEXT NOT NULL,
+                [ChildId] TEXT NOT NULL,
+                PRIMARY KEY([Id])
+            );
+            """;
+
+        internal const string InsertIntoRelationTable = """
+            INSERT INTO [__RelationHistory] ([Relation], [ChangeId], [Action], [ParentId], [ChildId])
+            VALUES ($Relation, $ChangeId, $Action, $ParentId, $ChildId);
+            """;
+
+        internal static string SelectCollectionTable(int changeId, string collection) => $"""
+            SELECT [Action], [EntityId], [OldProperties], [NewProperties]
+            FROM [__CollectionHistory]
+            WHERE [ChangeId] = {changeId} AND [Collection] = '{collection}';
+            """;
+
+        internal static string SelectRelationTable(int changeId, string relation) => $"""
+            SELECT [Action], [ParentId], [ChildId]
+            FROM [__RelationHistory]
+            WHERE [ChangeId] = {changeId} AND [Relation] = '{relation}';
+            """;
+    }
+
     internal static class Migrations
     {
         internal static string SetDatabaseVersion(long version) => $"PRAGMA user_version = {version};";

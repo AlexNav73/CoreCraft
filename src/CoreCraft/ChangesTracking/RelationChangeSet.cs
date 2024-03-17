@@ -111,10 +111,10 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
         return result;
     }
 
-    /// <inheritdoc cref="IRelationChangeSet{TParent, TChild}.Save(IRepository)" />
-    public void Save(IRepository repository)
+    /// <inheritdoc cref="IRelationChangeSet{TParent, TChild}.Update(IRepository)" />
+    public void Update(IRepository repository)
     {
-        repository.Save(this);
+        repository.Update(this);
     }
 
     /// <inheritdoc />

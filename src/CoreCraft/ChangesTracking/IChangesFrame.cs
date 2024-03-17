@@ -1,6 +1,4 @@
-﻿using CoreCraft.Persistence;
-
-namespace CoreCraft.ChangesTracking;
+﻿namespace CoreCraft.ChangesTracking;
 
 /// <summary>
 ///     A common interface for all change frames for each model shard.
@@ -20,38 +18,4 @@ public interface IChangesFrame
     /// </summary>
     /// <returns>True - if there are some changes inside the <see cref="IChangesFrame"/></returns>
     bool HasChanges();
-
-    /// <summary>
-    ///     Retrieves a collection's changes set
-    /// </summary>
-    /// <typeparam name="TEntity">A type of a collection's entity</typeparam>
-    /// <typeparam name="TProperty">A type of a collection's properties</typeparam>
-    /// <param name="collection">A collection to query a change set</param>
-    /// <returns>A collection's change set</returns>
-    ICollectionChangeSet<TEntity, TProperty>? Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
-        where TEntity : Entity
-        where TProperty : Properties;
-
-    /// <summary>
-    ///     Retrieves a relation's changes set
-    /// </summary>
-    /// <typeparam name="TParent">A type of a relation's parent entity</typeparam>
-    /// <typeparam name="TChild">A type of a relation's child entity</typeparam>
-    /// <param name="relation">A relation to query a change set</param>
-    /// <returns>A relation's change set</returns>
-    IRelationChangeSet<TParent, TChild>? Get<TParent, TChild>(IRelation<TParent, TChild> relation)
-        where TParent : Entity
-        where TChild : Entity;
-
-    /// <summary>
-    ///     Creates a new <see cref="IChangesFrame"/> which holds the changes opposite to the original changes
-    /// </summary>
-    /// <returns>A new inverted changes</returns>
-    IChangesFrame Invert();
-
-    /// <summary>
-    ///     Saves the implementing object using the provided repository.
-    /// </summary>
-    /// <param name="repository">The repository used to save the object.</param>
-    void Save(IRepository repository);
 }
