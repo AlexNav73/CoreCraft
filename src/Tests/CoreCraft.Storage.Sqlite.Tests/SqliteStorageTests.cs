@@ -27,8 +27,8 @@ public class SqliteStorageTests
     [Test]
     public void UpdateTransactionRollbackOnExceptionTest()
     {
-        var change = A.Fake<IChangesFrame>();
-        A.CallTo(() => change.Save(A<IRepository>.Ignored)).Throws<InvalidOperationException>();
+        var change = A.Fake<IChangesFrameEx>();
+        A.CallTo(() => change.Update(A<IRepository>.Ignored)).Throws<InvalidOperationException>();
         var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
         var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
@@ -43,13 +43,13 @@ public class SqliteStorageTests
     [Test]
     public void UpdateIsCalledOnModelShardStorageTest()
     {
-        var change = A.Fake<IChangesFrame>();
+        var change = A.Fake<IChangesFrameEx>();
         var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
         var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
         storage.Update([change]);
 
-        A.CallTo(() => change.Save(A<IRepository>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => change.Update(A<IRepository>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Test]

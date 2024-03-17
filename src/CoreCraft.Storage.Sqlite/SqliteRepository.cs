@@ -1,5 +1,7 @@
 ﻿using System.Data;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using Microsoft.Data.Sqlite;
@@ -9,6 +11,11 @@ namespace CoreCraft.Storage.Sqlite;
 
 internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 {
+    private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
+    {
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+    };
+
     private const string ParentIdParamName = "$ParentId";
     private const string ChildIdParamName = "$ChildId";
     private const string IdParamName = "$Id";
@@ -57,7 +64,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         command.ExecuteNonQuery();
     }
 
-    public void Save<TEntity, TProperties>(ICollectionChangeSet<TEntity, TProperties> changes)
+    public void Update<TEntity, TProperties>(ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -99,7 +106,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Save<TParent, TChild>(IRelationChangeSet<TParent, TChild> changes)
+    public void Update<TParent, TChild>(IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
@@ -177,6 +184,72 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
+    public void Save<TEntity, TProperties>(int changeId, ICollectionChangeSet<TEntity, TProperties> changes)
+        where TEntity : Entity
+        where TProperties : Properties
+    {
+        if (!changes.Any())
+        {
+            return;
+        }
+
+        var name = InferName(changes.Info);
+        var command = CreateCommand(History.InsertIntoCollectionTable);
+
+        var collection = CreateParameter(command, "$Collection");
+        var changeIdParam = CreateParameter(command, "$ChangeId");
+        var action = CreateParameter(command, "$Action");
+        var entityId = CreateParameter(command, "$EntityId");
+        var oldProperties = CreateParameter(command, "$OldProperties");
+        var newProperties = CreateParameter(command, "$NewProperties");
+
+        foreach (var change in changes)
+        {
+            collection.Value = name;
+            changeIdParam.Value = changeId;
+            action.Value = (int)change.Action;
+            entityId.Value = Serialize(change.Entity);
+            oldProperties.Value = Serialize(change.OldData);
+            newProperties.Value = Serialize(change.NewData);
+
+            command.ExecuteNonQuery();
+
+            Log(command);
+        }
+    }
+
+    public void Save<TParent, TChild>(int changeId, IRelationChangeSet<TParent, TChild> changes)
+        where TParent : Entity
+        where TChild : Entity
+    {
+        if (!changes.Any())
+        {
+            return;
+        }
+
+        var name = InferName(changes.Info);
+        var command = CreateCommand(History.InsertIntoRelationTable);
+
+        var relation = CreateParameter(command, "$Relation");
+        var changeIdParam = CreateParameter(command, "$ChangeId");
+        var action = CreateParameter(command, "$Action");
+        var parentId = CreateParameter(command, "$ParentId");
+        var childId = CreateParameter(command, "$ChildId");
+
+        foreach (var change in changes)
+        {
+            relation.Value = name;
+            changeIdParam.Value = changeId;
+            action.Value = (int)change.Action;
+            parentId.Value = Serialize(change.Parent);
+            childId.Value = Serialize(change.Child);
+
+            command.ExecuteNonQuery();
+
+            Log(command);
+        }
+    }
+
     public void Load<TEntity, TProperties>(IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
@@ -232,6 +305,62 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
+    public void Load<TEntity, TProperties>(int changeId, ICollectionChangeSet<TEntity, TProperties> changes)
+        where TEntity : Entity
+        where TProperties : Properties
+    {
+        using var command = CreateCommand(History.SelectCollectionTable(changeId, InferName(changes.Info)));
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var action = (CollectionAction)reader.GetInt32(0);
+            var entity = Deserialize<TEntity>(reader, 1);
+            var oldProperty = Deserialize<TProperties>(reader, 2);
+            var newProperty = Deserialize<TProperties>(reader, 3);
+
+            changes.Add(action, entity!, oldProperty, newProperty);
+
+            Log(command);
+        }
+    }
+
+    public void Load<TParent, TChild>(int changeId, IRelationChangeSet<TParent, TChild> changes)
+        where TParent : Entity
+        where TChild : Entity
+    {
+        using var command = CreateCommand(History.SelectRelationTable(changeId, InferName(changes.Info)));
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var action = (RelationAction)reader.GetInt32(0);
+            var parent = Deserialize<TParent>(reader, 1);
+            var child = Deserialize<TChild>(reader, 2);
+
+            changes.Add(action, parent!, child!);
+
+            Log(command);
+        }
+    }
+
+    public int GetMaxChangeId()
+    {
+        var command = CreateCommand(History.SelectMaxChangeId);
+
+        Log(command);
+
+        using var reader = command.ExecuteReader();
+        if (reader.Read())
+        {
+            var changeId = reader.GetInt32(0);
+
+            return changeId;
+        }
+
+        return 0;
+    }
+
     internal bool Exists(CollectionInfo collection)
     {
         return Exists(InferName(collection));
@@ -244,8 +373,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 
     internal IEnumerable<SqliteColumnInfo> QueryTableColumns(CollectionInfo collection)
     {
-        using var command = _connection.CreateCommand();
-        command.CommandText = $"PRAGMA table_info([{InferName(collection)}]);";
+        using var command = CreateCommand($"PRAGMA table_info([{InferName(collection)}]);");
 
         using var reader = command.ExecuteReader();
         while (reader.Read())
@@ -388,7 +516,14 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 
             for (var i = 0; i < command.Parameters.Count; i++)
             {
-                builder.Replace(command.Parameters[i].ParameterName, command.Parameters[i].Value?.ToString());
+                if (command.Parameters[i].Value != DBNull.Value)
+                {
+                    builder.Replace(command.Parameters[i].ParameterName, command.Parameters[i].Value!.ToString());
+                }
+                else
+                {
+                    builder.Replace(command.Parameters[i].ParameterName, "NULL");
+                }
             }
 
             _loggingAction(builder.ToString());
@@ -446,6 +581,14 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
+    private static SqliteParameter CreateParameter(SqliteCommand command, string name)
+    {
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = name;
+        command.Parameters.Add(parameter);
+        return parameter;
+    }
+
     private static void SetParameterValue(SqliteCommand command, string parameter, object? value)
     {
         if (value != null)
@@ -456,6 +599,32 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         {
             command.Parameters[$"${parameter}"].Value = DBNull.Value;
         }
+    }
+
+    private static object Serialize(object? value)
+    {
+        if (value == null)
+        {
+            return DBNull.Value;
+        }
+
+        return JsonSerializer.Serialize(value, _jsonOptions);
+    }
+
+    private static T? Deserialize<T>(SqliteDataReader reader, int column)
+    {
+        if (reader.IsDBNull(column))
+        {
+            return default;
+        }
+
+        var json = reader.GetString(column);
+        if (json == null)
+        {
+            return default;
+        }
+
+        return JsonSerializer.Deserialize<T>(json, _jsonOptions);
     }
 
     protected override void DisposeManagedObjects()

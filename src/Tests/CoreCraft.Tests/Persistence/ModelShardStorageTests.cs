@@ -20,9 +20,9 @@ public class ModelShardStorageTests
     {
         var shard = new FakeChangesFrame();
 
-        shard.Save(_repository!);
+        shard.Update(_repository!);
 
-        A.CallTo(() => _repository!.Save(
+        A.CallTo(() => _repository!.Update(
             A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
@@ -32,9 +32,9 @@ public class ModelShardStorageTests
     {
         var shard = new FakeChangesFrame();
 
-        shard.Save(_repository!);
+        shard.Update(_repository!);
 
-        A.CallTo(() => _repository!.Save(
+        A.CallTo(() => _repository!.Update(
             A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
             .MustHaveHappened(4, Times.Exactly);
     }

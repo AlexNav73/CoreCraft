@@ -94,7 +94,7 @@ public sealed class CoWCollection<TEntity, TProperties> :
         _copy.Remove(entity);
     }
 
-    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Load(IRepository)"/>
+    /// <inheritdoc cref="ILoadable.Load(IRepository)"/>
     public void Load(IRepository repository)
     {
         _copy ??= (IMutableCollection<TEntity, TProperties>)_collection.Copy();

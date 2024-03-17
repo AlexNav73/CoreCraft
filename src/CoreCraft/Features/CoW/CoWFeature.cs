@@ -3,7 +3,7 @@
 internal class CoWFeature : IFeature
 {
     public IMutableCollection<TEntity, TProperties> Decorate<TEntity, TProperties>(
-        IFeatureContext context,
+        IFrameFactory factory,
         IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
@@ -12,7 +12,7 @@ internal class CoWFeature : IFeature
     }
 
     public IMutableRelation<TParent, TChild> Decorate<TParent, TChild>(
-        IFeatureContext context,
+        IFrameFactory factory,
         IMutableRelation<TParent, TChild> relation)
         where TParent : Entity
         where TChild : Entity

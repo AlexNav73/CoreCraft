@@ -15,6 +15,7 @@ namespace compilation.AllFeatures
     using CoreCraft.Core;
     using CoreCraft.ChangesTracking;
     using CoreCraft.Persistence;
+    using CoreCraft.Persistence.History;
     using compilation.AllFeatures.Entities;
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
@@ -160,11 +161,11 @@ namespace compilation.AllFeatures
         }
     }
 
-    internal sealed partial class FakeModelShard : IFeatureContext
+    internal sealed partial class FakeModelShard : IFrameFactory
     {
-        IChangesFrame IFeatureContext.GetOrAddFrame(IMutableModelChanges modelChanges)
+        public IChangesFrame Create()
         {
-            return modelChanges.Register(static () => new FakeChangesFrame());
+            return new FakeChangesFrame();
         }
     }
 
@@ -206,7 +207,9 @@ namespace compilation.AllFeatures
         public IRelationChangeSet<FirstEntity, SecondEntity> ManyToOneRelation { get; private set; }
         public IRelationChangeSet<FirstEntity, SecondEntity> ManyToManyRelation { get; private set; }
 
-        ICollectionChangeSet<TEntity, TProperty>? IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
+        public ICollectionChangeSet<TEntity, TProperty>? Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
+            where TEntity : Entity
+            where TProperty : Properties
         {
             if (FirstCollection.Info == collection.Info) return FirstCollection as ICollectionChangeSet<TEntity, TProperty>;
             if (SecondCollection.Info == collection.Info) return SecondCollection as ICollectionChangeSet<TEntity, TProperty>;
@@ -214,7 +217,9 @@ namespace compilation.AllFeatures
             throw new System.InvalidOperationException("Unable to find collection's changes set");
         }
 
-        IRelationChangeSet<TParent, TChild>? IChangesFrame.Get<TParent, TChild>(IRelation<TParent, TChild> relation)
+        public IRelationChangeSet<TParent, TChild>? Get<TParent, TChild>(IRelation<TParent, TChild> relation)
+            where TParent : Entity
+            where TChild : Entity
         {
             if (OneToOneRelation.Info == relation.Info) return OneToOneRelation as IRelationChangeSet<TParent, TChild>;
             if (OneToManyRelation.Info == relation.Info) return OneToManyRelation as IRelationChangeSet<TParent, TChild>;
@@ -224,7 +229,7 @@ namespace compilation.AllFeatures
             throw new System.InvalidOperationException($"Unable to find relation's change set");
         }
 
-        IChangesFrame IChangesFrame.Invert()
+        public IChangesFrame Invert()
         {
             return new FakeChangesFrame()
             {
@@ -271,15 +276,37 @@ namespace compilation.AllFeatures
             };
         }
 
-        public void Save(IRepository repository)
+        public void Update(IRepository repository)
         {
-            repository.Save(FirstCollection);
-            repository.Save(SecondCollection);
+            repository.Update(FirstCollection);
+            repository.Update(SecondCollection);
 
-            repository.Save(OneToOneRelation);
-            repository.Save(OneToManyRelation);
-            repository.Save(ManyToOneRelation);
-            repository.Save(ManyToManyRelation);
+            repository.Update(OneToOneRelation);
+            repository.Update(OneToManyRelation);
+            repository.Update(ManyToOneRelation);
+            repository.Update(ManyToManyRelation);
+        }
+
+        public void Save(int changeId, IHistoryRepository repository)
+        {
+            repository.Save(changeId, FirstCollection);
+            repository.Save(changeId, SecondCollection);
+
+            repository.Save(changeId, OneToOneRelation);
+            repository.Save(changeId, OneToManyRelation);
+            repository.Save(changeId, ManyToOneRelation);
+            repository.Save(changeId, ManyToManyRelation);
+        }
+
+        public void Load(int changeId, IHistoryRepository repository)
+        {
+            repository.Load(changeId, FirstCollection);
+            repository.Load(changeId, SecondCollection);
+
+            repository.Load(changeId, OneToOneRelation);
+            repository.Load(changeId, OneToManyRelation);
+            repository.Load(changeId, ManyToOneRelation);
+            repository.Load(changeId, ManyToManyRelation);
         }
 
     }

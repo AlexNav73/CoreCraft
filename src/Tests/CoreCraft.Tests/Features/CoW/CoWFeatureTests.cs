@@ -10,8 +10,8 @@ public class CoWFeatureTests
     {
         var feature = new CoWFeature();
 
-        var collection = feature.Decorate(A.Fake<IFeatureContext>(), A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>());
-        var relation = feature.Decorate(A.Fake<IFeatureContext>(), A.Fake<IMutableRelation<FirstEntity, SecondEntity>>());
+        var collection = feature.Decorate(A.Fake<IFrameFactory>(), A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>());
+        var relation = feature.Decorate(A.Fake<IFrameFactory>(), A.Fake<IMutableRelation<FirstEntity, SecondEntity>>());
 
         Assert.That(collection, Is.Not.Null);
         Assert.That(collection, Is.TypeOf<CoWCollection<FirstEntity, FirstEntityProperties>>());

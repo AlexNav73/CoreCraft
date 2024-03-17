@@ -13,7 +13,7 @@ internal sealed class JsonRepository : IJsonRepository
         _modelShards = modelShards;
     }
 
-    public void Save<TEntity, TProperties>(ICollectionChangeSet<TEntity, TProperties> changes)
+    public void Update<TEntity, TProperties>(ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -61,7 +61,7 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public void Save<TParent, TChild>(IRelationChangeSet<TParent, TChild> changes)
+    public void Update<TParent, TChild>(IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
@@ -138,6 +138,20 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
+    public void Save<TEntity, TProperties>(int changeId, ICollectionChangeSet<TEntity, TProperties> changes)
+        where TEntity : Entity
+        where TProperties : Properties
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Save<TParent, TChild>(int changeId, IRelationChangeSet<TParent, TChild> changes)
+        where TParent : Entity
+        where TChild : Entity
+    {
+        throw new NotImplementedException();
+    }
+
     public void Load<TEntity, TProperties>(IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
@@ -188,6 +202,20 @@ internal sealed class JsonRepository : IJsonRepository
                 relation.Add(parent, child);
             }
         }
+    }
+
+    public void Load<TEntity, TProperties>(int changeId, ICollectionChangeSet<TEntity, TProperties> changes)
+        where TEntity : Entity
+        where TProperties : Properties
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Load<TParent, TChild>(int changeId, IRelationChangeSet<TParent, TChild> changes)
+        where TParent : Entity
+        where TChild : Entity
+    {
+        throw new NotImplementedException();
     }
 
     private ModelShard GetOrCreateModelShard(string name)

@@ -2,16 +2,20 @@
 
 namespace CoreCraft.ChangesTracking;
 
-internal sealed class ModelChanges : IMutableModelChanges
+/// <inheritdoc cref="IModelChanges" />
+public sealed class ModelChanges : IMutableModelChanges
 {
-    private readonly IList<IChangesFrame> _frames;
+    private readonly HashSet<IChangesFrameEx> _frames;
 
+    /// <summary>
+    ///     Ctor
+    /// </summary>
     public ModelChanges()
-        : this(new List<IChangesFrame>())
+        : this(new HashSet<IChangesFrameEx>(ChangesFrameComparer.Instance))
     {
     }
 
-    private ModelChanges(IList<IChangesFrame> frames)
+    private ModelChanges(HashSet<IChangesFrameEx> frames)
     {
         _frames = frames;
     }
@@ -26,46 +30,44 @@ internal sealed class ModelChanges : IMutableModelChanges
     }
 
     /// <inheritdoc />
-    public T Register<T>(Func<T> factory)
-        where T : class, IChangesFrameEx
+    public IChangesFrame AddOrGet(IChangesFrame frame)
     {
-        if (TryGetFrame<T>(out var frame))
+        if (frame is IChangesFrameEx ext && _frames.Add(ext))
         {
             return frame;
         }
 
-        var newFrame = factory();
-        _frames.Add(newFrame);
-        return newFrame;
+        return _frames.Single(x => ChangesFrameComparer.Instance.Equals(x, frame));
     }
 
     /// <inheritdoc />
     public IModelChanges Invert()
     {
-        var frames = _frames.Select(x => x.Invert()).ToArray();
+        var frames = _frames.Select(x => x.Invert()).Cast<IChangesFrameEx>();
 
-        return new ModelChanges(frames);
+        return new ModelChanges(new HashSet<IChangesFrameEx>(frames, ChangesFrameComparer.Instance));
     }
 
     /// <inheritdoc />
     public void Apply(IModel model)
     {
-        foreach (var frame in _frames.Cast<IChangesFrameEx>())
+        foreach (var frame in _frames)
         {
             frame.Apply(model);
         }
     }
 
+    /// <inheritdoc />
     public IMutableModelChanges Merge(IModelChanges changes)
     {
         var changesFrames = changes.ToDictionary(k => k.GetType());
-        var result = new List<IChangesFrame>();
+        var result = new HashSet<IChangesFrameEx>(ChangesFrameComparer.Instance);
 
-        foreach (var frame in _frames.Cast<IChangesFrameEx>())
+        foreach (var frame in _frames)
         {
             if (changesFrames.TryGetValue(frame.GetType(), out var changesFrame))
             {
-                result.Add(frame.Merge(changesFrame));
+                result.Add((IChangesFrameEx)frame.Merge(changesFrame));
             }
         }
 
@@ -78,6 +80,7 @@ internal sealed class ModelChanges : IMutableModelChanges
         return _frames.Any(x => x.HasChanges());
     }
 
+    /// <inheritdoc />
     public IEnumerator<IChangesFrame> GetEnumerator()
     {
         return _frames.GetEnumerator();
@@ -86,5 +89,20 @@ internal sealed class ModelChanges : IMutableModelChanges
     IEnumerator IEnumerable.GetEnumerator()
     {
         return _frames.GetEnumerator();
+    }
+
+    private sealed class ChangesFrameComparer : IEqualityComparer<IChangesFrame>
+    {
+        public static ChangesFrameComparer Instance = new ChangesFrameComparer();
+
+        public bool Equals(IChangesFrame? x, IChangesFrame? y)
+        {
+            return x != null && y != null && x.GetType() == y.GetType();
+        }
+
+        public int GetHashCode(IChangesFrame obj)
+        {
+            return obj.GetType().GetHashCode();
+        }
     }
 }

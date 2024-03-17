@@ -27,6 +27,17 @@ public sealed class SyncScheduler : IScheduler
     /// <param name="job">A job to start</param>
     /// <param name="token">Cancellation token</param>
     /// <returns>A task to await</returns>
+    public Task<T> Enqueue<T>(Func<T> job, CancellationToken token)
+    {
+        return Task.FromResult(job());
+    }
+
+    /// <summary>
+    ///     Immediately starts the job
+    /// </summary>
+    /// <param name="job">A job to start</param>
+    /// <param name="token">Cancellation token</param>
+    /// <returns>A task to await</returns>
     public Task RunParallel(Action job, CancellationToken token = default)
     {
         job();

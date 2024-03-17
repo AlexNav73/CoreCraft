@@ -11,7 +11,7 @@ public class ModelChangesTests
     public void ChangesFrameRegisteredByConcreteTypeAndRetrievedByInterfaceTypeTest()
     {
         var modelChanges = new ModelChanges();
-        var changesFrame = modelChanges.Register(() => new FakeChangesFrame());
+        var changesFrame = modelChanges.AddOrGet(new FakeChangesFrame());
 
         var success = modelChanges.TryGetFrame<IFakeChangesFrame>(out var frame);
 
@@ -24,8 +24,8 @@ public class ModelChangesTests
     public void RegisterChangesFrameMultipleTimesTest()
     {
         var modelChanges = new ModelChanges();
-        var changesFrame1 = modelChanges.Register(() => new FakeChangesFrame());
-        var changesFrame2 = modelChanges.Register(() => new FakeChangesFrame());
+        var changesFrame1 = modelChanges.AddOrGet(new FakeChangesFrame());
+        var changesFrame2 = modelChanges.AddOrGet(new FakeChangesFrame());
 
         Assert.That(ReferenceEquals(changesFrame1, changesFrame2), Is.True);
     }
@@ -39,7 +39,7 @@ public class ModelChangesTests
         var value = "test";
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = value });
-        var inverted = ((IChangesFrame)changesFrame).Invert();
+        var inverted = ((IChangesFrameEx)changesFrame).Invert();
         var change = ((IFakeChangesFrame)inverted).FirstCollection.SingleOrDefault();
 
         Assert.That(change, Is.Not.Null);
@@ -73,14 +73,14 @@ public class ModelChangesTests
     public void MigrateTest()
     {
         var modelChanges = new ModelChanges();
-        var changesFrame = modelChanges.Register(() => new FakeChangesFrame());
+        var changesFrame = (FakeChangesFrame)modelChanges.AddOrGet(new FakeChangesFrame());
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = "test" });
 
         var modelChanges2 = new ModelChanges();
-        var changesFrame2 = modelChanges2.Register(() => new FakeChangesFrame());
+        var changesFrame2 = (FakeChangesFrame)modelChanges2.AddOrGet(new FakeChangesFrame());
         var props2 = new FirstEntityProperties();
 
         changesFrame2.FirstCollection.Add(CollectionAction.Remove, entity, props2, props2 with { NonNullableStringProperty = "test" });
@@ -94,7 +94,7 @@ public class ModelChangesTests
     public void HasChangesTest()
     {
         var modelChanges = new ModelChanges();
-        var changesFrame = modelChanges.Register(() => new FakeChangesFrame());
+        var changesFrame = (FakeChangesFrame)modelChanges.AddOrGet(new FakeChangesFrame());
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
         var value = "test";

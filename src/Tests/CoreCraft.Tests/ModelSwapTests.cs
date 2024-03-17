@@ -79,6 +79,16 @@ class TestStorage : IStorage
     {
         throw new NotImplementedException();
     }
+
+    public void Save(IEnumerable<IModelChanges> modelChanges)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEnumerable<IModelChanges> Load(IEnumerable<IModelShard> modelShards)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 class DelayedAsyncScheduler : IScheduler
@@ -99,6 +109,19 @@ class DelayedAsyncScheduler : IScheduler
             {
                 Thread.Sleep(_commandDelay);
                 job();
+            },
+            token,
+            TaskCreationOptions.DenyChildAttach,
+            SequentialTaskScheduler.Instance);
+    }
+
+    public Task<T> Enqueue<T>(Func<T> job, CancellationToken token)
+    {
+        return Task.Factory.StartNew(
+            () =>
+            {
+                Thread.Sleep(_commandDelay);
+                return job();
             },
             token,
             TaskCreationOptions.DenyChildAttach,

@@ -18,7 +18,7 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
             code.EmptyLine();
             DefineModelShardClassAsReadOnlyState(modelShard);
             code.EmptyLine();
-            DefineModelShardClassAsIFeatureContext(modelShard);
+            DefineModelShardClassAsIFrameFactory(modelShard);
             code.EmptyLine();
             DefineChangesFrameInterface(modelShard);
             code.EmptyLine();
@@ -226,15 +226,15 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
         });
     }
 
-    private void DefineModelShardClassAsIFeatureContext(ModelShard modelShard)
+    private void DefineModelShardClassAsIFrameFactory(ModelShard modelShard)
     {
-        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", ["IFeatureContext"],
+        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", ["IFrameFactory"],
         () =>
         {
-            code.WriteLine("IChangesFrame IFeatureContext.GetOrAddFrame(IMutableModelChanges modelChanges)");
+            code.WriteLine("public IChangesFrame Create()");
             code.Block(() =>
             {
-                code.WriteLine($"return modelChanges.Register(static () => new {modelShard.Name}ChangesFrame());");
+                code.WriteLine($"return new {modelShard.Name}ChangesFrame();");
             });
         });
     }
@@ -283,7 +283,11 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
                 code.EmptyLine();
                 DefineMergeMethod(modelShard);
                 code.EmptyLine();
+                ImplementUpdateMethod(modelShard);
+                code.EmptyLine();
                 ImplementSaveMethod(modelShard);
+                code.EmptyLine();
+                ImplementLoadMethod(modelShard);
                 code.EmptyLine();
             });
 
@@ -321,7 +325,12 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
 
         void DefineGetMethod(ModelShard modelShard)
         {
-            code.WriteLine("ICollectionChangeSet<TEntity, TProperty>? IChangesFrame.Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)");
+            code.WriteLine("public ICollectionChangeSet<TEntity, TProperty>? Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)");
+            code.WithIndent(c =>
+            {
+                c.WriteLine("where TEntity : Entity");
+                c.WriteLine("where TProperty : Properties");
+            });
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -334,7 +343,12 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
             });
             code.EmptyLine();
 
-            code.WriteLine("IRelationChangeSet<TParent, TChild>? IChangesFrame.Get<TParent, TChild>(IRelation<TParent, TChild> relation)");
+            code.WriteLine("public IRelationChangeSet<TParent, TChild>? Get<TParent, TChild>(IRelation<TParent, TChild> relation)");
+            code.WithIndent(c =>
+            {
+                c.WriteLine("where TParent : Entity");
+                c.WriteLine("where TChild : Entity");
+            });
             code.Block(() =>
             {
                 foreach (var relation in modelShard.Relations)
@@ -349,7 +363,7 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
 
         void DefineInvertMethod(ModelShard modelShard)
         {
-            code.WriteLine($"IChangesFrame IChangesFrame.Invert()");
+            code.WriteLine($"public IChangesFrame Invert()");
             code.Block(() =>
             {
                 code.WriteLine($"return new {modelShard.Name}ChangesFrame()");
@@ -424,20 +438,56 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
             });
         }
 
-        void ImplementSaveMethod(ModelShard modelShard)
+        void ImplementUpdateMethod(ModelShard modelShard)
         {
-            code.WriteLine($"public void Save(IRepository repository)");
+            code.WriteLine($"public void Update(IRepository repository)");
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"repository.Save({collection.Name});");
+                    code.WriteLine($"repository.Update({collection.Name});");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"repository.Save({relation.Name});");
+                    code.WriteLine($"repository.Update({relation.Name});");
+                }
+            });
+        }
+
+        void ImplementSaveMethod(ModelShard modelShard)
+        {
+            code.WriteLine($"public void Save(int changeId, IHistoryRepository repository)");
+            code.Block(() =>
+            {
+                foreach (var collection in modelShard.Collections)
+                {
+                    code.WriteLine($"repository.Save(changeId, {collection.Name});");
+                }
+                code.EmptyLine();
+
+                foreach (var relation in modelShard.Relations)
+                {
+                    code.WriteLine($"repository.Save(changeId, {relation.Name});");
+                }
+            });
+        }
+
+        void ImplementLoadMethod(ModelShard modelShard)
+        {
+            code.WriteLine($"public void Load(int changeId, IHistoryRepository repository)");
+            code.Block(() =>
+            {
+                foreach (var collection in modelShard.Collections)
+                {
+                    code.WriteLine($"repository.Load(changeId, {collection.Name});");
+                }
+                code.EmptyLine();
+
+                foreach (var relation in modelShard.Relations)
+                {
+                    code.WriteLine($"repository.Load(changeId, {relation.Name});");
                 }
             });
         }

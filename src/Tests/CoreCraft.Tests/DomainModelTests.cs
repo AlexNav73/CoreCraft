@@ -469,7 +469,7 @@ public class DomainModelTests
 
         public async Task Save(IReadOnlyList<IModelChanges> changes)
         {
-            await Save(_storage, changes);
+            await Update(_storage, changes);
         }
 
         public async Task Save()

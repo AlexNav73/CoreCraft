@@ -12,12 +12,12 @@ internal class TrackableFeature : IFeature
     }
 
     public IMutableCollection<TEntity, TProperties> Decorate<TEntity, TProperties>(
-        IFeatureContext context,
+        IFrameFactory factory,
         IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties
     {
-        var frame = context.GetOrAddFrame(_modelChanges);
+        var frame = (IChangesFrameEx)_modelChanges.AddOrGet(factory.Create());
         var collectionChangesSet = frame.Get(collection);
 
         if (collectionChangesSet is not null)
@@ -29,12 +29,12 @@ internal class TrackableFeature : IFeature
     }
 
     public IMutableRelation<TParent, TChild> Decorate<TParent, TChild>(
-        IFeatureContext context,
+        IFrameFactory factory,
         IMutableRelation<TParent, TChild> relation)
         where TParent : Entity
         where TChild : Entity
     {
-        var frame = context.GetOrAddFrame(_modelChanges);
+        var frame = (IChangesFrameEx)_modelChanges.AddOrGet(factory.Create());
         var relationChangesSet = frame.Get(relation);
 
         if (relationChangesSet is not null)

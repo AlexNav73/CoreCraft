@@ -17,7 +17,7 @@ public class JsonStorageTests
     [Test]
     public void UpdateTest()
     {
-        var change = A.Fake<IChangesFrame>();
+        var change = A.Fake<IChangesFrameEx>();
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
         var storage = new JsonStorage("test.json", jsonFileHandler);
 
@@ -28,7 +28,7 @@ public class JsonStorageTests
 
         A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => change.Save(A<IRepository>.Ignored))
+        A.CallTo(() => change.Update(A<IRepository>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => jsonFileHandler.WriteModelShardsToFile(A<string>.Ignored, A<IList<ModelShard>>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();

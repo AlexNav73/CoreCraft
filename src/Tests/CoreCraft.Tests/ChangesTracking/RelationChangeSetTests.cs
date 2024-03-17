@@ -127,14 +127,14 @@ public class RelationChangeSetTests
     }
 
     [Test]
-    public void SaveShouldCallRepositoryTest()
+    public void UpdateShouldCallRepositoryTest()
     {
         var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
         var repo = A.Fake<IRepository>();
 
-        changes.Save(repo);
+        changes.Update(repo);
 
-        A.CallTo(() => repo.Save(A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
+        A.CallTo(() => repo.Update(A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
             .Invokes(c =>
             {
                 var changeSet = c.Arguments[0];

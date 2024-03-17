@@ -62,5 +62,5 @@ public interface IRelationChangeSet<TParent, TChild> : IHaveInfo<RelationInfo>, 
     ///     Saves the changes in the relation change set to the specified repository.
     /// </summary>
     /// <param name="repository">The repository where the changes will be saved.</param>
-    void Save(IRepository repository);
+    void Update(IRepository repository);
 }

@@ -63,5 +63,5 @@ public interface ICollectionChangeSet<TEntity, TProperties> : IHaveInfo<Collecti
     ///     Saves the changes in the collection change set to the specified repository.
     /// </summary>
     /// <param name="repository">The repository where the changes will be saved.</param>
-    void Save(IRepository repository);
+    void Update(IRepository repository);
 }

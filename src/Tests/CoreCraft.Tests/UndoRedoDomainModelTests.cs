@@ -119,7 +119,7 @@ public class UndoRedoDomainModelTests
     }
 
     [Test]
-    public async Task SaveUndoRedoDomainModelTest()
+    public async Task UpdateUndoRedoDomainModelTest()
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
@@ -133,12 +133,12 @@ public class UndoRedoDomainModelTests
         Assert.That(model.UndoStack.Count, Is.EqualTo(1));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
 
-        await model.Save(storage);
+        await model.Update(storage);
 
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        Assert.That(model.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(model.UndoStack.Count, Is.EqualTo(1));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
         Assert.That(modelHasBeenChanged, Is.True);
     }
@@ -158,11 +158,11 @@ public class UndoRedoDomainModelTests
         Assert.That(model.UndoStack.Count, Is.EqualTo(1));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
 
-        await model.SaveAs(storage);
+        await model.Save(storage);
 
         A.CallTo(() => storage.Save(A<IEnumerable<IModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
 
-        Assert.That(model.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(model.UndoStack.Count, Is.EqualTo(1));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
         Assert.That(modelHasBeenChanged, Is.True);
     }
@@ -182,11 +182,11 @@ public class UndoRedoDomainModelTests
         Assert.That(model.UndoStack.Count, Is.EqualTo(1));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
 
-        await model.SaveAs(storage);
+        await model.Save(storage);
 
         A.CallTo(() => storage.Save(A<IEnumerable<IModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
 
-        Assert.That(model.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(model.UndoStack.Count, Is.EqualTo(1));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
         Assert.That(modelHasBeenChanged, Is.True);
     }

@@ -40,13 +40,6 @@ public class DomainModel : IDomainModel
         _modelSubscription = new ModelSubscription();
     }
 
-    /// <summary>
-    ///     Raised after all subscribers handled changes
-    /// </summary>
-    protected virtual void OnModelChanged(Change<IModelChanges> change)
-    {
-    }
-
     /// <inheritdoc cref="IModel.Shard{T}"/>
     public T Shard<T>() where T : IModelShard
     {
@@ -138,35 +131,6 @@ public class DomainModel : IDomainModel
     }
 
     /// <summary>
-    ///     Saves a list of model changes
-    /// </summary>
-    /// <param name="storage">A storage to write</param>
-    /// <param name="changes">A list of changes</param>
-    /// <param name="token">Cancellation token</param>
-    /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
-    protected Task Save(IStorage storage, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
-    {
-        try
-        {
-            if (changes.Count > 0)
-            {
-                var merged = MergeChanges(changes);
-
-                if (merged.HasChanges())
-                {
-                    return _scheduler.RunParallel(() => storage.Update(merged), token);
-                }
-            }
-
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            throw new ModelSaveException("Model save has failed", ex);
-        }
-    }
-
-    /// <summary>
     ///     Loads the domain model data.
     /// </summary>
     /// <param name="storage">A storage.</param>
@@ -241,6 +205,49 @@ public class DomainModel : IDomainModel
         var configuration = configure(loader);
 
         return Load(snapshot, changes, () => storage.Load(configuration), token);
+    }
+
+    /// <summary>
+    /// </summary>
+    protected internal IReadOnlyCollection<IModelShard> UnsafeModelShards => _view.UnsafeModel.Shards.ToArray();
+
+    /// <summary>
+    /// </summary>
+    protected internal IScheduler Scheduler => _scheduler;
+
+    /// <summary>
+    ///     Raised after all subscribers handled changes
+    /// </summary>
+    protected virtual void OnModelChanged(Change<IModelChanges> change)
+    {
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <param name="storage">A storage to write</param>
+    /// <param name="changes">A list of changes</param>
+    /// <param name="token">Cancellation token</param>
+    /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
+    protected Task Update(IStorage storage, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
+    {
+        try
+        {
+            if (changes.Count > 0)
+            {
+                var merged = MergeChanges(changes);
+
+                if (merged.HasChanges())
+                {
+                    return _scheduler.RunParallel(() => storage.Update(merged), token);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            throw new ModelSaveException("Model update has failed", ex);
+        }
     }
 
     /// <summary>
