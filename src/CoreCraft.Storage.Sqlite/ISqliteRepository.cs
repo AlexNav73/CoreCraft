@@ -1,4 +1,6 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Persistence;
 using CoreCraft.Persistence.History;
 using System.Data;
 
@@ -31,7 +33,7 @@ public interface ISqliteRepository : IRepository, IHistoryRepository, IDisposabl
     ///     TODO: Write documentation
     /// </summary>
     /// <returns>TODO: Write documentation</returns>
-    int GetMaxChangeId();
+    IEnumerable<IModelChanges> LoadChanges(IEnumerable<IModelShard> shards);
 
     /// <summary>
     ///     Sets new database version

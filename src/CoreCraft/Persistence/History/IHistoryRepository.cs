@@ -17,7 +17,7 @@ public interface IHistoryRepository
     /// </param>
     /// <param name="changes">A collection of changes to be saved.</param>
     void Save<TEntity, TProperties>(
-        int changeId,
+        long changeId,
         ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties;
@@ -32,7 +32,7 @@ public interface IHistoryRepository
     /// </param>
     /// <param name="changes">A collection of changes to be saved.</param>
     void Save<TParent, TChild>(
-        int changeId,
+        long changeId,
         IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity;
@@ -45,7 +45,7 @@ public interface IHistoryRepository
     /// <param name="changeId">The identifier of the change set to load, representing a specific user action.</param>
     /// <param name="changes">A collection to populate with the loaded changes.</param>
     void Load<TEntity, TProperties>(
-        int changeId,
+        long changeId,
         ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties;
@@ -58,7 +58,7 @@ public interface IHistoryRepository
     /// <param name="changeId">The identifier of the change set to load, representing a specific user action.</param>
     /// <param name="changes">A collection to populate with the loaded changes.</param>
     void Load<TParent, TChild>(
-        int changeId,
+        long changeId,
         IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity;

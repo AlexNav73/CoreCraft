@@ -26,11 +26,11 @@ public interface IFeature
     /// </summary>
     /// <typeparam name="TEntity">A type of an entity</typeparam>
     /// <typeparam name="TProperties">A type of properties</typeparam>
-    /// <param name="context">A context with utility methods</param>
+    /// <param name="factory">A factory for changes frames</param>
     /// <param name="collection">A base collection which will be wrapped in this method</param>
     /// <returns>A new collection with adjusted behavior</returns>
     IMutableCollection<TEntity, TProperties> Decorate<TEntity, TProperties>(
-        IFrameFactory context,
+        IFrameFactory factory,
         IMutableCollection<TEntity, TProperties> collection)
         where TEntity : Entity
         where TProperties : Properties;
@@ -40,11 +40,11 @@ public interface IFeature
     /// </summary>
     /// <typeparam name="TParent">A type of a parent entity</typeparam>
     /// <typeparam name="TChild">A type of a child entity</typeparam>
-    /// <param name="context">A context with utility methods</param>
+    /// <param name="factory">A factory for changes frames</param>
     /// <param name="relation">A base relation which will be wrapped in this method</param>
     /// <returns>A new relation with adjusted behavior</returns>
     IMutableRelation<TParent, TChild> Decorate<TParent, TChild>(
-        IFrameFactory context,
+        IFrameFactory factory,
         IMutableRelation<TParent, TChild> relation)
         where TParent : Entity
         where TChild : Entity;

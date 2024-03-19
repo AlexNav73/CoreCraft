@@ -53,24 +53,13 @@ internal static class QueryBuilder
             CREATE TABLE IF NOT EXISTS [__CollectionHistory] (
                 [Id] INTEGER NOT NULL,
                 [Collection] TEXT NOT NULL,
-                [ChangeId] INTEGER NOT NULL,
+                [ChangeId] NUMERIC NOT NULL,
                 [Action] INTEGER NOT NULL,
                 [EntityId] TEXT NOT NULL,
                 [OldProperties] TEXT,
                 [NewProperties] TEXT,
                 PRIMARY KEY([Id])
             );
-            """;
-
-        internal const string SelectMaxChangeId = """
-            SELECT [ChangeId]
-            FROM (
-                SELECT [ChangeId] FROM [__CollectionHistory]
-                UNION ALL
-                SELECT [ChangeId] FROM [__RelationHistory]
-            )
-            ORDER BY [ChangeId] DESC
-            LIMIT 1;
             """;
 
         internal const string InsertIntoCollectionTable = """
@@ -82,7 +71,7 @@ internal static class QueryBuilder
             CREATE TABLE IF NOT EXISTS [__RelationHistory] (
                 [Id] INTEGER NOT NULL,
                 [Relation] TEXT NOT NULL,
-                [ChangeId] INTEGER NOT NULL,
+                [ChangeId] NUMERIC NOT NULL,
                 [Action] INTEGER NOT NULL,
                 [ParentId] TEXT NOT NULL,
                 [ChildId] TEXT NOT NULL,
@@ -95,16 +84,28 @@ internal static class QueryBuilder
             VALUES ($Relation, $ChangeId, $Action, $ParentId, $ChildId);
             """;
 
-        internal static string SelectCollectionTable(int changeId, string collection) => $"""
+        internal static string SelectCollectionTable(long changeId, string collection) => $"""
             SELECT [Action], [EntityId], [OldProperties], [NewProperties]
             FROM [__CollectionHistory]
             WHERE [ChangeId] = {changeId} AND [Collection] = '{collection}';
             """;
 
-        internal static string SelectRelationTable(int changeId, string relation) => $"""
+        internal static string SelectRelationTable(long changeId, string relation) => $"""
             SELECT [Action], [ParentId], [ChildId]
             FROM [__RelationHistory]
             WHERE [ChangeId] = {changeId} AND [Relation] = '{relation}';
+            """;
+
+        internal const string SelectChangeIds = """
+            SELECT DISTINCT *
+            FROM (
+                SELECT [ChangeId]
+                FROM [__CollectionHistory]
+                UNION ALL
+                SELECT [ChangeId]
+                FROM [__RelationHistory]
+            )
+            ORDER BY [ChangeId] ASC;
             """;
     }
 

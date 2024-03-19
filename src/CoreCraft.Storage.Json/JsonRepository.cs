@@ -138,14 +138,14 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public void Save<TEntity, TProperties>(int changeId, ICollectionChangeSet<TEntity, TProperties> changes)
+    public void Save<TEntity, TProperties>(long changeId, ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
         throw new NotImplementedException();
     }
 
-    public void Save<TParent, TChild>(int changeId, IRelationChangeSet<TParent, TChild> changes)
+    public void Save<TParent, TChild>(long changeId, IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
@@ -204,14 +204,14 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public void Load<TEntity, TProperties>(int changeId, ICollectionChangeSet<TEntity, TProperties> changes)
+    public void Load<TEntity, TProperties>(long changeId, ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
         throw new NotImplementedException();
     }
 
-    public void Load<TParent, TChild>(int changeId, IRelationChangeSet<TParent, TChild> changes)
+    public void Load<TParent, TChild>(long changeId, IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
