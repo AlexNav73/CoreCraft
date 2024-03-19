@@ -1,7 +1,4 @@
-﻿using CoreCraft.Persistence;
-using CoreCraft.Persistence.History;
-
-namespace CoreCraft.ChangesTracking;
+﻿namespace CoreCraft.ChangesTracking;
 
 /// <summary>
 ///     An extension of the <see cref="IChangesFrame"/> which used internally in the <see cref="DomainModel"/>
@@ -54,32 +51,8 @@ public interface IChangesFrameEx : IChangesFrame
     IChangesFrame Invert();
 
     /// <summary>
-    ///     Saves the changes frame using the provided repository.
+    ///     TODO: write documentation
     /// </summary>
-    /// <param name="repository">The repository used to save the changes frame.</param>
-    void Update(IRepository repository);
-
-    /// <summary>
-    ///     Saves the changes stored in this frame to the specified repository.
-    /// </summary>
-    /// <param name="changeId">A unique identifier for the change set.</param>
-    /// <param name="repository">The <see cref="IHistoryRepository" /> instance used to persist the changes.</param>
-    /// <remarks>
-    ///     This method persists the changes tracked within this <see cref="IChangesFrame"/> instance to the history storage using the provided `repository`.
-    ///     - The `changeId` parameter allows for associating the changes with a specific event or action.
-    ///     - The `repository` parameter is an <see cref="IHistoryRepository" /> instance responsible for handling the storage and retrieval of history data.
-    /// </remarks>
-    void Save(long changeId, IHistoryRepository repository);
-
-    /// <summary>
-    ///     Loads changes history from the specified repository for the given change identifier.
-    /// </summary>
-    /// <param name="changeId">A unique identifier for the change set to load.</param>
-    /// <param name="repository">The <see cref="IHistoryRepository" /> instance used to retrieve the changes.</param>
-    /// <remarks>
-    ///     This method retrieves changes associated with the provided `changeId` from the storage using the specified `repository`.
-    ///     - The `changeId` parameter specifies the unique identifier of the change set to be loaded.
-    ///     - The `repository` parameter is an <see cref="IHistoryRepository" /> instance responsible for providing access to changes.
-    /// </remarks>
-    void Load(long changeId, IHistoryRepository repository);
+    /// <param name="operation"></param>
+    void Do<T>(T operation) where T : IChangesFrameOperation;
 }

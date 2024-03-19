@@ -283,11 +283,7 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
                 code.EmptyLine();
                 DefineMergeMethod(modelShard);
                 code.EmptyLine();
-                ImplementUpdateMethod(modelShard);
-                code.EmptyLine();
-                ImplementSaveMethod(modelShard);
-                code.EmptyLine();
-                ImplementLoadMethod(modelShard);
+                ImplementDoMethod(modelShard);
                 code.EmptyLine();
             });
 
@@ -438,56 +434,21 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
             });
         }
 
-        void ImplementUpdateMethod(ModelShard modelShard)
+        void ImplementDoMethod(ModelShard modelShard)
         {
-            code.WriteLine($"public void Update(IRepository repository)");
+            code.WriteLine($"public void Do<T>(T operation)");
+            code.WithIndent(c => c.WriteLine("where T : IChangesFrameOperation"));
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"repository.Update({collection.Name});");
+                    code.WriteLine($"operation.OnCollection({collection.Name});");
                 }
                 code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"repository.Update({relation.Name});");
-                }
-            });
-        }
-
-        void ImplementSaveMethod(ModelShard modelShard)
-        {
-            code.WriteLine($"public void Save(long changeId, IHistoryRepository repository)");
-            code.Block(() =>
-            {
-                foreach (var collection in modelShard.Collections)
-                {
-                    code.WriteLine($"repository.Save(changeId, {collection.Name});");
-                }
-                code.EmptyLine();
-
-                foreach (var relation in modelShard.Relations)
-                {
-                    code.WriteLine($"repository.Save(changeId, {relation.Name});");
-                }
-            });
-        }
-
-        void ImplementLoadMethod(ModelShard modelShard)
-        {
-            code.WriteLine($"public void Load(long changeId, IHistoryRepository repository)");
-            code.Block(() =>
-            {
-                foreach (var collection in modelShard.Collections)
-                {
-                    code.WriteLine($"repository.Load(changeId, {collection.Name});");
-                }
-                code.EmptyLine();
-
-                foreach (var relation in modelShard.Relations)
-                {
-                    code.WriteLine($"repository.Load(changeId, {relation.Name});");
+                    code.WriteLine($"operation.OnRelation({relation.Name});");
                 }
             });
         }

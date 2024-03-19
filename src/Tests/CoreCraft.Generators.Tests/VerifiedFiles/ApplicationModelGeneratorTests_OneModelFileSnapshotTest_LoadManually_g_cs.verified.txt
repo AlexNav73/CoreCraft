@@ -236,31 +236,14 @@ namespace compilation.LoadManually
             };
         }
 
-        public void Update(IRepository repository)
+        public void Do<T>(T operation)
+            where T : IChangesFrameOperation
         {
-            repository.Update(FirstCollection);
-            repository.Update(SecondCollection);
-            repository.Update(ThirdCollection);
+            operation.OnCollection(FirstCollection);
+            operation.OnCollection(SecondCollection);
+            operation.OnCollection(ThirdCollection);
 
-            repository.Update(OneToOneRelation);
-        }
-
-        public void Save(int changeId, IHistoryRepository repository)
-        {
-            repository.Save(changeId, FirstCollection);
-            repository.Save(changeId, SecondCollection);
-            repository.Save(changeId, ThirdCollection);
-
-            repository.Save(changeId, OneToOneRelation);
-        }
-
-        public void Load(int changeId, IHistoryRepository repository)
-        {
-            repository.Load(changeId, FirstCollection);
-            repository.Load(changeId, SecondCollection);
-            repository.Load(changeId, ThirdCollection);
-
-            repository.Load(changeId, OneToOneRelation);
+            operation.OnRelation(OneToOneRelation);
         }
 
     }
@@ -441,17 +424,8 @@ namespace compilation.LoadManually
             };
         }
 
-        public void Update(IRepository repository)
-        {
-
-        }
-
-        public void Save(int changeId, IHistoryRepository repository)
-        {
-
-        }
-
-        public void Load(int changeId, IHistoryRepository repository)
+        public void Do<T>(T operation)
+            where T : IChangesFrameOperation
         {
 
         }

@@ -4,6 +4,7 @@ using CoreCraft.Persistence;
 using CoreCraft.Storage.Sqlite.Migrations;
 using System.Data;
 using CoreCraft.Persistence.Lazy;
+using CoreCraft.Persistence.Operations;
 
 namespace CoreCraft.Storage.Sqlite.Tests;
 
@@ -28,10 +29,11 @@ public class SqliteStorageTests
     public void UpdateTransactionRollbackOnExceptionTest()
     {
         var change = A.Fake<IChangesFrameEx>();
-        A.CallTo(() => change.Update(A<IRepository>.Ignored)).Throws<InvalidOperationException>();
+        A.CallTo(() => change.Do(A<UpdateChangesFrameOperation>.Ignored))
+            .Throws<InvalidOperationException>();
         var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
-        var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
+        var storage = new SqliteStorage("", [], _factory!);
 
         Assert.Throws<InvalidOperationException>(() => storage.Update([change]));
 
@@ -49,7 +51,8 @@ public class SqliteStorageTests
 
         storage.Update([change]);
 
-        A.CallTo(() => change.Update(A<IRepository>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => change.Do(A<UpdateChangesFrameOperation>.Ignored))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Test]

@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
+using CoreCraft.Persistence.Operations;
 using Microsoft.Data.Sqlite;
 using static CoreCraft.Storage.Sqlite.QueryBuilder;
 
@@ -38,8 +39,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 
     public int GetDatabaseVersion()
     {
-        using var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.Migrations.GetDatabaseVersion;
+        using var command = CreateCommand(QueryBuilder.Migrations.GetDatabaseVersion);
 
         Log(command);
 
@@ -50,17 +50,19 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 
     public void SetDatabaseVersion(int version)
     {
-        using var command = _connection.CreateCommand();
-        command.CommandText = QueryBuilder.Migrations.SetDatabaseVersion(version);
+        using var command = CreateCommand(QueryBuilder.Migrations.SetDatabaseVersion(version));
+
         Log(command);
+
         command.ExecuteNonQuery();
     }
 
     public void ExecuteNonQuery(string query)
     {
-        using var command = _connection.CreateCommand();
-        command.CommandText = query;
+        using var command = CreateCommand(query);
+
         Log(command);
+
         command.ExecuteNonQuery();
     }
 
@@ -287,8 +289,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             return;
         }
 
-        using var command = _connection.CreateCommand();
-        command.CommandText = Relations.Select(relation.Info);
+        using var command = CreateCommand(Relations.Select(relation.Info));
 
         Log(command);
 
@@ -311,6 +312,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
     {
         using var command = CreateCommand(History.SelectCollectionTable(changeId, InferName(changes.Info)));
 
+        Log(command);
+
         using var reader = command.ExecuteReader();
         while (reader.Read())
         {
@@ -320,8 +323,6 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             var newProperty = Deserialize<TProperties>(reader, 3);
 
             changes.Add(action, entity!, oldProperty, newProperty);
-
-            Log(command);
         }
     }
 
@@ -331,6 +332,8 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
     {
         using var command = CreateCommand(History.SelectRelationTable(changeId, InferName(changes.Info)));
 
+        Log(command);
+
         using var reader = command.ExecuteReader();
         while (reader.Read())
         {
@@ -339,8 +342,6 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             var child = Deserialize<TChild>(reader, 2);
 
             changes.Add(action, parent!, child!);
-
-            Log(command);
         }
     }
 
@@ -360,7 +361,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             foreach (var shard in shards.Cast<IFrameFactory>())
             {
                 var change = (IChangesFrameEx)shard.Create();
-                change.Load(timestamp, this);
+                change.Do(new LoadChangesFrameOperation(timestamp, this));
                 if (change.HasChanges())
                 {
                     modelChanges.AddOrGet(change);
@@ -456,8 +457,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
 
     private bool Exists(string name)
     {
-        using var command = _connection.CreateCommand();
-        command.CommandText = IfTableExists(name);
+        using var command = CreateCommand(IfTableExists(name));
 
         Log(command);
 

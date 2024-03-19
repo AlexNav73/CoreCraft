@@ -3,6 +3,7 @@ using CoreCraft.Core;
 using CoreCraft.Persistence;
 using CoreCraft.Persistence.History;
 using CoreCraft.Persistence.Lazy;
+using CoreCraft.Persistence.Operations;
 using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
 
@@ -43,7 +44,7 @@ public sealed class JsonStorage : IStorage, IHistoryStorage
 
         foreach (var change in modelChanges.Cast<IChangesFrameEx>())
         {
-            change.Update(repository);
+            change.Do(new UpdateChangesFrameOperation(repository));
         }
 
         _jsonFileHandler.WriteModelShardsToFile(_path, shards, _settings);

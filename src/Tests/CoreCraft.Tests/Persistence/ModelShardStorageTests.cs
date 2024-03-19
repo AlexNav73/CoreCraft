@@ -2,6 +2,7 @@
 using CoreCraft.Core;
 using CoreCraft.Features.CoW;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.Operations;
 
 namespace CoreCraft.Tests.Persistence;
 
@@ -18,9 +19,9 @@ public class ModelShardStorageTests
     [Test]
     public void UpdateCollectionTest()
     {
-        var shard = new FakeChangesFrame();
+        var changes = new FakeChangesFrame();
 
-        shard.Update(_repository!);
+        changes.Do(new UpdateChangesFrameOperation(_repository!));
 
         A.CallTo(() => _repository!.Update(
             A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
@@ -30,9 +31,9 @@ public class ModelShardStorageTests
     [Test]
     public void UpdateRelationTest()
     {
-        var shard = new FakeChangesFrame();
+        var changes = new FakeChangesFrame();
 
-        shard.Update(_repository!);
+        changes.Do(new UpdateChangesFrameOperation(_repository!));
 
         A.CallTo(() => _repository!.Update(
             A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
