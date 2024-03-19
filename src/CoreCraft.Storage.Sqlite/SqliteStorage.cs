@@ -63,13 +63,9 @@ public sealed class SqliteStorage : IStorage, IHistoryStorage
             repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
             repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
 
-            var baseId = repository.GetMaxChangeId();
-            foreach (var (idx, change) in modelChanges.Select((c, idx) => (idx, c)))
+            foreach (var change in modelChanges)
             {
-                foreach (var frame in change.Cast<IChangesFrameEx>())
-                {
-                    frame.Save(baseId + idx, repository);
-                }
+                change.Save(repository);
             }
         });
     }
@@ -121,30 +117,7 @@ public sealed class SqliteStorage : IStorage, IHistoryStorage
         repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
         repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
 
-        var changes = new List<IModelChanges>();
-        var numOfChanges = repository.GetMaxChangeId();
-
-        for (int i = 0; i <= numOfChanges; i++)
-        {
-            var modelChanges = new ModelChanges();
-
-            foreach (var shard in modelShards.Cast<IFrameFactory>())
-            {
-                var change = (IChangesFrameEx)shard.Create();
-                change.Load(i, repository);
-                if (change.HasChanges())
-                {
-                    modelChanges.AddOrGet(change);
-                }
-            }
-
-            if (modelChanges.Any())
-            {
-                changes.Add(modelChanges);
-            }
-        }
-
-        return changes;
+        return repository.LoadChanges(modelShards);
     }
 
     private void Transaction(string path, Action<ISqliteRepository> action)

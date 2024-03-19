@@ -10,7 +10,7 @@ public class ModelChangesTests
     [Test]
     public void ChangesFrameRegisteredByConcreteTypeAndRetrievedByInterfaceTypeTest()
     {
-        var modelChanges = new ModelChanges();
+        var modelChanges = new ModelChanges(0);
         var changesFrame = modelChanges.AddOrGet(new FakeChangesFrame());
 
         var success = modelChanges.TryGetFrame<IFakeChangesFrame>(out var frame);
@@ -23,7 +23,7 @@ public class ModelChangesTests
     [Test]
     public void RegisterChangesFrameMultipleTimesTest()
     {
-        var modelChanges = new ModelChanges();
+        var modelChanges = new ModelChanges(0);
         var changesFrame1 = modelChanges.AddOrGet(new FakeChangesFrame());
         var changesFrame2 = modelChanges.AddOrGet(new FakeChangesFrame());
 
@@ -72,14 +72,14 @@ public class ModelChangesTests
     [Test]
     public void MigrateTest()
     {
-        var modelChanges = new ModelChanges();
+        var modelChanges = new ModelChanges(0);
         var changesFrame = (FakeChangesFrame)modelChanges.AddOrGet(new FakeChangesFrame());
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = "test" });
 
-        var modelChanges2 = new ModelChanges();
+        var modelChanges2 = new ModelChanges(0);
         var changesFrame2 = (FakeChangesFrame)modelChanges2.AddOrGet(new FakeChangesFrame());
         var props2 = new FirstEntityProperties();
 
@@ -93,7 +93,7 @@ public class ModelChangesTests
     [Test]
     public void HasChangesTest()
     {
-        var modelChanges = new ModelChanges();
+        var modelChanges = new ModelChanges(0);
         var changesFrame = (FakeChangesFrame)modelChanges.AddOrGet(new FakeChangesFrame());
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
@@ -107,7 +107,7 @@ public class ModelChangesTests
     [Test]
     public void GetEnumeratorTest()
     {
-        var modelChanges = new ModelChanges();
+        var modelChanges = new ModelChanges(0);
 
         Assert.That(modelChanges.GetEnumerator(), Is.Not.Null);
     }
@@ -115,7 +115,7 @@ public class ModelChangesTests
     [Test]
     public void GetNonGenericEnumeratorTest()
     {
-        var modelChanges = new ModelChanges();
+        var modelChanges = new ModelChanges(0);
 
         Assert.That(((IEnumerable)modelChanges).GetEnumerator(), Is.Not.Null);
     }

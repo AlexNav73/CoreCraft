@@ -27,7 +27,7 @@ public class ModelShardTests
     public void AddOrGetFrameWithMissingFrameTest()
     {
         IFrameFactory modelShard = new FakeModelShard();
-        var modelChanges = new ModelChanges();
+        var modelChanges = new ModelChanges(0);
 
         var registered = modelChanges.AddOrGet(modelShard.Create());
 
@@ -39,7 +39,7 @@ public class ModelShardTests
     public void AddOrGetFrameWithFrameTest()
     {
         IFrameFactory modelShard = new FakeModelShard();
-        var modelChanges = new ModelChanges();
+        var modelChanges = new ModelChanges(0);
         var frame = modelChanges.AddOrGet(new FakeChangesFrame());
 
         var registered = modelChanges.AddOrGet(modelShard.Create());

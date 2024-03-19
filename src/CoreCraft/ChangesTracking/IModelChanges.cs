@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.ChangesTracking;
+﻿using CoreCraft.Persistence.History;
+
+namespace CoreCraft.ChangesTracking;
 
 /// <summary>
 ///     A collection of changes for a model
@@ -36,4 +38,10 @@ public interface IModelChanges : IEnumerable<IChangesFrame>
     /// </summary>
     /// <returns>A new inverted changes</returns>
     IModelChanges Invert();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="repository"></param>
+    void Save(IHistoryRepository repository);
 }

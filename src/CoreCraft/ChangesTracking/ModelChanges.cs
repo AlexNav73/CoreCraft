@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using CoreCraft.Persistence.History;
 
 namespace CoreCraft.ChangesTracking;
 
@@ -7,16 +8,19 @@ public sealed class ModelChanges : IMutableModelChanges
 {
     private readonly HashSet<IChangesFrameEx> _frames;
 
+    private long _timestamp;
+
     /// <summary>
     ///     Ctor
     /// </summary>
-    public ModelChanges()
-        : this(new HashSet<IChangesFrameEx>(ChangesFrameComparer.Instance))
+    public ModelChanges(long timestamp)
+        : this(timestamp, new HashSet<IChangesFrameEx>(ChangesFrameComparer.Instance))
     {
     }
 
-    private ModelChanges(HashSet<IChangesFrameEx> frames)
+    private ModelChanges(long timestamp, HashSet<IChangesFrameEx> frames)
     {
+        _timestamp = timestamp;
         _frames = frames;
     }
 
@@ -45,7 +49,7 @@ public sealed class ModelChanges : IMutableModelChanges
     {
         var frames = _frames.Select(x => x.Invert()).Cast<IChangesFrameEx>();
 
-        return new ModelChanges(new HashSet<IChangesFrameEx>(frames, ChangesFrameComparer.Instance));
+        return new ModelChanges(_timestamp, new HashSet<IChangesFrameEx>(frames, ChangesFrameComparer.Instance));
     }
 
     /// <inheritdoc />
@@ -71,7 +75,16 @@ public sealed class ModelChanges : IMutableModelChanges
             }
         }
 
-        return new ModelChanges(result);
+        return new ModelChanges(_timestamp, result);
+    }
+
+    /// <inheritdoc />
+    public void Save(IHistoryRepository repository)
+    {
+        foreach (var frame in _frames)
+        {
+            frame.Save(_timestamp, repository);
+        }
     }
 
     /// <inheritdoc />

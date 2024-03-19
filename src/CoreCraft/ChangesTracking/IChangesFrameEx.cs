@@ -69,7 +69,7 @@ public interface IChangesFrameEx : IChangesFrame
     ///     - The `changeId` parameter allows for associating the changes with a specific event or action.
     ///     - The `repository` parameter is an <see cref="IHistoryRepository" /> instance responsible for handling the storage and retrieval of history data.
     /// </remarks>
-    void Save(int changeId, IHistoryRepository repository);
+    void Save(long changeId, IHistoryRepository repository);
 
     /// <summary>
     ///     Loads changes history from the specified repository for the given change identifier.
@@ -81,5 +81,5 @@ public interface IChangesFrameEx : IChangesFrame
     ///     - The `changeId` parameter specifies the unique identifier of the change set to be loaded.
     ///     - The `repository` parameter is an <see cref="IHistoryRepository" /> instance responsible for providing access to changes.
     /// </remarks>
-    void Load(int changeId, IHistoryRepository repository);
+    void Load(long changeId, IHistoryRepository repository);
 }

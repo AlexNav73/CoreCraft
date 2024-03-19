@@ -458,7 +458,7 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
 
         void ImplementSaveMethod(ModelShard modelShard)
         {
-            code.WriteLine($"public void Save(int changeId, IHistoryRepository repository)");
+            code.WriteLine($"public void Save(long changeId, IHistoryRepository repository)");
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -476,7 +476,7 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
 
         void ImplementLoadMethod(ModelShard modelShard)
         {
-            code.WriteLine($"public void Load(int changeId, IHistoryRepository repository)");
+            code.WriteLine($"public void Load(long changeId, IHistoryRepository repository)");
             code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)

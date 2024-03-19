@@ -82,7 +82,7 @@ public class DomainModel : IDomainModel
     /// <inheritdoc cref="IDomainModel.Run(Action{IMutableModel, CancellationToken}, CancellationToken)"/>
     public async Task Run(Action<IMutableModel, CancellationToken> command, CancellationToken token = default)
     {
-        var changes = new ModelChanges();
+        var changes = new ModelChanges(DateTime.UtcNow.Ticks);
         var snapshot = new Snapshot(_view.UnsafeModel, [new CoWFeature(), new TrackableFeature(changes)]);
 
         try
@@ -142,7 +142,7 @@ public class DomainModel : IDomainModel
     /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model.</exception>
     public Task Load(IStorage storage, bool force = false, CancellationToken token = default)
     {
-        var changes = new ModelChanges();
+        var changes = new ModelChanges(DateTime.UtcNow.Ticks);
         var snapshot = new LoadSnapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
 
         return Load(snapshot, changes, () => storage.Load(snapshot, force), token);
@@ -170,7 +170,7 @@ public class DomainModel : IDomainModel
         CancellationToken token = default)
         where T : IMutableModelShard
     {
-        var changes = new ModelChanges();
+        var changes = new ModelChanges(DateTime.UtcNow.Ticks);
         var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
         var loader = new ModelLoader<T>(((IMutableModel)snapshot).Shard<T>(), force);
 
@@ -199,7 +199,7 @@ public class DomainModel : IDomainModel
         CancellationToken token = default)
         where T : IMutableModelShard
     {
-        var changes = new ModelChanges();
+        var changes = new ModelChanges(DateTime.UtcNow.Ticks);
         var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
         var loader = new ModelShardLoader<T>(((IMutableModel)snapshot).Shard<T>());
         var configuration = configure(loader);

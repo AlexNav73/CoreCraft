@@ -184,7 +184,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Save<TEntity, TProperties>(int changeId, ICollectionChangeSet<TEntity, TProperties> changes)
+    public void Save<TEntity, TProperties>(long changeId, ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -218,7 +218,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Save<TParent, TChild>(int changeId, IRelationChangeSet<TParent, TChild> changes)
+    public void Save<TParent, TChild>(long changeId, IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
@@ -305,7 +305,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Load<TEntity, TProperties>(int changeId, ICollectionChangeSet<TEntity, TProperties> changes)
+    public void Load<TEntity, TProperties>(long changeId, ICollectionChangeSet<TEntity, TProperties> changes)
         where TEntity : Entity
         where TProperties : Properties
     {
@@ -325,7 +325,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public void Load<TParent, TChild>(int changeId, IRelationChangeSet<TParent, TChild> changes)
+    public void Load<TParent, TChild>(long changeId, IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity
     {
@@ -344,21 +344,36 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public int GetMaxChangeId()
+    public IEnumerable<IModelChanges> LoadChanges(IEnumerable<IModelShard> shards)
     {
-        var command = CreateCommand(History.SelectMaxChangeId);
+        var changes = new List<IModelChanges>();
+        using var command = CreateCommand(History.SelectChangeIds);
 
         Log(command);
 
         using var reader = command.ExecuteReader();
-        if (reader.Read())
+        while (reader.Read())
         {
-            var changeId = reader.GetInt32(0);
+            var timestamp = reader.GetInt64(0);
+            var modelChanges = new ModelChanges(timestamp);
 
-            return changeId;
+            foreach (var shard in shards.Cast<IFrameFactory>())
+            {
+                var change = (IChangesFrameEx)shard.Create();
+                change.Load(timestamp, this);
+                if (change.HasChanges())
+                {
+                    modelChanges.AddOrGet(change);
+                }
+            }
+
+            if (modelChanges.Any())
+            {
+                changes.Add(modelChanges);
+            }
         }
 
-        return 0;
+        return changes;
     }
 
     internal bool Exists(CollectionInfo collection)
