@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using CoreCraft.Persistence.History;
+using CoreCraft.Persistence.Operations;
 
 namespace CoreCraft.ChangesTracking;
 
@@ -83,7 +84,7 @@ public sealed class ModelChanges : IMutableModelChanges
     {
         foreach (var frame in _frames)
         {
-            frame.Save(_timestamp, repository);
+            frame.Do(new SaveChangesFrameOperation(_timestamp, repository));
         }
     }
 

@@ -276,37 +276,16 @@ namespace compilation.AnotherModelFile
             };
         }
 
-        public void Update(IRepository repository)
+        public void Do<T>(T operation)
+            where T : IChangesFrameOperation
         {
-            repository.Update(FirstCollection);
-            repository.Update(SecondCollection);
+            operation.OnCollection(FirstCollection);
+            operation.OnCollection(SecondCollection);
 
-            repository.Update(OneToOneRelation);
-            repository.Update(OneToManyRelation);
-            repository.Update(ManyToOneRelation);
-            repository.Update(ManyToManyRelation);
-        }
-
-        public void Save(int changeId, IHistoryRepository repository)
-        {
-            repository.Save(changeId, FirstCollection);
-            repository.Save(changeId, SecondCollection);
-
-            repository.Save(changeId, OneToOneRelation);
-            repository.Save(changeId, OneToManyRelation);
-            repository.Save(changeId, ManyToOneRelation);
-            repository.Save(changeId, ManyToManyRelation);
-        }
-
-        public void Load(int changeId, IHistoryRepository repository)
-        {
-            repository.Load(changeId, FirstCollection);
-            repository.Load(changeId, SecondCollection);
-
-            repository.Load(changeId, OneToOneRelation);
-            repository.Load(changeId, OneToManyRelation);
-            repository.Load(changeId, ManyToOneRelation);
-            repository.Load(changeId, ManyToManyRelation);
+            operation.OnRelation(OneToOneRelation);
+            operation.OnRelation(OneToManyRelation);
+            operation.OnRelation(ManyToOneRelation);
+            operation.OnRelation(ManyToManyRelation);
         }
 
     }

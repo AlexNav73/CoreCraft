@@ -1,6 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Persistence;
 using CoreCraft.Persistence.Lazy;
+using CoreCraft.Persistence.Operations;
 using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
 
@@ -28,7 +29,7 @@ public class JsonStorageTests
 
         A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => change.Update(A<IRepository>.Ignored))
+        A.CallTo(() => change.Do(A<UpdateChangesFrameOperation>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => jsonFileHandler.WriteModelShardsToFile(A<string>.Ignored, A<IList<ModelShard>>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();

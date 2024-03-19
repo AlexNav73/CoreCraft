@@ -3,6 +3,7 @@ using CoreCraft.Core;
 using CoreCraft.Persistence;
 using CoreCraft.Persistence.History;
 using CoreCraft.Persistence.Lazy;
+using CoreCraft.Persistence.Operations;
 using CoreCraft.Storage.Sqlite.Migrations;
 using System.Data;
 
@@ -48,7 +49,7 @@ public sealed class SqliteStorage : IStorage, IHistoryStorage
         {
             foreach (var change in modelChanges.Cast<IChangesFrameEx>())
             {
-                change.Update(repository);
+                change.Do(new UpdateChangesFrameOperation(repository));
             }
         });
     }

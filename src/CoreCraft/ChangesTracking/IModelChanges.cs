@@ -40,7 +40,7 @@ public interface IModelChanges : IEnumerable<IChangesFrame>
     IModelChanges Invert();
 
     /// <summary>
-    /// 
+    ///     TODO: write documentation
     /// </summary>
     /// <param name="repository"></param>
     void Save(IHistoryRepository repository);
