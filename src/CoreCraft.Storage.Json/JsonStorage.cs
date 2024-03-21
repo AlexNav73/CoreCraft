@@ -4,7 +4,6 @@ using CoreCraft.Persistence;
 using CoreCraft.Persistence.History;
 using CoreCraft.Persistence.Lazy;
 using CoreCraft.Persistence.Operations;
-using CoreCraft.Storage.Json.Model;
 using Newtonsoft.Json;
 
 namespace CoreCraft.Storage.Json;
@@ -39,7 +38,7 @@ public sealed class JsonStorage : IStorage, IHistoryStorage
     /// <inheritdoc/>
     public void Update(IEnumerable<IChangesFrame> modelChanges)
     {
-        var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
+        var shards = _jsonFileHandler.ReadModelFromFile(_path, _settings);
         var repository = new JsonRepository(shards);
 
         foreach (var change in modelChanges.Cast<IChangesFrameEx>())
@@ -47,35 +46,43 @@ public sealed class JsonStorage : IStorage, IHistoryStorage
             change.Do(new UpdateChangesFrameOperation(repository));
         }
 
-        _jsonFileHandler.WriteModelShardsToFile(_path, shards, _settings);
+        _jsonFileHandler.WriteModelToFile(_path, shards, _settings);
     }
 
     /// <inheritdoc/>
     public void Save(IEnumerable<IModelChanges> modelChanges)
     {
-        throw new NotImplementedException();
+        var shards = _jsonFileHandler.ReadModelFromFile(_path, _settings);
+        var repository = new JsonRepository(shards);
+
+        foreach (var change in modelChanges)
+        {
+            change.Save(repository);
+        }
+
+        _jsonFileHandler.WriteModelToFile(_path, shards, _settings);
     }
 
     /// <inheritdoc/>
     public void Save(IEnumerable<IModelShard> modelShards)
     {
-        var shards = new List<ModelShard>();
-        var repository = new JsonRepository(shards);
+        var model = new Model.Model();
+        var repository = new JsonRepository(model);
 
         foreach (var shard in modelShards)
         {
             shard.Save(repository);
         }
 
-        _jsonFileHandler.WriteModelShardsToFile(_path, shards, _settings);
+        _jsonFileHandler.WriteModelToFile(_path, model, _settings);
     }
 
     /// <inheritdoc/>
     public void Load(IEnumerable<IMutableModelShard> modelShards, bool force = false)
     {
-        var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
+        var model = _jsonFileHandler.ReadModelFromFile(_path, _settings);
 
-        var repository = new JsonRepository(shards);
+        var repository = new JsonRepository(model);
 
         foreach (var loadable in modelShards.Where(x => force || !x.ManualLoadRequired))
         {
@@ -86,14 +93,18 @@ public sealed class JsonStorage : IStorage, IHistoryStorage
     /// <inheritdoc/>
     public void Load(ILazyLoader loader)
     {
-        var shards = _jsonFileHandler.ReadModelShardsFromFile(_path, _settings);
+        var model = _jsonFileHandler.ReadModelFromFile(_path, _settings);
 
-        loader.Load(new JsonRepository(shards));
+        loader.Load(new JsonRepository(model));
     }
 
     /// <inheritdoc/>
     public IEnumerable<IModelChanges> Load(IEnumerable<IModelShard> modelShards)
     {
-        throw new NotImplementedException();
+        var model = _jsonFileHandler.ReadModelFromFile(_path, _settings);
+
+        var repository = new JsonRepository(model);
+
+        return repository.LoadHistory(modelShards);
     }
 }

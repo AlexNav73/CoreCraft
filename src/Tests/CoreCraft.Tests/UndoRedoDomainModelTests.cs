@@ -111,11 +111,11 @@ public class UndoRedoDomainModelTests
 
         await ExecuteModifyCommand(model, entity, "test");
 
-        model.Undo().GetAwaiter().GetResult();
+        await model.Undo();
 
         await ExecuteRemoveCommand(model, entity);
 
-        Assert.DoesNotThrow(() => model.Redo().GetAwaiter().GetResult());
+        Assert.DoesNotThrowAsync(model.Redo);
     }
 
     [Test]
@@ -138,7 +138,7 @@ public class UndoRedoDomainModelTests
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        Assert.That(model.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(model.UndoStack.Count, Is.EqualTo(0));
         Assert.That(model.RedoStack.Count, Is.EqualTo(0));
         Assert.That(modelHasBeenChanged, Is.True);
     }

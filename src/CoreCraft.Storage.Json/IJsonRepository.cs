@@ -1,4 +1,6 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Persistence;
 using CoreCraft.Persistence.History;
 
 namespace CoreCraft.Storage.Json;
@@ -8,4 +10,10 @@ namespace CoreCraft.Storage.Json;
 /// </summary>
 public interface IJsonRepository : IRepository, IHistoryRepository
 {
+    /// <summary>
+    ///     TODO: write documentation
+    /// </summary>
+    /// <param name="modelShards"></param>
+    /// <returns></returns>
+    IEnumerable<IModelChanges> LoadHistory(IEnumerable<IModelShard> modelShards);
 }

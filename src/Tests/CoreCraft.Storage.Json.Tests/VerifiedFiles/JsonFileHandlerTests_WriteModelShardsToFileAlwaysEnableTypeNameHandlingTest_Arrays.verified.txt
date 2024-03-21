@@ -1,98 +1,105 @@
 ﻿{
-  "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.ModelShard, CoreCraft.Storage.Json]], System.Private.CoreLib",
-  "$values": [
-    {
-      "$type": "CoreCraft.Storage.Json.Model.ModelShard, CoreCraft.Storage.Json",
-      "Name": "Test",
-      "Collections": {
-        "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.ICollection, CoreCraft.Storage.Json]], System.Private.CoreLib",
-        "$values": [
-          {
-            "$type": "CoreCraft.Storage.Json.Model.Collection`1[[CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
-            "Name": "First",
-            "Items": {
-              "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json]], System.Private.CoreLib",
-              "$values": [
-                {
-                  "$type": "CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
-                  "Id": "4338c5bd-62a5-4881-9496-de733cbc32e9",
-                  "Properties": {
-                    "$type": "CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure",
-                    "NonNullableStringProperty": "",
-                    "NullableStringProperty": "value1",
-                    "NullableStringWithDefaultValueProperty": null
+  "$type": "CoreCraft.Storage.Json.Model.Model, CoreCraft.Storage.Json",
+  "ChangesHistory": {
+    "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.ModelChanges, CoreCraft.Storage.Json]], System.Private.CoreLib",
+    "$values": []
+  },
+  "Shards": {
+    "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.ModelShard, CoreCraft.Storage.Json]], System.Private.CoreLib",
+    "$values": [
+      {
+        "$type": "CoreCraft.Storage.Json.Model.ModelShard, CoreCraft.Storage.Json",
+        "Name": "Test",
+        "Collections": {
+          "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.ICollection, CoreCraft.Storage.Json]], System.Private.CoreLib",
+          "$values": [
+            {
+              "$type": "CoreCraft.Storage.Json.Model.Collection`1[[CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
+              "Name": "First",
+              "Items": {
+                "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json]], System.Private.CoreLib",
+                "$values": [
+                  {
+                    "$type": "CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
+                    "Id": "4338c5bd-62a5-4881-9496-de733cbc32e9",
+                    "Properties": {
+                      "$type": "CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure",
+                      "NonNullableStringProperty": "",
+                      "NullableStringProperty": "value1",
+                      "NullableStringWithDefaultValueProperty": null
+                    }
+                  },
+                  {
+                    "$type": "CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
+                    "Id": "51a44e3e-3a5e-4f08-b0fa-04779c95530f",
+                    "Properties": {
+                      "$type": "CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure",
+                      "NonNullableStringProperty": "",
+                      "NullableStringProperty": "value2",
+                      "NullableStringWithDefaultValueProperty": null
+                    }
                   }
-                },
-                {
-                  "$type": "CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
-                  "Id": "51a44e3e-3a5e-4f08-b0fa-04779c95530f",
-                  "Properties": {
-                    "$type": "CoreCraft.Tests.Infrastructure.Model.Entities.FirstEntityProperties, CoreCraft.Tests.Infrastructure",
-                    "NonNullableStringProperty": "",
-                    "NullableStringProperty": "value2",
-                    "NullableStringWithDefaultValueProperty": null
+                ]
+              }
+            },
+            {
+              "$type": "CoreCraft.Storage.Json.Model.Collection`1[[CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
+              "Name": "Second",
+              "Items": {
+                "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json]], System.Private.CoreLib",
+                "$values": [
+                  {
+                    "$type": "CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
+                    "Id": "484591a6-0382-4c9d-9f2c-8a12d3227570",
+                    "Properties": {
+                      "$type": "CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure",
+                      "IntProperty": 0,
+                      "BoolProperty": false,
+                      "DoubleProperty": 1.1,
+                      "FloatProperty": 0.0
+                    }
+                  },
+                  {
+                    "$type": "CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
+                    "Id": "b5165342-e8b9-456b-aa1e-1a363693e50e",
+                    "Properties": {
+                      "$type": "CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure",
+                      "IntProperty": 0,
+                      "BoolProperty": false,
+                      "DoubleProperty": 2.2,
+                      "FloatProperty": 0.0
+                    }
                   }
-                }
-              ]
+                ]
+              }
             }
-          },
-          {
-            "$type": "CoreCraft.Storage.Json.Model.Collection`1[[CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
-            "Name": "Second",
-            "Items": {
-              "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json]], System.Private.CoreLib",
-              "$values": [
-                {
-                  "$type": "CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
-                  "Id": "484591a6-0382-4c9d-9f2c-8a12d3227570",
-                  "Properties": {
-                    "$type": "CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure",
-                    "IntProperty": 0,
-                    "BoolProperty": false,
-                    "DoubleProperty": 1.1,
-                    "FloatProperty": 0.0
+          ]
+        },
+        "Relations": {
+          "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.Relation, CoreCraft.Storage.Json]], System.Private.CoreLib",
+          "$values": [
+            {
+              "$type": "CoreCraft.Storage.Json.Model.Relation, CoreCraft.Storage.Json",
+              "Name": "OneToOne",
+              "Pairs": {
+                "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.Pair, CoreCraft.Storage.Json]], System.Private.CoreLib",
+                "$values": [
+                  {
+                    "$type": "CoreCraft.Storage.Json.Model.Pair, CoreCraft.Storage.Json",
+                    "Parent": "4338c5bd-62a5-4881-9496-de733cbc32e9",
+                    "Child": "484591a6-0382-4c9d-9f2c-8a12d3227570"
+                  },
+                  {
+                    "$type": "CoreCraft.Storage.Json.Model.Pair, CoreCraft.Storage.Json",
+                    "Parent": "51a44e3e-3a5e-4f08-b0fa-04779c95530f",
+                    "Child": "b5165342-e8b9-456b-aa1e-1a363693e50e"
                   }
-                },
-                {
-                  "$type": "CoreCraft.Storage.Json.Model.Item`1[[CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure]], CoreCraft.Storage.Json",
-                  "Id": "b5165342-e8b9-456b-aa1e-1a363693e50e",
-                  "Properties": {
-                    "$type": "CoreCraft.Tests.Infrastructure.Model.Entities.SecondEntityProperties, CoreCraft.Tests.Infrastructure",
-                    "IntProperty": 0,
-                    "BoolProperty": false,
-                    "DoubleProperty": 2.2,
-                    "FloatProperty": 0.0
-                  }
-                }
-              ]
+                ]
+              }
             }
-          }
-        ]
-      },
-      "Relations": {
-        "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.Relation, CoreCraft.Storage.Json]], System.Private.CoreLib",
-        "$values": [
-          {
-            "$type": "CoreCraft.Storage.Json.Model.Relation, CoreCraft.Storage.Json",
-            "Name": "OneToOne",
-            "Pairs": {
-              "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.Pair, CoreCraft.Storage.Json]], System.Private.CoreLib",
-              "$values": [
-                {
-                  "$type": "CoreCraft.Storage.Json.Model.Pair, CoreCraft.Storage.Json",
-                  "Parent": "4338c5bd-62a5-4881-9496-de733cbc32e9",
-                  "Child": "484591a6-0382-4c9d-9f2c-8a12d3227570"
-                },
-                {
-                  "$type": "CoreCraft.Storage.Json.Model.Pair, CoreCraft.Storage.Json",
-                  "Parent": "51a44e3e-3a5e-4f08-b0fa-04779c95530f",
-                  "Child": "b5165342-e8b9-456b-aa1e-1a363693e50e"
-                }
-              ]
-            }
-          }
-        ]
+          ]
+        }
       }
-    }
-  ]
+    ]
+  }
 }

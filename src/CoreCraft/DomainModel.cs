@@ -223,34 +223,6 @@ public class DomainModel : IDomainModel
     }
 
     /// <summary>
-    /// </summary>
-    /// <param name="storage">A storage to write</param>
-    /// <param name="changes">A list of changes</param>
-    /// <param name="token">Cancellation token</param>
-    /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
-    protected Task Update(IStorage storage, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
-    {
-        try
-        {
-            if (changes.Count > 0)
-            {
-                var merged = MergeChanges(changes);
-
-                if (merged.HasChanges())
-                {
-                    return _scheduler.RunParallel(() => storage.Update(merged), token);
-                }
-            }
-
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            throw new ModelSaveException("Model update has failed", ex);
-        }
-    }
-
-    /// <summary>
     ///     Applies changes to the model
     /// </summary>
     /// <param name="changes">Changes to apply</param>
@@ -310,16 +282,5 @@ public class DomainModel : IDomainModel
     private static Change<IModelChanges> CreateChangeObject(ModelChangeResult result, IModelChanges changes)
     {
         return new Change<IModelChanges>(result.OldModel, result.NewModel, changes);
-    }
-
-    private static IModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)
-    {
-        var merged = (IMutableModelChanges)changes[0];
-        for (var i = 1; i < changes.Count; i++)
-        {
-            merged = merged.Merge(changes[i]);
-        }
-
-        return merged;
     }
 }
