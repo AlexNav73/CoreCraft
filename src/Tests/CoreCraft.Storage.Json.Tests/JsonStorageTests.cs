@@ -22,16 +22,16 @@ public class JsonStorageTests
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
         var storage = new JsonStorage("test.json", jsonFileHandler);
 
-        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
-            .Returns(new List<ModelShard>());
+        A.CallTo(() => jsonFileHandler.ReadModelFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
+            .Returns(new Model.Model());
 
         storage.Update([change]);
 
-        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
+        A.CallTo(() => jsonFileHandler.ReadModelFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => change.Do(A<UpdateChangesFrameOperation>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => jsonFileHandler.WriteModelShardsToFile(A<string>.Ignored, A<IList<ModelShard>>.Ignored, A<JsonSerializerSettings>.Ignored))
+        A.CallTo(() => jsonFileHandler.WriteModelToFile(A<string>.Ignored, A<Model.Model>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -46,7 +46,7 @@ public class JsonStorageTests
 
         A.CallTo(() => change.Save(A<IRepository>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => jsonFileHandler.WriteModelShardsToFile(A<string>.Ignored, A<IList<ModelShard>>.Ignored, A<JsonSerializerSettings>.Ignored))
+        A.CallTo(() => jsonFileHandler.WriteModelToFile(A<string>.Ignored, A<Model.Model>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -59,7 +59,7 @@ public class JsonStorageTests
 
         storage.Load([loadable]);
 
-        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
+        A.CallTo(() => jsonFileHandler.ReadModelFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => loadable.Load(A<IRepository>.Ignored, A<bool>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -74,7 +74,7 @@ public class JsonStorageTests
 
         storage.Load(loader);
 
-        A.CallTo(() => jsonFileHandler.ReadModelShardsFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
+        A.CallTo(() => jsonFileHandler.ReadModelFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => loader.Load(A<IRepository>.Ignored))
             .MustHaveHappenedOnceExactly();

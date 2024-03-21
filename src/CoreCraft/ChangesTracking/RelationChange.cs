@@ -4,7 +4,7 @@ namespace CoreCraft.ChangesTracking;
 
 /// <inheritdoc cref="IRelationChange{TParent, TChild}"/>
 [DebuggerDisplay("Action = {Action}")]
-public sealed class RelationChange<TParent, TChild> : IRelationChange<TParent, TChild>
+internal sealed class RelationChange<TParent, TChild> : IRelationChange<TParent, TChild>
     where TParent : Entity
     where TChild : Entity
 {

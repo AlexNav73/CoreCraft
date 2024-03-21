@@ -1,11 +1,10 @@
-﻿using CoreCraft.Storage.Json.Model;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace CoreCraft.Storage.Json;
 
 internal class JsonFileHandler : IJsonFileHandler
 {
-    public IList<ModelShard> ReadModelShardsFromFile(
+    public Model.Model ReadModelFromFile(
         string path,
         JsonSerializerSettings? settings)
     {
@@ -15,15 +14,15 @@ internal class JsonFileHandler : IJsonFileHandler
             var reader = new JsonTextReader(fileReader);
             var serializer = CreateSerializer(settings);
 
-            return serializer.Deserialize<IList<ModelShard>>(reader) ?? new List<ModelShard>();
+            return serializer.Deserialize<Model.Model>(reader) ?? new Model.Model();
         }
 
-        return new List<ModelShard>();
+        return new Model.Model();
     }
 
-    public void WriteModelShardsToFile(
+    public void WriteModelToFile(
         string path,
-        IList<ModelShard> shards,
+        Model.Model shards,
         JsonSerializerSettings? settings)
     {
         using var sw = new StreamWriter(path);

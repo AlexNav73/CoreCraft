@@ -1,4 +1,5 @@
-﻿using CoreCraft.ChangesTracking;
+﻿using System.Threading.Tasks;
+using CoreCraft.ChangesTracking;
 using CoreCraft.Commands;
 using CoreCraft.Core;
 using CoreCraft.Exceptions;
@@ -154,9 +155,11 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .Throws<InvalidOperationException>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, new SyncScheduler());
 
-        Assert.ThrowsAsync<ModelSaveException>(() => model.Save([A.Fake<IModelChanges>()]));
+        var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
+
+        Assert.ThrowsAsync<ModelSaveException>(() => model.Update(storage));
     }
 
     [Test]
@@ -165,7 +168,7 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
-        var task = model.Save([]);
+        var task = model.Update(storage);
 
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustNotHaveHappened();
@@ -176,16 +179,19 @@ public class DomainModelTests
     [Test]
     public void SaveModelDoMergingOfModelChangesIntoOneChangeTest()
     {
-        var modelChanges1 = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
-        var modelChanges2 = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
-
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, new SyncScheduler());
 
-        var task = model.Save([modelChanges1, modelChanges2]);
+        var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
+        _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
 
-        A.CallTo(() => ((IMutableModelChanges)modelChanges1).Merge(modelChanges2))
+        var task = model.Update(storage);
+
+        A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.That.Matches(changes => changes.Count() == 1)))
             .MustHaveHappenedOnceExactly();
+
+        Assert.That(task, Is.Not.Null);
+        Assert.That(task.IsCompleted, Is.True);
     }
 
     [Test]
@@ -452,7 +458,7 @@ public class DomainModelTests
         Assert.That(ReferenceEquals(originalShard.ManyToManyRelation, changedShard.ManyToManyRelation), Is.True);
     }
 
-    private class TestDomainModel : DomainModel
+    private class TestDomainModel : UndoRedoDomainModel
     {
         private readonly IStorage _storage;
         private readonly Action<Change<IModelChanges>>? _onModelChanged;
@@ -465,11 +471,6 @@ public class DomainModelTests
         {
             _storage = storage;
             _onModelChanged = onModelChanged;
-        }
-
-        public async Task Save(IReadOnlyList<IModelChanges> changes)
-        {
-            await Update(_storage, changes);
         }
 
         public async Task Save()

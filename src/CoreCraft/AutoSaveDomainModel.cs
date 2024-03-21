@@ -1,4 +1,5 @@
 ﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
@@ -40,6 +41,21 @@ public class AutoSaveDomainModel : DomainModel
         // Currently, changes' frequency is low and every change have enough time
         // for saving. In future, changes could be more frequent and it is necessary
         // to queue changes for saving or batch them in one big change
-        await Update(_storage, [change.Hunk]);
+        await Update(_storage, change.Hunk);
+    }
+
+    private async Task Update(IStorage storage, IModelChanges changes)
+    {
+        try
+        {
+            if (changes.HasChanges())
+            {
+                await Scheduler.RunParallel(() => storage.Update(changes), CancellationToken.None);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new ModelSaveException("Model update has failed", ex);
+        }
     }
 }

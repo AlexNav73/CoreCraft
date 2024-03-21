@@ -54,14 +54,29 @@ public class UndoRedoDomainModel : DomainModel
     /// <summary>
     ///     Saves changes happened since the last save operation
     /// </summary>
+    /// <param name="token">Cancellation token</param>
     /// <param name="storage">A storage where a model will be saved</param>
     public async Task Update(IStorage storage, CancellationToken token = default)
     {
         var changes = _undoStack.Reverse().ToArray();
 
-        if (changes.Length != 0)
+        try
         {
-            await Update(storage, changes, token);
+            if (changes.Length > 0)
+            {
+                var merged = MergeChanges(changes);
+
+                if (merged.HasChanges())
+                {
+                    await Scheduler.RunParallel(() => storage.Update(merged), token);
+                }
+
+                ClearHistory();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new ModelSaveException("Model update has failed", ex);
         }
     }
 
@@ -188,5 +203,16 @@ public class UndoRedoDomainModel : DomainModel
         var model = UnsafeModelShards;
 
         return await Scheduler.Enqueue(() => storage.Load(model), token);
+    }
+
+    private static IModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)
+    {
+        var merged = (IMutableModelChanges)changes[0];
+        for (var i = 1; i < changes.Count; i++)
+        {
+            merged = merged.Merge(changes[i]);
+        }
+
+        return merged;
     }
 }

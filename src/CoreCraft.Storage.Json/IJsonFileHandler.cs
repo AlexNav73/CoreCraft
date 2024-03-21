@@ -1,16 +1,15 @@
-﻿using CoreCraft.Storage.Json.Model;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace CoreCraft.Storage.Json;
 
 internal interface IJsonFileHandler
 {
-    IList<ModelShard> ReadModelShardsFromFile(
+    Model.Model ReadModelFromFile(
         string path,
         JsonSerializerSettings? settings);
 
-    void WriteModelShardsToFile(
+    void WriteModelToFile(
         string path,
-        IList<ModelShard> shards,
+        Model.Model shards,
         JsonSerializerSettings? settings);
 }

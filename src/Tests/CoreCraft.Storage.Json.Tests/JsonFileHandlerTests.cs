@@ -8,12 +8,12 @@ public class JsonFileHandlerTests
     [Test]
     public async Task WriteModelShardsToFileTest()
     {
-        var shards = CreateModel();
+        var model = CreateModel();
         var jsonFileHandler = new JsonFileHandler();
         var setting = new JsonSerializerSettings();
         var file = "test1.json";
 
-        jsonFileHandler.WriteModelShardsToFile(file, shards, setting);
+        jsonFileHandler.WriteModelToFile(file, model, setting);
 
         var json = File.ReadAllText(file);
         File.Delete(file);
@@ -24,7 +24,7 @@ public class JsonFileHandlerTests
     [Test]
     public async Task WriteModelShardsToFilePreserveJsonSettingsTest()
     {
-        var shards = CreateModel();
+        var model = CreateModel();
         var jsonFileHandler = new JsonFileHandler();
         var setting = new JsonSerializerSettings()
         {
@@ -32,7 +32,7 @@ public class JsonFileHandlerTests
         };
         var file = "test1.json";
 
-        jsonFileHandler.WriteModelShardsToFile(file, shards, setting);
+        jsonFileHandler.WriteModelToFile(file, model, setting);
 
         var json = File.ReadAllText(file);
         File.Delete(file);
@@ -48,7 +48,7 @@ public class JsonFileHandlerTests
     [TestCase(TypeNameHandling.Auto)]
     public async Task WriteModelShardsToFileAlwaysEnableTypeNameHandlingTest(TypeNameHandling typeNameHandling)
     {
-        var shards = CreateModel();
+        var model = CreateModel();
         var jsonFileHandler = new JsonFileHandler();
         var setting = new JsonSerializerSettings()
         {
@@ -57,15 +57,15 @@ public class JsonFileHandlerTests
         };
         var file = "test1.json";
 
-        jsonFileHandler.WriteModelShardsToFile(file, shards, setting);
+        jsonFileHandler.WriteModelToFile(file, model, setting);
 
         var json = File.ReadAllText(file);
 
-        var redShards = jsonFileHandler.ReadModelShardsFromFile(file, setting);
+        var readModel = jsonFileHandler.ReadModelFromFile(file, setting);
 
         File.Delete(file);
 
-        Assert.That(redShards.Count, Is.EqualTo(1));
+        Assert.That(readModel.Shards.Count, Is.EqualTo(1));
 
         var fileName = $"{nameof(JsonFileHandlerTests)}_{nameof(WriteModelShardsToFileAlwaysEnableTypeNameHandlingTest)}_{typeNameHandling}";
         await Verify(json).UseDirectory("./VerifiedFiles").UseFileName(fileName);
@@ -74,7 +74,7 @@ public class JsonFileHandlerTests
     [Test]
     public void WriteModelShardsToFileThrowsOnInvalidTypeNameHandlingTest()
     {
-        var shards = CreateModel();
+        var model = CreateModel();
         var jsonFileHandler = new JsonFileHandler();
         var setting = new JsonSerializerSettings()
         {
@@ -83,22 +83,22 @@ public class JsonFileHandlerTests
         };
         var file = "test1.json";
 
-        Assert.Throws<NotSupportedException>(() => jsonFileHandler.WriteModelShardsToFile(file, shards, setting));
+        Assert.Throws<NotSupportedException>(() => jsonFileHandler.WriteModelToFile(file, model, setting));
     }
 
     [Test]
     public void ReadModelShardsFromFileTest()
     {
-        var shards = CreateModel();
+        var model = CreateModel();
         var jsonFileHandler = new JsonFileHandler();
         var setting = new JsonSerializerSettings();
         var file = "test2.json";
 
-        jsonFileHandler.WriteModelShardsToFile(file, shards, setting);
+        jsonFileHandler.WriteModelToFile(file, model, setting);
         var json1 = File.ReadAllText(file);
 
-        var redShards = jsonFileHandler.ReadModelShardsFromFile(file, setting);
-        jsonFileHandler.WriteModelShardsToFile(file, redShards, setting);
+        var readModel = jsonFileHandler.ReadModelFromFile(file, setting);
+        jsonFileHandler.WriteModelToFile(file, readModel, setting);
 
         var json2 = File.ReadAllText(file);
         File.Delete(file);
@@ -113,53 +113,56 @@ public class JsonFileHandlerTests
         var setting = new JsonSerializerSettings();
         var file = "test3.json";
 
-        var redShards = jsonFileHandler.ReadModelShardsFromFile(file, setting);
+        var model = jsonFileHandler.ReadModelFromFile(file, setting);
 
-        Assert.That(redShards.Count, Is.EqualTo(0));
+        Assert.That(model.Shards.Count, Is.EqualTo(0));
     }
 
-    private static IList<ModelShard> CreateModel()
+    private static Model.Model CreateModel()
     {
         var entity1Id = Guid.Parse("4338C5BD-62A5-4881-9496-DE733CBC32E9");
         var entity2Id = Guid.Parse("51A44E3E-3A5E-4F08-B0FA-04779C95530F");
         var entity3Id = Guid.Parse("484591A6-0382-4C9D-9F2C-8A12D3227570");
         var entity4Id = Guid.Parse("B5165342-E8B9-456B-AA1E-1A363693E50E");
 
-        return new List<ModelShard>()
+        return new Model.Model()
         {
-            new ModelShard("Test")
-            {
-                Collections = new List<ICollection>()
+            Shards =
+            [
+                new("Test")
                 {
-                    new Collection<FirstEntityProperties>("First")
-                    {
-                        Items = new List<Item<FirstEntityProperties>>()
+                    Collections =
+                    [
+                        new Collection<FirstEntityProperties>("First")
                         {
-                            new Item<FirstEntityProperties>(entity1Id, new() { NullableStringProperty = "value1" }),
-                            new Item<FirstEntityProperties>(entity2Id, new() { NullableStringProperty = "value2" })
-                        }
-                    },
-                    new Collection<SecondEntityProperties>("Second")
-                    {
-                        Items = new List<Item<SecondEntityProperties>>()
+                            Items =
+                            [
+                                new(entity1Id, new() { NullableStringProperty = "value1" }),
+                                new(entity2Id, new() { NullableStringProperty = "value2" })
+                            ]
+                        },
+                        new Collection<SecondEntityProperties>("Second")
                         {
-                            new Item<SecondEntityProperties>(entity3Id, new() { DoubleProperty = 1.1 }),
-                            new Item<SecondEntityProperties>(entity4Id, new() { DoubleProperty = 2.2 })
-                        }
-                    },
-                },
-                Relations = new List<Relation>()
-                {
-                    new Relation("OneToOne")
-                    {
-                        Pairs = new List<Pair>()
+                            Items =
+                            [
+                                new(entity3Id, new() { DoubleProperty = 1.1 }),
+                                new(entity4Id, new() { DoubleProperty = 2.2 })
+                            ]
+                        },
+                    ],
+                    Relations =
+                    [
+                        new("OneToOne")
                         {
-                            new Pair(entity1Id, entity3Id),
-                            new Pair(entity2Id, entity4Id),
+                            Pairs =
+                            [
+                                new(entity1Id, entity3Id),
+                                new(entity2Id, entity4Id),
+                            ]
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
     }
 }
