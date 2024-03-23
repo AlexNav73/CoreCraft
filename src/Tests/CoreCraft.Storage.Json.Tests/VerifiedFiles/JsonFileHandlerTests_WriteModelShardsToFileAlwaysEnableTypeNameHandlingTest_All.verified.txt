@@ -1,7 +1,7 @@
 ﻿{
   "$type": "CoreCraft.Storage.Json.Model.Model, CoreCraft.Storage.Json",
   "ChangesHistory": {
-    "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.ModelChanges, CoreCraft.Storage.Json]], System.Private.CoreLib",
+    "$type": "System.Collections.Generic.List`1[[CoreCraft.Storage.Json.Model.History.ModelChanges, CoreCraft.Storage.Json]], System.Private.CoreLib",
     "$values": []
   },
   "Shards": {
