@@ -150,8 +150,8 @@ internal sealed class JsonRepository : IJsonRepository
         }
 
         var modelChange = GetOrCreateModelChanges(changeId);
-        var frame = JsonRepository.GetOrCreateChangesFrame(modelChange, changes.Info.ShardName);
-        var collectionChanges = JsonRepository.GetOrCreateCollectionChanges<TEntity, TProperties>(frame, changes.Info.Name);
+        var frame = GetOrCreateChangesFrame(modelChange, changes.Info.ShardName);
+        var collectionChanges = GetOrCreateCollectionChanges<TEntity, TProperties>(frame, changes.Info.Name);
 
         foreach (var change in changes)
         {
@@ -169,8 +169,8 @@ internal sealed class JsonRepository : IJsonRepository
         }
 
         var modelChange = GetOrCreateModelChanges(changeId);
-        var frame = JsonRepository.GetOrCreateChangesFrame(modelChange, changes.Info.ShardName);
-        var relationChanges = JsonRepository.GetOrCreateRelationChanges<TParent, TChild>(frame, changes.Info.Name);
+        var frame = GetOrCreateChangesFrame(modelChange, changes.Info.ShardName);
+        var relationChanges = GetOrCreateRelationChanges<TParent, TChild>(frame, changes.Info.Name);
 
         foreach (var change in changes)
         {
@@ -290,7 +290,7 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public IEnumerable<IModelChanges> LoadHistory(IEnumerable<IModelShard> modelShards)
+    public IEnumerable<IModelChanges> RestoreHistory(IEnumerable<IModelShard> modelShards)
     {
         var changes = new List<IModelChanges>();
 

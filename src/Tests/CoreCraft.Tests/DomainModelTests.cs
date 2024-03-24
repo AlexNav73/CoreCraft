@@ -4,6 +4,7 @@ using CoreCraft.Commands;
 using CoreCraft.Core;
 using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.History;
 using CoreCraft.Persistence.Lazy;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
@@ -168,10 +169,36 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
 
-        var task = model.Update(storage);
+        var task = model.Update();
 
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustNotHaveHappened();
+        Assert.That(task, Is.Not.Null);
+        Assert.That(task.IsCompleted, Is.True);
+    }
+
+    [Test]
+    public void SaveChangesWithSavingHistoryShouldTriggerHistoryStorageTest()
+    {
+        var storage = A.Fake<IStorage>();
+        var historyStorage = A.Fake<IHistoryStorage>();
+        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, new SyncScheduler());
+
+        var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
+
+        Assert.That(model.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(model.RedoStack.Count, Is.EqualTo(0));
+
+        var task = model.Update(storage, historyStorage);
+
+        A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => historyStorage.Save(A<IEnumerable<IModelChanges>>.Ignored))
+            .MustHaveHappenedOnceExactly();
+
+        Assert.That(model.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(model.RedoStack.Count, Is.EqualTo(0));
+
         Assert.That(task, Is.Not.Null);
         Assert.That(task.IsCompleted, Is.True);
     }
@@ -476,6 +503,11 @@ public class DomainModelTests
         public async Task Save()
         {
             await Save(_storage);
+        }
+
+        public async Task Update()
+        {
+            await Update(_storage);
         }
 
         public async Task Load(bool force = false)

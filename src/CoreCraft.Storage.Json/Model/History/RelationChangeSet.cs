@@ -11,7 +11,19 @@ internal sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet
         Changes = new List<RelationChange<TParent, TChild>>();
     }
 
+    public RelationChangeSet(string name) : this()
+    {
+        Name = name;
+    }
+
     public string Name { get; set; }
 
     public IList<RelationChange<TParent, TChild>> Changes { get; set; }
+
+    public RelationChange<TParent, TChild> Create(TParent parent, TChild child)
+    {
+        var change = RelationChange<TParent, TChild>.Create(parent, child);
+        Changes.Add(change);
+        return change;
+    }
 }

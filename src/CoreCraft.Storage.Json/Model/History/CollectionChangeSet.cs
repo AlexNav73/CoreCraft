@@ -11,7 +11,19 @@ internal sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionCha
         Changes = new List<CollectionChange<TEntity, TProperties>>();
     }
 
+    public CollectionChangeSet(string name) : this()
+    {
+        Name = name;
+    }
+
     public string Name { get; set; }
 
     public IList<CollectionChange<TEntity, TProperties>> Changes { get; set; }
+
+    public CollectionChange<TEntity, TProperties> Create(TEntity entity, TProperties properties)
+    {
+        var change = CollectionChange<TEntity, TProperties>.Create(entity, properties);
+        Changes.Add(change);
+        return change;
+    }
 }

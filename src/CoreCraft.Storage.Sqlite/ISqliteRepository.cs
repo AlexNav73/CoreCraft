@@ -33,7 +33,7 @@ public interface ISqliteRepository : IRepository, IHistoryRepository, IDisposabl
     ///     TODO: Write documentation
     /// </summary>
     /// <returns>TODO: Write documentation</returns>
-    IEnumerable<IModelChanges> LoadChanges(IEnumerable<IModelShard> shards);
+    IEnumerable<IModelChanges> RestoreHistory(IEnumerable<IModelShard> shards);
 
     /// <summary>
     ///     Sets new database version

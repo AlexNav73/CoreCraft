@@ -56,22 +56,32 @@ public class UndoRedoDomainModel : DomainModel
     /// </summary>
     /// <param name="token">Cancellation token</param>
     /// <param name="storage">A storage where a model will be saved</param>
-    public async Task Update(IStorage storage, CancellationToken token = default)
+    /// <param name="historyStorage">A storage where a model changes history will be saved</param>
+    public async Task Update(IStorage storage, IHistoryStorage? historyStorage = null, CancellationToken token = default)
     {
-        var changes = _undoStack.Reverse().ToArray();
-
         try
         {
-            if (changes.Length > 0)
+            var changes = _undoStack.Reverse().ToList();
+            if (changes.Count > 0)
             {
                 var merged = MergeChanges(changes);
-
+                // merge operation can combine actions line Add and Remove, which will cause
+                // resulting IModelChanges object contain no changes
                 if (merged.HasChanges())
                 {
-                    await Scheduler.RunParallel(() => storage.Update(merged), token);
-                }
+                    await Scheduler.RunParallel(() =>
+                    {
+                        storage.Update(merged);
+                        historyStorage?.Save(changes);
+                    }, token);
 
-                ClearHistory();
+                    // TODO(#8): saving operation executes in thread pool
+                    // and launched by 'async void' methods. If two
+                    // sequential savings happened, clearing of the stacks
+                    // can cause data race (just after first save we will clear stack
+                    // with new changes, made after first save started).
+                    ClearHistory();
+                }
             }
         }
         catch (Exception ex)
@@ -95,6 +105,11 @@ public class UndoRedoDomainModel : DomainModel
             {
                 await Scheduler.RunParallel(() => storage.Save(changes), token);
 
+                // TODO(#8): saving operation executes in thread pool
+                // and launched by 'async void' methods. If two
+                // sequential savings happened, clearing of the stacks
+                // can cause data race (just after first save we will clear stack
+                // with new changes, made after first save started).
                 ClearHistory();
             }
         }
@@ -131,11 +146,6 @@ public class UndoRedoDomainModel : DomainModel
     {
         if (_undoStack.Count > 0 || _redoStack.Count > 0)
         {
-            // TODO(#8): saving operation executes in thread pool
-            // and launched by 'async void' methods. If two
-            // sequential savings happened, clearing of the stacks
-            // can cause data race (just after first save we will clear stack
-            // with new changes, made after first save started).
             _undoStack.Clear();
             _redoStack.Clear();
 
@@ -200,9 +210,9 @@ public class UndoRedoDomainModel : DomainModel
         CancellationToken token = default)
     {
         // TODO: Write explanation why we can use UnsafeModelShards here
-        var model = UnsafeModelShards;
+        var shards = UnsafeModelShards;
 
-        return await Scheduler.Enqueue(() => storage.Load(model), token);
+        return await Scheduler.Enqueue(() => storage.Load(shards), token);
     }
 
     private static IModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)

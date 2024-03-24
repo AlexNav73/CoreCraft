@@ -15,5 +15,5 @@ public interface IJsonRepository : IRepository, IHistoryRepository
     /// </summary>
     /// <param name="modelShards"></param>
     /// <returns></returns>
-    IEnumerable<IModelChanges> LoadHistory(IEnumerable<IModelShard> modelShards);
+    IEnumerable<IModelChanges> RestoreHistory(IEnumerable<IModelShard> modelShards);
 }

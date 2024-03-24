@@ -23,4 +23,14 @@ internal sealed class RelationChange<TParent, TChild>
     public TParent Parent { get; set; }
 
     public TChild Child { get; set; }
+
+    public static RelationChange<TParent, TChild> Create(TParent parent, TChild child)
+    {
+        return new RelationChange<TParent, TChild>()
+        {
+            Action = RelationAction.Linked,
+            Parent = parent,
+            Child = child
+        };
+    }
 }

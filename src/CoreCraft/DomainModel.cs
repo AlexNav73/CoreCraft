@@ -208,10 +208,22 @@ public class DomainModel : IDomainModel
     }
 
     /// <summary>
+    ///     Provides direct access to the underlying collection of model shards in a read-only manner.
     /// </summary>
-    protected internal IReadOnlyCollection<IModelShard> UnsafeModelShards => _view.UnsafeModel.Shards.ToArray();
+    /// <remarks>
+    ///     <b>Warning:</b>
+    ///     <list type="bullet">
+    ///         <item>This property exposes the model shards collection as a snapshot of its state at the time of access.</item>
+    ///         <item>Subsequent changes to the model through commands or other operations might not be reflected in the returned collection.</item>
+    ///         <item>It's recommended to use the <see cref="Shard{T}()"/> method for safer, up-to-date access to specific model shards.</item>
+    ///         <item>Modifying the returned collection directly can lead to unexpected behavior and data inconsistencies.</item>
+    ///     </list>
+    /// </remarks>
+    protected internal IReadOnlyCollection<IModelShard> UnsafeModelShards => _view.UnsafeModel.Shards.ToList();
 
     /// <summary>
+    ///     Provides access to the internal scheduler used for running commands, applying changes, saving and loading.
+    ///     The scheduler can decide to execute tasks synchronously or asynchronously depending on its implementation.
     /// </summary>
     protected internal IScheduler Scheduler => _scheduler;
 

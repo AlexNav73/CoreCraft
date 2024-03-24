@@ -2,6 +2,8 @@
 using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using CoreCraft.Features.CoW;
+using CoreCraft.Persistence.History;
+using CoreCraft.Persistence.Operations;
 
 namespace CoreCraft.Tests.ChangesTracking;
 
@@ -39,7 +41,7 @@ public class ModelChangesTests
         var value = "test";
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = value });
-        var inverted = ((IChangesFrameEx)changesFrame).Invert();
+        var inverted = changesFrame.Invert();
         var change = ((IFakeChangesFrame)inverted).FirstCollection.SingleOrDefault();
 
         Assert.That(change, Is.Not.Null);
@@ -70,17 +72,17 @@ public class ModelChangesTests
     }
 
     [Test]
-    public void MigrateTest()
+    public void MergeTest()
     {
         var modelChanges = new ModelChanges(0);
-        var changesFrame = (FakeChangesFrame)modelChanges.AddOrGet(new FakeChangesFrame());
+        var changesFrame = modelChanges.AddOrGet(new FakeChangesFrame());
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = "test" });
 
         var modelChanges2 = new ModelChanges(0);
-        var changesFrame2 = (FakeChangesFrame)modelChanges2.AddOrGet(new FakeChangesFrame());
+        var changesFrame2 = modelChanges2.AddOrGet(new FakeChangesFrame());
         var props2 = new FirstEntityProperties();
 
         changesFrame2.FirstCollection.Add(CollectionAction.Remove, entity, props2, props2 with { NonNullableStringProperty = "test" });
@@ -91,10 +93,23 @@ public class ModelChangesTests
     }
 
     [Test]
+    public void SaveTest()
+    {
+        var modelChanges = new ModelChanges(0);
+        var repository = A.Fake<IHistoryRepository>();
+        var frame = A.Fake<IChangesFrameEx>();
+        modelChanges.AddOrGet(frame);
+
+        modelChanges.Save(repository);
+
+        A.CallTo(() => frame.Do(A<SaveChangesFrameOperation>.Ignored)).MustHaveHappened();
+    }
+
+    [Test]
     public void HasChangesTest()
     {
         var modelChanges = new ModelChanges(0);
-        var changesFrame = (FakeChangesFrame)modelChanges.AddOrGet(new FakeChangesFrame());
+        var changesFrame = modelChanges.AddOrGet(new FakeChangesFrame());
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
         var value = "test";

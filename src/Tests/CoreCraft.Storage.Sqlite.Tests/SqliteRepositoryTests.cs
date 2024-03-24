@@ -84,6 +84,93 @@ public class SqliteRepositoryTests
     }
 
     [Test]
+    public void SaveHistoryCollectionWithItemsTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+
+        var entity = new FirstEntity(Guid.NewGuid());
+        var properties = new FirstEntityProperties();
+        var frame = new FakeChangesFrame();
+
+        frame.FirstCollection.Add(CollectionAction.Add, entity, null, properties);
+
+        repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
+
+        repository.Save(42, frame.FirstCollection);
+
+        var loadedFrame = new FakeChangesFrame();
+        repository.Load(42, loadedFrame.FirstCollection);
+
+        Assert.That(loadedFrame.FirstCollection.Count(), Is.EqualTo(1));
+        Assert.That(loadedFrame.FirstCollection.Single().Action, Is.EqualTo(CollectionAction.Add));
+        Assert.That(loadedFrame.FirstCollection.Single().Entity, Is.EqualTo(entity));
+        Assert.That(loadedFrame.FirstCollection.Single().OldData, Is.Null);
+        Assert.That(loadedFrame.FirstCollection.Single().NewData, Is.EqualTo(properties));
+    }
+
+    [Test]
+    public void SaveHistoryRelationWithItemsTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+
+        var parent = new FirstEntity(Guid.NewGuid());
+        var child = new SecondEntity(Guid.NewGuid());
+        var frame = new FakeChangesFrame();
+
+        frame.OneToOneRelation.Add(RelationAction.Linked, parent, child);
+
+        repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
+
+        repository.Save(42, frame.OneToOneRelation);
+
+        var loadedFrame = new FakeChangesFrame();
+        repository.Load(42, loadedFrame.OneToOneRelation);
+
+        Assert.That(loadedFrame.OneToOneRelation.Count(), Is.EqualTo(1));
+        Assert.That(loadedFrame.OneToOneRelation.Single().Action, Is.EqualTo(RelationAction.Linked));
+        Assert.That(loadedFrame.OneToOneRelation.Single().Parent, Is.EqualTo(parent));
+        Assert.That(loadedFrame.OneToOneRelation.Single().Child, Is.EqualTo(child));
+    }
+
+    [Test]
+    public void SaveHistoryCollectionWithoutItemsTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+
+        var entity = new FirstEntity(Guid.NewGuid());
+        var properties = new FirstEntityProperties();
+        var frame = new FakeChangesFrame();
+
+        repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
+
+        repository.Save(42, frame.FirstCollection);
+
+        var loadedFrame = new FakeChangesFrame();
+        repository.Load(42, loadedFrame.FirstCollection);
+
+        Assert.That(loadedFrame.FirstCollection.Count(), Is.EqualTo(0));
+    }
+
+    [Test]
+    public void SaveHistoryRelationWithoutItemsTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+
+        var parent = new FirstEntity(Guid.NewGuid());
+        var child = new SecondEntity(Guid.NewGuid());
+        var frame = new FakeChangesFrame();
+
+        repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
+
+        repository.Save(42, frame.OneToOneRelation);
+
+        var loadedFrame = new FakeChangesFrame();
+        repository.Load(42, loadedFrame.OneToOneRelation);
+
+        Assert.That(loadedFrame.OneToOneRelation.Count(), Is.EqualTo(0));
+    }
+
+    [Test]
     public void InsertCollectionTest()
     {
         using var repository = new SqliteRepository(":memory:");
@@ -269,6 +356,33 @@ public class SqliteRepositoryTests
         };
 
         Assert.Throws<NonEmptyModelException>(() => relation.Load(repository, parentCollection, childCollection));
+    }
+
+    [Test]
+    public void RestoreHistoryTest()
+    {
+        using var repository = new SqliteRepository(":memory:");
+
+        var entity = new FirstEntity(Guid.NewGuid());
+        var properties = new FirstEntityProperties();
+        var frame = new FakeChangesFrame();
+
+        frame.FirstCollection.Add(CollectionAction.Add, entity, null, properties);
+
+        repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
+        repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
+
+        repository.Save(42, frame.FirstCollection);
+
+        var changes = repository.RestoreHistory([new FakeModelShard()]).ToList();
+
+        Assert.That(changes.Count, Is.EqualTo(1));
+        var loadedFrame = changes.Single().OfType<FakeChangesFrame>().Single();
+        Assert.That(loadedFrame.FirstCollection.Count(), Is.EqualTo(1));
+        Assert.That(loadedFrame.FirstCollection.Single().Action, Is.EqualTo(CollectionAction.Add));
+        Assert.That(loadedFrame.FirstCollection.Single().Entity, Is.EqualTo(entity));
+        Assert.That(loadedFrame.FirstCollection.Single().OldData, Is.Null);
+        Assert.That(loadedFrame.FirstCollection.Single().NewData, Is.EqualTo(properties));
     }
 
     [Test]
