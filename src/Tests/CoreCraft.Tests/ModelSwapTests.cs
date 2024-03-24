@@ -1,5 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.Lazy;
 using CoreCraft.Scheduling;
 
 namespace CoreCraft.Tests;
@@ -43,32 +45,47 @@ class TestDomainModel : DomainModel
     {
     }
 
-    public Task Save(Action<IEnumerable<ICanBeSaved>> assert)
+    public Task Save(Action<IEnumerable<IModelShard>> assert)
     {
-        return Save(new TestStorage(assert), "test.txt");
+        return Save(new TestStorage(assert));
     }
 }
 
 class TestStorage : IStorage
 {
-    private readonly Action<IEnumerable<ICanBeSaved>> _assert;
+    private readonly Action<IEnumerable<IModelShard>> _assert;
 
-    public TestStorage(Action<IEnumerable<ICanBeSaved>> assert)
+    public TestStorage(Action<IEnumerable<IModelShard>> assert)
     {
         _assert = assert;
     }
 
-    public void Update(string path, IEnumerable<ICanBeSaved> modelChanges)
+    public void Update(IEnumerable<IChangesFrame> modelChanges)
     {
         throw new NotImplementedException();
     }
 
-    public void Save(string path, IEnumerable<ICanBeSaved> modelShards)
+    public void Save(IEnumerable<IModelShard> modelShards)
     {
         _assert(modelShards);
     }
 
-    public void Load(string path, IEnumerable<ICanBeLoaded> modelShards)
+    public void Load(IEnumerable<IMutableModelShard> modelShards, bool force = false)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Load(ILazyLoader loader)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Save(IEnumerable<IModelChanges> modelChanges)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEnumerable<IModelChanges> Load(IEnumerable<IModelShard> modelShards)
     {
         throw new NotImplementedException();
     }
@@ -92,6 +109,19 @@ class DelayedAsyncScheduler : IScheduler
             {
                 Thread.Sleep(_commandDelay);
                 job();
+            },
+            token,
+            TaskCreationOptions.DenyChildAttach,
+            SequentialTaskScheduler.Instance);
+    }
+
+    public Task<T> Enqueue<T>(Func<T> job, CancellationToken token)
+    {
+        return Task.Factory.StartNew(
+            () =>
+            {
+                Thread.Sleep(_commandDelay);
+                return job();
             },
             token,
             TaskCreationOptions.DenyChildAttach,

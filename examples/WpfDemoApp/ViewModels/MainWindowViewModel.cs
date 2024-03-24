@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CoreCraft;
 using CoreCraft.ChangesTracking;
+using CoreCraft.Persistence;
 using CoreCraft.Subscription;
 using Microsoft.Win32;
 using WpfDemoApp.Model;
@@ -21,13 +21,15 @@ internal partial class MainWindowViewModel : ObservableObject
 {
     private readonly IDisposable _subscription; // Dispose to unsubscribe
     private readonly UndoRedoDomainModel _model;
+    private readonly Func<string, IStorage> _storageFactory;
 
     [ObservableProperty]
     private string? _newItemName;
 
-    public MainWindowViewModel(UndoRedoDomainModel model)
+    public MainWindowViewModel(UndoRedoDomainModel model, Func<string, IStorage> storageFactory)
     {
         _model = model;
+        _storageFactory = storageFactory;
 
         Items = new ObservableCollection<ItemViewModel>();
         Logs = new ObservableCollection<string>();
@@ -92,7 +94,7 @@ internal partial class MainWindowViewModel : ObservableObject
 
         if (saveFileDialog.ShowDialog() == true)
         {
-            await _model.Save(saveFileDialog.FileName);
+            await _model.Save(_storageFactory(saveFileDialog.FileName));
         }
     }
 
@@ -103,7 +105,7 @@ internal partial class MainWindowViewModel : ObservableObject
 
         if (openFileDialog.ShowDialog() == true)
         {
-            await _model.Load(openFileDialog.FileName);
+            await _model.Load(_storageFactory(openFileDialog.FileName));
         }
     }
 

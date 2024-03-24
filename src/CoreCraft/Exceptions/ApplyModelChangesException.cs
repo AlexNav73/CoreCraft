@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
 
 namespace CoreCraft.Exceptions;
 
@@ -25,12 +24,6 @@ public class ApplyModelChangesException : Exception
     /// <inheritdoc />
     public ApplyModelChangesException(string? message, Exception? innerException)
         : base(message, innerException)
-    {
-    }
-
-    /// <inheritdoc />
-    protected ApplyModelChangesException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
     {
     }
 }

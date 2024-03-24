@@ -1,4 +1,9 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Persistence;
+using CoreCraft.Persistence.History;
+using CoreCraft.Persistence.Lazy;
+using CoreCraft.Persistence.Operations;
 using CoreCraft.Storage.Sqlite.Migrations;
 using System.Data;
 
@@ -7,37 +12,58 @@ namespace CoreCraft.Storage.Sqlite;
 /// <summary>
 ///     A SQLite storage implementation for the domain model
 /// </summary>
-public sealed class SqliteStorage : IStorage
+public sealed class SqliteStorage : IStorage, IHistoryStorage
 {
+    private readonly string _path;
     private readonly MigrationRunner _migrationRunner;
     private readonly ISqliteRepositoryFactory _sqliteRepositoryFactory;
-    private readonly Action<string>? _logginAction;
+    private readonly Action<string>? _loggingAction;
 
     /// <summary>
     ///     Ctor
     /// </summary>
     public SqliteStorage(
+        string path,
         IEnumerable<IMigration> migrations,
-        Action<string>? logginAction = null)
-        : this(migrations, new SqliteRepositoryFactory(), logginAction)
+        Action<string>? loggingAction = null)
+        : this(path, migrations, new SqliteRepositoryFactory(), loggingAction)
     {
     }
 
     internal SqliteStorage(
+        string path,
         IEnumerable<IMigration> migrations,
         ISqliteRepositoryFactory sqliteRepositoryFactory,
-        Action<string>? logginAction = null)
+        Action<string>? loggingAction = null)
     {
+        _path = path;
         _migrationRunner = new MigrationRunner(migrations);
         _sqliteRepositoryFactory = sqliteRepositoryFactory;
-        _logginAction = logginAction;
+        _loggingAction = loggingAction;
     }
 
-    /// <inheritdoc cref="IStorage.Update(string, IEnumerable{ICanBeSaved})"/>
-    public void Update(string path, IEnumerable<ICanBeSaved> modelChanges)
+    /// <inheritdoc cref="IStorage.Update(IEnumerable{IChangesFrame})"/>
+    public void Update(IEnumerable<IChangesFrame> modelChanges)
     {
-        Transaction(path, repository =>
+        Transaction(_path, repository =>
         {
+            foreach (var change in modelChanges.Cast<IChangesFrameEx>())
+            {
+                change.Do(new UpdateChangesFrameOperation(repository));
+            }
+        });
+    }
+
+    /// <inheritdoc cref="IHistoryStorage.Save(IEnumerable{IModelChanges})"/>
+    public void Save(IEnumerable<IModelChanges> modelChanges)
+    {
+        Transaction(_path, repository =>
+        {
+            _migrationRunner.UpdateDatabaseVersion(repository);
+
+            repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
+            repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
+
             foreach (var change in modelChanges)
             {
                 change.Save(repository);
@@ -45,10 +71,10 @@ public sealed class SqliteStorage : IStorage
         });
     }
 
-    /// <inheritdoc cref="IStorage.Save(string, IEnumerable{ICanBeSaved})"/>
-    public void Save(string path, IEnumerable<ICanBeSaved> modelShards)
+    /// <inheritdoc cref="IStorage.Save(IEnumerable{IModelShard})"/>
+    public void Save(IEnumerable<IModelShard> modelShards)
     {
-        Transaction(path, repository =>
+        Transaction(_path, repository =>
         {
             _migrationRunner.UpdateDatabaseVersion(repository);
 
@@ -59,17 +85,40 @@ public sealed class SqliteStorage : IStorage
         });
     }
 
-    /// <inheritdoc cref="IStorage.Load(string, IEnumerable{ICanBeLoaded})"/>
-    public void Load(string path, IEnumerable<ICanBeLoaded> modelShards)
+    /// <inheritdoc cref="IStorage.Load(IEnumerable{IMutableModelShard}, bool)"/>
+    public void Load(IEnumerable<IMutableModelShard> modelShards, bool force = false)
     {
-        using var repository = _sqliteRepositoryFactory.Create(path, _logginAction);
+        using var repository = _sqliteRepositoryFactory.Create(_path, _loggingAction);
 
         _migrationRunner.Run(repository);
 
-        foreach (var loadable in modelShards)
+        foreach (var shard in modelShards.Where(x => force || !x.ManualLoadRequired))
         {
-            loadable.Load(repository);
+            shard.Load(repository, force);
         }
+    }
+
+    /// <inheritdoc />
+    public void Load(ILazyLoader loader)
+    {
+        using var repository = _sqliteRepositoryFactory.Create(_path, _loggingAction);
+
+        _migrationRunner.Run(repository);
+
+        loader.Load(repository);
+    }
+
+    /// <inheritdoc />
+    public IEnumerable<IModelChanges> Load(IEnumerable<IModelShard> modelShards)
+    {
+        using var repository = _sqliteRepositoryFactory.Create(_path, _loggingAction);
+
+        _migrationRunner.Run(repository);
+
+        repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
+        repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
+
+        return repository.RestoreHistory(modelShards);
     }
 
     private void Transaction(string path, Action<ISqliteRepository> action)
@@ -79,7 +128,7 @@ public sealed class SqliteStorage : IStorage
 
         try
         {
-            repository = _sqliteRepositoryFactory.Create(path, _logginAction);
+            repository = _sqliteRepositoryFactory.Create(path, _loggingAction);
             transaction = repository.BeginTransaction();
 
             action(repository);
@@ -89,8 +138,8 @@ public sealed class SqliteStorage : IStorage
         catch (Exception ex)
         {
             transaction?.Rollback();
-            _logginAction?.Invoke($"Exception was thrown with message: {ex.Message}");
-            _logginAction?.Invoke($"Stack trace: {ex.StackTrace}");
+            _loggingAction?.Invoke($"Exception was thrown with message: {ex.Message}");
+            _loggingAction?.Invoke($"Stack trace: {ex.StackTrace}");
             throw;
         }
         finally

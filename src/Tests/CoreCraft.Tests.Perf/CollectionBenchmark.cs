@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using CoreCraft.Tests.Infrastructure.Model;
 
 namespace CoreCraft.Tests.Perf;
 
@@ -14,16 +15,16 @@ public class CollectionBenchmark
 
     private IMutableCollection<FirstEntity, FirstEntityProperties> _collection = null!;
 
-    [IterationSetup(Targets = new[] { nameof(Add) })]
+    [IterationSetup(Targets = [nameof(Add)])]
     public void IterationSetupEmpty()
     {
-        _collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new FirstEntity(id), () => new());
+        _collection = new Collection<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo, id => new FirstEntity(id), () => new());
     }
 
-    [IterationSetup(Targets = new[] { nameof(Remove), nameof(Modify), nameof(Get), nameof(Contains) })]
+    [IterationSetup(Targets = [nameof(Remove), nameof(Modify), nameof(Get), nameof(Contains)])]
     public void IterationSetupFilled()
     {
-        _collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new FirstEntity(id), () => new());
+        _collection = new Collection<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo, id => new FirstEntity(id), () => new());
         _i = 0;
         _entities = new List<FirstEntity>();
 

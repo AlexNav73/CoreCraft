@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
 
 namespace CoreCraft.Exceptions;
 
@@ -25,12 +24,6 @@ public class ModelSaveException : Exception
     /// <inheritdoc />
     public ModelSaveException(string? message, Exception? innerException)
         : base(message, innerException)
-    {
-    }
-
-    /// <inheritdoc />
-    protected ModelSaveException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
     {
     }
 }

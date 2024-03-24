@@ -9,7 +9,7 @@ public class ChangesInversionTests
     {
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Add, entity, null, props }
         };
@@ -27,7 +27,7 @@ public class ChangesInversionTests
     {
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Remove, entity, props, null }
         };
@@ -46,7 +46,7 @@ public class ChangesInversionTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { CollectionAction.Modify, entity, oldProps, newProps }
         };
@@ -65,7 +65,7 @@ public class ChangesInversionTests
         var entity = new FirstEntity();
         var oldProps = new FirstEntityProperties();
         var newProps = new FirstEntityProperties();
-        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        var changes = new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
         {
             { (CollectionAction)42, entity, oldProps, newProps }
         };
@@ -78,7 +78,7 @@ public class ChangesInversionTests
     {
         var first = new FirstEntity();
         var second = new SecondEntity();
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("")
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo)
         {
             { RelationAction.Linked, first, second }
         };
@@ -95,7 +95,7 @@ public class ChangesInversionTests
     {
         var first = new FirstEntity();
         var second = new SecondEntity();
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("")
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo)
         {
             { RelationAction.Unlinked, first, second }
         };
@@ -112,7 +112,7 @@ public class ChangesInversionTests
     {
         var first = new FirstEntity();
         var second = new SecondEntity();
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("")
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo)
         {
             { (RelationAction)42, first, second }
         };

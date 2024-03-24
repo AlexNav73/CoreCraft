@@ -1,4 +1,5 @@
 ﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
@@ -11,7 +12,6 @@ namespace CoreCraft;
 public class AutoSaveDomainModel : DomainModel
 {
     private readonly IStorage _storage;
-    private readonly string _path;
 
     /// <summary>
     ///     Ctor
@@ -19,12 +19,10 @@ public class AutoSaveDomainModel : DomainModel
     public AutoSaveDomainModel(
         IEnumerable<IModelShard> modelShards,
         IScheduler scheduler,
-        IStorage storage,
-        string path)
+        IStorage storage)
         : base(modelShards, scheduler)
     {
         _storage = storage;
-        _path = path;
     }
 
     /// <summary>
@@ -32,7 +30,7 @@ public class AutoSaveDomainModel : DomainModel
     /// </summary>
     public async Task Load()
     {
-        await Load(_storage, _path);
+        await Load(_storage);
     }
 
     /// <inheritdoc/>
@@ -43,6 +41,21 @@ public class AutoSaveDomainModel : DomainModel
         // Currently, changes' frequency is low and every change have enough time
         // for saving. In future, changes could be more frequent and it is necessary
         // to queue changes for saving or batch them in one big change
-        await Save(_storage, _path, new[] { change.Hunk });
+        await Update(_storage, change.Hunk);
+    }
+
+    private async Task Update(IStorage storage, IModelChanges changes)
+    {
+        try
+        {
+            if (changes.HasChanges())
+            {
+                await Scheduler.RunParallel(() => storage.Update(changes), CancellationToken.None);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new ModelSaveException("Model update has failed", ex);
+        }
     }
 }

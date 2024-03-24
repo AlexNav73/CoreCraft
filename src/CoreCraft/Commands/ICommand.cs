@@ -20,12 +20,12 @@ public interface ICommand
     ///     Command business logic
     /// </summary>
     /// <remarks>
-    ///     <see cref="IModel"/> in this case, contains mutable versions of
+    ///     <see cref="IMutableModel"/> in this case, contains mutable versions of
     ///     model shards. For example: if there is a "IExampleModelShard", a
     ///     command can only extract "IMutableExampleModelShard" from the
-    ///     <see cref="IModel"/> object.
+    ///     <see cref="IMutableModel"/> object.
     /// </remarks>
     /// <param name="model">Mutable model</param>
     /// <param name="token">Cancellation token</param>
-    void Execute(IModel model, CancellationToken token);
+    void Execute(IMutableModel model, CancellationToken token);
 }

@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.Core;
+﻿using CoreCraft.Persistence;
+
+namespace CoreCraft.Core;
 
 /// <summary>
 ///     An mutable counterpart of a <see cref="IRelation{TParent, TChild}"/> interface
@@ -31,4 +33,15 @@ public interface IMutableRelation<TParent, TChild> : IRelation<TParent, TChild>
     /// <param name="parent">A parent entity</param>
     /// <param name="child">A child entity</param>
     void Remove(TParent parent, TChild child);
+
+    /// <summary>
+    ///     Loads the relation between parent and child entities from the specified repository.
+    /// </summary>
+    /// <param name="repository">The repository from which to load the relation.</param>
+    /// <param name="parents">The collection of parent entities.</param>
+    /// <param name="children">The collection of child entities.</param>
+    void Load(
+        IRepository repository,
+        IEnumerable<TParent> parents,
+        IEnumerable<TChild> children);
 }

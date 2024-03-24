@@ -35,4 +35,11 @@
     <None Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
+  <Import Project="..\CoreCraft.SourceGeneration\CoreCraft.SourceGeneration.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+    <InternalsVisibleTo Include="CoreCraft.Generators.Tests" />
+  </ItemGroup>
+
 </Project>

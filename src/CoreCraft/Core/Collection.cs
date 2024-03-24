@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics;
 using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Core;
 
@@ -24,13 +25,13 @@ public sealed class Collection<TEntity, TProperties> :
     /// <summary>
     ///     Ctor
     /// </summary>
-    public Collection(string id, Func<Guid, TEntity> entityCreator, Func<TProperties> propsCreator)
-        : this(id, new Dictionary<TEntity, TProperties>(), entityCreator, propsCreator)
+    public Collection(CollectionInfo info, Func<Guid, TEntity> entityCreator, Func<TProperties> propsCreator)
+        : this(info, new Dictionary<TEntity, TProperties>(), entityCreator, propsCreator)
     {
     }
 
     private Collection(
-        string id,
+        CollectionInfo info,
         IDictionary<TEntity, TProperties> relation,
         Func<Guid, TEntity> entityFactory,
         Func<TProperties> dataFactory)
@@ -39,11 +40,11 @@ public sealed class Collection<TEntity, TProperties> :
         _entityFactory = entityFactory;
         _propsFactory = dataFactory;
 
-        Id = id;
+        Info = info;
     }
 
-    /// <inheritdoc cref="IHaveId.Id"/>
-    public string Id { get; }
+    /// <inheritdoc cref="IHaveInfo{T}.Info"/>
+    public CollectionInfo Info { get; }
 
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _relation.Count;
@@ -124,14 +125,40 @@ public sealed class Collection<TEntity, TProperties> :
         }
     }
 
+    /// <inheritdoc cref="ILoadable.Load(IRepository)"/>
+    public void Load(IRepository repository)
+    {
+        if (_relation.Count != 0)
+        {
+            throw new NonEmptyModelException($"The [{Info.ShardName}.{Info.Name}] is not empty. Clear or recreate the model before loading data");
+        }
+
+        repository.Load(this);
+    }
+
     /// <inheritdoc cref="ICopy{T}.Copy()"/>
     public ICollection<TEntity, TProperties> Copy()
     {
         return new Collection<TEntity, TProperties>(
-            Id,
+            Info,
             new Dictionary<TEntity, TProperties>(_relation),
             _entityFactory,
             _propsFactory);
+    }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs()" />
+    public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
+    {
+        foreach (var pair in _relation)
+        {
+            yield return (pair.Key, pair.Value);
+        }
+    }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Save(IRepository)" />
+    public void Save(IRepository repository)
+    {
+        repository.Save(this);
     }
 
     /// <inheritdoc />
@@ -144,14 +171,5 @@ public sealed class Collection<TEntity, TProperties> :
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs()" />
-    public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
-    {
-        foreach (var pair in _relation)
-        {
-            yield return (pair.Key, pair.Value);
-        }
     }
 }

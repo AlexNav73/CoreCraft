@@ -12,9 +12,8 @@ internal class MigrationRunnerTest
         using var repository = new SqliteRepository(":memory:");
         var runner = new MigrationRunner(new[] { new DropCollectionTableMigration(FakeModelShardInfo.FirstCollectionInfo) });
 
-        repository.Save(
-            FakeModelShardInfo.FirstCollectionInfo,
-            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        repository.Update(
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
             });
@@ -34,9 +33,8 @@ internal class MigrationRunnerTest
         using var repository = new SqliteRepository(":memory:");
         var runner = new MigrationRunner(new[] { new DropRelationTableMigration(FakeModelShardInfo.OneToOneRelationInfo) });
 
-        repository.Save(
-            FakeModelShardInfo.OneToOneRelationInfo,
-            new RelationChangeSet<FirstEntity, SecondEntity>("")
+        repository.Update(
+            new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo)
             {
                 { RelationAction.Linked, new(), new() }
             });
@@ -58,17 +56,16 @@ internal class MigrationRunnerTest
         var nullColumn = "NullInt";
         var notNullStringColumn = "NonNullString";
         var nullStringColumn = "NullString";
-        var runner = new MigrationRunner(new[]
-        {
+        var runner = new MigrationRunner(
+        [
             new AddColumnMigration<int>(FakeModelShardInfo.FirstCollectionInfo, nonNullColumn, false, 5) as IMigration,
             new AddColumnMigration<int>(FakeModelShardInfo.FirstCollectionInfo, nullColumn, true),
             new AddColumnMigration<string>(FakeModelShardInfo.FirstCollectionInfo, notNullStringColumn, false, "test"),
             new AddColumnMigration<string>(FakeModelShardInfo.FirstCollectionInfo, nullStringColumn, true),
-        });
+        ]);
 
-        repository.Save(
-            FakeModelShardInfo.FirstCollectionInfo,
-            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        repository.Update(
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
             });
@@ -102,9 +99,8 @@ internal class MigrationRunnerTest
             new DropColumnMigration(FakeModelShardInfo.FirstCollectionInfo, columnName)
         });
 
-        repository.Save(
-            FakeModelShardInfo.FirstCollectionInfo,
-            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        repository.Update(
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
             });
@@ -133,9 +129,8 @@ internal class MigrationRunnerTest
             new RenameColumnMigration(FakeModelShardInfo.FirstCollectionInfo, columnName, newColumnName)
         });
 
-        repository.Save(
-            FakeModelShardInfo.FirstCollectionInfo,
-            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        repository.Update(
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
             });
@@ -183,9 +178,8 @@ internal class MigrationRunnerTest
             new NonNullTypeWithEmptyDefaultValueMigration(FakeModelShardInfo.FirstCollectionInfo, columnName)
         });
 
-        repository.Save(
-            FakeModelShardInfo.FirstCollectionInfo,
-            new CollectionChangeSet<FirstEntity, FirstEntityProperties>("")
+        repository.Update(
+            new CollectionChangeSet<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo)
             {
                 { CollectionAction.Add, new(), null, new() }
             });

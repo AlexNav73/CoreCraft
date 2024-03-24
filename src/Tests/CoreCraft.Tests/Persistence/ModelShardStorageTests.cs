@@ -1,6 +1,8 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
+using CoreCraft.Features.CoW;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.Operations;
 
 namespace CoreCraft.Tests.Persistence;
 
@@ -17,12 +19,11 @@ public class ModelShardStorageTests
     [Test]
     public void UpdateCollectionTest()
     {
-        var shard = new FakeChangesFrame();
+        var changes = new FakeChangesFrame();
 
-        shard.Save(_repository!);
+        changes.Do(new UpdateChangesFrameOperation(_repository!));
 
-        A.CallTo(() => _repository!.Save(
-            A<CollectionInfo>.Ignored,
+        A.CallTo(() => _repository!.Update(
             A<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
@@ -30,12 +31,11 @@ public class ModelShardStorageTests
     [Test]
     public void UpdateRelationTest()
     {
-        var shard = new FakeChangesFrame();
+        var changes = new FakeChangesFrame();
 
-        shard.Save(_repository!);
+        changes.Do(new UpdateChangesFrameOperation(_repository!));
 
-        A.CallTo(() => _repository!.Save(
-            A<RelationInfo>.Ignored,
+        A.CallTo(() => _repository!.Update(
             A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
             .MustHaveHappened(4, Times.Exactly);
     }
@@ -48,7 +48,6 @@ public class ModelShardStorageTests
         shard.Save(_repository!);
 
         A.CallTo(() => _repository!.Save(
-            A<CollectionInfo>.Ignored,
             A<ICollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
@@ -61,7 +60,6 @@ public class ModelShardStorageTests
         shard.Save(_repository!);
 
         A.CallTo(() => _repository!.Save(
-            A<RelationInfo>.Ignored,
             A<IRelation<FirstEntity, SecondEntity>>.Ignored))
             .MustHaveHappened(4, Times.Exactly);
     }
@@ -69,12 +67,11 @@ public class ModelShardStorageTests
     [Test]
     public void LoadCollectionTest()
     {
-        var storage = new MutableFakeModelShard();
+        var shard = new FakeModelShard().AsMutable([new CoWFeature()]);
 
-        storage.Load(_repository!);
+        shard.Load(_repository!);
 
         A.CallTo(() => _repository!.Load(
-            A<CollectionInfo>.Ignored,
             A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
@@ -82,12 +79,11 @@ public class ModelShardStorageTests
     [Test]
     public void LoadRelationTest()
     {
-        var storage = new MutableFakeModelShard();
+        var shard = new FakeModelShard().AsMutable([new CoWFeature()]);
 
-        storage.Load(_repository!);
+        shard.Load(_repository!);
 
         A.CallTo(() => _repository!.Load(
-            A<RelationInfo>.Ignored,
             A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored,
             A<IEnumerable<FirstEntity>>.Ignored,
             A<IEnumerable<SecondEntity>>.Ignored))

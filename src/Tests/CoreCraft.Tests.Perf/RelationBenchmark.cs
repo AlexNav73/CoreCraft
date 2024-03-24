@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using CoreCraft.Tests.Infrastructure.Model;
 
 namespace CoreCraft.Tests.Perf;
 
@@ -15,23 +16,23 @@ public class RelationBenchmark
 
     private IMutableRelation<FirstEntity, SecondEntity> _relation = null!;
 
-    [IterationSetup(Targets = new[] { nameof(Add) })]
+    [IterationSetup(Targets = [nameof(Add)])]
     public void IterationSetupEmpty()
     {
-        _relation = new Relation<FirstEntity, SecondEntity>("", new OneToMany<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
+        _relation = new Relation<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo, new OneToMany<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
     }
 
-    [IterationSetup(Targets = new[]
-    {
+    [IterationSetup(Targets =
+    [
         nameof(Remove),
         nameof(Children),
         nameof(Parents),
         nameof(ContainsParent),
         nameof(ContainsChild)
-    })]
+    ])]
     public void IterationSetupFilled()
     {
-        _relation = new Relation<FirstEntity, SecondEntity>("", new OneToMany<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
+        _relation = new Relation<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo, new OneToMany<FirstEntity, SecondEntity>(), new OneToMany<SecondEntity, FirstEntity>());
         _i = 0;
         _parents = new List<FirstEntity>();
         _children = new List<SecondEntity>();

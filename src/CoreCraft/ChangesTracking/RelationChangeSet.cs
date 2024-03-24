@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Diagnostics;
 using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.ChangesTracking;
 
@@ -15,20 +16,20 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     /// <summary>
     ///     Ctor
     /// </summary>
-    public RelationChangeSet(string id)
-        : this(id, new List<IRelationChange<TParent, TChild>>())
+    public RelationChangeSet(RelationInfo info)
+        : this(info, new List<IRelationChange<TParent, TChild>>())
     {
     }
 
-    private RelationChangeSet(string id, IList<IRelationChange<TParent, TChild>> changes)
+    private RelationChangeSet(RelationInfo info, IList<IRelationChange<TParent, TChild>> changes)
     {
         _changes = changes;
 
-        Id = id;
+        Info = info;
     }
 
     /// <inheritdoc />
-    public string Id { get; }
+    public RelationInfo Info { get; }
 
     /// <inheritdoc />
     public void Add(RelationAction action, TParent parent, TChild child)
@@ -72,7 +73,7 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     public IRelationChangeSet<TParent, TChild> Invert()
     {
         var inverted = _changes.Reverse().Select(x => x.Invert()).ToList();
-        return new RelationChangeSet<TParent, TChild>(Id, inverted);
+        return new RelationChangeSet<TParent, TChild>(Info, inverted);
     }
 
     /// <inheritdoc />
@@ -100,7 +101,7 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     /// <inheritdoc cref="IRelationChangeSet{TParent, TChild}.Merge(IRelationChangeSet{TParent, TChild})" />
     public IRelationChangeSet<TParent, TChild> Merge(IRelationChangeSet<TParent, TChild> changeSet)
     {
-        var result = new RelationChangeSet<TParent, TChild>(Id, _changes.ToList());
+        var result = new RelationChangeSet<TParent, TChild>(Info, _changes.ToList());
 
         foreach (var change in changeSet)
         {
@@ -108,6 +109,12 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
         }
 
         return result;
+    }
+
+    /// <inheritdoc cref="IRelationChangeSet{TParent, TChild}.Update(IRepository)" />
+    public void Update(IRepository repository)
+    {
+        repository.Update(this);
     }
 
     /// <inheritdoc />

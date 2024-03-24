@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.Core;
+﻿using CoreCraft.Persistence;
+
+namespace CoreCraft.Core;
 
 /// <summary>
 ///     Relation represents a relationships between parents and children entities.
@@ -13,7 +15,7 @@
 /// </remarks>
 /// <typeparam name="TParent">A type of parent entity</typeparam>
 /// <typeparam name="TChild">A type of child entity</typeparam>
-public interface IRelation<TParent, TChild> : IEnumerable<TParent>, IHaveId, ICopy<IRelation<TParent, TChild>>
+public interface IRelation<TParent, TChild> : IEnumerable<TParent>, IHaveInfo<RelationInfo>, ICopy<IRelation<TParent, TChild>>
     where TParent : Entity
     where TChild : Entity
 {
@@ -52,4 +54,10 @@ public interface IRelation<TParent, TChild> : IEnumerable<TParent>, IHaveId, ICo
     /// <param name="child">A child entity</param>
     /// <returns>A collection of parent entities</returns>
     IEnumerable<TParent> Parents(TChild child);
+
+    /// <summary>
+    ///     Saves the relation to the specified repository.
+    /// </summary>
+    /// <param name="repository">The repository where the relations between entities will be saved.</param>
+    void Save(IRepository repository);
 }

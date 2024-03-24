@@ -12,7 +12,7 @@ public class AddLotOfEntitiesCommand : ICommand
         _count = count;
     }
 
-    public void Execute(IModel model, CancellationToken token)
+    public void Execute(IMutableModel model, CancellationToken token)
     {
         var modelShard = model.Shard<IMutableFakeModelShard>();
 

@@ -1,5 +1,6 @@
 ﻿using CoreCraft.Core;
 using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Tests.Core;
 
@@ -10,7 +11,7 @@ public class CollectionTests
     [SetUp]
     public void Setup()
     {
-        _collection = new Collection<FirstEntity, FirstEntityProperties>("", id => new FirstEntity(id), () => new FirstEntityProperties());
+        _collection = new Collection<FirstEntity, FirstEntityProperties>(FakeModelShardInfo.FirstCollectionInfo, id => new FirstEntity(id), () => new FirstEntityProperties());
     }
 
     [Test]
@@ -185,5 +186,13 @@ public class CollectionTests
 
         Assert.That(enumerator, Is.Not.Null);
         Assert.That(enumerator.MoveNext(), Is.False);
+    }
+
+    [Test]
+    public void LoadToNonEmptyCollectionShouldThrowExceptionTest()
+    {
+        _collection!.Add(new() { NullableStringProperty = "a" });
+
+        Assert.Throws<NonEmptyModelException>(() => _collection.Load(A.Fake<IRepository>()));
     }
 }

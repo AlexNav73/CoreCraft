@@ -3,6 +3,7 @@
     {
       "name": "Fake",
       "visibility": "All",
+      "loadManually": true,
       "entities": [
         {
           "name": "FirstEntity",

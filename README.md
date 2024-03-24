@@ -3,7 +3,7 @@
 </p>
 
 [![build](https://github.com/AlexNav73/CoreCraft/workflows/releasing/badge.svg)](https://github.com/AlexNav73/CoreCraft/actions)
-[![codecov](https://codecov.io/gh/AlexNav73/CoreCraft/branch/master/graph/badge.svg?token=Q6ZY0WHL9J)](https://codecov.io/gh/AlexNav73/CoreCraft) ![Nuget](https://img.shields.io/nuget/dt/CoreCraft) ![GitHub](https://img.shields.io/github/license/AlexNav73/CoreCraft) ![Lines of code](https://img.shields.io/tokei/lines/github/AlexNav73/CoreCraft)  
+[![codecov](https://codecov.io/gh/AlexNav73/CoreCraft/branch/master/graph/badge.svg?token=Q6ZY0WHL9J)](https://codecov.io/gh/AlexNav73/CoreCraft) ![Nuget](https://img.shields.io/nuget/dt/CoreCraft) ![GitHub](https://img.shields.io/github/license/AlexNav73/CoreCraft) ![Lines of code](https://img.shields.io/tokei/lines/github/AlexNav73/CoreCraft)
 
 ## Introduction
 
@@ -33,12 +33,12 @@ The `CoreCraft` provides a wealth of features, including:
 
 CoreCraft is distributed as NuGet packages.
 
-|Package|Status|
-|:------|:-----:|
-|CoreCraft|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft?color=blue)](https://www.nuget.org/packages/CoreCraft)|
-|CoreCraft.Generators|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Generators?color=blue)](https://www.nuget.org/packages/CoreCraft.Generators)|
-|CoreCraft.Storage.SQLite|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Storage.SQLite?color=blue)](https://www.nuget.org/packages/CoreCraft.Storage.SQLite)|
-|CoreCraft.Storage.Json|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Storage.Json?color=blue)](https://www.nuget.org/packages/CoreCraft.Storage.Json)|
+| Package                  |                                                                            Status                                                                             |
+| :----------------------- | :-----------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| CoreCraft                |                [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft?color=blue)](https://www.nuget.org/packages/CoreCraft)                |
+| CoreCraft.Generators     |     [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Generators?color=blue)](https://www.nuget.org/packages/CoreCraft.Generators)     |
+| CoreCraft.Storage.SQLite | [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Storage.SQLite?color=blue)](https://www.nuget.org/packages/CoreCraft.Storage.SQLite) |
+| CoreCraft.Storage.Json   |   [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Storage.Json?color=blue)](https://www.nuget.org/packages/CoreCraft.Storage.Json)   |
 
 ## Basic usage
 
@@ -57,9 +57,7 @@ The only thing is needed to start using the `CoreCraft` toolkit is to define the
           ]
         }
       ],
-      "collections": [
-        { "name": "Items", "entityType": "ToDoItem" }
-      ],
+      "collections": [{ "name": "Items", "entityType": "ToDoItem" }],
       "relations": []
     }
   ]
@@ -88,7 +86,7 @@ var model = new DomainModel(new[] { new ToDoModelShard() });
 Then we need to subscribe to the model changes by providing an event handler method to handle the collection changes.:
 
 ```cs
-// Subscribe to Items collection change events 
+// Subscribe to Items collection change events
 using var subscription = model.For<IToDoChangesFrame>()
     .With(x => x.Items)
     .Subscribe(OnItemChanged);
@@ -116,9 +114,9 @@ model.Run<IMutableToDoModelShard>(
 Save the domain model to an SQLite database file.
 
 ```cs
-var storage = new SqliteStorage(Array.Empty<IMigration>());
+var storage = new SqliteStorage("my_data.db", Array.Empty<IMigration>());
 
-model.Save(storage, "my_data.db");
+model.Save(storage);
 ```
 
 Please refer to the [documentation](https://github.com/AlexNav73/CoreCraft/wiki/Getting-Started) for comprehensive information on using the `CoreCraft` toolkit and its features.

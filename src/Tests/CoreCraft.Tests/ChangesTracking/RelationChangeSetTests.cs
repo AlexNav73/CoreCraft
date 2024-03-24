@@ -1,5 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
 using CoreCraft.Exceptions;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Tests.ChangesTracking;
 
@@ -8,7 +10,7 @@ public class RelationChangeSetTests
     [Test]
     public void LinkMultipleTimesShouldThrowExceptionTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
         var parent = new FirstEntity();
         var child = new SecondEntity();
 
@@ -32,7 +34,7 @@ public class RelationChangeSetTests
     [Test]
     public void UnlinkMultipleTimesShouldThrowExceptionTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
         var parent = new FirstEntity();
         var child = new SecondEntity();
 
@@ -56,7 +58,7 @@ public class RelationChangeSetTests
     [Test]
     public void LinkUnlinkRelationChangeSetTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
         var parent = new FirstEntity();
         var child = new SecondEntity();
 
@@ -69,7 +71,7 @@ public class RelationChangeSetTests
     [Test]
     public void UnlinkLinkRelationChangeSetTest()
     {
-        var changes = new RelationChangeSet<FirstEntity, SecondEntity>("");
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo );
         var parent = new FirstEntity();
         var child = new SecondEntity();
 
@@ -87,8 +89,8 @@ public class RelationChangeSetTests
     [Test]
     public void MergeRelationChangeSetTest()
     {
-        var changes1 = new RelationChangeSet<FirstEntity, SecondEntity>("");
-        var changes2 = new RelationChangeSet<FirstEntity, SecondEntity>("");
+        var changes1 = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
+        var changes2 = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
         var parent = new FirstEntity();
         var child = new SecondEntity();
 
@@ -104,11 +106,40 @@ public class RelationChangeSetTests
     [Test]
     public void NonGenericGetEnumeratorTest()
     {
-        System.Collections.IEnumerable relation = new RelationChangeSet<FirstEntity, SecondEntity>("");
+        System.Collections.IEnumerable relation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
 
         var enumerator = relation.GetEnumerator();
 
         Assert.That(enumerator, Is.Not.Null);
         Assert.That(enumerator.MoveNext(), Is.False);
+    }
+
+    [Test]
+    public void AddChangeWithInvalidActionShouldThrowExceptionTest()
+    {
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
+        var first = new FirstEntity();
+        var second = new SecondEntity();
+
+        changes.Add((RelationAction)42, first, second);
+
+        Assert.Throws<NotSupportedException>(() => changes.Apply(A.Fake<IMutableRelation<FirstEntity, SecondEntity>>()));
+    }
+
+    [Test]
+    public void UpdateShouldCallRepositoryTest()
+    {
+        var changes = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
+        var repo = A.Fake<IRepository>();
+
+        changes.Update(repo);
+
+        A.CallTo(() => repo.Update(A<IRelationChangeSet<FirstEntity, SecondEntity>>.Ignored))
+            .Invokes(c =>
+            {
+                var changeSet = c.Arguments[0];
+
+                Assert.That(ReferenceEquals(changes, changeSet), Is.True);
+            });
     }
 }

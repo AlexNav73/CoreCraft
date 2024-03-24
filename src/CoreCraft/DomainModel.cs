@@ -1,8 +1,10 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Commands;
 using CoreCraft.Exceptions;
-using CoreCraft.Features;
+using CoreCraft.Features.CoW;
+using CoreCraft.Features.Tracking;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.Lazy;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Builders;
@@ -38,13 +40,6 @@ public class DomainModel : IDomainModel
         _modelSubscription = new ModelSubscription();
     }
 
-    /// <summary>
-    ///     Raised after all subscribers handled changes
-    /// </summary>
-    protected virtual void OnModelChanged(Change<IModelChanges> change)
-    {
-    }
-
     /// <inheritdoc cref="IModel.Shard{T}"/>
     public T Shard<T>() where T : IModelShard
     {
@@ -73,7 +68,7 @@ public class DomainModel : IDomainModel
 
     /// <inheritdoc cref="IDomainModel.Run{T}(Action{T, CancellationToken}, CancellationToken)"/>
     public async Task Run<T>(Action<T, CancellationToken> command, CancellationToken token = default)
-        where T : IModelShard
+        where T : IMutableModelShard
     {
         await Run((m, t) => command(m.Shard<T>(), t), token);
     }
@@ -84,11 +79,11 @@ public class DomainModel : IDomainModel
         await Run(command.Execute, token);
     }
 
-    /// <inheritdoc cref="IDomainModel.Run(Action{IModel, CancellationToken}, CancellationToken)"/>
-    public async Task Run(Action<IModel, CancellationToken> command, CancellationToken token = default)
+    /// <inheritdoc cref="IDomainModel.Run(Action{IMutableModel, CancellationToken}, CancellationToken)"/>
+    public async Task Run(Action<IMutableModel, CancellationToken> command, CancellationToken token = default)
     {
-        var changes = new ModelChanges();
-        var snapshot = new Snapshot(_view.UnsafeModel, new IFeature[] { new CoWFeature(), new TrackableFeature(changes) });
+        var changes = new ModelChanges(DateTime.UtcNow.Ticks);
+        var snapshot = new Snapshot(_view.UnsafeModel, [new CoWFeature(), new TrackableFeature(changes)]);
 
         try
         {
@@ -113,10 +108,9 @@ public class DomainModel : IDomainModel
     ///     Saves a model as a whole when storage is empty
     /// </summary>
     /// <param name="storage">A storage</param>
-    /// <param name="path">A path to a file</param>
     /// <param name="token">Cancellation token</param>
     /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
-    public Task Save(IStorage storage, string path, CancellationToken token = default)
+    public Task Save(IStorage storage, CancellationToken token = default)
     {
         // Store a references to model shards before start saving task. It is safe to use UnsafeModel here
         // because we are storing model shards objects in the RunParallel delegate, but not the reference to the
@@ -124,11 +118,11 @@ public class DomainModel : IDomainModel
         // change stored model shards (instead a reference to the model in the _view will be replaced with a reference
         // to the new model, leaving old references and model shards untouched). This is exact behavior we need, because
         // when Save is executed it should save state at that moment, but not when 'storage.Save' is executed.
-        var model = _view.UnsafeModel.Shards.OfType<ICanBeSaved>().ToArray(); // Do not remove ToArray from here!
+        var model = _view.UnsafeModel.Shards.ToArray(); // Do not remove ToArray from here!
 
         try
         {
-            return _scheduler.RunParallel(() => storage.Save(path, model), token);
+            return _scheduler.RunParallel(() => storage.Save(model), token);
         }
         catch (Exception ex)
         {
@@ -137,63 +131,107 @@ public class DomainModel : IDomainModel
     }
 
     /// <summary>
-    ///     Loads a model
+    ///     Loads the domain model data.
     /// </summary>
-    /// <param name="storage">A storage</param>
-    /// <param name="path">A path to a file</param>
-    /// <param name="token">Cancellation token</param>
-    /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model</exception>
-    public async Task Load(IStorage storage, string path, CancellationToken token = default)
+    /// <param name="storage">A storage.</param>
+    /// <param name="force">
+    ///     (Optional) A boolean indicating whether to force loading all model shards (even if they are marked as "loadManually")
+    ///     together with their collections and relations (even if they are marked as "loadManually").
+    /// </param>
+    /// <param name="token">Cancellation token.</param>
+    /// <exception cref="ModelLoadingException">Throws when an error occurred while loading the model.</exception>
+    public Task Load(IStorage storage, bool force = false, CancellationToken token = default)
     {
-        var changes = new ModelChanges();
+        var changes = new ModelChanges(DateTime.UtcNow.Ticks);
         var snapshot = new LoadSnapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
 
-        try
-        {
-            await _scheduler.Enqueue(() => storage.Load(path, snapshot), token);
-        }
-        catch (Exception ex)
-        {
-            throw new ModelLoadingException("Model loading has failed", ex);
-        }
-
-        if (changes.HasChanges())
-        {
-            var result = _view.ApplySnapshot(snapshot);
-            var eventArgs = CreateChangeObject(result, changes);
-
-            NotifySubscriptions(eventArgs);
-        }
+        return Load(snapshot, changes, () => storage.Load(snapshot, force), token);
     }
 
     /// <summary>
-    ///     Saves a list of model changes
+    ///     Loads only the specified model shard.
     /// </summary>
-    /// <param name="storage">A storage to write</param>
-    /// <param name="path">A path of a file</param>
-    /// <param name="changes">A list of changes</param>
-    /// <param name="token">Cancellation token</param>
-    /// <exception cref="ModelSaveException">Throws when an error occurred while saving the model</exception>
-    protected Task Save(IStorage storage, string path, IReadOnlyList<IModelChanges> changes, CancellationToken token = default)
+    /// <remarks>
+    ///     Model shards can be marked as lazy using the "loadManually" property.
+    ///     If a model shard is marked as "loadManually", it means that the model shard
+    ///     will not be loaded during the regular <see cref="Load(IStorage, bool, CancellationToken)"/> invocation.
+    ///     Instead, the user can decide when to load the model shard.
+    /// </remarks>
+    /// <param name="storage">The storage from which to load the data.</param>
+    /// <param name="force">
+    ///     (Optional) A boolean indicating whether to force loading collections and/or relations
+    ///     even if they are marked as "loadManually".
+    /// </param>
+    /// <param name="token">The cancellation token.</param>
+    /// <exception cref="ModelLoadingException">Thrown when an error occurs while loading the model.</exception>
+    public Task Load<T>(
+        IStorage storage,
+        bool force = false,
+        CancellationToken token = default)
+        where T : IMutableModelShard
     {
-        try
-        {
-            if (changes.Count > 0)
-            {
-                var merged = MergeChanges(changes);
+        var changes = new ModelChanges(DateTime.UtcNow.Ticks);
+        var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
+        var loader = new ModelLoader<T>(((IMutableModel)snapshot).Shard<T>(), force);
 
-                if (merged.HasChanges())
-                {
-                    return _scheduler.RunParallel(() => storage.Update(path, merged.OfType<ICanBeSaved>()), token);
-                }
-            }
+        return Load(snapshot, changes, () => storage.Load(loader), token);
+    }
 
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            throw new ModelSaveException("Model save has failed", ex);
-        }
+    /// <summary>
+    ///     Loads only the specified part of the domain model data.
+    /// </summary>
+    /// <remarks>
+    ///     Collections can be marked as lazy using the "loadManually" property.
+    ///     If a collection is marked as "loadManually", it means that the collection
+    ///     will not be loaded during the regular <see cref="Load(IStorage, bool, CancellationToken)"/> invocation.
+    ///     Instead, the user can decide when to load the collection. In the case of relations,
+    ///     a relation is marked as "loadManually" when at least one of the collections (parent or child)
+    ///     is marked as "loadManually" and can only be loaded after the parent and child collections had been
+    ///     loaded.
+    /// </remarks>
+    /// <param name="storage">The storage from which to load the data.</param>
+    /// <param name="configure">An action in which the specific collections and relations can be loaded.</param>
+    /// <param name="token">The cancellation token.</param>
+    /// <exception cref="ModelLoadingException">Thrown when an error occurs while loading the model.</exception>
+    public Task Load<T>(
+        IStorage storage,
+        Func<IModelShardLoader<T>, ILazyLoader> configure,
+        CancellationToken token = default)
+        where T : IMutableModelShard
+    {
+        var changes = new ModelChanges(DateTime.UtcNow.Ticks);
+        var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
+        var loader = new ModelShardLoader<T>(((IMutableModel)snapshot).Shard<T>());
+        var configuration = configure(loader);
+
+        return Load(snapshot, changes, () => storage.Load(configuration), token);
+    }
+
+    /// <summary>
+    ///     Provides direct access to the underlying collection of model shards in a read-only manner.
+    /// </summary>
+    /// <remarks>
+    ///     <b>Warning:</b>
+    ///     <list type="bullet">
+    ///         <item>This property exposes the model shards collection as a snapshot of its state at the time of access.</item>
+    ///         <item>Subsequent changes to the model through commands or other operations might not be reflected in the returned collection.</item>
+    ///         <item>It's recommended to use the <see cref="Shard{T}()"/> method for safer, up-to-date access to specific model shards.</item>
+    ///         <item>Modifying the returned collection directly can lead to unexpected behavior and data inconsistencies.</item>
+    ///     </list>
+    /// </remarks>
+    protected internal IReadOnlyCollection<IModelShard> UnsafeModelShards => _view.UnsafeModel.Shards.ToList();
+
+    /// <summary>
+    ///     Provides access to the internal scheduler used for running commands, applying changes, saving and loading.
+    ///     The scheduler can decide to execute tasks synchronously or asynchronously depending on its implementation.
+    /// </summary>
+    protected internal IScheduler Scheduler => _scheduler;
+
+    /// <summary>
+    ///     Raised after all subscribers handled changes
+    /// </summary>
+    protected virtual void OnModelChanged(Change<IModelChanges> change)
+    {
     }
 
     /// <summary>
@@ -224,6 +262,26 @@ public class DomainModel : IDomainModel
         }
     }
 
+    private async Task Load(ISnapshot snapshot, IModelChanges changes, Action action, CancellationToken token)
+    {
+        try
+        {
+            await _scheduler.Enqueue(action, token);
+        }
+        catch (Exception ex)
+        {
+            throw new ModelLoadingException("Model loading has failed", ex);
+        }
+
+        if (changes.HasChanges())
+        {
+            var result = _view.ApplySnapshot(snapshot);
+            var changeObject = CreateChangeObject(result, changes);
+
+            NotifySubscriptions(changeObject);
+        }
+    }
+
     private void NotifySubscriptions(Change<IModelChanges> change)
     {
         _currentChanges = change;
@@ -236,16 +294,5 @@ public class DomainModel : IDomainModel
     private static Change<IModelChanges> CreateChangeObject(ModelChangeResult result, IModelChanges changes)
     {
         return new Change<IModelChanges>(result.OldModel, result.NewModel, changes);
-    }
-
-    private static IModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)
-    {
-        var merged = (IMutableModelChanges)changes[0];
-        for (var i = 1; i < changes.Count; i++)
-        {
-            merged = merged.Merge(changes[i]);
-        }
-
-        return merged;
     }
 }

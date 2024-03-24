@@ -3,6 +3,7 @@
   <PropertyGroup>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
@@ -10,5 +11,6 @@
   <ItemGroup>
     <None Include="../../LICENSE.md" Pack="true" PackagePath="" />
     <None Include="../../images/icon.png" Pack="true" PackagePath="" />
+    <None Include="../../README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
 </Project>

@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.ChangesTracking;
+﻿using CoreCraft.Persistence;
+
+namespace CoreCraft.ChangesTracking;
 
 /// <summary>
 ///     A container of changes performed on the collection
@@ -13,7 +15,7 @@
 ///     When needed, change sets can be applied to the collection or relation to update it
 ///     to the newer version
 /// </remarks>
-public interface ICollectionChangeSet<TEntity, TProperties> : IHaveId, IEnumerable<ICollectionChange<TEntity, TProperties>>
+public interface ICollectionChangeSet<TEntity, TProperties> : IHaveInfo<CollectionInfo>, IEnumerable<ICollectionChange<TEntity, TProperties>>
     where TEntity : Entity
     where TProperties : Properties
 {
@@ -56,4 +58,10 @@ public interface ICollectionChangeSet<TEntity, TProperties> : IHaveId, IEnumerab
     /// <param name="changeSet">Changes, that have happened after the current ones</param>
     /// <returns>Merged changes by combining current changes with the newest</returns>
     ICollectionChangeSet<TEntity, TProperties> Merge(ICollectionChangeSet<TEntity, TProperties> changeSet);
+
+    /// <summary>
+    ///     Saves the changes in the collection change set to the specified repository.
+    /// </summary>
+    /// <param name="repository">The repository where the changes will be saved.</param>
+    void Update(IRepository repository);
 }

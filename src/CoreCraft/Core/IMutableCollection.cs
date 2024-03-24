@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.Core;
+﻿using CoreCraft.Persistence;
+
+namespace CoreCraft.Core;
 
 /// <summary>
 ///     An mutable counterpart of a <see cref="ICollection{TEntity, TProperties}"/> interface
@@ -14,7 +16,7 @@
 /// </remarks>
 /// <typeparam name="TEntity">A type of an entity</typeparam>
 /// <typeparam name="TProperties">A type of a properties</typeparam>
-public interface IMutableCollection<TEntity, TProperties> : ICollection<TEntity, TProperties>
+public interface IMutableCollection<TEntity, TProperties> : ICollection<TEntity, TProperties>, ILoadable
     where TEntity : Entity
     where TProperties : Properties
 {

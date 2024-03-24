@@ -1,4 +1,7 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
+using CoreCraft.Persistence;
+using CoreCraft.Persistence.History;
 using System.Data;
 
 namespace CoreCraft.Storage.Sqlite;
@@ -6,7 +9,7 @@ namespace CoreCraft.Storage.Sqlite;
 /// <summary>
 ///     SQLite extension of the base <see cref="IRepository"/> interface
 /// </summary>
-public interface ISqliteRepository : IRepository, IDisposable
+public interface ISqliteRepository : IRepository, IHistoryRepository, IDisposable
 {
     /// <summary>
     ///     Creates new transaction
@@ -21,10 +24,16 @@ public interface ISqliteRepository : IRepository, IDisposable
     void ExecuteNonQuery(string query);
 
     /// <summary>
-    ///     Gets latests database version
+    ///     Gets latest database version
     /// </summary>
     /// <returns>Version</returns>
     int GetDatabaseVersion();
+
+    /// <summary>
+    ///     TODO: Write documentation
+    /// </summary>
+    /// <returns>TODO: Write documentation</returns>
+    IEnumerable<IModelChanges> RestoreHistory(IEnumerable<IModelShard> shards);
 
     /// <summary>
     ///     Sets new database version

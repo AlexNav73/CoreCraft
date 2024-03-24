@@ -1,5 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
+using CoreCraft.Persistence.History;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
 
@@ -10,7 +12,6 @@ namespace CoreCraft;
 /// </summary>
 public class UndoRedoDomainModel : DomainModel
 {
-    private readonly IStorage _storage;
     private readonly Stack<IModelChanges> _undoStack;
     private readonly Stack<IModelChanges> _redoStack;
 
@@ -18,9 +19,8 @@ public class UndoRedoDomainModel : DomainModel
     ///     Ctor
     /// </summary>
     public UndoRedoDomainModel(
-        IEnumerable<IModelShard> modelShards,
-        IStorage storage)
-        : this(modelShards, storage, new AsyncScheduler())
+        IEnumerable<IModelShard> modelShards)
+        : this(modelShards, new AsyncScheduler())
     {
     }
 
@@ -29,11 +29,9 @@ public class UndoRedoDomainModel : DomainModel
     /// </summary>
     public UndoRedoDomainModel(
         IEnumerable<IModelShard> modelShards,
-        IStorage storage,
         IScheduler scheduler)
         : base(modelShards, scheduler)
     {
-        _storage = storage;
         _undoStack = new Stack<IModelChanges>();
         _redoStack = new Stack<IModelChanges>();
     }
@@ -56,55 +54,103 @@ public class UndoRedoDomainModel : DomainModel
     /// <summary>
     ///     Saves changes happened since the last save operation
     /// </summary>
-    /// <param name="path">A path to file</param>
-    public async Task Save(string path)
+    /// <param name="token">Cancellation token</param>
+    /// <param name="storage">A storage where a model will be saved</param>
+    /// <param name="historyStorage">A storage where a model changes history will be saved</param>
+    public async Task Update(IStorage storage, IHistoryStorage? historyStorage = null, CancellationToken token = default)
     {
-        var changes = _undoStack.Reverse().ToArray();
-
-        if (changes.Any())
+        try
         {
-            await Save(_storage, path, changes);
+            var changes = _undoStack.Reverse().ToList();
+            if (changes.Count > 0)
+            {
+                var merged = MergeChanges(changes);
+                // merge operation can combine actions line Add and Remove, which will cause
+                // resulting IModelChanges object contain no changes
+                if (merged.HasChanges())
+                {
+                    await Scheduler.RunParallel(() =>
+                    {
+                        storage.Update(merged);
+                        historyStorage?.Save(changes);
+                    }, token);
 
-            // TODO(#8): saving operation executes in thread pool
-            // and launched by 'async void' methods. If two
-            // sequential savings happened, clearing of the stacks
-            // can cause data race (just after first save we will clear stack
-            // with new changes, made after first save started).
+                    // TODO(#8): saving operation executes in thread pool
+                    // and launched by 'async void' methods. If two
+                    // sequential savings happened, clearing of the stacks
+                    // can cause data race (just after first save we will clear stack
+                    // with new changes, made after first save started).
+                    ClearHistory();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new ModelSaveException("Model update has failed", ex);
+        }
+    }
+
+    /// <summary>
+    ///     Saves the model's undo/redo history to the provided storage.
+    /// </summary>
+    /// <param name="storage">A storage to write</param>
+    /// <param name="token">Cancellation token</param>
+    /// <exception cref="ModelSaveException">Throws when an error occurred while saving model changes history</exception>
+    public async Task SaveHistory(IHistoryStorage storage, CancellationToken token = default)
+    {
+        try
+        {
+            var changes = _undoStack.Reverse().ToList();
+            if (changes.Count > 0)
+            {
+                await Scheduler.RunParallel(() => storage.Save(changes), token);
+
+                // TODO(#8): saving operation executes in thread pool
+                // and launched by 'async void' methods. If two
+                // sequential savings happened, clearing of the stacks
+                // can cause data race (just after first save we will clear stack
+                // with new changes, made after first save started).
+                ClearHistory();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new ModelSaveException("Model changes saving has failed", ex);
+        }
+    }
+
+    /// <summary>
+    ///     Restores the model's undo/redo history from the provided storage.
+    /// </summary>
+    /// <param name="storage">A storage to write</param>
+    /// <param name="token">Cancellation token</param>
+    public async Task RestoreHistory(IHistoryStorage storage, CancellationToken token = default)
+    {
+        if (_undoStack.Count > 0 || _redoStack.Count > 0)
+        {
+            return;
+        }
+
+        var changes = await LoadHistory(storage, token);
+
+        foreach (var change in changes)
+        {
+            _undoStack.Push(change);
+        }
+    }
+
+    /// <summary>
+    ///     Clears the model's undo/redo history
+    /// </summary>
+    public void ClearHistory()
+    {
+        if (_undoStack.Count > 0 || _redoStack.Count > 0)
+        {
             _undoStack.Clear();
             _redoStack.Clear();
 
             Changed?.Invoke(this, EventArgs.Empty);
         }
-    }
-
-    /// <summary>
-    ///     Saves model as a whole (if the data should be stored from the scratch)
-    /// </summary>
-    /// <param name="storage">A storage where a model will be saved</param>
-    /// <param name="path">A path to a file</param>
-    public async Task SaveAs(string path, IStorage? storage = null)
-    {
-        await Save(storage ?? _storage, path);
-
-        // TODO(#8): saving operation executes in thread pool
-        // and launched by 'async void' methods. If two
-        // sequential savings happened, clearing of the stacks
-        // can cause data race (just after first save we will clear stack
-        // with new changes, made after first save started).
-        _undoStack.Clear();
-        _redoStack.Clear();
-
-        Changed?.Invoke(this, EventArgs.Empty);
-    }
-
-    /// <summary>
-    ///     Loads the model
-    /// </summary>
-    /// <param name="storage">A storage from which a model will be loaded</param>
-    /// <param name="path">A path to a file</param>
-    public async Task Load(string path, IStorage? storage = null)
-    {
-        await Load(storage ?? _storage, path);
     }
 
     /// <summary>
@@ -153,5 +199,30 @@ public class UndoRedoDomainModel : DomainModel
         _redoStack.Clear();
 
         Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+#if NET5_0_OR_GREATER
+    private async ValueTask<IEnumerable<IModelChanges>> LoadHistory(
+#else
+    private async Task<IEnumerable<IModelChanges>> LoadHistory(
+#endif
+        IHistoryStorage storage,
+        CancellationToken token = default)
+    {
+        // TODO: Write explanation why we can use UnsafeModelShards here
+        var shards = UnsafeModelShards;
+
+        return await Scheduler.Enqueue(() => storage.Load(shards), token);
+    }
+
+    private static IModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)
+    {
+        var merged = (IMutableModelChanges)changes[0];
+        for (var i = 1; i < changes.Count; i++)
+        {
+            merged = merged.Merge(changes[i]);
+        }
+
+        return merged;
     }
 }

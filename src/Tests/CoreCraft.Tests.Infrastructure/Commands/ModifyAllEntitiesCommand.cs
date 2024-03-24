@@ -5,7 +5,7 @@ namespace CoreCraft.Tests.Infrastructure.Commands;
 
 internal class ModifyAllEntitiesCommand : ICommand
 {
-    public void Execute(IModel model, CancellationToken token = default)
+    public void Execute(IMutableModel model, CancellationToken token = default)
     {
         var modelShard = model.Shard<IMutableFakeModelShard>();
 

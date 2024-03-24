@@ -2,6 +2,7 @@
   "shards": [
     {
       "name": "Example",
+      "loadManually": true,
       "entities": [
         {
           "name": "FirstEntity",
@@ -42,11 +43,13 @@
       "collections": [
         {
           "name": "FirstCollection",
-          "entityType": "FirstEntity"
+          "entityType": "FirstEntity",
+          "loadManually": true
         },
         {
           "name": "SecondCollection",
-          "entityType": "SecondEntity"
+          "entityType": "SecondEntity",
+          "loadManually": true
         }
       ],
       "relations": [
