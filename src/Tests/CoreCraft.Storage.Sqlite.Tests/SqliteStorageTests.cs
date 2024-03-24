@@ -5,6 +5,7 @@ using CoreCraft.Storage.Sqlite.Migrations;
 using System.Data;
 using CoreCraft.Persistence.Lazy;
 using CoreCraft.Persistence.Operations;
+using CoreCraft.Persistence.History;
 
 namespace CoreCraft.Storage.Sqlite.Tests;
 
@@ -46,7 +47,7 @@ public class SqliteStorageTests
     public void UpdateIsCalledOnModelShardStorageTest()
     {
         var change = A.Fake<IChangesFrameEx>();
-        var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
+        var storage = new SqliteStorage("", [], _factory!);
         var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
         storage.Update([change]);
@@ -58,7 +59,7 @@ public class SqliteStorageTests
     [Test]
     public void SaveTransactionCreatedSuccessfullyAndCommittedTest()
     {
-        var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
+        var storage = new SqliteStorage("", [], _factory!);
 
         storage.Save(A.Fake<IEnumerable<IModelShard>>());
 
@@ -73,7 +74,7 @@ public class SqliteStorageTests
         var shard = A.Fake<IModelShard>();
         A.CallTo(() => shard.Save(A<IRepository>.Ignored)).Throws<InvalidOperationException>();
 
-        var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
+        var storage = new SqliteStorage("", [], _factory!);
 
         Assert.Throws<InvalidOperationException>(() => storage.Save([shard]));
 
@@ -86,7 +87,7 @@ public class SqliteStorageTests
     public void SaveIsCalledOnModelShardStorageTest()
     {
         var shard = A.Fake<IModelShard>();
-        var storage = new SqliteStorage("", Array.Empty<IMigration>(), _factory!);
+        var storage = new SqliteStorage("", [], _factory!);
 
         storage.Save([shard]);
 
@@ -108,6 +109,18 @@ public class SqliteStorageTests
         A.CallTo(() => _repo!.SetDatabaseVersion(2))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => shard.Save(A<IRepository>.Ignored))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
+    public void SaveHistoryTest()
+    {
+        var modelChanges = A.Fake<IModelChanges>();
+        var storage = new SqliteStorage("", [], _factory!);
+
+        storage.Save([modelChanges]);
+
+        A.CallTo(() => modelChanges.Save(A<IHistoryRepository>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 
@@ -153,5 +166,17 @@ public class SqliteStorageTests
         A.CallTo(() => _repo!.BeginTransaction()).MustHaveHappened(2, Times.Exactly);
         A.CallTo(() => _transaction!.Commit()).MustHaveHappened(2, Times.Exactly);
         A.CallTo(() => _transaction!.Rollback()).MustNotHaveHappened();
+    }
+
+    [Test]
+    public void LoadHistoryTest()
+    {
+        var storage = new SqliteStorage("", [], _factory!);
+        var shard = A.Fake<IModelShard>();
+
+        var changes = storage.Load([shard]);
+
+        A.CallTo(() => _repo!.ExecuteNonQuery(A<string>.Ignored)).MustHaveHappenedTwiceExactly();
+        A.CallTo(() => _repo!.RestoreHistory(A<IEnumerable<IModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
     }
 }

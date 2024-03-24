@@ -118,7 +118,7 @@ public sealed class SqliteStorage : IStorage, IHistoryStorage
         repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
         repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
 
-        return repository.LoadChanges(modelShards);
+        return repository.RestoreHistory(modelShards);
     }
 
     private void Transaction(string path, Action<ISqliteRepository> action)

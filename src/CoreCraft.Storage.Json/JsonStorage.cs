@@ -105,6 +105,6 @@ public sealed class JsonStorage : IStorage, IHistoryStorage
 
         var repository = new JsonRepository(model);
 
-        return repository.LoadHistory(modelShards);
+        return repository.RestoreHistory(modelShards);
     }
 }

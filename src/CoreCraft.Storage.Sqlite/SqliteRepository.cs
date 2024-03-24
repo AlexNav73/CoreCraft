@@ -345,7 +345,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
         }
     }
 
-    public IEnumerable<IModelChanges> LoadChanges(IEnumerable<IModelShard> shards)
+    public IEnumerable<IModelChanges> RestoreHistory(IEnumerable<IModelShard> shards)
     {
         var changes = new List<IModelChanges>();
         using var command = CreateCommand(History.SelectChangeIds);

@@ -26,4 +26,14 @@ internal sealed class CollectionChange<TEntity, TProperties>
     public TProperties? OldProperties { get; set; }
 
     public TProperties? NewProperties { get; set; }
+
+    public static CollectionChange<TEntity, TProperties> Create(TEntity entity, TProperties props)
+    {
+        return new CollectionChange<TEntity, TProperties>()
+        {
+            Action = CollectionAction.Add,
+            Entity = entity,
+            NewProperties = props
+        };
+    }
 }
