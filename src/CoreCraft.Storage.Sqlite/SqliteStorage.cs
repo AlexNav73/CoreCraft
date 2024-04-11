@@ -61,6 +61,9 @@ public sealed class SqliteStorage : IStorage, IHistoryStorage
         {
             _migrationRunner.UpdateDatabaseVersion(repository);
 
+            repository.ExecuteNonQuery(QueryBuilder.DropTable(QueryBuilder.History.CollectionHistory));
+            repository.ExecuteNonQuery(QueryBuilder.DropTable(QueryBuilder.History.RelationHistory));
+
             repository.ExecuteNonQuery(QueryBuilder.History.CreateCollectionTable);
             repository.ExecuteNonQuery(QueryBuilder.History.CreateRelationTable);
 

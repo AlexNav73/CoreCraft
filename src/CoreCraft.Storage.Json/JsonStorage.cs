@@ -38,29 +38,15 @@ public sealed class JsonStorage : IStorage, IHistoryStorage
     /// <inheritdoc/>
     public void Update(IEnumerable<IChangesFrame> modelChanges)
     {
-        var shards = _jsonFileHandler.ReadModelFromFile(_path, _settings);
-        var repository = new JsonRepository(shards);
+        var model = _jsonFileHandler.ReadModelFromFile(_path, _settings);
+        var repository = new JsonRepository(model);
 
         foreach (var change in modelChanges.Cast<IChangesFrameEx>())
         {
             change.Do(new UpdateChangesFrameOperation(repository));
         }
 
-        _jsonFileHandler.WriteModelToFile(_path, shards, _settings);
-    }
-
-    /// <inheritdoc/>
-    public void Save(IEnumerable<IModelChanges> modelChanges)
-    {
-        var shards = _jsonFileHandler.ReadModelFromFile(_path, _settings);
-        var repository = new JsonRepository(shards);
-
-        foreach (var change in modelChanges)
-        {
-            change.Save(repository);
-        }
-
-        _jsonFileHandler.WriteModelToFile(_path, shards, _settings);
+        _jsonFileHandler.WriteModelToFile(_path, model, _settings);
     }
 
     /// <inheritdoc/>
@@ -72,6 +58,23 @@ public sealed class JsonStorage : IStorage, IHistoryStorage
         foreach (var shard in modelShards)
         {
             shard.Save(repository);
+        }
+
+        _jsonFileHandler.WriteModelToFile(_path, model, _settings);
+    }
+
+    /// <inheritdoc/>
+    public void Save(IEnumerable<IModelChanges> modelChanges)
+    {
+        var model = _jsonFileHandler.ReadModelFromFile(_path, _settings);
+
+        model.ChangesHistory.Clear();
+
+        var repository = new JsonRepository(model);
+
+        foreach (var change in modelChanges)
+        {
+            change.Save(repository);
         }
 
         _jsonFileHandler.WriteModelToFile(_path, model, _settings);
