@@ -164,10 +164,7 @@ public class DomainModel : IDomainModel
     /// </param>
     /// <param name="token">The cancellation token.</param>
     /// <exception cref="ModelLoadingException">Thrown when an error occurs while loading the model.</exception>
-    public Task Load<T>(
-        IStorage storage,
-        bool force = false,
-        CancellationToken token = default)
+    public Task Load<T>(IStorage storage, bool force = false, CancellationToken token = default)
         where T : IMutableModelShard
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
@@ -193,10 +190,7 @@ public class DomainModel : IDomainModel
     /// <param name="configure">An action in which the specific collections and relations can be loaded.</param>
     /// <param name="token">The cancellation token.</param>
     /// <exception cref="ModelLoadingException">Thrown when an error occurs while loading the model.</exception>
-    public Task Load<T>(
-        IStorage storage,
-        Func<IModelShardLoader<T>, ILazyLoader> configure,
-        CancellationToken token = default)
+    public Task Load<T>(IStorage storage, Func<IModelShardLoader<T>, ILazyLoader> configure, CancellationToken token = default)
         where T : IMutableModelShard
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
@@ -262,7 +256,7 @@ public class DomainModel : IDomainModel
         }
     }
 
-    private async Task Load(ISnapshot snapshot, IModelChanges changes, Action action, CancellationToken token)
+    private async Task Load(ISnapshot snapshot, ModelChanges changes, Action action, CancellationToken token)
     {
         try
         {

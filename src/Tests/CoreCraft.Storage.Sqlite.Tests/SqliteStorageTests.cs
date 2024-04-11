@@ -125,6 +125,20 @@ public class SqliteStorageTests
     }
 
     [Test]
+    public void SavingNewChangesHistoryShouldClearOldHistoryTest()
+    {
+        var storage = new SqliteStorage("", [], _factory!);
+        var changes = A.Fake<IModelChanges>();
+
+        storage.Save([changes]);
+
+        A.CallTo(() => _repo!.ExecuteNonQuery(QueryBuilder.DropTable(QueryBuilder.History.CollectionHistory)))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _repo!.ExecuteNonQuery(QueryBuilder.DropTable(QueryBuilder.History.RelationHistory)))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
     public void LoadModelTest()
     {
         var shard = A.Fake<IMutableModelShard>();
