@@ -23,9 +23,9 @@ internal sealed record RelationDto
 {
     public string Name { get; init; }
 
-    public string ParentType { get; init; }
+    public string Parent { get; init; }
 
-    public string ChildType { get; init; }
+    public string Child { get; init; }
 
     public RelationTypeDto RelationType { get; init; }
 }

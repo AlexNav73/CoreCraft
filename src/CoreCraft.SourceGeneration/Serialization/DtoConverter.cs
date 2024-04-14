@@ -23,10 +23,10 @@ internal class DtoConverter
 
         foreach (var relation in modelShard.Relations)
         {
-            var parentEntity = entities.Single(x => x.Name == relation.ParentType);
+            var parentEntity = entities.Single(x => x.Name == relation.Parent);
             var parentCollection = collections.Single(x => x.Entity == parentEntity);
 
-            var childEntity = entities.Single(x => x.Name == relation.ChildType);
+            var childEntity = entities.Single(x => x.Name == relation.Child);
             var childCollection = collections.Single(x => x.Entity == childEntity);
 
             relations.Add(new Relation()
