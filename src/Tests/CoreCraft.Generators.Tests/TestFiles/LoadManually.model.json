@@ -52,8 +52,7 @@
           "name": "OneToOneRelation",
           "parentType": "FirstEntity",
           "childType": "SecondEntity",
-          "parentRelationType": "OneToOne",
-          "childRelationType": "OneToOne"
+          "relationType": "OneToOne"
         }
       ]
     },

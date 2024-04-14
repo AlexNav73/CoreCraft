@@ -567,6 +567,8 @@ public class DomainModelTests
         A.CallTo(() => repo.Load(A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => repo.Load(A<IMutableCollection<SecondEntity, SecondEntityProperties>>.Ignored)).MustHaveHappenedOnceExactly();
         A.CallTo(() => repo.Load(A<IMutableRelation<FirstEntity, SecondEntity>>.Ignored, A<IEnumerable<FirstEntity>>.Ignored, A<IEnumerable<SecondEntity>>.Ignored))
-            .MustHaveHappened(4, Times.Exactly);
+            .MustHaveHappened(3, Times.Exactly);
+        A.CallTo(() => repo.Load(A<IMutableRelation<SecondEntity, FirstEntity>>.Ignored, A<IEnumerable<SecondEntity>>.Ignored, A<IEnumerable<FirstEntity>>.Ignored))
+            .MustHaveHappenedOnceExactly();
     }
 }

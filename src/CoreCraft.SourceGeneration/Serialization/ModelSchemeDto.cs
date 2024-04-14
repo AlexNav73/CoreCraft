@@ -27,9 +27,7 @@ internal sealed record RelationDto
 
     public string ChildType { get; init; }
 
-    public RelationTypeDto ParentRelationType { get; init; }
-
-    public RelationTypeDto ChildRelationType { get; init; }
+    public RelationTypeDto RelationType { get; init; }
 }
 
 internal enum VisibilityDto
@@ -42,7 +40,8 @@ internal enum VisibilityDto
 internal enum RelationTypeDto
 {
     OneToOne,
-    OneToMany
+    OneToMany,
+    ManyToMany
 }
 
 internal sealed record EntityDto(string Name, IEnumerable<PropertyDto> Properties);

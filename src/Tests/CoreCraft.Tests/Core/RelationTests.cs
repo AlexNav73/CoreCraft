@@ -1,4 +1,5 @@
 ﻿using CoreCraft.Core;
+using CoreCraft.Exceptions;
 
 namespace CoreCraft.Tests.Core;
 
@@ -27,6 +28,74 @@ public class RelationTests
 
         A.CallTo(() => _parentMapping!.Add(firstEntity, secondEntity)).MustHaveHappened();
         A.CallTo(() => _childMapping!.Add(secondEntity, firstEntity)).MustHaveHappened();
+    }
+
+    [Test]
+    public void RelationAddOneToOneTest()
+    {
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        var relation = new Relation<FirstEntity, SecondEntity>(
+            FakeModelShardInfo.OneToOneRelationInfo,
+            new OneToOne<FirstEntity, SecondEntity>(),
+            new OneToOne<SecondEntity, FirstEntity>());
+
+        relation.Add(firstEntity, secondEntity);
+        
+        Assert.Throws<DuplicatedRelationException>(() => relation.Add(firstEntity, new()));
+        Assert.Throws<DuplicatedRelationException>(() => relation.Add(new(), secondEntity));
+    }
+
+    [Test]
+    public void RelationAddOneToManyTest()
+    {
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        var relation = new Relation<FirstEntity, SecondEntity>(
+            FakeModelShardInfo.OneToOneRelationInfo,
+            new OneToMany<FirstEntity, SecondEntity>(),
+            new OneToOne<SecondEntity, FirstEntity>());
+
+        relation.Add(firstEntity, secondEntity);
+
+        Assert.DoesNotThrow(() => relation.Add(firstEntity, new()));
+        Assert.Throws<DuplicatedRelationException>(() => relation.Add(new(), secondEntity));
+    }
+
+    [Test]
+    public void RelationAddManyToOneTest()
+    {
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        var relation = new Relation<FirstEntity, SecondEntity>(
+            FakeModelShardInfo.OneToOneRelationInfo,
+            new OneToOne<FirstEntity, SecondEntity>(),
+            new OneToMany<SecondEntity, FirstEntity>());
+
+        relation.Add(firstEntity, secondEntity);
+
+        Assert.Throws<DuplicatedRelationException>(() => relation.Add(firstEntity, new()));
+        Assert.DoesNotThrow(() => relation.Add(new(), secondEntity));
+    }
+
+    [Test]
+    public void RelationAddManyToManyTest()
+    {
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        var relation = new Relation<FirstEntity, SecondEntity>(
+            FakeModelShardInfo.OneToOneRelationInfo,
+            new OneToMany<FirstEntity, SecondEntity>(),
+            new OneToMany<SecondEntity, FirstEntity>());
+
+        relation.Add(firstEntity, secondEntity);
+
+        Assert.DoesNotThrow(() => relation.Add(firstEntity, new()));
+        Assert.DoesNotThrow(() => relation.Add(new(), secondEntity));
     }
 
     [Test]

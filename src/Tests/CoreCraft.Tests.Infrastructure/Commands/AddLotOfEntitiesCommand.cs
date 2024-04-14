@@ -30,7 +30,7 @@ public class AddLotOfEntitiesCommand : ICommand
             });
 
             modelShard.ManyToManyRelation.Add(first, second);
-            modelShard.ManyToOneRelation.Add(first, second);
+            modelShard.ManyToOneRelation.Add(second, first);
             modelShard.OneToManyRelation.Add(first, second);
             modelShard.OneToOneRelation.Add(first, second);
         }

@@ -27,7 +27,7 @@ namespace compilation.AllFeatures
 
         IRelation<FirstEntity, SecondEntity> OneToOneRelation { get; }
         IRelation<FirstEntity, SecondEntity> OneToManyRelation { get; }
-        IRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; }
+        IRelation<SecondEntity, FirstEntity> ManyToOneRelation { get; }
         IRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; }
     }
 
@@ -40,7 +40,7 @@ namespace compilation.AllFeatures
 
         IMutableRelation<FirstEntity, SecondEntity> OneToOneRelation { get; }
         IMutableRelation<FirstEntity, SecondEntity> OneToManyRelation { get; }
-        IMutableRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; }
+        IMutableRelation<SecondEntity, FirstEntity> ManyToOneRelation { get; }
         IMutableRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; }
     }
 
@@ -84,10 +84,10 @@ namespace compilation.AllFeatures
                 FakeModelShardInfo.OneToManyRelationInfo,
                 new OneToMany<FirstEntity, SecondEntity>(),
                 new OneToOne<SecondEntity, FirstEntity>());
-            ManyToOneRelation = new Relation<FirstEntity, SecondEntity>(
+            ManyToOneRelation = new Relation<SecondEntity, FirstEntity>(
                 FakeModelShardInfo.ManyToOneRelationInfo,
-                new OneToOne<FirstEntity, SecondEntity>(),
-                new OneToMany<SecondEntity, FirstEntity>());
+                new OneToMany<SecondEntity, FirstEntity>(),
+                new OneToOne<FirstEntity, SecondEntity>());
             ManyToManyRelation = new Relation<FirstEntity, SecondEntity>(
                 FakeModelShardInfo.ManyToManyRelationInfo,
                 new OneToMany<FirstEntity, SecondEntity>(),
@@ -101,7 +101,7 @@ namespace compilation.AllFeatures
 
             OneToOneRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.OneToOneRelation).AsReadOnly();
             OneToManyRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.OneToManyRelation).AsReadOnly();
-            ManyToOneRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToOneRelation).AsReadOnly();
+            ManyToOneRelation = ((IMutableState<IRelation<SecondEntity, FirstEntity>>)mutable.ManyToOneRelation).AsReadOnly();
             ManyToManyRelation = ((IMutableState<IRelation<FirstEntity, SecondEntity>>)mutable.ManyToManyRelation).AsReadOnly();
         }
 
@@ -110,7 +110,7 @@ namespace compilation.AllFeatures
 
         public IRelation<FirstEntity, SecondEntity> OneToOneRelation { get; init; } = null!;
         public IRelation<FirstEntity, SecondEntity> OneToManyRelation { get; init; } = null!;
-        public IRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; init; } = null!;
+        public IRelation<SecondEntity, FirstEntity> ManyToOneRelation { get; init; } = null!;
         public IRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; init; } = null!;
 
         public void Save(IRepository repository)
@@ -134,7 +134,7 @@ namespace compilation.AllFeatures
 
             var oneToOneRelation = (IMutableRelation<FirstEntity, SecondEntity>)OneToOneRelation;
             var oneToManyRelation = (IMutableRelation<FirstEntity, SecondEntity>)OneToManyRelation;
-            var manyToOneRelation = (IMutableRelation<FirstEntity, SecondEntity>)ManyToOneRelation;
+            var manyToOneRelation = (IMutableRelation<SecondEntity, FirstEntity>)ManyToOneRelation;
             var manyToManyRelation = (IMutableRelation<FirstEntity, SecondEntity>)ManyToManyRelation;
 
             foreach (var feature in features)
@@ -178,7 +178,7 @@ namespace compilation.AllFeatures
 
         IRelationChangeSet<FirstEntity, SecondEntity> OneToOneRelation { get; }
         IRelationChangeSet<FirstEntity, SecondEntity> OneToManyRelation { get; }
-        IRelationChangeSet<FirstEntity, SecondEntity> ManyToOneRelation { get; }
+        IRelationChangeSet<SecondEntity, FirstEntity> ManyToOneRelation { get; }
         IRelationChangeSet<FirstEntity, SecondEntity> ManyToManyRelation { get; }
     }
 
@@ -195,7 +195,7 @@ namespace compilation.AllFeatures
 
             OneToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToOneRelationInfo);
             OneToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.OneToManyRelationInfo);
-            ManyToOneRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.ManyToOneRelationInfo);
+            ManyToOneRelation = new RelationChangeSet<SecondEntity, FirstEntity>(FakeModelShardInfo.ManyToOneRelationInfo);
             ManyToManyRelation = new RelationChangeSet<FirstEntity, SecondEntity>(FakeModelShardInfo.ManyToManyRelationInfo);
         }
 
@@ -204,7 +204,7 @@ namespace compilation.AllFeatures
 
         public IRelationChangeSet<FirstEntity, SecondEntity> OneToOneRelation { get; private set; }
         public IRelationChangeSet<FirstEntity, SecondEntity> OneToManyRelation { get; private set; }
-        public IRelationChangeSet<FirstEntity, SecondEntity> ManyToOneRelation { get; private set; }
+        public IRelationChangeSet<SecondEntity, FirstEntity> ManyToOneRelation { get; private set; }
         public IRelationChangeSet<FirstEntity, SecondEntity> ManyToManyRelation { get; private set; }
 
         public ICollectionChangeSet<TEntity, TProperty>? Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
@@ -303,7 +303,7 @@ namespace compilation.AllFeatures
 
         public IMutableRelation<FirstEntity, SecondEntity> OneToOneRelation { get; init; } = null!;
         public IMutableRelation<FirstEntity, SecondEntity> OneToManyRelation { get; init; } = null!;
-        public IMutableRelation<FirstEntity, SecondEntity> ManyToOneRelation { get; init; } = null!;
+        public IMutableRelation<SecondEntity, FirstEntity> ManyToOneRelation { get; init; } = null!;
         public IMutableRelation<FirstEntity, SecondEntity> ManyToManyRelation { get; init; } = null!;
 
         public IFakeModelShard AsReadOnly()
@@ -318,7 +318,7 @@ namespace compilation.AllFeatures
 
             OneToOneRelation.Load(repository, FirstCollection, SecondCollection);
             OneToManyRelation.Load(repository, FirstCollection, SecondCollection);
-            ManyToOneRelation.Load(repository, FirstCollection, SecondCollection);
+            ManyToOneRelation.Load(repository, SecondCollection, FirstCollection);
             ManyToManyRelation.Load(repository, FirstCollection, SecondCollection);
         }
 

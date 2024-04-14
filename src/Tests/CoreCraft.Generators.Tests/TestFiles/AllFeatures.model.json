@@ -61,29 +61,25 @@
           "name": "OneToOneRelation",
           "parentType": "FirstEntity",
           "childType": "SecondEntity",
-          "parentRelationType": "OneToOne",
-          "childRelationType": "OneToOne"
+          "relationType": "OneToOne"
         },
         {
           "name": "OneToManyRelation",
           "parentType": "FirstEntity",
           "childType": "SecondEntity",
-          "parentRelationType": "OneToMany",
-          "childRelationType": "OneToOne"
+          "relationType": "OneToMany"
         },
         {
           "name": "ManyToOneRelation",
-          "parentType": "FirstEntity",
-          "childType": "SecondEntity",
-          "parentRelationType": "OneToOne",
-          "childRelationType": "OneToMany"
+          "parentType": "SecondEntity",
+          "childType": "FirstEntity",
+          "relationType": "OneToMany"
         },
         {
           "name": "ManyToManyRelation",
           "parentType": "FirstEntity",
           "childType": "SecondEntity",
-          "parentRelationType": "OneToMany",
-          "childRelationType": "OneToMany"
+          "relationType": "ManyToMany"
         }
       ]
     }

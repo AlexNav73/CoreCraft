@@ -32,15 +32,27 @@ internal sealed record Relation
 
     public Collection Child { get; init; }
 
-    public RelationType ParentRelationType { get; init; }
-
-    public RelationType ChildRelationType { get; init; }
+    public RelationType RelationType { get; init; }
 
     public string Type => $"Relation<{Parent.Entity.Name}, {Child.Entity.Name}>";
 
     public string MutableType => $"Mutable{Type}";
 
     public string ChangesType => $"RelationChangeSet<{Parent.Entity.Name}, {Child.Entity.Name}>";
+
+    public string ParentRelationType => RelationType switch
+    {
+        RelationType.OneToOne => "OneToOne",
+        RelationType.OneToMany or RelationType.ManyToMany => "OneToMany",
+        _ => throw new NotSupportedException($"RelationType [{RelationType}] is not supported"),
+    };
+
+    public string ChildRelationType => RelationType switch
+    {
+        RelationType.OneToOne or RelationType.OneToMany => "OneToOne",
+        RelationType.ManyToMany => "OneToMany",
+        _ => throw new NotSupportedException($"RelationType [{RelationType}] is not supported"),
+    };
 }
 
 internal enum Visibility
@@ -53,7 +65,8 @@ internal enum Visibility
 internal enum RelationType
 {
     OneToOne,
-    OneToMany
+    OneToMany,
+    ManyToMany
 }
 
 internal sealed record Entity(string Name, IEnumerable<Property> Properties)
