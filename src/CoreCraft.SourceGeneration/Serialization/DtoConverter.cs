@@ -32,8 +32,7 @@ internal class DtoConverter
             relations.Add(new Relation()
             {
                 Name = relation.Name,
-                ChildRelationType = Convert(relation.ChildRelationType),
-                ParentRelationType = Convert(relation.ParentRelationType),
+                RelationType = Convert(relation.RelationType),
                 Parent = parentCollection,
                 Child = childCollection
             });
@@ -65,6 +64,7 @@ internal class DtoConverter
         {
             RelationTypeDto.OneToOne => RelationType.OneToOne,
             RelationTypeDto.OneToMany => RelationType.OneToMany,
+            RelationTypeDto.ManyToMany => RelationType.ManyToMany,
             _ => throw new NotSupportedException(),
         };
     }
