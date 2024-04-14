@@ -17,7 +17,7 @@ internal partial class Build : NukeBuild
     [GitRepository]
     readonly GitRepository GitRepository;
 
-    [Solution(GenerateProjects = true)]
+    [Solution(@".\CoreCraft.sln", GenerateProjects = true)]
     readonly Solution Solution;
 
     [Parameter]

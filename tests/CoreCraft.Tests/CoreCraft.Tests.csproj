@@ -27,8 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\CoreCraft\CoreCraft.csproj" />
     <ProjectReference Include="..\CoreCraft.Tests.Infrastructure\CoreCraft.Tests.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\CoreCraft\CoreCraft.csproj" />
   </ItemGroup>
 
 </Project>
