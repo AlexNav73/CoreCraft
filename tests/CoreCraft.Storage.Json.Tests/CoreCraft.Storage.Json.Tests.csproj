@@ -29,7 +29,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\CoreCraft.Storage.Json\CoreCraft.Storage.Json.csproj" />
+        <ProjectReference Include="..\..\src\CoreCraft.Storage.Json\CoreCraft.Storage.Json.csproj" />
         <ProjectReference Include="..\CoreCraft.Tests.Infrastructure\CoreCraft.Tests.Infrastructure.csproj" />
     </ItemGroup>
 

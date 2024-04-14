@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\CoreCraft.Storage.Sqlite\CoreCraft.Storage.Sqlite.csproj" />
+    <ProjectReference Include="..\..\src\CoreCraft.Storage.Sqlite\CoreCraft.Storage.Sqlite.csproj" />
     <ProjectReference Include="..\CoreCraft.Tests.Infrastructure\CoreCraft.Tests.Infrastructure.csproj" />
   </ItemGroup>
 

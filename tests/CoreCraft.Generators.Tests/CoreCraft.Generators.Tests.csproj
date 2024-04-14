@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\CoreCraft.Generators\CoreCraft.Generators.csproj" />
+    <ProjectReference Include="..\..\src\CoreCraft.Generators\CoreCraft.Generators.csproj" />
     <ProjectReference Include="..\CoreCraft.Tests.Infrastructure\CoreCraft.Tests.Infrastructure.csproj" />
   </ItemGroup>
 
