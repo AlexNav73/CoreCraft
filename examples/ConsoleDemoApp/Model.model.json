@@ -55,26 +55,26 @@
       "relations": [
         {
           "name": "OneToOneRelation",
-          "parentType": "FirstEntity",
-          "childType": "SecondEntity",
+          "parent": "FirstEntity",
+          "child": "SecondEntity",
           "relationType": "OneToOne"
         },
         {
           "name": "OneToManyRelation",
-          "parentType": "FirstEntity",
-          "childType": "SecondEntity",
+          "parent": "FirstEntity",
+          "child": "SecondEntity",
           "relationType": "OneToMany"
         },
         {
           "name": "ManyToOneRelation",
-          "parentType": "SecondEntity",
-          "childType": "FirstEntity",
+          "parent": "SecondEntity",
+          "child": "FirstEntity",
           "relationType": "OneToMany"
         },
         {
           "name": "ManyToManyRelation",
-          "parentType": "FirstEntity",
-          "childType": "SecondEntity",
+          "parent": "FirstEntity",
+          "child": "SecondEntity",
           "relationType": "ManyToMany"
         }
       ]

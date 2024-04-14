@@ -50,8 +50,8 @@
       "relations": [
         {
           "name": "OneToOneRelation",
-          "parentType": "FirstEntity",
-          "childType": "SecondEntity",
+          "parent": "FirstEntity",
+          "child": "SecondEntity",
           "relationType": "OneToOne"
         }
       ]
