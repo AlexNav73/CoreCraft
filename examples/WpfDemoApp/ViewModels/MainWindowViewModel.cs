@@ -39,7 +39,7 @@ internal partial class MainWindowViewModel : ObservableObject
             .With(x => x.Items)
             .Bind(OnNext);
 
-        _model.Changed += OnModelChanged; // unsubscribe
+        _model.History.Changed += OnModelChanged; // unsubscribe
     }
 
     public ObservableCollection<ItemViewModel> Items { get; }
@@ -78,13 +78,13 @@ internal partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task Undo()
     {
-        await _model.Undo();
+        await _model.History.Undo();
     }
 
     [RelayCommand]
     private async Task Redo()
     {
-        await _model.Redo();
+        await _model.History.Redo();
     }
 
     [RelayCommand]
@@ -113,7 +113,7 @@ internal partial class MainWindowViewModel : ObservableObject
     {
         Logs.Clear();
 
-        foreach (var change in _model.UndoStack)
+        foreach (var change in _model.History.UndoStack)
         {
             if (change.TryGetFrame<IToDoChangesFrame>(out var frame) && frame.HasChanges())
             {

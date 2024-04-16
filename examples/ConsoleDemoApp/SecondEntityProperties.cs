@@ -9,6 +9,7 @@
 
     partial record SecondEntityProperties
     {
+        [Newtonsoft.Json.JsonIgnore]
         public SecondEntityEnum EnumProperty
         {
             get => (SecondEntityEnum)IntProperty;

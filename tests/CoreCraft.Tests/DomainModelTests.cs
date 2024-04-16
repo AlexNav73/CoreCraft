@@ -160,7 +160,7 @@ public class DomainModelTests
 
         var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
 
-        Assert.ThrowsAsync<ModelSaveException>(() => model.Update(storage));
+        Assert.ThrowsAsync<ModelSaveException>(() => model.History.Update(storage));
     }
 
     [Test]
@@ -186,18 +186,18 @@ public class DomainModelTests
 
         var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
 
-        Assert.That(model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(model.History.RedoStack.Count, Is.EqualTo(0));
 
-        var task = model.Update(storage, historyStorage);
+        var task = model.History.Update(storage, historyStorage);
 
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => historyStorage.Save(A<IEnumerable<IModelChanges>>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        Assert.That(model.UndoStack.Count, Is.EqualTo(0));
-        Assert.That(model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(model.History.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(model.History.RedoStack.Count, Is.EqualTo(0));
 
         Assert.That(task, Is.Not.Null);
         Assert.That(task.IsCompleted, Is.True);
@@ -212,7 +212,7 @@ public class DomainModelTests
         var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
         _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
 
-        var task = model.Update(storage);
+        var task = model.History.Update(storage);
 
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.That.Matches(changes => changes.Count() == 1)))
             .MustHaveHappenedOnceExactly();
@@ -507,7 +507,7 @@ public class DomainModelTests
 
         public async Task Update()
         {
-            await Update(_storage);
+            await History.Update(_storage);
         }
 
         public async Task Load(bool force = false)
