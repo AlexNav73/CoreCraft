@@ -213,20 +213,13 @@ public class DomainModel : IDomainModel
     ///         <item>Modifying the returned collection directly can lead to unexpected behavior and data inconsistencies.</item>
     ///     </list>
     /// </remarks>
-    protected internal IReadOnlyCollection<IModelShard> UnsafeModelShards => _view.UnsafeModel.Shards.ToList();
+    internal IReadOnlyCollection<IModelShard> UnsafeModelShards => _view.UnsafeModel.Shards.ToList();
 
     /// <summary>
     ///     Provides access to the internal scheduler used for running commands, applying changes, saving and loading.
     ///     The scheduler can decide to execute tasks synchronously or asynchronously depending on its implementation.
     /// </summary>
-    protected internal IScheduler Scheduler => _scheduler;
-
-    /// <summary>
-    ///     Raised after all subscribers handled changes
-    /// </summary>
-    protected virtual void OnModelChanged(Change<IModelChanges> change)
-    {
-    }
+    internal IScheduler Scheduler => _scheduler;
 
     /// <summary>
     ///     Applies changes to the model
@@ -234,7 +227,7 @@ public class DomainModel : IDomainModel
     /// <param name="changes">Changes to apply</param>
     /// <param name="token">Cancellation token</param>
     /// <exception cref="ApplyModelChangesException">Throws when an error occurred while applying changes to the model</exception>
-    protected async Task Apply(IModelChanges changes, CancellationToken token = default)
+    internal async Task Apply(IModelChanges changes, CancellationToken token = default)
     {
         if (changes.HasChanges())
         {
@@ -254,6 +247,13 @@ public class DomainModel : IDomainModel
 
             NotifySubscriptions(changeObject);
         }
+    }
+
+    /// <summary>
+    ///     Raised after all subscribers handled changes
+    /// </summary>
+    protected virtual void OnModelChanged(Change<IModelChanges> change)
+    {
     }
 
     private async Task Load(ISnapshot snapshot, ModelChanges changes, Action action, CancellationToken token)

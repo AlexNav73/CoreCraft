@@ -1,15 +1,17 @@
 ﻿using ConsoleDemoApp.Model;
-using CoreCraft;
-using CoreCraft.Subscription;
-using CoreCraft.Storage.Sqlite;
-using CoreCraft.Storage.Sqlite.Migrations;
 using ConsoleDemoApp.Model.Entities;
+using CoreCraft;
+using CoreCraft.Scheduling;
+using CoreCraft.Storage.Json;
+using CoreCraft.Storage.Sqlite;
+using CoreCraft.Subscription;
 
 namespace ConsoleDemoApp;
 
 class Program
 {
     private const string Path = "test.db";
+    private const string History = "history.json";
 
     public static async Task Main()
     {
@@ -17,12 +19,14 @@ class Program
         {
             File.Delete(Path);
         }
+        if (File.Exists(History))
+        {
+            File.Delete(History);
+        }
 
-        var storage = new SqliteStorage(
-            Path,
-            Array.Empty<IMigration>(),
-            Console.WriteLine);
-        var model = new DomainModel(new[] { new ExampleModelShard() });
+        var storage = new SqliteStorage(Path, [], Console.WriteLine);
+        var historyStorage = new JsonStorage(History, new() { Formatting = Newtonsoft.Json.Formatting.Indented });
+        var model = new UndoRedoDomainModel(new[] { new ExampleModelShard() }, new SyncScheduler());
 
         using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
@@ -63,13 +67,32 @@ class Program
 
         Console.WriteLine("======================== Saving ========================");
         await model.Save(storage);
+        await model.History.Save(historyStorage);
 
-        model = new DomainModel(new[] { new ExampleModelShard() });
+        model = new UndoRedoDomainModel(new[] { new ExampleModelShard() }, new SyncScheduler());
         using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
             Console.WriteLine("======================== Loading ========================");
 
-            await model.Load(storage);
+            await model.History.Load(historyStorage);
+            await model.Load(storage, force: true);
+
+            Console.WriteLine("======================== Adding new change ========================");
+
+            await model.Run<IMutableExampleModelShard>((shard, _) =>
+            {
+                shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
+            });
+            await model.History.Save(historyStorage);
+            await model.History.Load(historyStorage);
+
+            Console.WriteLine("======================== Undo after load ========================");
+
+            var historySize = model.History.UndoStack.Count;
+            for (int i = 0; i < historySize; i++)
+            {
+                await model.History.Undo();
+            }
         }
     }
 

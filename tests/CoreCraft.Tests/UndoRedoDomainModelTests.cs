@@ -35,14 +35,14 @@ public class UndoRedoDomainModelTests
     {
         await ExecuteAddCommand();
 
-        Assert.That(_model.HasChanges(), Is.True);
+        Assert.That(_model.History.HasChanges(), Is.True);
     }
 
     [Test]
     public async Task ChangedEventRaisedTest()
     {
         var changedEventOccurred = false;
-        _model.Changed += (s, e) => changedEventOccurred = true;
+        _model.History.Changed += (s, e) => changedEventOccurred = true;
 
         await ExecuteAddCommand();
 
@@ -54,7 +54,7 @@ public class UndoRedoDomainModelTests
     {
         await ExecuteAddCommand();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
     }
 
     [Test]
@@ -62,10 +62,10 @@ public class UndoRedoDomainModelTests
     {
         await ExecuteAddCommand();
 
-        await _model.Undo();
+        await _model.History.Undo();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(0));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(1));
     }
 
     [Test]
@@ -74,17 +74,17 @@ public class UndoRedoDomainModelTests
         var modelHasBeenChanged = false;
 
         await ExecuteAddCommand();
-        await _model.Undo();
+        await _model.History.Undo();
 
-        _model.Changed += (s, a) => modelHasBeenChanged = true;
+        _model.History.Changed += (s, a) => modelHasBeenChanged = true;
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(0));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(1));
 
-        await _model.Redo();
+        await _model.History.Redo();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
         Assert.That(modelHasBeenChanged, Is.True);
     }
 
@@ -97,11 +97,11 @@ public class UndoRedoDomainModelTests
 
         await ExecuteModifyCommand(entity, "test");
 
-        await _model.Undo();
+        await _model.History.Undo();
 
         await ExecuteRemoveCommand(entity);
 
-        Assert.DoesNotThrowAsync(_model.Redo);
+        Assert.DoesNotThrowAsync(_model.History.Redo);
     }
 
     [Test]
@@ -110,20 +110,20 @@ public class UndoRedoDomainModelTests
         var storage = A.Fake<IStorage>();
         var modelHasBeenChanged = false;
 
-        _model.Changed += (s, args) => modelHasBeenChanged = true;
+        _model.History.Changed += (s, args) => modelHasBeenChanged = true;
 
         await ExecuteAddCommand();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
 
-        await _model.Update(storage);
+        await _model.History.Update(storage);
 
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(0));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
         Assert.That(modelHasBeenChanged, Is.True);
     }
 
@@ -133,19 +133,19 @@ public class UndoRedoDomainModelTests
         var storage = A.Fake<IStorage>();
         var modelHasBeenChanged = false;
 
-        _model.Changed += (s, args) => modelHasBeenChanged = true;
+        _model.History.Changed += (s, args) => modelHasBeenChanged = true;
 
         await ExecuteAddCommand();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
 
         await _model.Save(storage);
 
         A.CallTo(() => storage.Save(A<IEnumerable<IModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
         Assert.That(modelHasBeenChanged, Is.True);
     }
 
@@ -155,19 +155,19 @@ public class UndoRedoDomainModelTests
         var storage = A.Fake<IStorage>();
         var modelHasBeenChanged = false;
 
-        _model.Changed += (s, args) => modelHasBeenChanged = true;
+        _model.History.Changed += (s, args) => modelHasBeenChanged = true;
 
         await ExecuteAddCommand();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
 
         await _model.Save(storage);
 
         A.CallTo(() => storage.Save(A<IEnumerable<IModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
         Assert.That(modelHasBeenChanged, Is.True);
     }
 
@@ -178,16 +178,16 @@ public class UndoRedoDomainModelTests
 
         await ExecuteAddCommand();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
 
-        await _model.SaveHistory(storage);
+        await _model.History.Save(storage);
 
         A.CallTo(() => storage.Save(A<IEnumerable<IModelChanges>>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(0));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
     }
 
     [Test]
@@ -196,18 +196,18 @@ public class UndoRedoDomainModelTests
         await ExecuteAddCommand();
         await ExecuteAddCommand();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(2));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(2));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
 
-        await _model.Undo();
+        await _model.History.Undo();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(1));
 
-        _model.ClearHistory();
+        _model.History.Clear();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(0));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
     }
 
     [Test]
@@ -231,8 +231,8 @@ public class UndoRedoDomainModelTests
 
             A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceExactly();
 
-            Assert.That(_model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
-            Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+            Assert.That(_model.History.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
+            Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
             Assert.That(firstCollectionChanged, Is.True);
         }
     }
@@ -258,8 +258,8 @@ public class UndoRedoDomainModelTests
 
             A.CallTo(() => storage.Load(A<IEnumerable<IMutableModelShard>>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceExactly();
 
-            Assert.That(_model.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
-            Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+            Assert.That(_model.History.UndoStack.Count, Is.EqualTo(0), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
+            Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
             Assert.That(relationChanged, Is.True);
         }
     }
@@ -272,13 +272,13 @@ public class UndoRedoDomainModelTests
         A.CallTo(() => storage.Load(A<IEnumerable<IModelShard>>.Ignored))
             .Returns([new ModelChanges(0)]);
 
-        await _model.RestoreHistory(storage);
+        await _model.History.Load(storage);
 
         A.CallTo(() => storage.Load(A<IEnumerable<IModelShard>>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1), "Undo stack should be empty after model has been loaded. User should not see that model is changed, because it is loaded - not modified");
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
     }
 
     [Test]
@@ -291,19 +291,19 @@ public class UndoRedoDomainModelTests
 
         await ExecuteAddCommand();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
 
-        var change = _model.UndoStack.Single();
+        var change = _model.History.UndoStack.Single();
 
-        await _model.RestoreHistory(storage);
+        await _model.History.Load(storage);
 
         A.CallTo(() => storage.Load(A<IEnumerable<IModelShard>>.Ignored))
             .MustNotHaveHappened();
 
-        Assert.That(_model.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.RedoStack.Count, Is.EqualTo(0));
-        Assert.That(ReferenceEquals(change, _model.UndoStack.Single()), Is.True);
+        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
+        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
+        Assert.That(ReferenceEquals(change, _model.History.UndoStack.Single()), Is.True);
     }
 
     private async Task ExecuteAddCommand()
