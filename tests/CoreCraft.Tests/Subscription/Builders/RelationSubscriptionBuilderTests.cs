@@ -2,6 +2,7 @@
 using CoreCraft.Core;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Builders;
+using CoreCraft.Subscription.Extensions;
 
 namespace CoreCraft.Tests.Subscription.Builders;
 
