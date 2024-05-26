@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="WpfDemoApp.Views.ItemsPageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <Style x:Key="ToDoItemStyle" TargetType="TextBlock">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsChecked}" Value="True">
+                    <Setter Property="TextDecorations" Value="Strikethrough" />
+                    <Setter Property="Opacity" Value="0.5" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Button Grid.Row="0"
+                Command="{Binding DataContext.GoHomeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                Margin="0 0 0 10">
+            <materialDesign:PackIcon Kind="Home" />
+        </Button>
+
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <materialDesign:Card Padding="8"
+                                             Margin="3"
+                                             Background="{DynamicResource PrimaryHueLightBrush}"
+                                             Foreground="{DynamicResource PrimaryHueLightForegroundBrush}">
+                            <CheckBox Style="{StaticResource MaterialDesignCheckBox}"
+                                      IsChecked="{Binding IsChecked}"
+                                      Margin="0 0 5 0">
+                                <TextBlock Text="{Binding Name, Mode=OneWay}" Style="{StaticResource ToDoItemStyle}" />
+                            </CheckBox>
+                        </materialDesign:Card>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0 10 0 10">
+            <TextBox Text="{Binding NewItemName}"
+                     VerticalAlignment="Center"
+                     materialDesign:HintAssist.Hint="New Item Name"
+                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                     MinWidth="200"
+                     Margin="0 0 10 0"/>
+            <Button Command="{Binding AddCommand}"
+                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                    Padding="5"
+                    IsDefault="True">
+                <materialDesign:PackIcon Kind="Plus" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

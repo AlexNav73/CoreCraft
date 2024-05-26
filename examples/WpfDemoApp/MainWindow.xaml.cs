@@ -1,20 +1,20 @@
-﻿using Autofac;
-using MahApps.Metro.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.Windows;
+using Autofac;
 using CoreCraft;
 using CoreCraft.Core;
 using CoreCraft.Persistence;
 using CoreCraft.Storage.Sqlite;
-using System.Collections.Generic;
-using WpfDemoApp.Model;
-using System;
 using CoreCraft.Storage.Sqlite.Migrations;
+using WpfDemoApp.Model;
 
 namespace WpfDemoApp;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : MetroWindow
+public partial class MainWindow : Window
 {
     public MainWindow()
     {

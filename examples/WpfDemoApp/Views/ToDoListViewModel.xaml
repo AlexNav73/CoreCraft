@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="WpfDemoApp.Views.ToDoListViewModel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             MouseLeftButtonUp="OnMouseLeftButtonUp"
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0"
+               Grid.Column="0"
+               Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+               Style="{StaticResource MaterialDesignSubtitle2TextBlock}" />
+
+        <ProgressBar Grid.Row="1"
+                 Grid.Column="0"
+                 Height="6"
+                 Minimum="0"
+                 Maximum="100"
+                 materialDesign:TransitionAssist.DisableTransitions="True"
+                 Value="{Binding Completed, Mode=OneWay}" />
+
+        <TextBlock Grid.Row="1"
+               Grid.Column="1"
+               Margin="10 0 0 0">
+        <Run Text="{Binding Checked, Mode=OneWay}" />
+        <Run Text=" / " />
+        <Run Text="{Binding Total, Mode=OneWay}" />
+        </TextBlock>
+
+        <materialDesign:PopupBox Grid.Row="0"
+                             Grid.Column="1"
+                             HorizontalAlignment="Right"
+                             StaysOpen="True">
+            <Menu>
+                <MenuItem Header="Remove"
+                      Icon="{materialDesign:PackIcon Kind=TrashCanOutline}"
+                      Command="{Binding RemoveCommand, Mode=OneTime}"/>
+            </Menu>
+        </materialDesign:PopupBox>
+    </Grid>
+</UserControl>
