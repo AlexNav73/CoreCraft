@@ -134,8 +134,8 @@ public class RelationTests
         Assert.That(relation.ContainsParent(firstEntity2), Is.True);
         Assert.That(relation.ContainsChild(secondEntity1), Is.True);
         Assert.That(relation.ContainsChild(secondEntity2), Is.True);
-        Assert.That(relation.AreLinked(firstEntity2, secondEntity1), Is.True);
-        Assert.That(relation.AreLinked(firstEntity2, secondEntity2), Is.True);
+        Assert.That(relation.Contains(firstEntity2, secondEntity1), Is.True);
+        Assert.That(relation.Contains(firstEntity2, secondEntity2), Is.True);
     }
 
     [Test]
@@ -161,7 +161,7 @@ public class RelationTests
         Assert.That(relation.ContainsParent(firstEntity2), Is.True);
         Assert.That(relation.ContainsChild(secondEntity1), Is.True);
         Assert.That(relation.ContainsChild(secondEntity2), Is.False);
-        Assert.That(relation.AreLinked(firstEntity2, secondEntity1), Is.True);
+        Assert.That(relation.Contains(firstEntity2, secondEntity1), Is.True);
     }
 
     [Test]
@@ -194,10 +194,10 @@ public class RelationTests
         var firstEntity = new FirstEntity();
         var secondEntity = new SecondEntity();
 
-        _relation!.AreLinked(firstEntity, secondEntity);
+        _relation!.Contains(firstEntity, secondEntity);
 
-        A.CallTo(() => _parentMapping!.AreLinked(firstEntity, secondEntity)).MustHaveHappened();
-        A.CallTo(() => _childMapping!.AreLinked(secondEntity, firstEntity)).MustHaveHappened();
+        A.CallTo(() => _parentMapping!.Contains(firstEntity, secondEntity)).MustHaveHappened();
+        A.CallTo(() => _childMapping!.Contains(secondEntity, firstEntity)).MustHaveHappened();
     }
 
     [Test]

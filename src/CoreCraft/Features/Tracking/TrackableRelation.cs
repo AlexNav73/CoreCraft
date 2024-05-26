@@ -84,10 +84,10 @@ public sealed class TrackableRelation<TParent, TChild> :
         return _relation.ContainsChild(entity);
     }
 
-    /// <inheritdoc cref="IRelation{TParent, TChild}.AreLinked(TParent, TChild)" />
-    public bool AreLinked(TParent parent, TChild child)
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TParent, TChild)" />
+    public bool Contains(TParent parent, TChild child)
     {
-        return _relation.AreLinked(parent, child);
+        return _relation.Contains(parent, child);
     }
 
     /// <inheritdoc cref="IRelation{TParent, TChild}.Children(TParent)" />
