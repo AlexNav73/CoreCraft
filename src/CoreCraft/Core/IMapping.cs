@@ -27,6 +27,13 @@ public interface IMapping<TParent, TChild> : IEnumerable<TParent>, ICopy<IMappin
     void Add(TParent parent, TChild child);
 
     /// <summary>
+    ///     Removes all relations of the parent entity
+    /// </summary>
+    /// <param name="parent">A parent entity</param>
+    /// <exception cref="Exceptions.MissingRelationException">Throws then a relation is not exists</exception>
+    void Remove(TParent parent);
+
+    /// <summary>
     ///     Removes a relation between parent and child
     /// </summary>
     /// <param name="parent">A parent entity</param>

@@ -111,6 +111,60 @@ public class RelationTests
     }
 
     [Test]
+    public void RelationManyToManyRemoveTest()
+    {
+        var firstEntity1 = new FirstEntity();
+        var firstEntity2 = new FirstEntity();
+        var secondEntity1 = new SecondEntity();
+        var secondEntity2 = new SecondEntity();
+
+        var relation = new Relation<FirstEntity, SecondEntity>(
+            FakeModelShardInfo.OneToOneRelationInfo,
+            new OneToMany<FirstEntity, SecondEntity>(),
+            new OneToMany<SecondEntity, FirstEntity>());
+
+        relation.Add(firstEntity1, secondEntity1);
+        relation.Add(firstEntity1, secondEntity2);
+        relation.Add(firstEntity2, secondEntity1);
+        relation.Add(firstEntity2, secondEntity2);
+
+        relation.Remove(firstEntity1);
+
+        Assert.That(relation.ContainsParent(firstEntity1), Is.False);
+        Assert.That(relation.ContainsParent(firstEntity2), Is.True);
+        Assert.That(relation.ContainsChild(secondEntity1), Is.True);
+        Assert.That(relation.ContainsChild(secondEntity2), Is.True);
+        Assert.That(relation.AreLinked(firstEntity2, secondEntity1), Is.True);
+        Assert.That(relation.AreLinked(firstEntity2, secondEntity2), Is.True);
+    }
+
+    [Test]
+    public void RelationManyToManyRemoveAlsoRemovesChildWithNoParentsTest()
+    {
+        var firstEntity1 = new FirstEntity();
+        var firstEntity2 = new FirstEntity();
+        var secondEntity1 = new SecondEntity();
+        var secondEntity2 = new SecondEntity();
+
+        var relation = new Relation<FirstEntity, SecondEntity>(
+            FakeModelShardInfo.OneToOneRelationInfo,
+            new OneToMany<FirstEntity, SecondEntity>(),
+            new OneToMany<SecondEntity, FirstEntity>());
+
+        relation.Add(firstEntity1, secondEntity1);
+        relation.Add(firstEntity1, secondEntity2);
+        relation.Add(firstEntity2, secondEntity1);
+
+        relation.Remove(firstEntity1);
+
+        Assert.That(relation.ContainsParent(firstEntity1), Is.False);
+        Assert.That(relation.ContainsParent(firstEntity2), Is.True);
+        Assert.That(relation.ContainsChild(secondEntity1), Is.True);
+        Assert.That(relation.ContainsChild(secondEntity2), Is.False);
+        Assert.That(relation.AreLinked(firstEntity2, secondEntity1), Is.True);
+    }
+
+    [Test]
     public void RelationContainsParentTest()
     {
         var firstEntity = new FirstEntity();

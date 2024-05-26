@@ -102,6 +102,20 @@ public class MappingsTests
     }
 
     [Test]
+    public void OneToOneRemoveParentTest()
+    {
+        var mapping = new OneToOne<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        mapping.Add(firstEntity, secondEntity);
+        mapping.Remove(firstEntity);
+
+        Assert.That(mapping, Is.Empty);
+    }
+
+    [Test]
     public void OneToOneRemoveFromEmptyRelationTest()
     {
         var mapping = new OneToOne<FirstEntity, SecondEntity>();
@@ -110,6 +124,16 @@ public class MappingsTests
         var secondEntity = new SecondEntity();
 
         Assert.Throws<MissingRelationException>(() => mapping.Remove(firstEntity, secondEntity));
+    }
+
+    [Test]
+    public void OneToOneRemoveParentFromEmptyRelationTest()
+    {
+        var mapping = new OneToOne<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+
+        Assert.Throws<MissingRelationException>(() => mapping.Remove(firstEntity));
     }
 
     [Test]
@@ -141,6 +165,20 @@ public class MappingsTests
     }
 
     [Test]
+    public void OneToManyRemoveParentTest()
+    {
+        var mapping = new OneToMany<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+
+        mapping.Add(firstEntity, secondEntity);
+        mapping.Remove(firstEntity);
+
+        Assert.That(mapping, Is.Empty);
+    }
+
+    [Test]
     public void OneToManyRemoveSomeItemsTest()
     {
         var mapping = new OneToMany<FirstEntity, SecondEntity>();
@@ -158,6 +196,22 @@ public class MappingsTests
     }
 
     [Test]
+    public void OneToManyRemoveParentWithMultipleChildrenTest()
+    {
+        var mapping = new OneToMany<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+        var secondEntity = new SecondEntity();
+        var thirdEntity = new SecondEntity();
+
+        mapping.Add(firstEntity, secondEntity);
+        mapping.Add(firstEntity, thirdEntity);
+        mapping.Remove(firstEntity);
+
+        Assert.That(mapping, Is.Empty);
+    }
+
+    [Test]
     public void OneToManyRemoveFromEmptyRelationTest()
     {
         var mapping = new OneToMany<FirstEntity, SecondEntity>();
@@ -166,6 +220,16 @@ public class MappingsTests
         var secondEntity = new SecondEntity();
 
         Assert.Throws<MissingRelationException>(() => mapping.Remove(firstEntity, secondEntity));
+    }
+
+    [Test]
+    public void OneToManyRemoveParentFromEmptyRelationTest()
+    {
+        var mapping = new OneToMany<FirstEntity, SecondEntity>();
+
+        var firstEntity = new FirstEntity();
+
+        Assert.Throws<MissingRelationException>(() => mapping.Remove(firstEntity));
     }
 
     [Test]

@@ -76,13 +76,22 @@ public sealed class Relation<TParent, TChild> :
         return _childToParentRelations.Children(child);
     }
 
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Remove(TParent)"/>
+    public void Remove(TParent parent)
+    {
+        foreach (var child in _parentToChildRelations.Children(parent))
+        {
+            _childToParentRelations.Remove(child, parent);
+        }
+        _parentToChildRelations.Remove(parent);
+    }
+
     /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Remove(TParent, TChild)"/>
     public void Remove(TParent parent, TChild child)
     {
         _parentToChildRelations.Remove(parent, child);
         _childToParentRelations.Remove(child, parent);
     }
-
 
     /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Load(IRepository, IEnumerable{TParent}, IEnumerable{TChild})"/>
     public void Load(IRepository repository, IEnumerable<TParent> parents, IEnumerable<TChild> children)
