@@ -173,11 +173,11 @@ public class CoWRelationTests
 
         A.CallTo(() => inner.Copy()).Returns(copy);
 
-        relation.AreLinked(new(), new());
+        relation.Contains(new(), new());
 
-        A.CallTo(() => inner.AreLinked(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
+        A.CallTo(() => inner.Contains(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
             .MustHaveHappened();
-        A.CallTo(() => copy.AreLinked(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
+        A.CallTo(() => copy.Contains(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
             .MustNotHaveHappened();
     }
 
@@ -192,11 +192,11 @@ public class CoWRelationTests
         A.CallTo(() => inner.Copy()).Returns(copy);
 
         relation.Remove(new(), new());
-        relation.AreLinked(new(), new());
+        relation.Contains(new(), new());
 
-        A.CallTo(() => inner.AreLinked(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
+        A.CallTo(() => inner.Contains(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
             .MustNotHaveHappened();
-        A.CallTo(() => copy.AreLinked(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
+        A.CallTo(() => copy.Contains(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored))
             .MustHaveHappenedOnceExactly();
     }
 

@@ -83,9 +83,9 @@ public class TrackableRelationTests
         var first = new FirstEntity();
         var second = new SecondEntity();
 
-        _trackable!.AreLinked(first, second);
+        _trackable!.Contains(first, second);
 
-        A.CallTo(() => _relation!.AreLinked(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored)).MustHaveHappened();
+        A.CallTo(() => _relation!.Contains(A<FirstEntity>.Ignored, A<SecondEntity>.Ignored)).MustHaveHappened();
     }
 
     [Test]

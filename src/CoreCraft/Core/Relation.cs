@@ -58,10 +58,10 @@ public sealed class Relation<TParent, TChild> :
         return _childToParentRelations.Contains(entity);
     }
 
-    /// <inheritdoc cref="IRelation{TParent, TChild}.AreLinked(TParent, TChild)"/>
-    public bool AreLinked(TParent parent, TChild child)
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TParent, TChild)"/>
+    public bool Contains(TParent parent, TChild child)
     {
-        return _parentToChildRelations.AreLinked(parent, child) || _childToParentRelations.AreLinked(child, parent);
+        return _parentToChildRelations.Contains(parent, child) || _childToParentRelations.Contains(child, parent);
     }
 
     /// <inheritdoc cref="IRelation{TParent, TChild}.Children(TParent)"/>

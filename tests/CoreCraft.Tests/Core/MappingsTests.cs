@@ -261,20 +261,20 @@ public class MappingsTests
     }
 
     [Test]
-    public void OneToOneAreLinkedWhenEmptyMappingTest()
+    public void OneToOneContainsWhenEmptyMappingTest()
     {
         var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
         var firstEntity = new FirstEntity();
         var secondEntity = new SecondEntity();
 
-        var result = mapping.AreLinked(firstEntity, secondEntity);
+        var result = mapping.Contains(firstEntity, secondEntity);
 
         Assert.That(result, Is.False);
     }
 
     [Test]
-    public void OneToOneAreLinkedWhenNonEmptyMappingTest()
+    public void OneToOneContainsWhenNonEmptyMappingTest()
     {
         var mapping = new OneToOne<FirstEntity, SecondEntity>();
 
@@ -283,26 +283,26 @@ public class MappingsTests
 
         mapping.Add(firstEntity, secondEntity);
 
-        var result = mapping.AreLinked(firstEntity, secondEntity);
+        var result = mapping.Contains(firstEntity, secondEntity);
 
         Assert.That(result, Is.True);
     }
 
     [Test]
-    public void OneToManyAreLinkedWhenEmptyMappingTest()
+    public void OneToManyContainsWhenEmptyMappingTest()
     {
         var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
         var firstEntity = new FirstEntity();
         var secondEntity = new SecondEntity();
 
-        var result = mapping.AreLinked(firstEntity, secondEntity);
+        var result = mapping.Contains(firstEntity, secondEntity);
 
         Assert.That(result, Is.False);
     }
 
     [Test]
-    public void OneToManyAreLinkedWhenNonEmptyMappingTest()
+    public void OneToManyContainsWhenNonEmptyMappingTest()
     {
         var mapping = new OneToMany<FirstEntity, SecondEntity>();
 
@@ -311,7 +311,7 @@ public class MappingsTests
 
         mapping.Add(firstEntity, secondEntity);
 
-        var result = mapping.AreLinked(firstEntity, secondEntity);
+        var result = mapping.Contains(firstEntity, secondEntity);
 
         Assert.That(result, Is.True);
     }

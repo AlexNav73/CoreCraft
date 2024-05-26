@@ -39,7 +39,7 @@ public interface IRelation<TParent, TChild> : IEnumerable<TParent>, IHaveInfo<Re
     /// <param name="parent">A parent entity.</param>
     /// <param name="child">A child entity.</param>
     /// <returns>True if the parent is linked to the child.</returns>
-    bool AreLinked(TParent parent, TChild child);
+    bool Contains(TParent parent, TChild child);
 
     /// <summary>
     ///     Retrieves all children entities for a given parent entity

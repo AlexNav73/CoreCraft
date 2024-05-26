@@ -54,7 +54,7 @@ public interface IMapping<TParent, TChild> : IEnumerable<TParent>, ICopy<IMappin
     /// <param name="parent">A parent entity.</param>
     /// <param name="child">A child entity.</param>
     /// <returns>True if the parent is linked to the child.</returns>
-    bool AreLinked(TParent parent, TChild child);
+    bool Contains(TParent parent, TChild child);
 
     /// <summary>
     ///     Returns all related children for a given parent

@@ -83,10 +83,10 @@ public sealed class CoWRelation<TParent, TChild> :
         return (_copy ?? _relation).ContainsChild(entity);
     }
 
-    /// <inheritdoc cref="IRelation{TParent, TChild}.AreLinked(TParent, TChild)" />
-    public bool AreLinked(TParent parent, TChild child)
+    /// <inheritdoc cref="IRelation{TParent, TChild}.Contains(TParent, TChild)" />
+    public bool Contains(TParent parent, TChild child)
     {
-        return (_copy ?? _relation).AreLinked(parent, child);
+        return (_copy ?? _relation).Contains(parent, child);
     }
 
     /// <inheritdoc cref="IRelation{TParent, TChild}.Children(TParent)" />
