@@ -5,6 +5,7 @@ using CoreCraft.Scheduling;
 using CoreCraft.Storage.Json;
 using CoreCraft.Storage.Sqlite;
 using CoreCraft.Subscription;
+using CoreCraft.Subscription.Extensions;
 
 namespace ConsoleDemoApp;
 
@@ -61,7 +62,7 @@ class Program
                 var entity = shard.FirstCollection.Last();
 
                 shard.FirstCollection.Remove(entity);
-                shard.OneToOneRelation.Remove(entity, shard.OneToOneRelation.Children(entity).Single());
+                shard.OneToOneRelation.Remove(entity);
             });
         }
 
