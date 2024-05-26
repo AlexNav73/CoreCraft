@@ -7,6 +7,7 @@ using CoreCraft.Persistence.History;
 using CoreCraft.Persistence.Lazy;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
+using CoreCraft.Subscription.Extensions;
 
 namespace CoreCraft.Tests;
 

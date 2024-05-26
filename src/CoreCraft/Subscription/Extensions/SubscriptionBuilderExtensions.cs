@@ -1,7 +1,7 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Subscription.Builders;
 
-namespace CoreCraft.Subscription;
+namespace CoreCraft.Subscription.Extensions;
 
 /// <summary>
 ///     A collection of extensions methods for <see cref="ISubscriptionBuilder{T}"/>
