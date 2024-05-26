@@ -47,6 +47,14 @@ public sealed class CoWRelation<TParent, TChild> :
         _copy.Add(parent, child);
     }
 
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Remove(TParent)" />
+    public void Remove(TParent parent)
+    {
+        _copy ??= (IMutableRelation<TParent, TChild>)_relation.Copy();
+
+        _copy.Remove(parent);
+    }
+
     /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Remove(TParent, TChild)" />
     public void Remove(TParent parent, TChild child)
     {

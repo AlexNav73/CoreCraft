@@ -48,6 +48,17 @@ public sealed class OneToMany<TParent, TChild> : IMapping<TParent, TChild>
         }
     }
 
+    /// <inheritdoc cref="IMapping{TParent, TChild}.Remove(TParent)"/>
+    public void Remove(TParent parent)
+    {
+        if (!_relation.ContainsKey(parent))
+        {
+            throw new MissingRelationException($"Can't remove all {parent} links");
+        }
+
+        _relation.Remove(parent);
+    }
+
     /// <inheritdoc cref="IMapping{TParent, TChild}.Remove(TParent, TChild)"/>
     public void Remove(TParent parent, TChild child)
     {

@@ -28,6 +28,12 @@ public interface IMutableRelation<TParent, TChild> : IRelation<TParent, TChild>
     void Add(TParent parent, TChild child);
 
     /// <summary>
+    ///     Removes all relations of the parent entity
+    /// </summary>
+    /// <param name="parent">A parent entity</param>
+    void Remove(TParent parent);
+
+    /// <summary>
     ///     Removes a relation between parent and child entities
     /// </summary>
     /// <param name="parent">A parent entity</param>

@@ -43,6 +43,17 @@ public sealed class TrackableRelation<TParent, TChild> :
         _changes.Add(RelationAction.Linked, parent, child);
     }
 
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Remove(TParent)" />
+    public void Remove(TParent parent)
+    {
+        foreach (var child in _relation.Children(parent))
+        {
+            _changes.Add(RelationAction.Unlinked, parent, child);
+        }
+
+        _relation.Remove(parent);
+    }
+
     /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Remove(TParent, TChild)" />
     public void Remove(TParent parent, TChild child)
     {
