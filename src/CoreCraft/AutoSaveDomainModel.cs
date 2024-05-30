@@ -11,6 +11,7 @@ namespace CoreCraft;
 /// </summary>
 public class AutoSaveDomainModel : DomainModel
 {
+    private readonly IScheduler _scheduler;
     private readonly IStorage _storage;
 
     /// <summary>
@@ -22,6 +23,7 @@ public class AutoSaveDomainModel : DomainModel
         IStorage storage)
         : base(modelShards, scheduler)
     {
+        _scheduler = scheduler;
         _storage = storage;
     }
 
@@ -50,7 +52,7 @@ public class AutoSaveDomainModel : DomainModel
         {
             if (changes.HasChanges())
             {
-                await Scheduler.RunParallel(() => storage.Update(changes), CancellationToken.None);
+                await _scheduler.RunParallel(() => storage.Update(changes), CancellationToken.None);
             }
         }
         catch (Exception ex)

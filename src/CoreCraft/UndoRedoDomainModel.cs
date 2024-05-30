@@ -26,7 +26,7 @@ public class UndoRedoDomainModel : DomainModel
         IScheduler scheduler)
         : base(modelShards, scheduler)
     {
-        History = new ChangesHistory(this);
+        History = new ChangesHistory(this, scheduler);
     }
 
     /// <summary>
