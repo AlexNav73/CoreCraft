@@ -32,7 +32,6 @@ public class SqliteStorageTests
         var change = A.Fake<IChangesFrameEx>();
         A.CallTo(() => change.Do(A<UpdateChangesFrameOperation>.Ignored))
             .Throws<InvalidOperationException>();
-        var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
         var storage = new SqliteStorage("", [], _factory!);
 
@@ -48,7 +47,6 @@ public class SqliteStorageTests
     {
         var change = A.Fake<IChangesFrameEx>();
         var storage = new SqliteStorage("", [], _factory!);
-        var modelChanges = A.Fake<IModelChanges>(c => c.Implements<IMutableModelChanges>());
 
         storage.Update([change]);
 

@@ -9,7 +9,7 @@ using CoreCraft.Subscription.Extensions;
 
 namespace ConsoleDemoApp;
 
-class Program
+static class Program
 {
     private const string Path = "test.db";
     private const string History = "history.json";

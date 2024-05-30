@@ -8,7 +8,7 @@ namespace CoreCraft;
 /// <summary>
 ///     Tracks changes history for a model and provides undo/redo functionality.
 /// </summary>
-public class ChangesHistory
+public sealed class ChangesHistory
 {
     private readonly DomainModel _model;
 
@@ -198,15 +198,18 @@ public class ChangesHistory
         IHistoryStorage storage,
         CancellationToken token = default)
     {
-        // TODO: Write explanation why we can use UnsafeModelShards here
-        var shards = _model.UnsafeModelShards;
+        // It is safe there to call UnsafeGetModelShards method, because we will
+        // use model shards only to create empty changes frames. We don't care about data
+        // stored in the model shard and it's consistency.
+        var shards = _model.UnsafeGetModelShards();
 
         return _model.Scheduler.Enqueue(() => storage.Load(shards), token);
     }
 
     private static IModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)
     {
-        var merged = (IMutableModelChanges)changes[0];
+        var merged = changes[0];
+
         for (var i = 1; i < changes.Count; i++)
         {
             merged = merged.Merge(changes[i]);

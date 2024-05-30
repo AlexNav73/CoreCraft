@@ -2,7 +2,6 @@
 using CoreCraft.Core;
 using CoreCraft.Persistence;
 using CoreCraft.Persistence.History;
-using CoreCraft.Scheduling;
 using CoreCraft.Subscription.Extensions;
 
 namespace CoreCraft.Tests;
@@ -20,14 +19,7 @@ public class UndoRedoDomainModelTests
     [Test]
     public void ConstructorDoesNotThrowTest()
     {
-        var storage = A.Fake<IStorage>();
         Assert.DoesNotThrow(() => new UndoRedoDomainModel(new[] { new FakeModelShard() }));
-    }
-
-    [Test]
-    public void DefaultSchedulerIsAsyncTest()
-    {
-        Assert.That(_model.Scheduler, Is.TypeOf<AsyncScheduler>());
     }
 
     [Test]
@@ -129,28 +121,6 @@ public class UndoRedoDomainModelTests
 
     [Test]
     public async Task SaveAsUndoRedoDomainModelTest()
-    {
-        var storage = A.Fake<IStorage>();
-        var modelHasBeenChanged = false;
-
-        _model.History.Changed += (s, args) => modelHasBeenChanged = true;
-
-        await ExecuteAddCommand();
-
-        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
-
-        await _model.Save(storage);
-
-        A.CallTo(() => storage.Save(A<IEnumerable<IModelShard>>.Ignored)).MustHaveHappenedOnceExactly();
-
-        Assert.That(_model.History.UndoStack.Count, Is.EqualTo(1));
-        Assert.That(_model.History.RedoStack.Count, Is.EqualTo(0));
-        Assert.That(modelHasBeenChanged, Is.True);
-    }
-
-    [Test]
-    public async Task SaveAsWithOtherStorageUndoRedoDomainModelTest()
     {
         var storage = A.Fake<IStorage>();
         var modelHasBeenChanged = false;

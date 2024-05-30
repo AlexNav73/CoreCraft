@@ -1,4 +1,5 @@
-﻿using CoreCraft.ChangesTracking;
+﻿using System.Diagnostics.CodeAnalysis;
+using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 
 namespace CoreCraft.Storage.Json.Model.History;
@@ -7,10 +8,11 @@ internal sealed class CollectionChange<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties
 {
-    public CollectionChange()
+    private CollectionChange()
     {
     }
 
+    [SetsRequiredMembers]
     public CollectionChange(ICollectionChange<TEntity, TProperties> change)
     {
         Action = change.Action;
@@ -21,7 +23,7 @@ internal sealed class CollectionChange<TEntity, TProperties>
 
     public CollectionAction Action { get; set; }
 
-    public TEntity Entity { get; set; }
+    public required TEntity Entity { get; set; }
 
     public TProperties? OldProperties { get; set; }
 

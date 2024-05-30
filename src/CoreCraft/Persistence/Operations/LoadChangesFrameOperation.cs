@@ -5,10 +5,8 @@ using CoreCraft.Persistence.History;
 namespace CoreCraft.Persistence.Operations;
 
 /// <summary>
-///     TODO: write documentation
+///     Loads entity and relation changes from a repository based on a timestamp.
 /// </summary>
-/// <param name="timestamp"></param>
-/// <param name="repository"></param>
 [ExcludeFromCodeCoverage]
 public readonly struct LoadChangesFrameOperation(long timestamp, IHistoryRepository repository) : IChangesFrameOperation
 {

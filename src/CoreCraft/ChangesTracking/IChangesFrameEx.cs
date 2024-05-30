@@ -51,8 +51,17 @@ public interface IChangesFrameEx : IChangesFrame
     IChangesFrame Invert();
 
     /// <summary>
-    ///     TODO: write documentation
+    ///     Executes a operation on the changes represented by this frame.
     /// </summary>
-    /// <param name="operation"></param>
+    /// <typeparam name="T">The type of the class implementing <see cref="IChangesFrameOperation"/>.</typeparam>
+    /// <param name="operation">
+    ///     This object will perform specific operations on the changes within the frame.
+    /// </param>
+    /// <remarks>
+    ///     This method allows applying logic to the changes stored in the current <see cref="IChangesFrameEx"/> object.
+    ///     This object can then access and process the collection and relation changes through
+    ///     the <see cref="IChangesFrameOperation.OnCollection"/> and <see cref="IChangesFrameOperation.OnRelation"/> methods.
+    ///     This approach allows for flexible and decoupled processing of changes.
+    /// </remarks>
     void Do<T>(T operation) where T : IChangesFrameOperation;
 }

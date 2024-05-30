@@ -1,6 +1,4 @@
-﻿using CoreCraft.ChangesTracking;
-using CoreCraft.Core;
-using CoreCraft.Persistence;
+﻿using CoreCraft.Persistence;
 using CoreCraft.Persistence.History;
 using System.Data;
 
@@ -28,12 +26,6 @@ public interface ISqliteRepository : IRepository, IHistoryRepository, IDisposabl
     /// </summary>
     /// <returns>Version</returns>
     int GetDatabaseVersion();
-
-    /// <summary>
-    ///     TODO: Write documentation
-    /// </summary>
-    /// <returns>TODO: Write documentation</returns>
-    IEnumerable<IModelChanges> RestoreHistory(IEnumerable<IModelShard> shards);
 
     /// <summary>
     ///     Sets new database version
