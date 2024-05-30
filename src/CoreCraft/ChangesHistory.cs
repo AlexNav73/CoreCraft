@@ -2,6 +2,7 @@
 using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
 using CoreCraft.Persistence.History;
+using CoreCraft.Scheduling;
 
 namespace CoreCraft;
 
@@ -11,6 +12,7 @@ namespace CoreCraft;
 public sealed class ChangesHistory
 {
     private readonly DomainModel _model;
+    private readonly IScheduler _scheduler;
 
     private readonly Stack<IModelChanges> _undoStack;
     private readonly Stack<IModelChanges> _redoStack;
@@ -18,9 +20,10 @@ public sealed class ChangesHistory
     /// <summary>
     ///     Ctor
     /// </summary>
-    public ChangesHistory(DomainModel model)
+    public ChangesHistory(DomainModel model, IScheduler scheduler)
     {
         _model = model;
+        _scheduler = scheduler;
 
         _undoStack = new Stack<IModelChanges>();
         _redoStack = new Stack<IModelChanges>();
@@ -59,7 +62,7 @@ public sealed class ChangesHistory
                 // resulting IModelChanges object contain no changes
                 if (merged.HasChanges())
                 {
-                    await _model.Scheduler.RunParallel(() =>
+                    await _scheduler.RunParallel(() =>
                     {
                         storage.Update(merged);
                         historyStorage?.Save(changes);
@@ -93,7 +96,7 @@ public sealed class ChangesHistory
             var changes = _undoStack.Reverse().ToList();
             if (changes.Count > 0)
             {
-                await _model.Scheduler.RunParallel(() => storage.Save(changes), token);
+                await _scheduler.RunParallel(() => storage.Save(changes), token);
 
                 // TODO(#8): saving operation executes in thread pool
                 // and launched by 'async void' methods. If two
@@ -203,7 +206,7 @@ public sealed class ChangesHistory
         // stored in the model shard and it's consistency.
         var shards = _model.UnsafeGetModelShards();
 
-        return _model.Scheduler.Enqueue(() => storage.Load(shards), token);
+        return _scheduler.Enqueue(() => storage.Load(shards), token);
     }
 
     private static IModelChanges MergeChanges(IReadOnlyList<IModelChanges> changes)
