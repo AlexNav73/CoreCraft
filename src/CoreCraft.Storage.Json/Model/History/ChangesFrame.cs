@@ -15,7 +15,7 @@ internal sealed class ChangesFrame
         Name = name;
     }
 
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     public IList<ICollectionChangeSet> CollectionChanges { get; set; }
 

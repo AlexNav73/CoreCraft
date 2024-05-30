@@ -62,4 +62,15 @@ public interface IHistoryRepository
         IRelationChangeSet<TParent, TChild> changes)
         where TParent : Entity
         where TChild : Entity;
+
+    /// <summary>
+    ///     Retrieves the complete change history for a set of model shards.
+    /// </summary>
+    /// <param name="shards">A collection containing the model shards for which to restore the history.</param>
+    /// <returns>
+    ///     A collection of <see cref="IModelChanges"/> objects representing the complete change history
+    ///     for the provided model shards. The order of the returned objects reflects the chronological order
+    ///     of the changes.
+    /// </returns>
+    IEnumerable<IModelChanges> RestoreHistory(IEnumerable<IModelShard> shards);
 }

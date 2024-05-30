@@ -4,9 +4,8 @@ using CoreCraft.ChangesTracking;
 namespace CoreCraft.Persistence.Operations;
 
 /// <summary>
-///     TODO: write documentation
+///     Updates entities and relations in a repository based on model's changes.
 /// </summary>
-/// <param name="repository"></param>
 [ExcludeFromCodeCoverage]
 public readonly struct UpdateChangesFrameOperation(IRepository repository) : IChangesFrameOperation
 {

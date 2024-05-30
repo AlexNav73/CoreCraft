@@ -319,7 +319,6 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         var repo = A.Fake<IRepository>();
         var model = new TestDomainModel([new FakeModelShard()], storage);
-        var entityId = Guid.NewGuid();
 
         SetUpStorageLoadCollectionOfModelShards(storage, repo);
         SetUpStorageLoadLazyLoader(storage, repo);
@@ -432,7 +431,7 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
-        var modelChanges = A.Fake<IMutableModelChanges>();
+        var modelChanges = A.Fake<IModelChanges>();
         var notificationSent = false;
 
         A.CallTo(() => modelChanges.HasChanges()).Returns(true);
@@ -527,7 +526,7 @@ public class DomainModelTests
             await Load(_storage, configure);
         }
 
-        public async Task Apply(IMutableModelChanges changes)
+        public async Task Apply(IModelChanges changes)
         {
             await Apply(changes, CancellationToken.None);
         }

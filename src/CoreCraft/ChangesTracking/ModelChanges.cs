@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿// Ignore Spelling: timestamp
+
+using System.Collections;
 using CoreCraft.Persistence.History;
 using CoreCraft.Persistence.Operations;
 
@@ -9,7 +11,7 @@ public sealed class ModelChanges : IMutableModelChanges
 {
     private readonly HashSet<IChangesFrameEx> _frames;
 
-    private long _timestamp;
+    private readonly long _timestamp;
 
     /// <summary>
     ///     Ctor
@@ -64,7 +66,7 @@ public sealed class ModelChanges : IMutableModelChanges
     }
 
     /// <inheritdoc />
-    public IMutableModelChanges Merge(IModelChanges changes)
+    public IModelChanges Merge(IModelChanges changes)
     {
         var changesFrames = changes.ToDictionary(k => k.GetType());
         var result = new HashSet<IChangesFrameEx>(ChangesFrameComparer.Instance);
@@ -108,7 +110,7 @@ public sealed class ModelChanges : IMutableModelChanges
 
     private sealed class ChangesFrameComparer : IEqualityComparer<IChangesFrame>
     {
-        public static ChangesFrameComparer Instance = new ChangesFrameComparer();
+        public static readonly ChangesFrameComparer Instance = new();
 
         public bool Equals(IChangesFrame? x, IChangesFrame? y)
         {

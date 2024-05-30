@@ -294,14 +294,14 @@ internal sealed class JsonRepository : IJsonRepository
     {
         var changes = new List<IModelChanges>();
 
-        foreach (var change in _model.ChangesHistory)
+        foreach (var timestamp in _model.ChangesHistory.Select(x => x.Timestamp))
         {
-            var modelChanges = new ChangesTracking.ModelChanges(change.Timestamp);
+            var modelChanges = new ChangesTracking.ModelChanges(timestamp);
 
             foreach (var shard in modelShards.Cast<IFrameFactory>())
             {
                 var frame = (IChangesFrameEx)shard.Create();
-                frame.Do(new LoadChangesFrameOperation(change.Timestamp, this));
+                frame.Do(new LoadChangesFrameOperation(timestamp, this));
                 if (frame.HasChanges())
                 {
                     modelChanges.AddOrGet(frame);

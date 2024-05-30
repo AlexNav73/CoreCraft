@@ -8,7 +8,6 @@ namespace CoreCraft.Tests.Perf;
 public class RelationBenchmark
 {
     private const int InvocationCount = 2_000_000;
-    private const string Value = "test";
 
     private int _i;
     private List<FirstEntity> _parents = null!;
