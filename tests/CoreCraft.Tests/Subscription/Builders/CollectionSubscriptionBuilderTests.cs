@@ -53,11 +53,11 @@ internal class CollectionSubscriptionBuilderTests
     public void BindToCollectionTest(bool withChanges, int handlerCalledTimes, CollectionAction action)
     {
         var subscriptionBuilder = CreateTestee(withChanges, action);
-        var binding = A.Fake<IObserver<BindingChanges<FirstEntity, FirstEntityProperties>>>();
+        var binding = A.Fake<IObserver<Change<CollectionChangeGroups<FirstEntity, FirstEntityProperties>>>>();
 
         subscriptionBuilder.Bind(binding);
 
-        A.CallTo(() => binding.OnNext(A<BindingChanges<FirstEntity, FirstEntityProperties>>.Ignored)).MustHaveHappened(handlerCalledTimes, Times.Exactly);
+        A.CallTo(() => binding.OnNext(A<Change<CollectionChangeGroups<FirstEntity, FirstEntityProperties>>>.Ignored)).MustHaveHappened(handlerCalledTimes, Times.Exactly);
     }
 
     [TestCase(false, false, CollectionAction.Modify)]
@@ -74,6 +74,35 @@ internal class CollectionSubscriptionBuilderTests
         Assert.That(onNextWasCalled, Is.EqualTo(onNextCallIsExpected));
     }
 
+    [Test]
+    public void BindToCollectionParsesChangesOnceWhenPublishedAndOnEachInnerBindings()
+    {
+        var changesFrame = A.Fake<IFakeChangesFrame>();
+        var collection = A.Fake<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>();
+        var change = A.Fake<ICollectionChange<FirstEntity, FirstEntityProperties>>();
+
+        A.CallTo(() => collection.HasChanges()).Returns(true);
+        A.CallTo(() => collection.GetEnumerator()).Returns(new List<ICollectionChange<FirstEntity, FirstEntityProperties>>() { change }.GetEnumerator());
+        A.CallTo(() => changesFrame.FirstCollection).Returns(collection);
+
+        var changes = new Change<IFakeChangesFrame>(A.Fake<IModel>(), A.Fake<IModel>(), changesFrame);
+
+        var subscription = new CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties>(x => x.FirstCollection);
+        var subscriptionBuilder = CreateBuilder(subscription, null);
+
+        var observer = A.Fake<IObserver<Change<CollectionChangeGroups<FirstEntity, FirstEntityProperties>>>>();
+
+        // Bind to changes while handling collection changes
+        A.CallTo(() => observer.OnNext(A<Change<CollectionChangeGroups<FirstEntity, FirstEntityProperties>>>.Ignored))
+            .Invokes(() => CreateBuilder(subscription, changes).Bind(A.Fake<IObserver<Change<CollectionChangeGroups<FirstEntity, FirstEntityProperties>>>>()));
+
+        subscriptionBuilder.Bind(observer);
+
+        subscription.Publish(changes);
+
+        A.CallTo(() => collection.GetEnumerator()).MustHaveHappenedTwiceExactly();
+    }
+
     private CollectionSubscriptionBuilder<IFakeChangesFrame, FirstEntity, FirstEntityProperties> CreateTestee(bool withChanges, CollectionAction collectionAction = CollectionAction.Modify)
     {
         Change<IFakeChangesFrame>? changes = null;
@@ -84,17 +113,24 @@ internal class CollectionSubscriptionBuilderTests
             var collection = A.Fake<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>();
             var change = A.Fake<ICollectionChange<FirstEntity, FirstEntityProperties>>();
 
-            A.CallTo(() => changesFrame.FirstCollection).Returns(collection);
             A.CallTo(() => change.Action).Returns(collectionAction);
             A.CallTo(() => collection.HasChanges()).Returns(true);
             A.CallTo(() => collection.GetEnumerator()).Returns(new List<ICollectionChange<FirstEntity, FirstEntityProperties>>() { change }.GetEnumerator());
+            A.CallTo(() => changesFrame.FirstCollection).Returns(collection);
 
             changes = new Change<IFakeChangesFrame>(A.Fake<IModel>(), A.Fake<IModel>(), changesFrame);
         }
 
         var subscription = new CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties>(x => x.FirstCollection);
-        var subscriptionBuilder = new CollectionSubscriptionBuilder<IFakeChangesFrame, FirstEntity, FirstEntityProperties>(subscription, changes);
+        var subscriptionBuilder = CreateBuilder(subscription, changes);
 
         return subscriptionBuilder;
+    }
+
+    private static CollectionSubscriptionBuilder<IFakeChangesFrame, FirstEntity, FirstEntityProperties> CreateBuilder(
+        CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties> subscription,
+        Change<IFakeChangesFrame>? changes)
+    {
+        return new CollectionSubscriptionBuilder<IFakeChangesFrame, FirstEntity, FirstEntityProperties>(subscription, changes);
     }
 }

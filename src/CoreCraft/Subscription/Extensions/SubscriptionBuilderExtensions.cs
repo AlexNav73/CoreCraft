@@ -67,11 +67,11 @@ public static class SubscriptionBuilderExtensions
     /// <returns>A subscription</returns>
     public static IDisposable Bind<TEntity, TProperties>(
         this ICollectionSubscriptionBuilder<TEntity, TProperties> self,
-        Action<BindingChanges<TEntity, TProperties>> handler)
+        Action<Change<CollectionChangeGroups<TEntity, TProperties>>> handler)
           where TEntity : Entity
           where TProperties : Properties
     {
-        return self.Bind(new AnonymousObserver<BindingChanges<TEntity, TProperties>>(handler));
+        return self.Bind(new AnonymousObserver<Change<CollectionChangeGroups<TEntity, TProperties>>>(handler));
     }
 
     /// <summary>
