@@ -4,7 +4,6 @@ using System.Windows;
 using Autofac;
 using CoreCraft;
 using CoreCraft.Core;
-using CoreCraft.Persistence;
 using CoreCraft.Storage.Sqlite;
 using CoreCraft.Storage.Sqlite.Migrations;
 using WpfDemoApp.Model;
@@ -22,7 +21,7 @@ public partial class MainWindow : Window
 
         var builder = new ContainerBuilder();
 
-        builder.Register<Func<string, IStorage>>(c =>
+        builder.Register<Func<string, ISqliteStorage>>(c =>
         {
             var migrations = c.Resolve<IEnumerable<IMigration>>();
 

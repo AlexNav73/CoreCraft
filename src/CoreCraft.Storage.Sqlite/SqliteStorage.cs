@@ -9,10 +9,8 @@ using System.Data;
 
 namespace CoreCraft.Storage.Sqlite;
 
-/// <summary>
-///     A SQLite storage implementation for the domain model
-/// </summary>
-public sealed class SqliteStorage : IStorage, IHistoryStorage
+/// <inheritdoc cref="ISqliteStorage" />
+public sealed class SqliteStorage : ISqliteStorage
 {
     private readonly string _path;
     private readonly MigrationRunner _migrationRunner;

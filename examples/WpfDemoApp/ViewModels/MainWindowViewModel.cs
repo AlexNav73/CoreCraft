@@ -1,9 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CoreCraft;
-using CoreCraft.Persistence;
+using CoreCraft.Storage.Sqlite;
 using Microsoft.Win32;
 using WpfDemoApp.Model.Entities;
 using WpfDemoApp.ViewModels.Pages;
@@ -13,14 +14,14 @@ namespace WpfDemoApp;
 internal partial class MainWindowViewModel : ObservableObject
 {
     private readonly UndoRedoDomainModel _model;
-    private readonly Func<string, IStorage> _storageFactory;
+    private readonly Func<string, ISqliteStorage> _storageFactory;
 
     private readonly ObservableObject _homePage;
 
     [ObservableProperty]
     private ObservableObject? _page;
 
-    public MainWindowViewModel(UndoRedoDomainModel model, Func<string, IStorage> storageFactory)
+    public MainWindowViewModel(UndoRedoDomainModel model, Func<string, ISqliteStorage> storageFactory)
     {
         _model = model;
         _storageFactory = storageFactory;
@@ -48,7 +49,14 @@ internal partial class MainWindowViewModel : ObservableObject
 
         if (saveFileDialog.ShowDialog() == true)
         {
-            await _model.Save(_storageFactory(saveFileDialog.FileName));
+            if (File.Exists(saveFileDialog.FileName))
+            {
+                await _model.History.Update(_storageFactory(saveFileDialog.FileName));
+            }
+            else
+            {
+                await _model.Save(_storageFactory(saveFileDialog.FileName));
+            }
         }
     }
 

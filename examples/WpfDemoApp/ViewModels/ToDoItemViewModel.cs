@@ -1,7 +1,7 @@
-﻿using System.Reactive;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CoreCraft;
 using CoreCraft.ChangesTracking;
+using CoreCraft.Subscription.Extensions;
 using WpfDemoApp.Model;
 using WpfDemoApp.Model.Entities;
 
@@ -26,7 +26,7 @@ internal partial class ToDoItemViewModel : ObservableObject
 
         _model.For<IToDoChangesFrame>()
             .With(x => x.Items)
-            .Bind(item, Observer.Create<IEntityChange<ToDoItem, ToDoItemProperties>>(OnItemChanged));
+            .Bind(item, OnItemChanged);
     }
 
     public ToDoItem Entity { get; }
