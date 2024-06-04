@@ -1,7 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,7 +16,7 @@ namespace WpfDemoApp.ViewModels;
 
 internal partial class ToDoItemListViewModel : ObservableObject, IHasEntity<ToDoList>
 {
-    private readonly CompositeDisposable _subscription; // Dispose to unsubscribe
+    private readonly IReadOnlyList<IDisposable> _subscriptions; // Dispose to unsubscribe
     
     private readonly UndoRedoDomainModel _model;
 
@@ -37,7 +36,7 @@ internal partial class ToDoItemListViewModel : ObservableObject, IHasEntity<ToDo
         Entity = entity;
         Name = properties.Name;
 
-        _subscription =
+        _subscriptions =
         [
             model.For<IToDoChangesFrame>()
                 .With(x => x.Items)

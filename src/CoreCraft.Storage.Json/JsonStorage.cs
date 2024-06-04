@@ -1,17 +1,13 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
-using CoreCraft.Persistence;
-using CoreCraft.Persistence.History;
 using CoreCraft.Persistence.Lazy;
 using CoreCraft.Persistence.Operations;
 using Newtonsoft.Json;
 
 namespace CoreCraft.Storage.Json;
 
-/// <summary>
-///     A Json storage implementation for the domain model
-/// </summary>
-public sealed class JsonStorage : IStorage, IHistoryStorage
+/// <inheritdoc cref="IJsonStorage"/>
+public sealed class JsonStorage : IJsonStorage
 {
     private readonly string _path;
     private readonly JsonSerializerSettings? _settings;

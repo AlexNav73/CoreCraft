@@ -7,7 +7,7 @@
     <UseWPF>true</UseWPF>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>CS1591</NoWarn>
+    <NoWarn>CS1591,CA1823</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +18,6 @@
     <PackageReference Include="Autofac" Version="8.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="MaterialDesignThemes" Version="5.0.0" />
-    <PackageReference Include="System.Reactive" Version="6.0.0" />
 
     <ProjectReference Include="..\..\src\CoreCraft.Generators\CoreCraft.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\src\CoreCraft.Storage.Sqlite\CoreCraft.Storage.Sqlite.csproj" />
