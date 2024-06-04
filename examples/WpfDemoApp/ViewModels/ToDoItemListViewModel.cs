@@ -62,7 +62,7 @@ internal partial class ToDoItemListViewModel : ObservableObject, IHasEntity<ToDo
         });
     }
 
-    private void OnItemsChanged(BindingChanges<ToDoItem, ToDoItemProperties> changes)
+    private void OnItemsChanged(Change<CollectionChangeGroups<ToDoItem, ToDoItemProperties>> changes)
     {
         UpdateCounters(changes.NewModel);
     }

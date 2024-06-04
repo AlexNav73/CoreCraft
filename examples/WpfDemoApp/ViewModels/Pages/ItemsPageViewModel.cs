@@ -67,15 +67,15 @@ internal sealed partial class ItemsPageViewModel : ObservableObject, IHasEntity<
         }
     }
 
-    private void OnItemsChanged(BindingChanges<ToDoItem, ToDoItemProperties> changes)
+    private void OnItemsChanged(Change<CollectionChangeGroups<ToDoItem, ToDoItemProperties>> changes)
     {
-        foreach (var change in changes.Removed)
+        foreach (var change in changes.Hunk.Removed)
         {
             var viewModel = _items.Single(x => x.Entity == change.Entity);
             _items.Remove(viewModel);
         }
 
-        foreach (var change in changes.Added)
+        foreach (var change in changes.Hunk.Added)
         {
             _items.Add(new ToDoItemViewModel(change.Entity, change.NewData!, _model));
         }

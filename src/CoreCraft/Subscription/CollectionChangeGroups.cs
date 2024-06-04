@@ -9,33 +9,19 @@ namespace CoreCraft.Subscription;
 /// <typeparam name="TEntity">An entity type</typeparam>
 /// <typeparam name="TProperties">A type of a properties</typeparam>
 [ExcludeFromCodeCoverage]
-public sealed class BindingChanges<TEntity, TProperties>
+public sealed class CollectionChangeGroups<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties
 {
-    internal BindingChanges(
-        IModel oldModel,
-        IModel newModel,
+    internal CollectionChangeGroups(
         IEnumerable<IEntityChange<TEntity, TProperties>> added,
         IEnumerable<IEntityChange<TEntity, TProperties>> removed,
         IEnumerable<IEntityChange<TEntity, TProperties>> modified)
     {
-        OldModel = oldModel;
-        NewModel = newModel;
         Added = added;
         Removed = removed;
         Modified = modified;
     }
-
-    /// <summary>
-    ///     The old version of the domain model
-    /// </summary>
-    public IModel OldModel { get; }
-
-    /// <summary>
-    ///     The new version of the domain model
-    /// </summary>
-    public IModel NewModel { get; }
 
     /// <summary>
     ///     A collection of added entities

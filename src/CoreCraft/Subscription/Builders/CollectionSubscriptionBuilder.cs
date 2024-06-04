@@ -16,13 +16,13 @@ internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : I
         _changes = changes;
     }
 
-    public IDisposable Bind(IObserver<BindingChanges<TEntity, TProperties>> observer)
+    public IDisposable Bind(IObserver<Change<CollectionChangeGroups<TEntity, TProperties>>> observer)
     {
         var subscription = _root.Bind(observer);
 
         NotifyIfHasChanges(collection =>
         {
-            var changes = CreateBindingChanges(_changes!.OldModel, _changes.NewModel, collection);
+            var changes = _changes!.Map(_ => CreateCollectionChangeGroups(collection));
 
             observer.OnNext(changes);
         });
@@ -66,9 +66,7 @@ internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : I
         }
     }
 
-    private BindingChanges<TEntity, TProperties> CreateBindingChanges(
-        IModel oldModel,
-        IModel newModel,
+    private static CollectionChangeGroups<TEntity, TProperties> CreateCollectionChangeGroups(
         ICollectionChangeSet<TEntity, TProperties> collectionChanges)
     {
         var added = new List<ICollectionChange<TEntity, TProperties>>();
@@ -91,9 +89,7 @@ internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : I
             }
         }
 
-        return new BindingChanges<TEntity, TProperties>(
-            oldModel,
-            newModel,
+        return new CollectionChangeGroups<TEntity, TProperties>(
             added,
             removed,
             modified);

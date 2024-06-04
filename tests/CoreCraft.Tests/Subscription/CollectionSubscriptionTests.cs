@@ -123,6 +123,36 @@ internal class CollectionSubscriptionTests
         Assert.That(onEntityChanged1Called, Is.True);
     }
 
+    [Test]
+    public void CollectionBindingShouldParseChangesOnlyOnceTest()
+    {
+        var collectionSubscription = new CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties>(x => x.FirstCollection);
+        var count = 0;
+
+        var observer1 = CreateCollectionChangeObserver(() => count += 1);
+        var observer2 = CreateCollectionChangeObserver(() => count += 1);
+        var observer3 = CreateCollectionChangeObserver(() => count += 1);
+
+        collectionSubscription.Bind(observer1);
+        collectionSubscription.Bind(observer2);
+        collectionSubscription.Bind(observer3);
+
+        var change = A.Fake<ICollectionChange<FirstEntity, FirstEntityProperties>>();
+        var collectionChangeSet = A.Fake<ICollectionChangeSet<FirstEntity, FirstEntityProperties>>();
+        var changesFrame = A.Fake<IFakeChangesFrame>();
+
+        A.CallTo(() => collectionChangeSet.HasChanges()).Returns(true);
+        A.CallTo(() => collectionChangeSet.GetEnumerator()).Returns(new List<ICollectionChange<FirstEntity, FirstEntityProperties>> { change }.GetEnumerator());
+        A.CallTo(() => changesFrame.FirstCollection).Returns(collectionChangeSet);
+
+        var changes = new Change<IFakeChangesFrame>(A.Fake<IModel>(), A.Fake<IModel>(), changesFrame);
+
+        collectionSubscription.Publish(changes);
+
+        Assert.That(count, Is.EqualTo(3));
+        A.CallTo(() => collectionChangeSet.GetEnumerator()).MustHaveHappenedOnceExactly();
+    }
+
     private void BindToCollectionAndRiseEventBeforeBindingIsDeleted(
         CollectionSubscription<IFakeChangesFrame, FirstEntity, FirstEntityProperties> collectionSubscription,
         Action action)
@@ -175,11 +205,11 @@ internal class CollectionSubscriptionTests
         return observer;
     }
 
-    private IObserver<BindingChanges<FirstEntity, FirstEntityProperties>> CreateCollectionChangeObserver(Action action)
+    private IObserver<Change<CollectionChangeGroups<FirstEntity, FirstEntityProperties>>> CreateCollectionChangeObserver(Action action)
     {
-        var observer = A.Fake<IObserver<BindingChanges<FirstEntity, FirstEntityProperties>>>();
+        var observer = A.Fake<IObserver<Change<CollectionChangeGroups<FirstEntity, FirstEntityProperties>>>>();
 
-        A.CallTo(() => observer.OnNext(A<BindingChanges<FirstEntity, FirstEntityProperties>>.Ignored)).Invokes(action);
+        A.CallTo(() => observer.OnNext(A<Change<CollectionChangeGroups<FirstEntity, FirstEntityProperties>>>.Ignored)).Invokes(action);
 
         return observer;
     }

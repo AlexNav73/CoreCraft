@@ -46,21 +46,21 @@ internal sealed partial class HomePageViewModel : ObservableObject
         }
     }
 
-    private void OnListsChanged(BindingChanges<ToDoList, ToDoListProperties> changes)
+    private void OnListsChanged(Change<CollectionChangeGroups<ToDoList, ToDoListProperties>> changes)
     {
-        foreach (var removed in changes.Removed)
+        foreach (var removed in changes.Hunk.Removed)
         {
             var viewModel = Lists.Single(x => x.Entity == removed.Entity);
             Lists.Remove(viewModel);
         }
 
-        foreach (var modified in changes.Modified)
+        foreach (var modified in changes.Hunk.Modified)
         {
             var viewModel = Lists.Single(x => x.Entity == modified.Entity);
             viewModel.Name = modified.NewData!.Name;
         }
 
-        foreach (var added in changes.Added)
+        foreach (var added in changes.Hunk.Added)
         {
             Lists.Add(new ToDoItemListViewModel(_model, added.Entity, added.NewData!));
         }

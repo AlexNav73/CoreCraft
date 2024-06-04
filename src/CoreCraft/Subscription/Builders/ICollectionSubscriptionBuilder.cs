@@ -16,7 +16,7 @@ public interface ICollectionSubscriptionBuilder<TEntity, TProperties> : ISubscri
     /// </summary>
     /// <param name="observer">An observer of collection changes</param>
     /// <returns>A subscription</returns>
-    IDisposable Bind(IObserver<BindingChanges<TEntity, TProperties>> observer);
+    IDisposable Bind(IObserver<Change<CollectionChangeGroups<TEntity, TProperties>>> observer);
 
     /// <summary>
     ///     Binds an object to the specified entity to receive notifications about the entity's changes

@@ -9,23 +9,24 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
     where TEntity : Entity
     where TProperties : Properties
 {
-    private readonly List<IObserver<BindingChanges<TEntity, TProperties>>> _collectionBindings;
+    private readonly List<IObserver<Change<CollectionChangeGroups<TEntity, TProperties>>>> _collectionBindings;
     private readonly Dictionary<TEntity, List<IObserver<IEntityChange<TEntity, TProperties>>>> _entityBindings;
 
     public CollectionSubscription(Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> accessor)
     {
-        Accessor = accessor;
         _collectionBindings = new();
         _entityBindings = new();
+
+        Accessor = accessor;
     }
 
-    public Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> Accessor { get; }
+    internal Func<TChangesFrame, ICollectionChangeSet<TEntity, TProperties>> Accessor { get; }
 
-    public IDisposable Bind(IObserver<BindingChanges<TEntity, TProperties>> observer)
+    public IDisposable Bind(IObserver<Change<CollectionChangeGroups<TEntity, TProperties>>> observer)
     {
         _collectionBindings.Add(observer);
 
-        return new UnsubscribeOnDispose<IObserver<BindingChanges<TEntity, TProperties>>>(observer, r => _collectionBindings.Remove(r));
+        return new UnsubscribeOnDispose<IObserver<Change<CollectionChangeGroups<TEntity, TProperties>>>>(observer, r => _collectionBindings.Remove(r));
     }
 
     public IDisposable Bind(TEntity entity, IObserver<IEntityChange<TEntity, TProperties>> observer)
@@ -36,7 +37,7 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
         }
         else
         {
-            _entityBindings.Add(entity, new List<IObserver<IEntityChange<TEntity, TProperties>>>() { observer });
+            _entityBindings.Add(entity, [observer]);
         }
 
         return new UnsubscribeOnDispose<IObserver<IEntityChange<TEntity, TProperties>>>(observer, r => RemoveEntityBinding(entity, r));
@@ -56,44 +57,18 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
 
     private void UpdateBindings(Change<ICollectionChangeSet<TEntity, TProperties>> changes)
     {
-        var added = new List<ICollectionChange<TEntity, TProperties>>();
-        var removed = new List<ICollectionChange<TEntity, TProperties>>();
-        var modified = new List<ICollectionChange<TEntity, TProperties>>();
+        var collectionChangeGroups = ParseCollectionChanges(changes);
 
-        foreach (var change in changes.Hunk)
-        {
-            if (change.Action == CollectionAction.Add)
-            {
-                added.Add(change);
-            }
-            else if (change.Action == CollectionAction.Remove)
-            {
-                removed.Add(change);
-                _entityBindings.Remove(change.Entity);
-            }
-            else if (change.Action == CollectionAction.Modify)
-            {
-                modified.Add(change);
-                NotifyEntityBinding(change);
-            }
-        }
-
-        var bindingChanges = new BindingChanges<TEntity, TProperties>(
-            changes.OldModel,
-            changes.NewModel,
-            added,
-            removed,
-            modified);
-        NotifyCollectionBindings(bindingChanges);
+        NotifyCollectionBindings(changes.Map(_ => collectionChangeGroups));
     }
 
-    private void NotifyCollectionBindings(BindingChanges<TEntity, TProperties> bindingChanges)
+    private void NotifyCollectionBindings(Change<CollectionChangeGroups<TEntity, TProperties>> changes)
     {
         var bindings = _collectionBindings.ToArray();
 
         for (var i = 0; i < bindings.Length; i++)
         {
-            bindings[i].OnNext(bindingChanges);
+            bindings[i].OnNext(changes);
         }
     }
 
@@ -119,5 +94,32 @@ internal sealed class CollectionSubscription<TChangesFrame, TEntity, TProperties
                 _entityBindings.Remove(entity);
             }
         }
+    }
+
+    private CollectionChangeGroups<TEntity, TProperties> ParseCollectionChanges(Change<ICollectionChangeSet<TEntity, TProperties>> changes)
+    {
+        var added = new List<ICollectionChange<TEntity, TProperties>>();
+        var removed = new List<ICollectionChange<TEntity, TProperties>>();
+        var modified = new List<ICollectionChange<TEntity, TProperties>>();
+
+        foreach (var change in changes.Hunk)
+        {
+            if (change.Action == CollectionAction.Add)
+            {
+                added.Add(change);
+            }
+            else if (change.Action == CollectionAction.Remove)
+            {
+                removed.Add(change);
+                _entityBindings.Remove(change.Entity);
+            }
+            else if (change.Action == CollectionAction.Modify)
+            {
+                modified.Add(change);
+                NotifyEntityBinding(change);
+            }
+        }
+
+        return new CollectionChangeGroups<TEntity, TProperties>(added, removed, modified);
     }
 }
