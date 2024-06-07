@@ -8,7 +8,7 @@ namespace CoreCraft.Core;
 public interface IFrameFactory
 {
     /// <summary>
-    ///     Creates a new instance of a changes frame suitable for the model shard type this factory is associated with.
+    ///     Creates a new instance of a changes frame or returns existing one suitable for the model shard type this factory is associated with.
     /// </summary>
     /// <returns>
     ///     An instance of the <see cref="IChangesFrame" /> interface representing a changes frame for the specific model shard type.

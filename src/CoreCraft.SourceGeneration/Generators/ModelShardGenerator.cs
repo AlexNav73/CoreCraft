@@ -195,15 +195,15 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
                 code.WriteLine("foreach (var feature in features)");
                 code.Block(() =>
                 {
-                    foreach (var collection in modelShard.Collections)
+                    foreach (var name in modelShard.Collections.Select(x => x.Name))
                     {
-                        code.WriteLine($"{ToCamelCase(collection.Name)} = feature.Decorate(this, {ToCamelCase(collection.Name)});");
+                        code.WriteLine($"{ToCamelCase(name)} = feature.Decorate(this, {ToCamelCase(name)});");
                     }
                     code.EmptyLine();
 
-                    foreach (var relation in modelShard.Relations)
+                    foreach (var name in modelShard.Relations.Select(x => x.Name))
                     {
-                        code.WriteLine($"{ToCamelCase(relation.Name)} = feature.Decorate(this, {ToCamelCase(relation.Name)});");
+                        code.WriteLine($"{ToCamelCase(name)} = feature.Decorate(this, {ToCamelCase(name)});");
                     }
                 });
                 code.EmptyLine();
@@ -211,15 +211,15 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
                 code.WriteLine($"return new Mutable{modelShard.Name}ModelShard()");
                 code.Block(() =>
                 {
-                    foreach (var collection in modelShard.Collections)
+                    foreach (var name in modelShard.Collections.Select(x => x.Name))
                     {
-                        code.WriteLine($"{collection.Name} = {ToCamelCase(collection.Name)},");
+                        code.WriteLine($"{name} = {ToCamelCase(name)},");
                     }
                     code.EmptyLine();
 
-                    foreach (var relation in modelShard.Relations)
+                    foreach (var name in modelShard.Relations.Select(x => x.Name))
                     {
-                        code.WriteLine($"{relation.Name} = {ToCamelCase(relation.Name)},");
+                        code.WriteLine($"{name} = {ToCamelCase(name)},");
                     }
                 }, true);
             });

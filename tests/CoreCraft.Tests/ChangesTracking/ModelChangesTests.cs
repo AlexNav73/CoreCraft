@@ -75,14 +75,14 @@ public class ModelChangesTests
     public void MergeTest()
     {
         var modelChanges = new ModelChanges(0);
-        var changesFrame = modelChanges.AddOrGet(new FakeChangesFrame());
+        var changesFrame = (FakeChangesFrame)modelChanges.AddOrGet(new FakeChangesFrame());
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = "test" });
 
         var modelChanges2 = new ModelChanges(0);
-        var changesFrame2 = modelChanges2.AddOrGet(new FakeChangesFrame());
+        var changesFrame2 = (FakeChangesFrame)modelChanges2.AddOrGet(new FakeChangesFrame());
         var props2 = new FirstEntityProperties();
 
         changesFrame2.FirstCollection.Add(CollectionAction.Remove, entity, props2, props2 with { NonNullableStringProperty = "test" });
@@ -109,7 +109,7 @@ public class ModelChangesTests
     public void HasChangesTest()
     {
         var modelChanges = new ModelChanges(0);
-        var changesFrame = modelChanges.AddOrGet(new FakeChangesFrame());
+        var changesFrame = (FakeChangesFrame)modelChanges.AddOrGet(new FakeChangesFrame());
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
         var value = "test";

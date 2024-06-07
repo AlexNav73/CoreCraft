@@ -37,15 +37,16 @@ public sealed class ModelChanges : IMutableModelChanges
     }
 
     /// <inheritdoc />
-    public TFrame AddOrGet<TFrame>(TFrame frame)
-        where TFrame : IChangesFrame
+    public IChangesFrame AddOrGet(IChangesFrame frame)
     {
         if (frame is IChangesFrameEx ext && _frames.Add(ext))
         {
             return frame;
         }
 
-        return _frames.OfType<TFrame>().Single();
+        var frameType = frame.GetType();
+
+        return _frames.Single(x => x.GetType() == frameType);
     }
 
     /// <inheritdoc />

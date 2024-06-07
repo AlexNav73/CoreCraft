@@ -24,5 +24,5 @@ public interface IMutableModelChanges : IModelChanges
     ///     - The provided `frame` if it's a new frame for a shard that wasn't previously tracked.
     ///     - The existing <see cref="IChangesFrame"/> instance associated with the shard if one already exists.
     /// </returns>
-    TFrame AddOrGet<TFrame>(TFrame frame) where TFrame : IChangesFrame;
+    IChangesFrame AddOrGet(IChangesFrame frame);
 }
