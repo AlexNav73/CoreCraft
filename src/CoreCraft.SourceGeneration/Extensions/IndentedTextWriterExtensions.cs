@@ -95,11 +95,11 @@ internal static class IndentedTextWriterExtensions
         code.WriteLineNoTabs(string.Empty);
     }
 
-    public static void GeneratedClassAttributes(this IndentedTextWriter code)
+    public static void GeneratedClassAttributes(this IndentedTextWriter code, bool debug)
     {
         code.GeneratedCodeAttribute();
         code.CompilerGeneratedCodeAttribute();
-        code.DebuggerNonUserCodeAttribute();
+        code.DebuggerNonUserCodeAttribute(debug);
         code.ExcludeFromCodeCoverageAttribute();
     }
 
@@ -119,9 +119,12 @@ internal static class IndentedTextWriterExtensions
         code.WriteLine("[global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]");
     }
 
-    public static void DebuggerNonUserCodeAttribute(this IndentedTextWriter code)
+    public static void DebuggerNonUserCodeAttribute(this IndentedTextWriter code, bool debug)
     {
-        code.WriteLine("[global::System.Diagnostics.DebuggerNonUserCodeAttribute()]");
+        if (!debug)
+        {
+            code.WriteLine("[global::System.Diagnostics.DebuggerNonUserCodeAttribute()]");
+        }
     }
 
     public static void ExcludeFromCodeCoverageAttribute(this IndentedTextWriter code)

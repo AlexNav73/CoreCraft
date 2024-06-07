@@ -1,24 +1,40 @@
 ﻿namespace CoreCraft.SourceGeneration.Serialization;
 
-internal class DtoConverter
+internal static class DtoConverter
 {
     public static ModelScheme Convert(ModelSchemeDto modelScheme)
     {
-        return new ModelScheme(modelScheme.Shards.Select(Convert).ToArray());
+        var scheme = new ModelScheme(modelScheme.Debug);
+
+        scheme.Shards = modelScheme.Shards.Select(x => Convert(x, scheme)).ToArray();
+
+        return scheme;
     }
 
-    private static ModelShard Convert(ModelShardDto modelShard)
+    private static ModelShard Convert(ModelShardDto modelShard, ModelScheme scheme)
     {
         var collections = new List<Collection>();
         var relations = new List<Relation>();
 
+        var result = new ModelShard()
+        {
+            Name = modelShard.Name,
+            Visibility = Convert(modelShard.Visibility),
+            Collections = collections,
+            Relations = relations,
+            LoadManually = modelShard.LoadManually,
+            Scheme = scheme
+        };
+
         var entities = modelShard.Entities.Select(Convert).ToArray();
 
-        foreach (var collection in modelShard.Collections)
+        foreach (var collectionDto in modelShard.Collections)
         {
-            var entity = entities.Single(x => x.Name == collection.EntityType);
+            var entity = entities.Single(x => x.Name == collectionDto.EntityType);
 
-            collections.Add(new Collection(collection.Name, entity, collection.LoadManually));
+            entity.Collection = new Collection(collectionDto.Name, entity, result, collectionDto.LoadManually);
+
+            collections.Add(entity.Collection);
         }
 
         foreach (var relation in modelShard.Relations)
@@ -29,23 +45,10 @@ internal class DtoConverter
             var childEntity = entities.Single(x => x.Name == relation.Child);
             var childCollection = collections.Single(x => x.Entity == childEntity);
 
-            relations.Add(new Relation()
-            {
-                Name = relation.Name,
-                RelationType = Convert(relation.RelationType),
-                Parent = parentCollection,
-                Child = childCollection
-            });
+            relations.Add(new Relation(relation.Name, parentCollection, childCollection, Convert(relation.RelationType), result));
         }
 
-        return new ModelShard()
-        {
-            Name = modelShard.Name,
-            Visibility = Convert(modelShard.Visibility),
-            Collections = collections,
-            Relations = relations,
-            LoadManually = modelShard.LoadManually
-        };
+        return result;
     }
 
     private static Entity Convert(EntityDto entity)

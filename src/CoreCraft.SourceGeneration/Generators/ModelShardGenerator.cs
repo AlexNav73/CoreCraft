@@ -54,7 +54,7 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
-        code.GeneratedClassAttributes();
+        code.GeneratedClassAttributes(modelShard.Scheme.Debug);
         code.Class(visibility, "static", $"{modelShard.Name}ModelShardInfo",
             () =>
             {
@@ -67,16 +67,16 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
                 }
                 code.EmptyLine();
 
-                foreach (var relation in modelShard.Relations)
+                foreach (var name in modelShard.Relations.Select(x => x.Name))
                 {
-                    code.WriteLine($"public static readonly RelationInfo {relation.Name}Info = new(\"{modelShard.Name}\", \"{relation.Name}\");");
+                    code.WriteLine($"public static readonly RelationInfo {name}Info = new(\"{modelShard.Name}\", \"{name}\");");
                 }
             });
     }
 
     private void DefineModelShardClass(ModelShard modelShard)
     {
-        code.GeneratedClassAttributes();
+        code.GeneratedClassAttributes(modelShard.Scheme.Debug);
         code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", [$"I{modelShard.Name}ModelShard"], () =>
         {
             DefineCtor(modelShard);
@@ -262,7 +262,7 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
-        code.GeneratedClassAttributes();
+        code.GeneratedClassAttributes(modelShard.Scheme.Debug);
         code.Class(visibility, "sealed", $"{modelShard.Name}ChangesFrame",
             [
                 $"I{modelShard.Name}ChangesFrame", "IChangesFrameEx"
@@ -458,7 +458,7 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
-        code.GeneratedClassAttributes();
+        code.GeneratedClassAttributes(modelShard.Scheme.Debug);
         code.Class(visibility, "sealed", $"Mutable{modelShard.Name}ModelShard",
             [
                 $"IMutable{modelShard.Name}ModelShard",
