@@ -290,7 +290,7 @@ internal sealed class JsonRepository : IJsonRepository
         }
     }
 
-    public IEnumerable<IModelChanges> RestoreHistory(IEnumerable<IModelShard> modelShards)
+    public IEnumerable<IModelChanges> RestoreHistory(IEnumerable<IModelShard> shards)
     {
         var changes = new List<IModelChanges>();
 
@@ -298,7 +298,7 @@ internal sealed class JsonRepository : IJsonRepository
         {
             var modelChanges = new ChangesTracking.ModelChanges(timestamp);
 
-            foreach (var shard in modelShards.Cast<IFrameFactory>())
+            foreach (var shard in shards.Cast<IFrameFactory>())
             {
                 var frame = (IChangesFrameEx)shard.Create();
                 frame.Do(new LoadChangesFrameOperation(timestamp, this));

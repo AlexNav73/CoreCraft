@@ -5,7 +5,7 @@
 /// </summary>
 /// <typeparam name="TEntity">An entity type</typeparam>
 /// <typeparam name="TProperties">A type of a properties</typeparam>
-public interface IEntityChange<TEntity, TProperties> : IHasEntity<TEntity>
+public interface IEntityChange<out TEntity, TProperties> : IHasEntity<TEntity>
     where TEntity : Entity
     where TProperties : Properties
 {

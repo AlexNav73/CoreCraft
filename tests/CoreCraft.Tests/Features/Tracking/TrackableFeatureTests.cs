@@ -57,4 +57,24 @@ public class TrackableFeatureTests
         Assert.That(relation, Is.Not.Null);
         Assert.That(ReferenceEquals(relation, originalRelation), Is.True);
     }
+
+    [Test]
+    public void DoNotTreatDifferentModelShardsAsHavingTheSameTypeTest()
+    {
+        var modelChanges = new ModelChanges(0);
+        var feature = new TrackableFeature(modelChanges);
+        var frameFactory = new FakeModelShard();
+
+        var otherModelShard = A.Fake<IFrameFactory>();
+        var otherFrame = A.Fake<IChangesFrame>(c => c.Implements<IChangesFrameEx>());
+
+        A.CallTo(() => otherModelShard.Create()).Returns(otherFrame);
+
+        modelChanges.AddOrGet(otherFrame);
+
+        _ = feature.Decorate(otherModelShard, A.Fake<IMutableCollection<FirstEntity, FirstEntityProperties>>());
+        _ = feature.Decorate(frameFactory, (IMutableCollection<FirstEntity, FirstEntityProperties>)frameFactory.FirstCollection);
+
+        Assert.DoesNotThrow(() => feature.Decorate(frameFactory, (IMutableCollection<SecondEntity, SecondEntityProperties>)frameFactory.SecondCollection));
+    }
 }
