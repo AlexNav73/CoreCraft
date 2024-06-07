@@ -29,7 +29,7 @@ internal sealed class EntitiesGenerator(IndentedTextWriter code) : GeneratorComm
 
     private void DefineEntityType(Entity entity)
     {
-        code.GeneratedClassAttributes();
+        code.GeneratedClassAttributes(entity.Collection.Shard.Scheme.Debug);
         code.WriteLine($"public sealed record {entity.Name}(global::System.Guid Id) : Entity(Id)");
         code.Block(() =>
         {
@@ -42,7 +42,7 @@ internal sealed class EntitiesGenerator(IndentedTextWriter code) : GeneratorComm
 
     private void DefineEntityPropertiesClass(Entity entity)
     {
-        code.GeneratedClassAttributes();
+        code.GeneratedClassAttributes(entity.Collection.Shard.Scheme.Debug);
         code.WriteLine($"public sealed partial record {entity.PropertiesType} : Properties");
         code.Block(() =>
         {

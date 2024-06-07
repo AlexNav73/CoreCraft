@@ -1,6 +1,6 @@
 ﻿namespace CoreCraft.SourceGeneration.Serialization;
 
-internal sealed record ModelSchemeDto(IEnumerable<ModelShardDto> Shards);
+internal sealed record ModelSchemeDto(bool Debug, IEnumerable<ModelShardDto> Shards);
 
 internal sealed record ModelShardDto
 {

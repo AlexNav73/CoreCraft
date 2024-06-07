@@ -1,6 +1,9 @@
 ﻿namespace CoreCraft.SourceGeneration;
 
-internal sealed record ModelScheme(IEnumerable<ModelShard> Shards);
+internal sealed record ModelScheme(bool Debug)
+{
+    public IEnumerable<ModelShard> Shards { get; set; }
+}
 
 internal sealed record ModelShard
 {
@@ -10,12 +13,14 @@ internal sealed record ModelShard
 
     public Visibility Visibility { get; init; }
 
+    public ModelScheme Scheme { get; init; }
+
     public IEnumerable<Collection> Collections { get; init; }
 
     public IEnumerable<Relation> Relations { get; init; }
 }
 
-internal sealed record Collection(string Name, Entity Entity, bool LoadManually = false)
+internal sealed record Collection(string Name, Entity Entity, ModelShard Shard, bool LoadManually = false)
 {
     public string Type => $"Collection<{Entity.Name}, {Entity.PropertiesType}>";
 
@@ -24,16 +29,8 @@ internal sealed record Collection(string Name, Entity Entity, bool LoadManually 
     public string ChangesType => $"CollectionChangeSet<{Entity.Name}, {Entity.PropertiesType}>";
 }
 
-internal sealed record Relation
+internal sealed record Relation(string Name, Collection Parent, Collection Child, RelationType RelationType, ModelShard Shard)
 {
-    public string Name { get; init; }
-
-    public Collection Parent { get; init; }
-
-    public Collection Child { get; init; }
-
-    public RelationType RelationType { get; init; }
-
     public string Type => $"Relation<{Parent.Entity.Name}, {Child.Entity.Name}>";
 
     public string MutableType => $"Mutable{Type}";
@@ -71,6 +68,8 @@ internal enum RelationType
 
 internal sealed record Entity(string Name, IEnumerable<Property> Properties)
 {
+    public Collection Collection { get; set; }
+
     public string PropertiesType => $"{Name}Properties";
 }
 
