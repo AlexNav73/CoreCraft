@@ -92,4 +92,21 @@ public static class SubscriptionBuilderExtensions
     {
         return self.Bind(entity, new AnonymousObserver<IEntityChange<TEntity, TProperties>>(handler));
     }
+
+    /// <summary>
+    ///     Binds to an entity change events using a delegate
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity object</typeparam>
+    /// <typeparam name="TProperties">The type of the properties associated with the entity</typeparam>
+    /// <param name="self">A collection subscription builder</param>
+    /// <param name="binding">An entity to subscribe to</param>
+    /// <returns>A subscription</returns>
+    public static IDisposable Bind<TEntity, TProperties>(
+        this ICollectionSubscriptionBuilder<TEntity, TProperties> self,
+        IBinding<TEntity, TProperties> binding)
+          where TEntity : Entity
+          where TProperties : Properties
+    {
+        return self.Bind(binding.Entity, new AnonymousObserver<IEntityChange<TEntity, TProperties>>(binding.Update));
+    }
 }

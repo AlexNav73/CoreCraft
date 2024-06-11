@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CoreCraft;
-using CoreCraft.ChangesTracking;
+using CoreCraft.Generators.Bindings;
 using CoreCraft.Subscription.Extensions;
 using WpfDemoApp.Model;
 using WpfDemoApp.Model.Entities;
@@ -12,29 +12,22 @@ internal partial class ToDoItemViewModel : ObservableObject
     private readonly UndoRedoDomainModel _model;
 
     [ObservableProperty]
+    [property: Binding(nameof(ToDoItem), nameof(ToDoItemProperties.IsChecked))]
     private bool _isChecked;
     [ObservableProperty]
+    [property: Binding(nameof(ToDoItem), nameof(ToDoItemProperties.Name))]
     private string _name;
 
     public ToDoItemViewModel(ToDoItem item, ToDoItemProperties props, UndoRedoDomainModel model)
+        : this(item)
     {
         _model = model;
         _name = props.Name;
         _isChecked = props.IsChecked;
 
-        Entity = item;
-
         _model.For<IToDoChangesFrame>()
             .With(x => x.Items)
-            .Bind(item, OnItemChanged);
-    }
-
-    public ToDoItem Entity { get; }
-
-    public void OnItemChanged(IEntityChange<ToDoItem, ToDoItemProperties> value)
-    {
-        Name = value.NewData!.Name;
-        IsChecked = value.NewData!.IsChecked;
+            .Bind(this);
     }
 
     partial void OnNameChanged(string value)
