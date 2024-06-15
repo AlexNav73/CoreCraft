@@ -58,6 +58,28 @@ public class TrackableRelationTests
     }
 
     [Test]
+    public void TrackableRemoveParentFromRelationTest()
+    {
+        var first = new FirstEntity();
+        var second = new SecondEntity();
+        var third = new SecondEntity();
+
+        A.CallTo(() => _relation.Children(first)).Returns([second, third]);
+
+        _trackable!.Remove(first);
+
+        Assert.That(_changes!.HasChanges(), Is.True);
+        Assert.That(_changes.First().Action, Is.EqualTo(RelationAction.Unlinked));
+        Assert.That(_changes.First().Parent, Is.EqualTo(first));
+        Assert.That(_changes.First().Child, Is.EqualTo(second));
+
+        Assert.That(_changes!.HasChanges(), Is.True);
+        Assert.That(_changes.Last().Action, Is.EqualTo(RelationAction.Unlinked));
+        Assert.That(_changes.Last().Parent, Is.EqualTo(first));
+        Assert.That(_changes.Last().Child, Is.EqualTo(third));
+    }
+
+    [Test]
     public void TrackableRelationContainsParentTest()
     {
         var first = new FirstEntity();
