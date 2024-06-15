@@ -38,13 +38,6 @@ CoreCraft is distributed as NuGet packages.
 | CoreCraft.Storage.SQLite | [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Storage.SQLite?color=blue)](https://www.nuget.org/packages/CoreCraft.Storage.SQLite) |
 | CoreCraft.Storage.Json   |   [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/CoreCraft.Storage.Json?color=blue)](https://www.nuget.org/packages/CoreCraft.Storage.Json)   |
 
-## Installation
-
-```
-dotnet add package CoreCraft
-dotnet add package CoreCraft.Generators
-```
-
 ## Getting Started
 
 To start using CoreCraft, follow these steps:
@@ -94,9 +87,9 @@ Replace `path\to\your_schema.model.json` with the actual path to your schema fil
 var model = new DomainModel([new ToDoModelShard()]);
 ```
 
-### Full code example
+### Example
 
-Here's an full example code snippet that demonstrates how to use the `CoreCraft`:
+Here's a example code snippet that demonstrates how to use the `CoreCraft`:
 
 ```cs
 // Create an instance of the domain model (application state)
