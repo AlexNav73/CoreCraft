@@ -105,6 +105,26 @@ public class CoWRelationTests
     }
 
     [Test]
+    public void RemoveParentWhenNotCopiedTest()
+    {
+        var copy = A.Fake<IRelation<FirstEntity, SecondEntity>>(c => c
+            .Implements<IMutableRelation<FirstEntity, SecondEntity>>());
+        var inner = A.Fake<IRelation<FirstEntity, SecondEntity>>(c => c
+            .Implements<IMutableRelation<FirstEntity, SecondEntity>>());
+        var relation = new CoWRelation<FirstEntity, SecondEntity>(inner);
+
+        A.CallTo(() => inner.Copy()).Returns(copy);
+
+        relation.Remove(new());
+
+        A.CallTo(() => inner.Copy()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => ((IMutableRelation<FirstEntity, SecondEntity>)inner).Remove(A<FirstEntity>.Ignored))
+            .MustNotHaveHappened();
+        A.CallTo(() => ((IMutableRelation<FirstEntity, SecondEntity>)copy).Remove(A<FirstEntity>.Ignored))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Test]
     public void RemoveWhenCopiedTest()
     {
         var copy = A.Fake<IRelation<FirstEntity, SecondEntity>>(c => c
