@@ -16,7 +16,7 @@ namespace CoreCraft;
 /// </summary>
 public class DomainModel : IDomainModel
 {
-    private readonly View _view;
+    private readonly ModelView _modelView;
     private readonly IScheduler _scheduler;
     private readonly ModelSubscription _modelSubscription;
 
@@ -35,7 +35,7 @@ public class DomainModel : IDomainModel
     /// </summary>
     public DomainModel(IEnumerable<IModelShard> shards, IScheduler scheduler)
     {
-        _view = new View(shards);
+        _modelView = new ModelView(shards);
         _scheduler = scheduler;
         _modelSubscription = new ModelSubscription();
     }
@@ -43,7 +43,18 @@ public class DomainModel : IDomainModel
     /// <inheritdoc cref="IModel.Shard{T}"/>
     public T Shard<T>() where T : IModelShard
     {
-        return _view.UnsafeModel.Shard<T>();
+        return _modelView.UnsafeModel.Shard<T>();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TShard"></typeparam>
+    /// <returns></returns>
+    public ViewBuilder<TShard> View<TShard>()
+        where TShard : IModelShard
+    {
+        return new ViewBuilder<TShard>(this, _modelSubscription, _currentChanges);
     }
 
     /// <inheritdoc cref="IDomainModel.Subscribe(Action{Change{IModelChanges}})"/>
@@ -83,7 +94,7 @@ public class DomainModel : IDomainModel
     public async Task Run(Action<IMutableModel, CancellationToken> command, CancellationToken token = default)
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new Snapshot(_view.UnsafeModel, [new CoWFeature(), new TrackableFeature(changes)]);
+        var snapshot = new Snapshot(_modelView.UnsafeModel, [new CoWFeature(), new TrackableFeature(changes)]);
 
         try
         {
@@ -96,7 +107,7 @@ public class DomainModel : IDomainModel
 
         if (changes.HasChanges())
         {
-            var result = _view.ApplySnapshot(snapshot);
+            var result = _modelView.ApplySnapshot(snapshot);
             var eventArgs = CreateChangeObject(result, changes);
 
             NotifySubscriptions(eventArgs);
@@ -118,7 +129,7 @@ public class DomainModel : IDomainModel
         // change stored model shards (instead a reference to the model in the _view will be replaced with a reference
         // to the new model, leaving old references and model shards untouched). This is exact behavior we need, because
         // when Save is executed it should save state at that moment, but not when 'storage.Save' is executed.
-        var model = _view.UnsafeModel.Shards.ToArray(); // Do not remove ToArray from here!
+        var model = _modelView.UnsafeModel.Shards.ToArray(); // Do not remove ToArray from here!
 
         try
         {
@@ -143,7 +154,7 @@ public class DomainModel : IDomainModel
     public Task Load(IStorage storage, bool force = false, CancellationToken token = default)
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new LoadSnapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
+        var snapshot = new LoadSnapshot(_modelView.UnsafeModel, [new TrackableFeature(changes)]);
 
         return Load(snapshot, changes, () => storage.Load(snapshot, force), token);
     }
@@ -168,7 +179,7 @@ public class DomainModel : IDomainModel
         where T : IMutableModelShard
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
+        var snapshot = new Snapshot(_modelView.UnsafeModel, [new TrackableFeature(changes)]);
         var loader = new ModelLoader<T>(((IMutableModel)snapshot).Shard<T>(), force);
 
         return Load(snapshot, changes, () => storage.Load(loader), token);
@@ -194,7 +205,7 @@ public class DomainModel : IDomainModel
         where T : IMutableModelShard
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
+        var snapshot = new Snapshot(_modelView.UnsafeModel, new[] { new TrackableFeature(changes) });
         var loader = new ModelShardLoader<T>(((IMutableModel)snapshot).Shard<T>());
         var configuration = configure(loader);
 
@@ -213,7 +224,7 @@ public class DomainModel : IDomainModel
     ///         <item>Modifying the returned collection directly can lead to unexpected behavior and data inconsistencies.</item>
     ///     </list>
     /// </remarks>
-    internal IReadOnlyCollection<IModelShard> UnsafeGetModelShards() => _view.UnsafeModel.Shards.ToList();
+    internal IReadOnlyCollection<IModelShard> UnsafeGetModelShards() => _modelView.UnsafeModel.Shards.ToList();
 
     /// <summary>
     ///     Applies changes to the model
@@ -225,7 +236,7 @@ public class DomainModel : IDomainModel
     {
         if (changes.HasChanges())
         {
-            var snapshot = new Snapshot(_view.UnsafeModel, new[] { new CoWFeature() });
+            var snapshot = new Snapshot(_modelView.UnsafeModel, new[] { new CoWFeature() });
 
             try
             {
@@ -236,7 +247,7 @@ public class DomainModel : IDomainModel
                 throw new ApplyModelChangesException("Applying changes has failed", ex);
             }
 
-            var result = _view.ApplySnapshot(snapshot);
+            var result = _modelView.ApplySnapshot(snapshot);
             var changeObject = CreateChangeObject(result, changes);
 
             NotifySubscriptions(changeObject);
@@ -263,7 +274,7 @@ public class DomainModel : IDomainModel
 
         if (changes.HasChanges())
         {
-            var result = _view.ApplySnapshot(snapshot);
+            var result = _modelView.ApplySnapshot(snapshot);
             var changeObject = CreateChangeObject(result, changes);
 
             NotifySubscriptions(changeObject);
