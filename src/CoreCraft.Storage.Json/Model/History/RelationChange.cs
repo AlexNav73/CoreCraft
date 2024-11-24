@@ -1,4 +1,5 @@
-﻿using CoreCraft.ChangesTracking;
+﻿using System.Diagnostics.CodeAnalysis;
+using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 
 namespace CoreCraft.Storage.Json.Model.History;
@@ -11,6 +12,7 @@ internal sealed class RelationChange<TParent, TChild>
     {
     }
 
+    [SetsRequiredMembers]
     public RelationChange(IRelationChange<TParent, TChild> change)
     {
         Action = change.Action;
@@ -20,9 +22,9 @@ internal sealed class RelationChange<TParent, TChild>
 
     public RelationAction Action { get; set; }
 
-    public TParent Parent { get; set; }
+    public required TParent Parent { get; set; }
 
-    public TChild Child { get; set; }
+    public required TChild Child { get; set; }
 
     public static RelationChange<TParent, TChild> Create(TParent parent, TChild child)
     {

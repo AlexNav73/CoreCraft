@@ -154,7 +154,7 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Json)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.4.0", "0.4.0"))
+                .SetVersion(MakePreviewIfNeeded("0.4.1", "0.4.1"))
                 .SetDescription("Json storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "Json"));
 

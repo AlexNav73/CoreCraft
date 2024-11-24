@@ -8,7 +8,7 @@ internal sealed class CollectionChange<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties
 {
-    private CollectionChange()
+    public CollectionChange()
     {
     }
 
