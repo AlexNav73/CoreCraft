@@ -6,7 +6,7 @@ internal abstract class Subscription<T> : ISubscription<T>, IObservable<Change<T
 {
     private readonly HashSet<IObserver<Change<T>>> _handlers;
 
-    public Subscription()
+    protected Subscription()
     {
         _handlers = new HashSet<IObserver<Change<T>>>();
     }
