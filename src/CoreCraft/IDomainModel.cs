@@ -11,6 +11,16 @@ namespace CoreCraft;
 public interface IDomainModel : IModel
 {
     /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TShard"></typeparam>
+    /// <typeparam name="TFrame"></typeparam>
+    /// <returns></returns>
+    ViewBuilder<TShard, TFrame> View<TShard, TFrame>()
+        where TShard : IModelShard
+        where TFrame : class, IChangesFrame;
+
+    /// <summary>
     ///     Subscribes to the model changes notifications
     /// </summary>
     /// <param name="onModelChanges">A changes handler</param>
