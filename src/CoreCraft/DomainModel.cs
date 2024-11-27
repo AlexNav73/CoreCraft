@@ -46,15 +46,12 @@ public class DomainModel : IDomainModel
         return _modelView.UnsafeModel.Shard<T>();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <typeparam name="TShard"></typeparam>
-    /// <returns></returns>
-    public ViewBuilder<TShard> View<TShard>()
+    /// <inheritdoc cref="IDomainModel.View{TShard, TFrame}()"/>
+    public ViewBuilder<TShard, TFrame> View<TShard, TFrame>()
         where TShard : IModelShard
+        where TFrame : class, IChangesFrame
     {
-        return new ViewBuilder<TShard>(this, _modelSubscription, _currentChanges);
+        return new ViewBuilder<TShard, TFrame>(this);
     }
 
     /// <inheritdoc cref="IDomainModel.Subscribe(Action{Change{IModelChanges}})"/>
@@ -285,7 +282,8 @@ public class DomainModel : IDomainModel
     {
         _currentChanges = change;
 
-        _modelSubscription.Publish(change);
+        _modelSubscription.Publish(change, true);
+        _modelSubscription.Publish(change, false);
 
         _currentChanges = null;
     }

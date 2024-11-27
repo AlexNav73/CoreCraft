@@ -23,8 +23,13 @@ internal abstract class Subscription<T> : ISubscription<T>, IObservable<Change<T
         return new UnsubscribeOnDispose<IObserver<Change<T>>>(onModelChanges, s => _handlers.Remove(s));
     }
 
-    public virtual void Publish(Change<T> change)
+    public virtual void Publish(Change<T> change, bool forView)
     {
+        if (forView)
+        {
+            return;
+        }
+
         foreach (var handler in _handlers.ToArray())
         {
             handler.OnNext(change);
