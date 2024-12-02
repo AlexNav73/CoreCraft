@@ -16,7 +16,7 @@ public class ViewTests
         A.CallTo(() => ((IMutableState<IFakeModelShard>)mutableShard).AsReadOnly())
             .Returns(A.Fake<IFakeModelShard>());
 
-        var view = new View(new[] { originalShard });
+        var view = new ModelView(new[] { originalShard });
         var snapshot = new Snapshot(view.UnsafeModel, new[] { new CoWFeature() });
         var mutableShardSnapshot = ((IMutableModel)snapshot).Shard<IMutableFakeModelShard>();
         var model = snapshot.ToModel();
@@ -38,7 +38,7 @@ public class ViewTests
         A.CallTo(() => ((IMutableState<IFakeModelShard>)mutableShard).AsReadOnly())
             .Returns(A.Fake<IFakeModelShard>());
 
-        var view = new View(new[] { originalShard });
+        var view = new ModelView(new[] { originalShard });
         var snapshot = new Snapshot(view.UnsafeModel, new[] { new CoWFeature() });
         var mutableShardSnapshot = ((IMutableModel)snapshot).Shard<IMutableFakeModelShard>();
         var mutableShardSnapshot2 = ((IMutableModel)snapshot).Shard<IMutableFakeModelShard>();

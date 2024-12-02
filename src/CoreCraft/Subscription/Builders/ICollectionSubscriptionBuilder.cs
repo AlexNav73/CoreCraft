@@ -7,7 +7,7 @@ namespace CoreCraft.Subscription.Builders;
 /// </summary>
 /// <typeparam name="TEntity">The type of the entity object</typeparam>
 /// <typeparam name="TProperties">The type of the properties associated with the entity</typeparam>
-public interface ICollectionSubscriptionBuilder<TEntity, TProperties> : ISubscriptionBuilder<ICollectionChangeSet<TEntity, TProperties>>
+public interface ICollectionSubscriptionBuilder<TEntity, TProperties> : IObservable<Change<ICollectionChangeSet<TEntity, TProperties>>>
     where TEntity : Entity
     where TProperties : Properties
 {

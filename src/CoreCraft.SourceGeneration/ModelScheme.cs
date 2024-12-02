@@ -24,6 +24,8 @@ internal sealed record Collection(string Name, Entity Entity, ModelShard Shard, 
 {
     public string Type => $"Collection<{Entity.Name}, {Entity.PropertiesType}>";
 
+    public string ViewType => $"ICollectionView<{Entity.Name}, {Entity.PropertiesType}>";
+
     public string MutableType => $"Mutable{Type}";
 
     public string ChangesType => $"CollectionChangeSet<{Entity.Name}, {Entity.PropertiesType}>";
@@ -32,6 +34,8 @@ internal sealed record Collection(string Name, Entity Entity, ModelShard Shard, 
 internal sealed record Relation(string Name, Collection Parent, Collection Child, RelationType RelationType, ModelShard Shard)
 {
     public string Type => $"Relation<{Parent.Entity.Name}, {Child.Entity.Name}>";
+
+    public string ViewType => $"IRelationView<{Parent.Entity.Name}, {Child.Entity.Name}>";
 
     public string MutableType => $"Mutable{Type}";
 

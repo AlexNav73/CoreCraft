@@ -15,6 +15,7 @@ internal static class ModelGenerator
         code.WriteLine($"namespace {@namespace}");
         code.Block(() =>
         {
+            code.WriteLine("using CoreCraft;");
             code.WriteLine("using CoreCraft.Core;");
             code.WriteLine("using CoreCraft.ChangesTracking;");
             code.WriteLine("using CoreCraft.Persistence;");
