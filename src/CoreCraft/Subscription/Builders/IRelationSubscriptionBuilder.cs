@@ -7,7 +7,7 @@ namespace CoreCraft.Subscription.Builders;
 /// </summary>
 /// <typeparam name="TParent">A type of parent entity</typeparam>
 /// <typeparam name="TChild">A type of child entity</typeparam>
-public interface IRelationSubscriptionBuilder<TParent, TChild> : ISubscriptionBuilder<IRelationChangeSet<TParent, TChild>>
+public interface IRelationSubscriptionBuilder<TParent, TChild> : IObservable<Change<IRelationChangeSet<TParent, TChild>>>
     where TParent : Entity
     where TChild : Entity
 {

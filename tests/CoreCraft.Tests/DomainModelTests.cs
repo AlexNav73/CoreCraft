@@ -47,7 +47,7 @@ public class DomainModelTests
     public async Task SubscribeWhenHandlingChangesTest()
     {
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
         model.Subscribe(args =>
         {
             var subscriptionCalledImmidiately = false;
@@ -66,7 +66,7 @@ public class DomainModelTests
     public async Task SubscribeToModelShardWhenHandlingChangesTest()
     {
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
         model.For<IFakeChangesFrame>()
             .Subscribe(args =>
             {
@@ -86,7 +86,7 @@ public class DomainModelTests
     public void SubscribeSameDelegateTwiceTest()
     {
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
         Action<Change<IModelChanges>> handler = args => { };
         model.Subscribe(handler);
 
@@ -99,7 +99,7 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         var changesReceived = false;
         var model = new TestDomainModel(
-            new[] { new FakeModelShard() },
+            [new FakeModelShard()],
             storage,
             m => changesReceived = true);
 
@@ -114,7 +114,7 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         var changesReceived = false;
         var model = new TestDomainModel(
-            new[] { new FakeModelShard() },
+            [new FakeModelShard()],
             storage,
             m => changesReceived = true);
 
@@ -132,7 +132,7 @@ public class DomainModelTests
     public void RunThrowsWhenCommandExecutionFailsTest()
     {
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
 
         Assert.ThrowsAsync<CommandInvocationException>(() => model.Run<IMutableFakeModelShard>((shard, _) => throw new Exception("BOOM!")));
     }
@@ -141,7 +141,7 @@ public class DomainModelTests
     public void RunCommandThrowsWhenCommandExecutionFailsTest()
     {
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
         var command = A.Fake<ICommand>();
 
         A.CallTo(() => command.Execute(A<IMutableModel>.Ignored, A<CancellationToken>.Ignored))
@@ -156,7 +156,7 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .Throws<InvalidOperationException>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, new SyncScheduler());
+        var model = new UndoRedoDomainModel([new FakeModelShard()], new SyncScheduler());
 
         var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
 
@@ -167,7 +167,7 @@ public class DomainModelTests
     public void SaveChangesWithEmptyChangesCollectionShouldNotTriggerUpdateOnStorageTest()
     {
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
 
         var task = model.Update();
 
@@ -182,7 +182,7 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var historyStorage = A.Fake<IHistoryStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, new SyncScheduler());
+        var model = new UndoRedoDomainModel([new FakeModelShard()], new SyncScheduler());
 
         var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
 
@@ -207,7 +207,7 @@ public class DomainModelTests
     public void SaveModelDoMergingOfModelChangesIntoOneChangeTest()
     {
         var storage = A.Fake<IStorage>();
-        var model = new UndoRedoDomainModel(new[] { new FakeModelShard() }, new SyncScheduler());
+        var model = new UndoRedoDomainModel([new FakeModelShard()], new SyncScheduler());
 
         var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
         _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
@@ -227,7 +227,7 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         A.CallTo(() => storage.Save(A<IEnumerable<IModelShard>>.Ignored))
             .Throws<InvalidOperationException>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
 
         Assert.ThrowsAsync<ModelSaveException>(model.Save);
     }
@@ -236,7 +236,7 @@ public class DomainModelTests
     public void LoadThrowsWhenLoadExecutionFailsTest()
     {
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
         var notificationSent = false;
 
         model.Subscribe(c => notificationSent = true);
@@ -254,7 +254,7 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         var changesReceived = false;
         var model = new TestDomainModel(
-            new[] { new FakeModelShard() },
+            [new FakeModelShard()],
             storage,
             m => changesReceived = true);
 
@@ -371,7 +371,7 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var repo = A.Fake<IRepository>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
         var entityId = Guid.NewGuid();
 
         A.CallTo(() => repo.Load(A<IMutableCollection<FirstEntity, FirstEntityProperties>>.Ignored))
@@ -384,7 +384,7 @@ public class DomainModelTests
         SetUpStorageLoadCollectionOfModelShards(storage, repo);
         SetUpStorageLoadLazyLoader(storage, repo);
 
-        await model.Load();
+        await model.Load(true);
 
         Assert.DoesNotThrowAsync(() => model.Load<IMutableFakeModelShard>(x => x.Collection(y => y.FirstCollection)));
     }
@@ -394,7 +394,7 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var repo = A.Fake<IRepository>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
         var entityId1 = new FirstEntity();
         var entityId2 = new SecondEntity();
 
@@ -420,7 +420,7 @@ public class DomainModelTests
         SetUpStorageLoadCollectionOfModelShards(storage, repo);
         SetUpStorageLoadLazyLoader(storage, repo);
 
-        await model.Load();
+        await model.Load(true);
 
         Assert.DoesNotThrowAsync(() => model.Load<IMutableFakeModelShard>(x => x
             .Relation(y => y.OneToOneRelation, y => y.FirstCollection, y => y.SecondCollection)));
@@ -430,7 +430,7 @@ public class DomainModelTests
     public void ApplyThrowsWhenApplyExecutionFailsTest()
     {
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
         var modelChanges = A.Fake<IModelChanges>();
         var notificationSent = false;
 
@@ -447,7 +447,7 @@ public class DomainModelTests
     public async Task ChangesToTheOneCollectionShouldNotCauseCopyingOfOtherCollections()
     {
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
         var originalShard = model.Shard<IFakeModelShard>();
 
         await model.Run<IMutableFakeModelShard>((shard, _) =>
@@ -466,7 +466,7 @@ public class DomainModelTests
     public async Task ChangesToTheOneRelationShouldNotCauseCopyingOfOtherRelations()
     {
         var storage = A.Fake<IStorage>();
-        var model = new TestDomainModel(new[] { new FakeModelShard() }, storage);
+        var model = new TestDomainModel([new FakeModelShard()], storage);
         var originalShard = model.Shard<IFakeModelShard>();
 
         await model.Run<IMutableFakeModelShard>((shard, _) =>

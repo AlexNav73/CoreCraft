@@ -581,7 +581,7 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
 
         void ImplementCtor(ModelShard modelShard)
         {
-            code.WriteLine($"public {modelShard.Name}ModelShardView(CoreCraft.IDomainModel model)");
+            code.WriteLine($"public {modelShard.Name}ModelShardView(IDomainModel model)");
             code.Block(() =>
             {
                 code.WriteLine($"var builder = model.View<I{modelShard.Name}ModelShard, I{modelShard.Name}ChangesFrame>();");

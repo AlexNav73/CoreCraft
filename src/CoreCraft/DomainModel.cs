@@ -202,7 +202,7 @@ public class DomainModel : IDomainModel
         where T : IMutableModelShard
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new Snapshot(_modelView.UnsafeModel, new[] { new TrackableFeature(changes) });
+        var snapshot = new Snapshot(_modelView.UnsafeModel, [new TrackableFeature(changes)]);
         var loader = new ModelShardLoader<T>(((IMutableModel)snapshot).Shard<T>());
         var configuration = configure(loader);
 
@@ -233,7 +233,7 @@ public class DomainModel : IDomainModel
     {
         if (changes.HasChanges())
         {
-            var snapshot = new Snapshot(_modelView.UnsafeModel, new[] { new CoWFeature() });
+            var snapshot = new Snapshot(_modelView.UnsafeModel, [new CoWFeature()]);
 
             try
             {

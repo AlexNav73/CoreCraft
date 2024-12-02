@@ -12,6 +12,7 @@
 
 namespace compilation.LoadManually
 {
+    using CoreCraft;
     using CoreCraft.Core;
     using CoreCraft.ChangesTracking;
     using CoreCraft.Persistence;
@@ -288,6 +289,64 @@ namespace compilation.LoadManually
 
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
+    internal sealed partial class FakeModelShardView : global::System.IDisposable
+    {
+        private bool _disposed = false;
+
+        public FakeModelShardView(IDomainModel model)
+        {
+            var builder = model.View<IFakeModelShard, IFakeChangesFrame>();
+
+            FirstCollection = builder.Create(static shard => shard.FirstCollection, static frame => frame.FirstCollection);
+            SecondCollection = builder.Create(static shard => shard.SecondCollection, static frame => frame.SecondCollection);
+            ThirdCollection = builder.Create(static shard => shard.ThirdCollection, static frame => frame.ThirdCollection);
+
+            OneToOneRelation = builder.Create(static shard => shard.OneToOneRelation, static frame => frame.OneToOneRelation);
+        }
+
+        public ICollectionView<FirstEntity, FirstEntityProperties> FirstCollection { get; private set; }
+        public ICollectionView<SecondEntity, SecondEntityProperties> SecondCollection { get; private set; }
+        public ICollectionView<ThirdEntity, ThirdEntityProperties> ThirdCollection { get; private set; }
+
+        public IRelationView<FirstEntity, SecondEntity> OneToOneRelation { get; private set; }
+
+        public void Save(IRepository repository)
+        {
+            throw new global::System.InvalidOperationException("Cannot save model shard's view. Call Save on the real model shard.");
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            global::System.GC.SuppressFinalize(this);
+        }
+
+        ~FakeModelShardView()
+        {
+            Dispose(false);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            FirstCollection.Dispose();
+            SecondCollection.Dispose();
+            ThirdCollection.Dispose();
+
+            OneToOneRelation.Dispose();
+
+            _disposed = true;
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public interface ILazyShardModelShard : IModelShard
     {
 
@@ -455,6 +514,52 @@ namespace compilation.LoadManually
         public void Save(IRepository repository)
         {
 
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
+    internal sealed partial class LazyShardModelShardView : global::System.IDisposable
+    {
+        private bool _disposed = false;
+
+        public LazyShardModelShardView(IDomainModel model)
+        {
+            var builder = model.View<ILazyShardModelShard, ILazyShardChangesFrame>();
+
+
+        }
+
+
+
+        public void Save(IRepository repository)
+        {
+            throw new global::System.InvalidOperationException("Cannot save model shard's view. Call Save on the real model shard.");
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            global::System.GC.SuppressFinalize(this);
+        }
+
+        ~LazyShardModelShardView()
+        {
+            Dispose(false);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+
+
+            _disposed = true;
         }
     }
 
