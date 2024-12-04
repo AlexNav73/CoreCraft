@@ -79,6 +79,7 @@ public sealed class ViewBuilder<TShard, TFrame>
     }
 }
 
+[ExcludeFromCodeCoverage]
 internal abstract class DataView<TFrame> : DisposableBase, IObserver<Change<TFrame>>
     where TFrame : class, IChangesFrame
 {

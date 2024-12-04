@@ -99,7 +99,7 @@ internal partial class Build : NukeBuild
                 .AddProperty("ExcludeByAttribute", "\\\"Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute\\\"")
                 .AddProperty("Exclude", $"\\\"[{Solution.Tests.CoreCraft_Tests_Infrastructure.Name}]*,[{Solution.CoreCraft.Name}]System.*\\\"")
                 .AddProperty("MergeWith", CoverageDirectory / "coverage.json")
-                .SetProcessArgumentConfigurator(c => c.Add("-m:1")));
+                .SetProcessAdditionalArguments("-m:1"));
         });
 
     Target Perf => _ => _
