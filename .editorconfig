@@ -156,3 +156,13 @@ csharp_style_allow_embedded_statements_on_same_line_experimental = true:silent
 dotnet_diagnostic.IDE0130.severity = warning
 dotnet_diagnostic.IDE0161.severity = warning
 csharp_style_prefer_primary_constructors = true:suggestion
+
+# Verify
+[*.{received,verified}.{cs,txt}]
+charset = "utf-8-bom"
+end_of_line = lf
+indent_size = unset
+indent_style = unset
+insert_final_newline = false
+tab_width = unset
+trim_trailing_whitespace = false
