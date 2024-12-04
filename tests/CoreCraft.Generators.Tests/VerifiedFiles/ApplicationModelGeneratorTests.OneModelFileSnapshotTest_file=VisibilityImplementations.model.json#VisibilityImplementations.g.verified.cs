@@ -15,6 +15,7 @@ namespace compilation.VisibilityImplementations
 {
     using CoreCraft;
     using CoreCraft.Core;
+    using CoreCraft.Views;
     using CoreCraft.ChangesTracking;
     using CoreCraft.Persistence;
     using CoreCraft.Persistence.History;
@@ -508,3 +509,4 @@ namespace compilation.VisibilityImplementations.Entities
 
 
 }
+

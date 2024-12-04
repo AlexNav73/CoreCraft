@@ -2,6 +2,7 @@
 using CoreCraft.Commands;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Builders;
+using CoreCraft.Views;
 
 namespace CoreCraft;
 

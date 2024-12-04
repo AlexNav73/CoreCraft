@@ -8,6 +8,7 @@ using CoreCraft.Persistence.Lazy;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Builders;
+using CoreCraft.Views;
 
 namespace CoreCraft;
 

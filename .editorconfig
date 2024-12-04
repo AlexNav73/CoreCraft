@@ -159,7 +159,7 @@ csharp_style_prefer_primary_constructors = true:suggestion
 
 # Verify
 [*.{received,verified}.{cs,txt}]
-charset = "utf-8-bom"
+charset = "utf-8"
 end_of_line = lf
 indent_size = unset
 indent_style = unset

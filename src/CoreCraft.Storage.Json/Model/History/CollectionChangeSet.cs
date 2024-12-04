@@ -9,6 +9,7 @@ internal sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionCha
     public CollectionChangeSet()
     {
         Changes = new List<CollectionChange<TEntity, TProperties>>();
+        Name = string.Empty;
     }
 
     public CollectionChangeSet(string name) : this()

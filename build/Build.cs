@@ -133,28 +133,28 @@ internal partial class Build : NukeBuild
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.7.0", "0.8.2"))
+                .SetVersion(MakePreviewIfNeeded("0.7.0", "0.8.3"))
                 .SetDescription("A core library to build cross-platform and highly customizable domain models")
                 .AddPackageTags("Model", "Domain"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Generators)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.7.0", "0.8.1"))
+                .SetVersion(MakePreviewIfNeeded("0.7.0", "0.8.2"))
                 .SetDescription("Roslyn Source Generators for generating domain models using 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Sqlite)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.7.0", "0.7.0"))
+                .SetVersion(MakePreviewIfNeeded("0.7.0", "0.8.0"))
                 .SetDescription("SQLite storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "SQLite"));
 
             DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Json)
                 .Apply(PackSettingsBase)
-                .SetVersion(MakePreviewIfNeeded("0.4.1", "0.4.1"))
+                .SetVersion(MakePreviewIfNeeded("0.4.1", "0.5.0"))
                 .SetDescription("Json storage implementation for 'CoreCraft' library")
                 .AddPackageTags("Model", "Domain", "Json"));
 
@@ -166,7 +166,7 @@ internal partial class Build : NukeBuild
                 .SetNoRestore(SucceededTargets.Contains(Restore))
                 .SetNoBuild(SucceededTargets.Contains(Compile))
                 .AddAuthors("Aliaksandr Navitski")
-                .SetCopyright("Copyright (c) Aliaksandr Navitski 2023.")
+                .SetCopyright("Copyright (c) Aliaksandr Navitski 2024.")
                 .SetPackageProjectUrl(GitRepository.HttpsUrl)
                 .SetRepositoryUrl(GitRepository.HttpsUrl)
                 .SetOutputDirectory(PackagesDirectory)
