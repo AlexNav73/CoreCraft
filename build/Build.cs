@@ -165,7 +165,7 @@ internal partial class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .SetNoRestore(SucceededTargets.Contains(Restore))
                 .SetNoBuild(SucceededTargets.Contains(Compile))
-                .AddAuthors("Aliaksandr Navitski")
+                .SetAuthors("Aliaksandr Navitski")
                 .SetCopyright("Copyright (c) Aliaksandr Navitski 2024.")
                 .SetPackageProjectUrl(GitRepository.HttpsUrl)
                 .SetRepositoryUrl(GitRepository.HttpsUrl)
