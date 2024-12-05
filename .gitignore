@@ -22,3 +22,8 @@ bld/
 [Ll]og/
 
 TestResult.xml
+
+# Verify
+*.received.*
+*.received/
+

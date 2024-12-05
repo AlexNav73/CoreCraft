@@ -2,6 +2,7 @@
 using CoreCraft.Commands;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Builders;
+using CoreCraft.Views;
 
 namespace CoreCraft;
 
@@ -10,6 +11,16 @@ namespace CoreCraft;
 /// </summary>
 public interface IDomainModel : IModel
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TShard"></typeparam>
+    /// <typeparam name="TFrame"></typeparam>
+    /// <returns></returns>
+    ViewBuilder<TShard, TFrame> View<TShard, TFrame>()
+        where TShard : IModelShard
+        where TFrame : class, IChangesFrame;
+
     /// <summary>
     ///     Subscribes to the model changes notifications
     /// </summary>

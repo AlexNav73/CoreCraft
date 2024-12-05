@@ -1,16 +1,17 @@
 ﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Views;
 
 namespace CoreCraft.Subscription.Builders;
 
-internal sealed class RelationSubscriptionBuilder<T, TParent, TChild> : IRelationSubscriptionBuilder<TParent, TChild>
-    where T : class, IChangesFrame
+internal sealed class RelationSubscriptionBuilder<TFrame, TParent, TChild> : IRelationSubscriptionBuilder<TParent, TChild>
+    where TFrame : class, IChangesFrame
     where TParent : Entity
     where TChild : Entity
 {
-    private readonly RelationSubscription<T, TParent, TChild> _root;
-    private readonly Change<T>? _changes;
+    private readonly RelationSubscription<TFrame, TParent, TChild> _root;
+    private readonly Change<TFrame>? _changes;
 
-    public RelationSubscriptionBuilder(RelationSubscription<T, TParent, TChild> root, Change<T>? changes)
+    public RelationSubscriptionBuilder(RelationSubscription<TFrame, TParent, TChild> root, Change<TFrame>? changes)
     {
         _root = root;
         _changes = changes;
@@ -30,5 +31,18 @@ internal sealed class RelationSubscriptionBuilder<T, TParent, TChild> : IRelatio
         }
 
         return subscription;
+    }
+
+    internal TView SubscribeView<TView>(TView newView)
+        where TView : DataView<TFrame>
+    {
+        var view = _root.SubscribeView(newView);
+
+        if (_changes is not null)
+        {
+            view.OnNext(_changes);
+        }
+
+        return view;
     }
 }

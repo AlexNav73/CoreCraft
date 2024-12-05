@@ -7,7 +7,7 @@ namespace CoreCraft.Subscription.Builders;
 ///     Subscription builder which provides a way to subscribe to model shard changes
 /// </summary>
 /// <typeparam name="T">A changes frame of the given model shard</typeparam>
-public interface IModelShardSubscriptionBuilder<T> : ISubscriptionBuilder<T>
+public interface IModelShardSubscriptionBuilder<T> : IObservable<Change<T>>
     where T : class, IChangesFrame
 {
     /// <summary>

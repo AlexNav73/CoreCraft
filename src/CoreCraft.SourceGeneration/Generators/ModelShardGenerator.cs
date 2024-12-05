@@ -26,6 +26,8 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
             code.EmptyLine();
             DefineMutableModelShardClass(modelShard);
             code.EmptyLine();
+            DefineModelShardViewClass(modelShard);
+            code.EmptyLine();
         }
     }
 
@@ -552,6 +554,113 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
                 {
                     code.WriteLine($"{relation.Name}.Save(repository);");
                 }
+            });
+        }
+    }
+
+    private void DefineModelShardViewClass(ModelShard modelShard)
+    {
+        var visibility = GetInternalTypeVisibility(modelShard);
+
+        code.GeneratedClassAttributes(modelShard.Scheme.Debug);
+        code.Class(visibility, "sealed partial", $"{modelShard.Name}ModelShardView",
+            [
+                "global::System.IDisposable"
+            ],
+            () =>
+            {
+                code.WriteLine("private bool _disposed = false;");
+                code.EmptyLine();
+                
+                ImplementCtor(modelShard);
+                code.EmptyLine();
+                ImplementModelShardInterface(modelShard);
+                code.EmptyLine();
+                ImplementDisposeInterface(modelShard);
+            });
+
+        void ImplementCtor(ModelShard modelShard)
+        {
+            code.WriteLine($"public {modelShard.Name}ModelShardView(IDomainModel model)");
+            code.Block(() =>
+            {
+                code.WriteLine($"var builder = model.View<I{modelShard.Name}ModelShard, I{modelShard.Name}ChangesFrame>();");
+                code.EmptyLine();
+
+                foreach (var collection in modelShard.Collections)
+                {
+                    code.WriteLine($"{collection.Name} = builder.Create(static shard => shard.{collection.Name}, static frame => frame.{collection.Name});");
+                }
+                code.EmptyLine();
+
+                foreach (var relation in modelShard.Relations)
+                {
+                    code.WriteLine($"{relation.Name} = builder.Create(static shard => shard.{relation.Name}, static frame => frame.{relation.Name});");
+                }
+            });
+        }
+
+        void ImplementDisposeInterface(ModelShard modelShard)
+        {
+            code.WriteLine("public void Dispose()");
+            code.Block(() =>
+            {
+                code.WriteLine("Dispose(true);");
+                code.WriteLine("global::System.GC.SuppressFinalize(this);");
+            });
+            code.EmptyLine();
+
+            code.WriteLine($"~{modelShard.Name}ModelShardView()");
+            code.Block(() =>
+            {
+                code.WriteLine("Dispose(false);");
+            });
+            code.EmptyLine();
+
+            code.WriteLine("private void Dispose(bool disposing)");
+            code.Block(() =>
+            {
+                code.WriteLine("if (_disposed)");
+                code.Block(() =>
+                {
+                    code.WriteLine("return;");
+                });
+                code.EmptyLine();
+
+                foreach (var collection in modelShard.Collections)
+                {
+                    code.WriteLine($"{collection.Name}.Dispose();");
+                }
+                code.EmptyLine();
+
+                foreach (var relation in modelShard.Relations)
+                {
+                    code.WriteLine($"{relation.Name}.Dispose();");
+                }
+                code.EmptyLine();
+
+                code.WriteLine("_disposed = true;");
+            });
+        }
+
+        void ImplementModelShardInterface(ModelShard modelShard)
+        {
+            foreach (var collection in modelShard.Collections)
+            {
+                code.WriteLine($"public {collection.ViewType} {collection.Name} {{ get; private set; }}");
+            }
+            code.EmptyLine();
+
+            foreach (var relation in modelShard.Relations)
+            {
+                code.WriteLine($"public {relation.ViewType} {relation.Name} {{ get; private set; }}");
+            }
+            code.EmptyLine();
+
+            code.WriteLine("public void Save(IRepository repository)");
+            code.Block(() =>
+            {
+                code.WriteLine("throw new global::System.InvalidOperationException(\"Cannot save model shard's view. Call Save on the real model shard.\");");
             });
         }
     }

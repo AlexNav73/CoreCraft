@@ -1,10 +1,10 @@
 ﻿namespace CoreCraft.Core;
 
-internal sealed class View
+internal sealed class ModelView
 {
     private volatile Model _model;
 
-    public View(IEnumerable<IModelShard> shards)
+    public ModelView(IEnumerable<IModelShard> shards)
     {
         _model = new Model(shards);
     }

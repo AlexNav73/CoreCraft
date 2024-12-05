@@ -9,6 +9,7 @@ internal sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet
     public RelationChangeSet()
     {
         Changes = new List<RelationChange<TParent, TChild>>();
+        Name = string.Empty;
     }
 
     public RelationChangeSet(string name) : this()
