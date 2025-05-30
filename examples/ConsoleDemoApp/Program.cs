@@ -27,7 +27,7 @@ static class Program
 
         var storage = new SqliteStorage(Path, [], Console.WriteLine);
         var historyStorage = new JsonStorage(History, new() { Formatting = Newtonsoft.Json.Formatting.Indented });
-        var model = new UndoRedoDomainModel(new[] { new ExampleModelShard() }, new SyncScheduler());
+        var model = new UndoRedoDomainModel([new ExampleModelShard()], new SyncScheduler());
 
         using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
@@ -70,7 +70,7 @@ static class Program
         await model.Save(storage);
         await model.History.Save(historyStorage);
 
-        model = new UndoRedoDomainModel(new[] { new ExampleModelShard() }, new SyncScheduler());
+        model = new UndoRedoDomainModel([new ExampleModelShard()], new SyncScheduler());
         using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
             Console.WriteLine("======================== Loading ========================");

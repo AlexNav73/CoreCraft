@@ -15,9 +15,9 @@ using WpfDemoApp.Model.Entities;
 
 namespace WpfDemoApp.ViewModels.Pages;
 
-internal sealed partial class ItemsPageViewModel : ObservableObject, IHasEntity<ToDoList>
+internal sealed partial class ItemsPageViewModel : DisposableObservableObject, IHasEntity<ToDoList>
 {
-    private readonly IDisposable _subscription; // Dispose to unsubscribe
+    private readonly IDisposable _subscription;
     private readonly UndoRedoDomainModel _model;
 
     private readonly ObservableCollection<ToDoItemViewModel> _items;
@@ -81,5 +81,10 @@ internal sealed partial class ItemsPageViewModel : ObservableObject, IHasEntity<
         }
 
         Items.Refresh();
+    }
+
+    protected override void DisposeManagedObjects()
+    {
+        _subscription?.Dispose();
     }
 }

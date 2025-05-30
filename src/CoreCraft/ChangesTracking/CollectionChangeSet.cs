@@ -11,7 +11,7 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
     where TEntity : Entity
     where TProperties : Properties
 {
-    private readonly IList<ICollectionChange<TEntity, TProperties>> _changes;
+    private readonly List<ICollectionChange<TEntity, TProperties>> _changes;
 
     /// <summary>
     ///     Ctor
@@ -21,7 +21,7 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
     {
     }
 
-    private CollectionChangeSet(CollectionInfo info, IList<ICollectionChange<TEntity, TProperties>> changes)
+    private CollectionChangeSet(CollectionInfo info, List<ICollectionChange<TEntity, TProperties>> changes)
     {
         _changes = changes;
 
@@ -30,6 +30,9 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
 
     /// <inheritdoc />
     public CollectionInfo Info { get; }
+
+    /// <inheritdoc />
+    public int Count => _changes.Count;
 
     /// <inheritdoc />
     public void Add(CollectionAction action, TEntity entity, TProperties? oldData, TProperties? newData)
@@ -83,7 +86,7 @@ public sealed class CollectionChangeSet<TEntity, TProperties> : ICollectionChang
     /// <inheritdoc />
     public ICollectionChangeSet<TEntity, TProperties> Invert()
     {
-        var inverted = _changes.Reverse().Select(x => x.Invert()).ToList();
+        var inverted = _changes.AsEnumerable().Reverse().Select(x => x.Invert()).ToList();
         return new CollectionChangeSet<TEntity, TProperties>(Info, inverted);
     }
 

@@ -24,11 +24,7 @@ internal sealed class RelationSubscription<TChangesFrame, TParent, TChild> :
     public TView SubscribeView<TView>(TView view)
         where TView : DataView<TChangesFrame>
     {
-        if (!_views.Add(view))
-        {
-            view = (TView)_views.Single(x => x.Equals(view));
-        }
-        else
+        if (_views.Add(view))
         {
             view.Subscription = new UnsubscribeOnDispose<DataView<TChangesFrame>>(view, s => _views.Remove(s));
         }

@@ -15,7 +15,7 @@ namespace CoreCraft.ChangesTracking;
 ///     When needed, change sets can be applied to the collection or relation to update it
 ///     to the newer version
 /// </remarks>
-public interface IRelationChangeSet<TParent, TChild> : IHaveInfo<RelationInfo>, IEnumerable<IRelationChange<TParent, TChild>>
+public interface IRelationChangeSet<TParent, TChild> : IHaveInfo<RelationInfo>, IReadOnlyCollection<IRelationChange<TParent, TChild>>
     where TParent : Entity
     where TChild : Entity
 {

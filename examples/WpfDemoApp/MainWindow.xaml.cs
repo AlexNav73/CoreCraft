@@ -30,6 +30,7 @@ public partial class MainWindow : Window
         builder.RegisterType<ToDoModelShard>().As<IModelShard>();
         builder.Register(c => new UndoRedoDomainModel(
             c.Resolve<IEnumerable<IModelShard>>()));
+        builder.Register(c => new ToDoModelShardView(c.Resolve<UndoRedoDomainModel>()));
         builder.RegisterType<MainWindowViewModel>().AsSelf();
 
         var container = builder.Build();
