@@ -11,6 +11,8 @@ internal sealed record ModelShard
 
     public bool LoadManually { get; init; }
 
+    public string[] Features { get; init; } = [];
+
     public Visibility Visibility { get; init; }
 
     public ModelScheme Scheme { get; init; }

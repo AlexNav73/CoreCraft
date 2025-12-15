@@ -756,9 +756,9 @@ public class JsonRepositoryTests
         };
         var repository = new JsonRepository(model);
         var frame = A.Fake<IChangesFrame>(c => c.Implements<IChangesFrameEx>());
-        var modelShard = A.Fake<IModelShard>(c => c.Implements<IFrameFactory>());
+        var modelShard = A.Fake<IModelShard>(c => c.Implements<IReadOnlyState<IMutableModelShard>>());
 
-        A.CallTo(() => ((IFrameFactory)modelShard).Create()).Returns(frame);
+        A.CallTo(() => ((IReadOnlyState<IMutableModelShard>)modelShard).Create()).Returns(frame);
         A.CallTo(() => frame.HasChanges()).Returns(true);
 
         var changes = repository.RestoreHistory([modelShard]).ToList();

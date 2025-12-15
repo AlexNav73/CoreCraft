@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.ChangesTracking;
 using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
 
@@ -144,6 +145,37 @@ public sealed class Collection<TEntity, TProperties> :
             new Dictionary<TEntity, TProperties>(_relation),
             _entityFactory,
             _propsFactory);
+    }
+
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.ApplyAsync(ICollectionChangeSet{TEntity, TProperties}, CancellationToken)" />
+    public Task ApplyAsync(ICollectionChangeSet<TEntity, TProperties> changeSet, CancellationToken token = default)
+    {
+        foreach (var change in changeSet)
+        {
+            switch (change.Action)
+            {
+                case CollectionAction.Add:
+                    // Add expects NewData to be non-null
+                    Add(change.Entity, change.NewData!);
+                    break;
+                case CollectionAction.Remove:
+                    Remove(change.Entity);
+                    break;
+                case CollectionAction.Modify:
+                    Modify(change.Entity, d =>
+                    {
+                        var bag = new PropertiesBag();
+                        change.NewData!.WriteTo(bag);
+
+                        return (TProperties)d.ReadFrom(bag);
+                    });
+                    break;
+                default:
+                    throw new NotSupportedException($"An action [{change.Action}] is not supported.");
+            }
+        }
+
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs()" />

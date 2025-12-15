@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using CoreCraft.ChangesTracking;
 
 namespace CoreCraft.Persistence;
 
@@ -6,10 +7,10 @@ internal sealed class LoadSnapshot : ISnapshot, IEnumerable<IMutableModelShard>
 {
     private readonly IReadOnlyCollection<IMutableModelShard> _mutableModelShards;
 
-    public LoadSnapshot(Model model, IEnumerable<IFeature> features)
+    public LoadSnapshot(Model model, IMutableModelChanges changes)
     {
         _mutableModelShards = model.Shards
-            .Select(s => ((IReadOnlyState<IMutableModelShard>)s).AsMutable(features))
+            .Select(s => ((IReadOnlyState<IMutableModelShard>)s).AsLoadModel(changes))
             .ToArray();
     }
 

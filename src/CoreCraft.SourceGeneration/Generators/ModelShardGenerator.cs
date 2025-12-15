@@ -2,62 +2,67 @@
 
 namespace CoreCraft.SourceGeneration.Generators;
 
-internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCommon
+internal class ModelShardGenerator(IndentedTextWriter code) : GeneratorCommon
 {
+    protected readonly IndentedTextWriter Code = code;
+
     public void Generate(IEnumerable<ModelShard> shards)
     {
-        foreach (var modelShard in shards)
+        foreach (var modelShard in shards.Where(ContainsFeature))
         {
             DefineModelShardInterface(modelShard, false);
-            code.EmptyLine();
+            Code.EmptyLine();
             DefineModelShardInterface(modelShard, true);
-            code.EmptyLine();
+            Code.EmptyLine();
             DefineModelShardInfoClass(modelShard);
-            code.EmptyLine();
+            Code.EmptyLine();
             DefineModelShardClass(modelShard);
-            code.EmptyLine();
+            Code.EmptyLine();
             DefineModelShardClassAsReadOnlyState(modelShard);
-            code.EmptyLine();
-            DefineModelShardClassAsIFrameFactory(modelShard);
-            code.EmptyLine();
+            Code.EmptyLine();
             DefineChangesFrameInterface(modelShard);
-            code.EmptyLine();
+            Code.EmptyLine();
             DefineChangesFrameClass(modelShard);
-            code.EmptyLine();
+            Code.EmptyLine();
             DefineMutableModelShardClass(modelShard);
-            code.EmptyLine();
+            Code.EmptyLine();
             DefineModelShardViewClass(modelShard);
-            code.EmptyLine();
+            Code.EmptyLine();
         }
     }
 
-    private void DefineModelShardInterface(ModelShard modelShard, bool isMutable)
+    protected virtual bool ContainsFeature(ModelShard modelShard)
+    {
+        return !modelShard.Features.Any();
+    }
+
+    protected virtual void DefineModelShardInterface(ModelShard modelShard, bool isMutable)
     {
         var mutability = isMutable ? "Mutable" : string.Empty;
 
-        code.GeneratedInterfaceAttributes();
-        code.Interface($"I{mutability}{modelShard.Name}ModelShard", [isMutable ? "IMutableModelShard" : "IModelShard"], () =>
+        Code.GeneratedInterfaceAttributes();
+        Code.Interface($"I{mutability}{modelShard.Name}ModelShard", [isMutable ? "IMutableModelShard" : "IModelShard"], () =>
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine(DefineProperty($"I{mutability}{collection.Type}", collection.Name, "get;"));
+                Code.WriteLine(DefineProperty($"I{mutability}{collection.Type}", collection.Name, "get;"));
             }
 
-            code.EmptyLine();
+            Code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine(DefineProperty($"I{mutability}{relation.Type}", relation.Name, "get;"));
+                Code.WriteLine(DefineProperty($"I{mutability}{relation.Type}", relation.Name, "get;"));
             }
         });
     }
 
-    private void DefineModelShardInfoClass(ModelShard modelShard)
+    protected virtual void DefineModelShardInfoClass(ModelShard modelShard)
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
-        code.GeneratedClassAttributes(modelShard.Scheme.Debug);
-        code.Class(visibility, "static", $"{modelShard.Name}ModelShardInfo",
+        Code.GeneratedClassAttributes(modelShard.Scheme.Debug);
+        Code.Class(visibility, "static", $"{modelShard.Name}ModelShardInfo",
             () =>
             {
                 foreach (var collection in modelShard.Collections)
@@ -65,56 +70,56 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
                     var properties = collection.Entity.Properties.Select(x => $"new(\"{x.Name}\", typeof({x.Type}), {x.IsNullable.ToString().ToLower()})");
                     var array = string.Join(", ", properties);
 
-                    code.WriteLine($"public static readonly CollectionInfo {collection.Name}Info = new(\"{modelShard.Name}\", \"{collection.Name}\", new PropertyInfo[] {{ {array} }});");
+                    Code.WriteLine($"public static readonly CollectionInfo {collection.Name}Info = new(\"{modelShard.Name}\", \"{collection.Name}\", new PropertyInfo[] {{ {array} }});");
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var name in modelShard.Relations.Select(x => x.Name))
                 {
-                    code.WriteLine($"public static readonly RelationInfo {name}Info = new(\"{modelShard.Name}\", \"{name}\");");
+                    Code.WriteLine($"public static readonly RelationInfo {name}Info = new(\"{modelShard.Name}\", \"{name}\");");
                 }
             });
     }
 
-    private void DefineModelShardClass(ModelShard modelShard)
+    protected virtual void DefineModelShardClass(ModelShard modelShard)
     {
-        code.GeneratedClassAttributes(modelShard.Scheme.Debug);
-        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", [$"I{modelShard.Name}ModelShard"], () =>
+        Code.GeneratedClassAttributes(modelShard.Scheme.Debug);
+        Code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", [$"I{modelShard.Name}ModelShard"], () =>
         {
             DefineCtor(modelShard);
-            code.EmptyLine();
+            Code.EmptyLine();
             DefineConversionCtor(modelShard);
-            code.EmptyLine();
+            Code.EmptyLine();
             ImplementModelShardInterface(modelShard);
-            code.EmptyLine();
+            Code.EmptyLine();
             ImplementSaveMethod(modelShard);
         });
 
         void DefineCtor(ModelShard modelShard)
         {
-            code.WriteLine($"public {modelShard.Name}ModelShard()");
-            code.Block(() =>
+            Code.WriteLine($"public {modelShard.Name}ModelShard()");
+            Code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = new {collection.Type}(");
-                    code.WithIndent(c =>
+                    Code.WriteLine($"{collection.Name} = new {collection.Type}(");
+                    Code.WithIndent(c =>
                     {
                         c.WriteLine($"{modelShard.Name}ModelShardInfo.{collection.Name}Info,");
                         c.WriteLine($"static id => new {collection.Entity.Name}(id),");
                         c.WriteLine($"static () => new {collection.Entity.PropertiesType}());");
                     });
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = new {relation.Type}(");
-                    code.WithIndent(c =>
+                    Code.WriteLine($"{relation.Name} = new {relation.Type}(");
+                    Code.WithIndent(c =>
                     {
                         c.WriteLine($"{modelShard.Name}ModelShardInfo.{relation.Name}Info,");
-                        code.WriteLine($"new {relation.ParentRelationType}<{relation.Parent.Entity.Name}, {relation.Child.Entity.Name}>(),");
-                        code.WriteLine($"new {relation.ChildRelationType}<{relation.Child.Entity.Name}, {relation.Parent.Entity.Name}>());");
+                        c.WriteLine($"new {relation.ParentRelationType}<{relation.Parent.Entity.Name}, {relation.Child.Entity.Name}>(),");
+                        c.WriteLine($"new {relation.ChildRelationType}<{relation.Child.Entity.Name}, {relation.Parent.Entity.Name}>());");
                     });
                 }
             });
@@ -122,18 +127,18 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
 
         void DefineConversionCtor(ModelShard modelShard)
         {
-            code.WriteLine($"internal {modelShard.Name}ModelShard(IMutable{modelShard.Name}ModelShard mutable)");
-            code.Block(() =>
+            Code.WriteLine($"internal {modelShard.Name}ModelShard(IMutable{modelShard.Name}ModelShard mutable)");
+            Code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = ((IMutableState<I{collection.Type}>)mutable.{collection.Name}).AsReadOnly();");
+                    Code.WriteLine($"{collection.Name} = ((IMutableState<I{collection.Type}>)mutable.{collection.Name}).AsReadOnly();");
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = ((IMutableState<I{relation.Type}>)mutable.{relation.Name}).AsReadOnly();");
+                    Code.WriteLine($"{relation.Name} = ((IMutableState<I{relation.Type}>)mutable.{relation.Name}).AsReadOnly();");
                 }
             });
         }
@@ -142,167 +147,179 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public {DefineProperty($"I{collection.Type}", collection.Name, "get; init;")} = null!;");
+                Code.WriteLine($"public {DefineProperty($"I{collection.Type}", collection.Name, "get; init;")} = null!;");
             }
-            code.EmptyLine();
+            Code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public {DefineProperty($"I{relation.Type}", relation.Name, "get; init;")} = null!;");
+                Code.WriteLine($"public {DefineProperty($"I{relation.Type}", relation.Name, "get; init;")} = null!;");
             }
         }
 
         void ImplementSaveMethod(ModelShard modelShard)
         {
-            code.WriteLine("public void Save(IRepository repository)");
-            code.Block(() =>
+            Code.WriteLine("public void Save(IRepository repository)");
+            Code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name}.Save(repository);");
+                    Code.WriteLine($"{collection.Name}.Save(repository);");
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name}.Save(repository);");
+                    Code.WriteLine($"{relation.Name}.Save(repository);");
                 }
             });
         }
     }
 
-    private void DefineModelShardClassAsReadOnlyState(ModelShard modelShard)
+    protected virtual void DefineModelShardClassAsReadOnlyState(ModelShard modelShard)
     {
-        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard",
+        Code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard",
         [
             $"IReadOnlyState<IMutable{modelShard.Name}ModelShard>"
         ],
         () =>
         {
-            code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)");
-            code.Block(() =>
+            Code.WriteLine("public IChangesFrame Create()");
+            Code.Block(() =>
             {
-                foreach (var collection in modelShard.Collections)
-                {
-                    code.WriteLine($"var {ToCamelCase(collection.Name)} = (I{collection.MutableType}){collection.Name};");
-                }
-                code.EmptyLine();
+                Code.WriteLine($"return new {modelShard.Name}ChangesFrame();");
+            });
+            Code.WriteLine();
 
-                foreach (var relation in modelShard.Relations)
-                {
-                    code.WriteLine($"var {ToCamelCase(relation.Name)} = (I{relation.MutableType}){relation.Name};");
-                }
-                code.EmptyLine();
+            Code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsRunCommandModel(IMutableModelChanges changes)");
+            Code.Block(() =>
+            {
+                Code.WriteLine($"var frame = new {modelShard.Name}ChangesFrame();");
+                Code.WriteLine($"changes.AddOrGet(frame);");
+                Code.WriteLine();
 
-                code.WriteLine("foreach (var feature in features)");
-                code.Block(() =>
+                Code.WriteLine($"return new Mutable{modelShard.Name}ModelShard()");
+                Code.Block(() =>
                 {
-                    foreach (var name in modelShard.Collections.Select(x => x.Name))
+                    foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{ToCamelCase(name)} = feature.Decorate(this, {ToCamelCase(name)});");
+                        Code.WriteLine($"{collection.Name} = new Trackable{collection.Type}(frame.{collection.Name}, new CoW{collection.Type}({collection.Name})),");
                     }
-                    code.EmptyLine();
+                    Code.EmptyLine();
 
-                    foreach (var name in modelShard.Relations.Select(x => x.Name))
+                    foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{ToCamelCase(name)} = feature.Decorate(this, {ToCamelCase(name)});");
+                        Code.WriteLine($"{relation.Name} = new Trackable{relation.Type}(frame.{relation.Name}, new CoW{relation.Type}({relation.Name})),");
                     }
-                });
-                code.EmptyLine();
+                }, true);
+            });
+            Code.WriteLine();
 
-                code.WriteLine($"return new Mutable{modelShard.Name}ModelShard()");
-                code.Block(() =>
+            Code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsLoadModel(IMutableModelChanges changes)");
+            Code.Block(() =>
+            {
+                Code.WriteLine($"var frame = new {modelShard.Name}ChangesFrame();");
+                Code.WriteLine($"changes.AddOrGet(frame);");
+                Code.WriteLine();
+
+                Code.WriteLine($"return new Mutable{modelShard.Name}ModelShard()");
+                Code.Block(() =>
                 {
-                    foreach (var name in modelShard.Collections.Select(x => x.Name))
+                    foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{name} = {ToCamelCase(name)},");
+                        Code.WriteLine($"{collection.Name} = new Trackable{collection.Type}(frame.{collection.Name}, (I{collection.MutableType}){collection.Name}),");
                     }
-                    code.EmptyLine();
+                    Code.EmptyLine();
 
-                    foreach (var name in modelShard.Relations.Select(x => x.Name))
+                    foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{name} = {ToCamelCase(name)},");
+                        Code.WriteLine($"{relation.Name} = new Trackable{relation.Type}(frame.{relation.Name}, (I{relation.MutableType}){relation.Name}),");
+                    }
+                }, true);
+            });
+            Code.WriteLine();
+
+            Code.WriteLine($"public IMutable{modelShard.Name}ModelShard AsApplyModel()");
+            Code.Block(() =>
+            {
+                Code.WriteLine($"return new Mutable{modelShard.Name}ModelShard()");
+                Code.Block(() =>
+                {
+                    foreach (var collection in modelShard.Collections)
+                    {
+                        Code.WriteLine($"{collection.Name} = new CoW{collection.Type}({collection.Name}),");
+                    }
+                    Code.EmptyLine();
+
+                    foreach (var relation in modelShard.Relations)
+                    {
+                        Code.WriteLine($"{relation.Name} = new CoW{relation.Type}({relation.Name}),");
                     }
                 }, true);
             });
         });
     }
 
-    private void DefineModelShardClassAsIFrameFactory(ModelShard modelShard)
+    protected virtual void DefineChangesFrameInterface(ModelShard modelShard)
     {
-        code.Class(modelShard.Visibility, "sealed partial", $"{modelShard.Name}ModelShard", ["IFrameFactory"],
-        () =>
-        {
-            code.WriteLine("public IChangesFrame Create()");
-            code.Block(() =>
-            {
-                code.WriteLine($"return new {modelShard.Name}ChangesFrame();");
-            });
-        });
-    }
-
-    private void DefineChangesFrameInterface(ModelShard modelShard)
-    {
-        code.GeneratedInterfaceAttributes();
-        code.Interface($"I{modelShard.Name}ChangesFrame", ["IChangesFrame"], () =>
+        Code.GeneratedInterfaceAttributes();
+        Code.Interface($"I{modelShard.Name}ChangesFrame", ["IChangesFrame"], () =>
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine(DefineProperty($"I{collection.ChangesType}", collection.Name, "get;"));
+                Code.WriteLine(DefineProperty($"I{collection.ChangesType}", collection.Name, "get;"));
             }
 
-            code.EmptyLine();
+            Code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine(DefineProperty($"I{relation.ChangesType}", relation.Name, "get;"));
+                Code.WriteLine(DefineProperty($"I{relation.ChangesType}", relation.Name, "get;"));
             }
         });
     }
 
-    private void DefineChangesFrameClass(ModelShard modelShard)
+    protected virtual void DefineChangesFrameClass(ModelShard modelShard)
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
-        code.GeneratedClassAttributes(modelShard.Scheme.Debug);
-        code.Class(visibility, "sealed", $"{modelShard.Name}ChangesFrame",
+        Code.GeneratedClassAttributes(modelShard.Scheme.Debug);
+        Code.Class(visibility, "sealed", $"{modelShard.Name}ChangesFrame",
             [
                 $"I{modelShard.Name}ChangesFrame", "IChangesFrameEx"
             ],
             () =>
             {
                 DefineCtor(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 ImplementModelShardChangesFrameInterface(modelShard);
-                code.EmptyLine();
-                DefineGetMethod(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 DefineInvertMethod(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 DefineApplyMethod(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 ImplementChangesFrameInterface(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 DefineMergeMethod(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 ImplementDoMethod(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
             });
 
         void DefineCtor(ModelShard modelShard)
         {
-            code.WriteLine($"public {modelShard.Name}ChangesFrame()");
-            code.Block(() =>
+            Code.WriteLine($"public {modelShard.Name}ChangesFrame()");
+            Code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = new {collection.ChangesType}({modelShard.Name}ModelShardInfo.{collection.Name}Info);");
+                    Code.WriteLine($"{collection.Name} = new {collection.ChangesType}({modelShard.Name}ModelShardInfo.{collection.Name}Info);");
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = new {relation.ChangesType}({modelShard.Name}ModelShardInfo.{relation.Name}Info);");
+                    Code.WriteLine($"{relation.Name} = new {relation.ChangesType}({modelShard.Name}ModelShardInfo.{relation.Name}Info);");
                 }
             });
         }
@@ -311,126 +328,70 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public {DefineProperty($"I{collection.ChangesType}", collection.Name)}");
+                Code.WriteLine($"public {DefineProperty($"I{collection.ChangesType}", collection.Name)}");
             }
-            code.EmptyLine();
+            Code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public {DefineProperty($"I{relation.ChangesType}", relation.Name)}");
+                Code.WriteLine($"public {DefineProperty($"I{relation.ChangesType}", relation.Name)}");
             }
-        }
-
-        void DefineGetMethod(ModelShard modelShard)
-        {
-            code.WriteLine("public ICollectionChangeSet<TEntity, TProperty>? Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)");
-            code.WithIndent(c =>
-            {
-                c.WriteLine("where TEntity : Entity");
-                c.WriteLine("where TProperty : Properties");
-            });
-            code.Block(() =>
-            {
-                foreach (var collection in modelShard.Collections)
-                {
-                    code.WriteLine($"if ({collection.Name}.Info == collection.Info) return {collection.Name} as ICollectionChangeSet<TEntity, TProperty>;");
-                }
-                code.EmptyLine();
-
-                code.WriteLine("throw new System.InvalidOperationException(\"Unable to find collection's changes set\");");
-            });
-            code.EmptyLine();
-
-            code.WriteLine("public IRelationChangeSet<TParent, TChild>? Get<TParent, TChild>(IRelation<TParent, TChild> relation)");
-            code.WithIndent(c =>
-            {
-                c.WriteLine("where TParent : Entity");
-                c.WriteLine("where TChild : Entity");
-            });
-            code.Block(() =>
-            {
-                foreach (var relation in modelShard.Relations)
-                {
-                    code.WriteLine($"if ({relation.Name}.Info == relation.Info) return {relation.Name} as IRelationChangeSet<TParent, TChild>;");
-                }
-                code.EmptyLine();
-
-                code.WriteLine("throw new System.InvalidOperationException($\"Unable to find relation's change set\");");
-            });
         }
 
         void DefineInvertMethod(ModelShard modelShard)
         {
-            code.WriteLine($"public IChangesFrame Invert()");
-            code.Block(() =>
+            Code.WriteLine($"public IChangesFrame Invert()");
+            Code.Block(() =>
             {
-                code.WriteLine($"return new {modelShard.Name}ChangesFrame()");
-                code.Block(() =>
+                Code.WriteLine($"return new {modelShard.Name}ChangesFrame()");
+                Code.Block(() =>
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{collection.Name} = {collection.Name}.Invert(),");
+                        Code.WriteLine($"{collection.Name} = {collection.Name}.Invert(),");
                     }
-                    code.EmptyLine();
+                    Code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{relation.Name} = {relation.Name}.Invert(),");
+                        Code.WriteLine($"{relation.Name} = {relation.Name}.Invert(),");
                     }
                 }, true);
             });
         }
 
-        void DefineApplyMethod(ModelShard modelShard)
-        {
-            code.WriteLine($"public void Apply(IModel model)");
-            code.Block(() =>
-            {
-                code.WriteLine($"var modelShard = model.Shard<IMutable{modelShard.Name}ModelShard>();");
-                code.EmptyLine();
-
-                var operations = modelShard.Relations.Select(x => $"{x.Name}.Apply(modelShard.{x.Name});")
-                    .Union(modelShard.Collections.Select(x => $"{x.Name}.Apply(modelShard.{x.Name});"));
-
-                foreach (var op in operations)
-                {
-                    code.WriteLine(op);
-                }
-            });
-        }
-
         void ImplementChangesFrameInterface(ModelShard modelShard)
         {
-            code.WriteLine($"public bool HasChanges()");
-            code.Block(() =>
+            Code.WriteLine($"public bool HasChanges()");
+            Code.Block(() =>
             {
                 var checks = modelShard.Collections.Select(x => $"{x.Name}.HasChanges()")
                     .Union(modelShard.Relations.Select(x => $"{x.Name}.HasChanges()"));
 
-                code.WriteLine($"return {string.Join(" || ", checks)};");
+                Code.WriteLine($"return {string.Join(" || ", checks)};");
             });
         }
 
         void DefineMergeMethod(ModelShard modelShard)
         {
-            code.WriteLine($"public IChangesFrame Merge(IChangesFrame frame)");
-            code.Block(() =>
+            Code.WriteLine($"public IChangesFrame Merge(IChangesFrame frame)");
+            Code.Block(() =>
             {
-                code.WriteLine($"var typedFrame = ({modelShard.Name}ChangesFrame)frame;");
-                code.EmptyLine();
+                Code.WriteLine($"var typedFrame = ({modelShard.Name}ChangesFrame)frame;");
+                Code.EmptyLine();
 
-                code.WriteLine($"return new {modelShard.Name}ChangesFrame()");
-                code.Block(() =>
+                Code.WriteLine($"return new {modelShard.Name}ChangesFrame()");
+                Code.Block(() =>
                 {
                     foreach (var collection in modelShard.Collections)
                     {
-                        code.WriteLine($"{collection.Name} = {collection.Name}.Merge(typedFrame.{collection.Name}),");
+                        Code.WriteLine($"{collection.Name} = {collection.Name}.Merge(typedFrame.{collection.Name}),");
                     }
-                    code.EmptyLine();
+                    Code.EmptyLine();
 
                     foreach (var relation in modelShard.Relations)
                     {
-                        code.WriteLine($"{relation.Name} = {relation.Name}.Merge(typedFrame.{relation.Name}),");
+                        Code.WriteLine($"{relation.Name} = {relation.Name}.Merge(typedFrame.{relation.Name}),");
                     }
                 }, true);
             });
@@ -438,30 +399,48 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
 
         void ImplementDoMethod(ModelShard modelShard)
         {
-            code.WriteLine($"public void Do<T>(T operation)");
-            code.WithIndent(c => c.WriteLine("where T : IChangesFrameOperation"));
-            code.Block(() =>
+            Code.WriteLine($"public void Do<T>(T operation)");
+            Code.WithIndent(c => c.WriteLine("where T : IChangesFrameOperation"));
+            Code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"operation.OnCollection({collection.Name});");
+                    Code.WriteLine($"operation.OnCollection({collection.Name});");
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"operation.OnRelation({relation.Name});");
+                    Code.WriteLine($"operation.OnRelation({relation.Name});");
                 }
             });
         }
     }
 
-    private void DefineMutableModelShardClass(ModelShard modelShard)
+    protected virtual void DefineApplyMethod(ModelShard modelShard)
+    {
+        Code.WriteLine($"public async global::System.Threading.Tasks.Task ApplyAsync(IModel model, global::System.Threading.CancellationToken token = default)");
+        Code.Block(() =>
+        {
+            Code.WriteLine($"var modelShard = model.Shard<IMutable{modelShard.Name}ModelShard>();");
+            Code.EmptyLine();
+
+            var operations = modelShard.Relations.Select(x => $"await modelShard.{x.Name}.ApplyAsync({x.Name}, token);")
+                .Union(modelShard.Collections.Select(x => $"await modelShard.{x.Name}.ApplyAsync({x.Name}, token);"));
+
+            foreach (var op in operations)
+            {
+                Code.WriteLine(op);
+            }
+        });
+    }
+
+    protected virtual void DefineMutableModelShardClass(ModelShard modelShard)
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
-        code.GeneratedClassAttributes(modelShard.Scheme.Debug);
-        code.Class(visibility, "sealed", $"Mutable{modelShard.Name}ModelShard",
+        Code.GeneratedClassAttributes(modelShard.Scheme.Debug);
+        Code.Class(visibility, "sealed", $"Mutable{modelShard.Name}ModelShard",
             [
                 $"IMutable{modelShard.Name}ModelShard",
                 $"IMutableState<I{modelShard.Name}ModelShard>"
@@ -469,71 +448,71 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
             () =>
             {
                 DefineManualLoadRequiredProperty(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 ImplementModelShardInterface(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 ImplementMutableStateInterface(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 ImplementLoadMethod(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 ImplementSaveMethod(modelShard);
             });
 
         void DefineManualLoadRequiredProperty(ModelShard modelShard)
         {
-            code.WriteLine($"public bool ManualLoadRequired => {modelShard.LoadManually.ToString().ToLowerInvariant()};");
+            Code.WriteLine($"public bool ManualLoadRequired => {modelShard.LoadManually.ToString().ToLowerInvariant()};");
         }
 
         void ImplementModelShardInterface(ModelShard modelShard)
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public {DefineProperty($"I{collection.MutableType}", collection.Name, "get; init;")} = null!;");
+                Code.WriteLine($"public {DefineProperty($"I{collection.MutableType}", collection.Name, "get; init;")} = null!;");
             }
-            code.EmptyLine();
+            Code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public {DefineProperty($"I{relation.MutableType}", relation.Name, "get; init;")} = null!;");
+                Code.WriteLine($"public {DefineProperty($"I{relation.MutableType}", relation.Name, "get; init;")} = null!;");
             }
         }
 
         void ImplementMutableStateInterface(ModelShard modelShard)
         {
-            code.WriteLine($"public I{modelShard.Name}ModelShard AsReadOnly()");
-            code.Block(() =>
+            Code.WriteLine($"public I{modelShard.Name}ModelShard AsReadOnly()");
+            Code.Block(() =>
             {
-                code.WriteLine($"return new {modelShard.Name}ModelShard(this);");
+                Code.WriteLine($"return new {modelShard.Name}ModelShard(this);");
             });
         }
 
         void ImplementLoadMethod(ModelShard modelShard)
         {
-            code.WriteLine("public void Load(IRepository repository, bool force = false)");
-            code.Block(() =>
+            Code.WriteLine("public void Load(IRepository repository, bool force = false)");
+            Code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
                     if (collection.LoadManually)
                     {
-                        code.WriteLine($"if (force) {collection.Name}.Load(repository);");
+                        Code.WriteLine($"if (force) {collection.Name}.Load(repository);");
                     }
                     else
                     {
-                        code.WriteLine($"{collection.Name}.Load(repository);");
+                        Code.WriteLine($"{collection.Name}.Load(repository);");
                     }
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
                     if (relation.Parent.LoadManually || relation.Child.LoadManually)
                     {
-                        code.WriteLine($"if (force) {relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
+                        Code.WriteLine($"if (force) {relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
                     }
                     else
                     {
-                        code.WriteLine($"{relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
+                        Code.WriteLine($"{relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
                     }
                 }
             });
@@ -541,105 +520,105 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
 
         void ImplementSaveMethod(ModelShard modelShard)
         {
-            code.WriteLine("public void Save(IRepository repository)");
-            code.Block(() =>
+            Code.WriteLine("public void Save(IRepository repository)");
+            Code.Block(() =>
             {
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name}.Save(repository);");
+                    Code.WriteLine($"{collection.Name}.Save(repository);");
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name}.Save(repository);");
+                    Code.WriteLine($"{relation.Name}.Save(repository);");
                 }
             });
         }
     }
 
-    private void DefineModelShardViewClass(ModelShard modelShard)
+    protected virtual void DefineModelShardViewClass(ModelShard modelShard)
     {
         var visibility = GetInternalTypeVisibility(modelShard);
 
-        code.GeneratedClassAttributes(modelShard.Scheme.Debug);
-        code.Class(visibility, "sealed partial", $"{modelShard.Name}ModelShardView",
+        Code.GeneratedClassAttributes(modelShard.Scheme.Debug);
+        Code.Class(visibility, "sealed partial", $"{modelShard.Name}ModelShardView",
             [
                 "global::System.IDisposable"
             ],
             () =>
             {
-                code.WriteLine("private bool _disposed = false;");
-                code.EmptyLine();
+                Code.WriteLine("private bool _disposed = false;");
+                Code.EmptyLine();
                 
                 ImplementCtor(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 ImplementModelShardInterface(modelShard);
-                code.EmptyLine();
+                Code.EmptyLine();
                 ImplementDisposeInterface(modelShard);
             });
 
         void ImplementCtor(ModelShard modelShard)
         {
-            code.WriteLine($"public {modelShard.Name}ModelShardView(IDomainModel model)");
-            code.Block(() =>
+            Code.WriteLine($"public {modelShard.Name}ModelShardView(IDomainModel model)");
+            Code.Block(() =>
             {
-                code.WriteLine($"var builder = model.View<I{modelShard.Name}ModelShard, I{modelShard.Name}ChangesFrame>();");
-                code.EmptyLine();
+                Code.WriteLine($"var builder = model.View<I{modelShard.Name}ModelShard, I{modelShard.Name}ChangesFrame>();");
+                Code.EmptyLine();
 
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name} = builder.Create(static shard => shard.{collection.Name}, static frame => frame.{collection.Name});");
+                    Code.WriteLine($"{collection.Name} = builder.Create(static shard => shard.{collection.Name}, static frame => frame.{collection.Name});");
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name} = builder.Create(static shard => shard.{relation.Name}, static frame => frame.{relation.Name});");
+                    Code.WriteLine($"{relation.Name} = builder.Create(static shard => shard.{relation.Name}, static frame => frame.{relation.Name});");
                 }
             });
         }
 
         void ImplementDisposeInterface(ModelShard modelShard)
         {
-            code.WriteLine("public void Dispose()");
-            code.Block(() =>
+            Code.WriteLine("public void Dispose()");
+            Code.Block(() =>
             {
-                code.WriteLine("Dispose(true);");
-                code.WriteLine("global::System.GC.SuppressFinalize(this);");
+                Code.WriteLine("Dispose(true);");
+                Code.WriteLine("global::System.GC.SuppressFinalize(this);");
             });
-            code.EmptyLine();
+            Code.EmptyLine();
 
-            code.WriteLine($"~{modelShard.Name}ModelShardView()");
-            code.Block(() =>
+            Code.WriteLine($"~{modelShard.Name}ModelShardView()");
+            Code.Block(() =>
             {
-                code.WriteLine("Dispose(false);");
+                Code.WriteLine("Dispose(false);");
             });
-            code.EmptyLine();
+            Code.EmptyLine();
 
-            code.WriteLine("private void Dispose(bool disposing)");
-            code.Block(() =>
+            Code.WriteLine("private void Dispose(bool disposing)");
+            Code.Block(() =>
             {
-                code.WriteLine("if (_disposed)");
-                code.Block(() =>
+                Code.WriteLine("if (_disposed)");
+                Code.Block(() =>
                 {
-                    code.WriteLine("return;");
+                    Code.WriteLine("return;");
                 });
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var collection in modelShard.Collections)
                 {
-                    code.WriteLine($"{collection.Name}.Dispose();");
+                    Code.WriteLine($"{collection.Name}.Dispose();");
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
                 foreach (var relation in modelShard.Relations)
                 {
-                    code.WriteLine($"{relation.Name}.Dispose();");
+                    Code.WriteLine($"{relation.Name}.Dispose();");
                 }
-                code.EmptyLine();
+                Code.EmptyLine();
 
-                code.WriteLine("_disposed = true;");
+                Code.WriteLine("_disposed = true;");
             });
         }
 
@@ -647,25 +626,25 @@ internal sealed class ModelShardGenerator(IndentedTextWriter code) : GeneratorCo
         {
             foreach (var collection in modelShard.Collections)
             {
-                code.WriteLine($"public {collection.ViewType} {collection.Name} {{ get; private set; }}");
+                Code.WriteLine($"public {collection.ViewType} {collection.Name} {{ get; private set; }}");
             }
-            code.EmptyLine();
+            Code.EmptyLine();
 
             foreach (var relation in modelShard.Relations)
             {
-                code.WriteLine($"public {relation.ViewType} {relation.Name} {{ get; private set; }}");
+                Code.WriteLine($"public {relation.ViewType} {relation.Name} {{ get; private set; }}");
             }
-            code.EmptyLine();
+            Code.EmptyLine();
 
-            code.WriteLine("public void Save(IRepository repository)");
-            code.Block(() =>
+            Code.WriteLine("public void Save(IRepository repository)");
+            Code.Block(() =>
             {
-                code.WriteLine("throw new global::System.InvalidOperationException(\"Cannot save model shard's view. Call Save on the real model shard.\");");
+                Code.WriteLine("throw new global::System.InvalidOperationException(\"Cannot save model shard's view. Call Save on the real model shard.\");");
             });
         }
     }
 
-    private static string GetInternalTypeVisibility(ModelShard modelShard)
+    protected static string GetInternalTypeVisibility(ModelShard modelShard)
     {
         return modelShard.Visibility switch
         {

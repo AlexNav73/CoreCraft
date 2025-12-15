@@ -20,6 +20,7 @@ internal static class DtoConverter
         {
             Name = modelShard.Name,
             Visibility = Convert(modelShard.Visibility),
+            Features = modelShard.Features,
             Collections = collections,
             Relations = relations,
             LoadManually = modelShard.LoadManually,

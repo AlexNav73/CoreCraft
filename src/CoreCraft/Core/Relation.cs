@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.ChangesTracking;
 using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
 
@@ -103,6 +104,27 @@ public sealed class Relation<TParent, TChild> :
         }
 
         repository.Load(this, parents, children);
+    }
+
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.ApplyAsync(IRelationChangeSet{TParent, TChild}, CancellationToken)" />
+    public Task ApplyAsync(IRelationChangeSet<TParent, TChild> changeSet, CancellationToken token = default)
+    {
+        foreach (var change in changeSet)
+        {
+            switch (change.Action)
+            {
+                case RelationAction.Linked:
+                    Add(change.Parent, change.Child);
+                    break;
+                case RelationAction.Unlinked:
+                    Remove(change.Parent, change.Child);
+                    break;
+                default:
+                    throw new NotSupportedException($"An action [{change.Action}] is not supported.");
+            }
+        }
+
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc cref="ICopy{T}.Copy"/>

@@ -83,7 +83,7 @@ public class JsonStorageTests
     [Test]
     public void LoadHistoryTest()
     {
-        var shard = A.Fake<IModelShard>(c => c.Implements<IFrameFactory>());
+        var shard = A.Fake<IModelShard>(c => c.Implements<IReadOnlyState<IMutableModelShard>>());
         var frame = A.Fake<IChangesFrame>(c => c.Implements<IChangesFrameEx>());
         var jsonFileHandler = A.Fake<IJsonFileHandler>();
         var storage = new JsonStorage("test.json", jsonFileHandler);
@@ -93,7 +93,7 @@ public class JsonStorageTests
         model.ChangesHistory.Add(modelChanges);
 
         A.CallTo(() => frame.HasChanges()).Returns(true);
-        A.CallTo(() => ((IFrameFactory)shard).Create())
+        A.CallTo(() => ((IReadOnlyState<IMutableModelShard>)shard).Create())
             .Returns(frame);
         A.CallTo(() => jsonFileHandler.ReadModelFromFile(A<string>.Ignored, A<JsonSerializerSettings>.Ignored))
             .Returns(model);

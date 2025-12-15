@@ -16,6 +16,8 @@ namespace compilation.LoadManually
     using CoreCraft;
     using CoreCraft.Core;
     using CoreCraft.Views;
+    using CoreCraft.Features.CoW;
+    using CoreCraft.Features.Tracking;
     using CoreCraft.ChangesTracking;
     using CoreCraft.Persistence;
     using CoreCraft.Persistence.History;
@@ -110,39 +112,51 @@ namespace compilation.LoadManually
 
     internal sealed partial class FakeModelShard : IReadOnlyState<IMutableFakeModelShard>
     {
-        public IMutableFakeModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)
-        {
-            var firstCollection = (IMutableCollection<FirstEntity, FirstEntityProperties>)FirstCollection;
-            var secondCollection = (IMutableCollection<SecondEntity, SecondEntityProperties>)SecondCollection;
-            var thirdCollection = (IMutableCollection<ThirdEntity, ThirdEntityProperties>)ThirdCollection;
-
-            var oneToOneRelation = (IMutableRelation<FirstEntity, SecondEntity>)OneToOneRelation;
-
-            foreach (var feature in features)
-            {
-                firstCollection = feature.Decorate(this, firstCollection);
-                secondCollection = feature.Decorate(this, secondCollection);
-                thirdCollection = feature.Decorate(this, thirdCollection);
-
-                oneToOneRelation = feature.Decorate(this, oneToOneRelation);
-            }
-
-            return new MutableFakeModelShard()
-            {
-                FirstCollection = firstCollection,
-                SecondCollection = secondCollection,
-                ThirdCollection = thirdCollection,
-
-                OneToOneRelation = oneToOneRelation,
-            };
-        }
-    }
-
-    internal sealed partial class FakeModelShard : IFrameFactory
-    {
         public IChangesFrame Create()
         {
             return new FakeChangesFrame();
+        }
+        
+        public IMutableFakeModelShard AsRunCommandModel(IMutableModelChanges changes)
+        {
+            var frame = new FakeChangesFrame();
+            changes.AddOrGet(frame);
+            
+            return new MutableFakeModelShard()
+            {
+                FirstCollection = new TrackableCollection<FirstEntity, FirstEntityProperties>(frame.FirstCollection, new CoWCollection<FirstEntity, FirstEntityProperties>(FirstCollection)),
+                SecondCollection = new TrackableCollection<SecondEntity, SecondEntityProperties>(frame.SecondCollection, new CoWCollection<SecondEntity, SecondEntityProperties>(SecondCollection)),
+                ThirdCollection = new TrackableCollection<ThirdEntity, ThirdEntityProperties>(frame.ThirdCollection, new CoWCollection<ThirdEntity, ThirdEntityProperties>(ThirdCollection)),
+
+                OneToOneRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.OneToOneRelation, new CoWRelation<FirstEntity, SecondEntity>(OneToOneRelation)),
+            };
+        }
+        
+        public IMutableFakeModelShard AsLoadModel(IMutableModelChanges changes)
+        {
+            var frame = new FakeChangesFrame();
+            changes.AddOrGet(frame);
+            
+            return new MutableFakeModelShard()
+            {
+                FirstCollection = new TrackableCollection<FirstEntity, FirstEntityProperties>(frame.FirstCollection, (IMutableCollection<FirstEntity, FirstEntityProperties>)FirstCollection),
+                SecondCollection = new TrackableCollection<SecondEntity, SecondEntityProperties>(frame.SecondCollection, (IMutableCollection<SecondEntity, SecondEntityProperties>)SecondCollection),
+                ThirdCollection = new TrackableCollection<ThirdEntity, ThirdEntityProperties>(frame.ThirdCollection, (IMutableCollection<ThirdEntity, ThirdEntityProperties>)ThirdCollection),
+
+                OneToOneRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.OneToOneRelation, (IMutableRelation<FirstEntity, SecondEntity>)OneToOneRelation),
+            };
+        }
+        
+        public IMutableFakeModelShard AsApplyModel()
+        {
+            return new MutableFakeModelShard()
+            {
+                FirstCollection = new CoWCollection<FirstEntity, FirstEntityProperties>(FirstCollection),
+                SecondCollection = new CoWCollection<SecondEntity, SecondEntityProperties>(SecondCollection),
+                ThirdCollection = new CoWCollection<ThirdEntity, ThirdEntityProperties>(ThirdCollection),
+
+                OneToOneRelation = new CoWRelation<FirstEntity, SecondEntity>(OneToOneRelation),
+            };
         }
     }
 
@@ -178,26 +192,6 @@ namespace compilation.LoadManually
 
         public IRelationChangeSet<FirstEntity, SecondEntity> OneToOneRelation { get; private set; }
 
-        public ICollectionChangeSet<TEntity, TProperty>? Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
-            where TEntity : Entity
-            where TProperty : Properties
-        {
-            if (FirstCollection.Info == collection.Info) return FirstCollection as ICollectionChangeSet<TEntity, TProperty>;
-            if (SecondCollection.Info == collection.Info) return SecondCollection as ICollectionChangeSet<TEntity, TProperty>;
-            if (ThirdCollection.Info == collection.Info) return ThirdCollection as ICollectionChangeSet<TEntity, TProperty>;
-
-            throw new System.InvalidOperationException("Unable to find collection's changes set");
-        }
-
-        public IRelationChangeSet<TParent, TChild>? Get<TParent, TChild>(IRelation<TParent, TChild> relation)
-            where TParent : Entity
-            where TChild : Entity
-        {
-            if (OneToOneRelation.Info == relation.Info) return OneToOneRelation as IRelationChangeSet<TParent, TChild>;
-
-            throw new System.InvalidOperationException($"Unable to find relation's change set");
-        }
-
         public IChangesFrame Invert()
         {
             return new FakeChangesFrame()
@@ -210,14 +204,14 @@ namespace compilation.LoadManually
             };
         }
 
-        public void Apply(IModel model)
+        public async global::System.Threading.Tasks.Task ApplyAsync(IModel model, global::System.Threading.CancellationToken token = default)
         {
             var modelShard = model.Shard<IMutableFakeModelShard>();
 
-            OneToOneRelation.Apply(modelShard.OneToOneRelation);
-            FirstCollection.Apply(modelShard.FirstCollection);
-            SecondCollection.Apply(modelShard.SecondCollection);
-            ThirdCollection.Apply(modelShard.ThirdCollection);
+            await modelShard.OneToOneRelation.ApplyAsync(OneToOneRelation, token);
+            await modelShard.FirstCollection.ApplyAsync(FirstCollection, token);
+            await modelShard.SecondCollection.ApplyAsync(SecondCollection, token);
+            await modelShard.ThirdCollection.ApplyAsync(ThirdCollection, token);
         }
 
         public bool HasChanges()
@@ -347,6 +341,7 @@ namespace compilation.LoadManually
         }
     }
 
+
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("C# Source Generator", "1.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public interface ILazyShardModelShard : IModelShard
@@ -396,27 +391,39 @@ namespace compilation.LoadManually
 
     internal sealed partial class LazyShardModelShard : IReadOnlyState<IMutableLazyShardModelShard>
     {
-        public IMutableLazyShardModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)
+        public IChangesFrame Create()
         {
-
-
-            foreach (var feature in features)
-            {
-
-            }
-
+            return new LazyShardChangesFrame();
+        }
+        
+        public IMutableLazyShardModelShard AsRunCommandModel(IMutableModelChanges changes)
+        {
+            var frame = new LazyShardChangesFrame();
+            changes.AddOrGet(frame);
+            
             return new MutableLazyShardModelShard()
             {
 
             };
         }
-    }
-
-    internal sealed partial class LazyShardModelShard : IFrameFactory
-    {
-        public IChangesFrame Create()
+        
+        public IMutableLazyShardModelShard AsLoadModel(IMutableModelChanges changes)
         {
-            return new LazyShardChangesFrame();
+            var frame = new LazyShardChangesFrame();
+            changes.AddOrGet(frame);
+            
+            return new MutableLazyShardModelShard()
+            {
+
+            };
+        }
+        
+        public IMutableLazyShardModelShard AsApplyModel()
+        {
+            return new MutableLazyShardModelShard()
+            {
+
+            };
         }
     }
 
@@ -440,22 +447,6 @@ namespace compilation.LoadManually
 
 
 
-        public ICollectionChangeSet<TEntity, TProperty>? Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
-            where TEntity : Entity
-            where TProperty : Properties
-        {
-
-            throw new System.InvalidOperationException("Unable to find collection's changes set");
-        }
-
-        public IRelationChangeSet<TParent, TChild>? Get<TParent, TChild>(IRelation<TParent, TChild> relation)
-            where TParent : Entity
-            where TChild : Entity
-        {
-
-            throw new System.InvalidOperationException($"Unable to find relation's change set");
-        }
-
         public IChangesFrame Invert()
         {
             return new LazyShardChangesFrame()
@@ -464,7 +455,7 @@ namespace compilation.LoadManually
             };
         }
 
-        public void Apply(IModel model)
+        public async global::System.Threading.Tasks.Task ApplyAsync(IModel model, global::System.Threading.CancellationToken token = default)
         {
             var modelShard = model.Shard<IMutableLazyShardModelShard>();
 
@@ -565,6 +556,7 @@ namespace compilation.LoadManually
         }
     }
 
+
 }
 
 namespace compilation.LoadManually.Entities
@@ -575,7 +567,7 @@ namespace compilation.LoadManually.Entities
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed record FirstEntity(global::System.Guid Id) : Entity(Id)
+    public sealed partial record FirstEntity(global::System.Guid Id) : Entity(Id)
     {
         internal FirstEntity() : this(global::System.Guid.NewGuid())
         {
@@ -618,7 +610,7 @@ namespace compilation.LoadManually.Entities
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed record SecondEntity(global::System.Guid Id) : Entity(Id)
+    public sealed partial record SecondEntity(global::System.Guid Id) : Entity(Id)
     {
         internal SecondEntity() : this(global::System.Guid.NewGuid())
         {
@@ -660,7 +652,7 @@ namespace compilation.LoadManually.Entities
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed record ThirdEntity(global::System.Guid Id) : Entity(Id)
+    public sealed partial record ThirdEntity(global::System.Guid Id) : Entity(Id)
     {
         internal ThirdEntity() : this(global::System.Guid.NewGuid())
         {
@@ -701,4 +693,3 @@ namespace compilation.LoadManually.Entities
 
 
 }
-

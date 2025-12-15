@@ -43,7 +43,8 @@ public interface IModelChanges : IEnumerable<IChangesFrame>
     ///     Applies changes to the given model
     /// </summary>
     /// <param name="model">A target model</param>
-    void Apply(IModel model);
+    /// <param name="token"></param>
+    Task ApplyAsync(IModel model, CancellationToken token = default);
 
     /// <summary>
     ///     Merges two <see cref="IModelChanges"/> into one, reducing a number of

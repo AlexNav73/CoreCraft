@@ -98,6 +98,12 @@ public sealed class TrackableCollection<TEntity, TProperties> :
         _collection.Remove(entity);
     }
 
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.ApplyAsync(ICollectionChangeSet{TEntity, TProperties}, CancellationToken)"/>
+    public Task ApplyAsync(ICollectionChangeSet<TEntity, TProperties> changeSet, CancellationToken token = default)
+    {
+        throw new InvalidOperationException("Unable to apply changes to the collection");
+    }
+
     /// <inheritdoc cref="ILoadable.Load(IRepository)" />
     public void Load(IRepository repository)
     {

@@ -43,6 +43,27 @@ public sealed class AsyncScheduler : IScheduler
     }
 
     /// <summary>
+    ///     Queues an asynchronous job for sequential execution within the scheduler.
+    /// </summary>
+    /// <remarks>
+    ///     Jobs are executed in the order they are enqueued. If the cancellation token is triggered
+    ///     before the job starts, the job will not be executed and the returned task will be canceled.
+    /// </remarks>
+    /// <param name="job">A delegate that represents the asynchronous operation to execute. Cannot be null.</param>
+    /// <param name="token">A cancellation token that can be used to cancel the scheduled job before it starts.</param>
+    /// <returns>A task that represents the scheduled job. The task completes when the job has finished executing.</returns>
+    public async Task Enqueue(Func<Task> job, CancellationToken token)
+    {
+        var childTask = await Task.Factory.StartNew(
+            job,
+            token,
+            TaskCreationOptions.AttachedToParent,
+            SequentialTaskScheduler.Instance);
+
+        await childTask;
+    }
+
+    /// <summary>
     ///     Starts the job in parallel.
     /// </summary>
     /// <remarks>

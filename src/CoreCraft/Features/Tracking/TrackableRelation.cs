@@ -61,6 +61,12 @@ public sealed class TrackableRelation<TParent, TChild> :
         _changes.Add(RelationAction.Unlinked, parent, child);
     }
 
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.ApplyAsync(IRelationChangeSet{TParent, TChild}, CancellationToken)" />
+    public Task ApplyAsync(IRelationChangeSet<TParent, TChild> changeSet, CancellationToken token = default)
+    {
+        throw new InvalidOperationException("Unable to apply changes to the relation");
+    }
+
     /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Load(IRepository, IEnumerable{TParent}, IEnumerable{TChild})" />
     public void Load(IRepository repository, IEnumerable<TParent> parents, IEnumerable<TChild> children)
     {

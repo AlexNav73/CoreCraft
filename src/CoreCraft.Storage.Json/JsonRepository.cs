@@ -298,7 +298,7 @@ internal sealed class JsonRepository : IJsonRepository
         {
             var modelChanges = new ChangesTracking.ModelChanges(timestamp);
 
-            foreach (var shard in shards.Cast<IFrameFactory>())
+            foreach (var shard in shards.Cast<IReadOnlyState<IMutableModelShard>>())
             {
                 var frame = (IChangesFrameEx)shard.Create();
                 frame.Do(new LoadChangesFrameOperation(timestamp, this));

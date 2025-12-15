@@ -16,6 +16,8 @@ namespace compilation.AllFeatures
     using CoreCraft;
     using CoreCraft.Core;
     using CoreCraft.Views;
+    using CoreCraft.Features.CoW;
+    using CoreCraft.Features.Tracking;
     using CoreCraft.ChangesTracking;
     using CoreCraft.Persistence;
     using CoreCraft.Persistence.History;
@@ -130,45 +132,57 @@ namespace compilation.AllFeatures
 
     internal sealed partial class FakeModelShard : IReadOnlyState<IMutableFakeModelShard>
     {
-        public IMutableFakeModelShard AsMutable(global::System.Collections.Generic.IEnumerable<IFeature> features)
-        {
-            var firstCollection = (IMutableCollection<FirstEntity, FirstEntityProperties>)FirstCollection;
-            var secondCollection = (IMutableCollection<SecondEntity, SecondEntityProperties>)SecondCollection;
-
-            var oneToOneRelation = (IMutableRelation<FirstEntity, SecondEntity>)OneToOneRelation;
-            var oneToManyRelation = (IMutableRelation<FirstEntity, SecondEntity>)OneToManyRelation;
-            var manyToOneRelation = (IMutableRelation<SecondEntity, FirstEntity>)ManyToOneRelation;
-            var manyToManyRelation = (IMutableRelation<FirstEntity, SecondEntity>)ManyToManyRelation;
-
-            foreach (var feature in features)
-            {
-                firstCollection = feature.Decorate(this, firstCollection);
-                secondCollection = feature.Decorate(this, secondCollection);
-
-                oneToOneRelation = feature.Decorate(this, oneToOneRelation);
-                oneToManyRelation = feature.Decorate(this, oneToManyRelation);
-                manyToOneRelation = feature.Decorate(this, manyToOneRelation);
-                manyToManyRelation = feature.Decorate(this, manyToManyRelation);
-            }
-
-            return new MutableFakeModelShard()
-            {
-                FirstCollection = firstCollection,
-                SecondCollection = secondCollection,
-
-                OneToOneRelation = oneToOneRelation,
-                OneToManyRelation = oneToManyRelation,
-                ManyToOneRelation = manyToOneRelation,
-                ManyToManyRelation = manyToManyRelation,
-            };
-        }
-    }
-
-    internal sealed partial class FakeModelShard : IFrameFactory
-    {
         public IChangesFrame Create()
         {
             return new FakeChangesFrame();
+        }
+        
+        public IMutableFakeModelShard AsRunCommandModel(IMutableModelChanges changes)
+        {
+            var frame = new FakeChangesFrame();
+            changes.AddOrGet(frame);
+            
+            return new MutableFakeModelShard()
+            {
+                FirstCollection = new TrackableCollection<FirstEntity, FirstEntityProperties>(frame.FirstCollection, new CoWCollection<FirstEntity, FirstEntityProperties>(FirstCollection)),
+                SecondCollection = new TrackableCollection<SecondEntity, SecondEntityProperties>(frame.SecondCollection, new CoWCollection<SecondEntity, SecondEntityProperties>(SecondCollection)),
+
+                OneToOneRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.OneToOneRelation, new CoWRelation<FirstEntity, SecondEntity>(OneToOneRelation)),
+                OneToManyRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.OneToManyRelation, new CoWRelation<FirstEntity, SecondEntity>(OneToManyRelation)),
+                ManyToOneRelation = new TrackableRelation<SecondEntity, FirstEntity>(frame.ManyToOneRelation, new CoWRelation<SecondEntity, FirstEntity>(ManyToOneRelation)),
+                ManyToManyRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.ManyToManyRelation, new CoWRelation<FirstEntity, SecondEntity>(ManyToManyRelation)),
+            };
+        }
+        
+        public IMutableFakeModelShard AsLoadModel(IMutableModelChanges changes)
+        {
+            var frame = new FakeChangesFrame();
+            changes.AddOrGet(frame);
+            
+            return new MutableFakeModelShard()
+            {
+                FirstCollection = new TrackableCollection<FirstEntity, FirstEntityProperties>(frame.FirstCollection, (IMutableCollection<FirstEntity, FirstEntityProperties>)FirstCollection),
+                SecondCollection = new TrackableCollection<SecondEntity, SecondEntityProperties>(frame.SecondCollection, (IMutableCollection<SecondEntity, SecondEntityProperties>)SecondCollection),
+
+                OneToOneRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.OneToOneRelation, (IMutableRelation<FirstEntity, SecondEntity>)OneToOneRelation),
+                OneToManyRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.OneToManyRelation, (IMutableRelation<FirstEntity, SecondEntity>)OneToManyRelation),
+                ManyToOneRelation = new TrackableRelation<SecondEntity, FirstEntity>(frame.ManyToOneRelation, (IMutableRelation<SecondEntity, FirstEntity>)ManyToOneRelation),
+                ManyToManyRelation = new TrackableRelation<FirstEntity, SecondEntity>(frame.ManyToManyRelation, (IMutableRelation<FirstEntity, SecondEntity>)ManyToManyRelation),
+            };
+        }
+        
+        public IMutableFakeModelShard AsApplyModel()
+        {
+            return new MutableFakeModelShard()
+            {
+                FirstCollection = new CoWCollection<FirstEntity, FirstEntityProperties>(FirstCollection),
+                SecondCollection = new CoWCollection<SecondEntity, SecondEntityProperties>(SecondCollection),
+
+                OneToOneRelation = new CoWRelation<FirstEntity, SecondEntity>(OneToOneRelation),
+                OneToManyRelation = new CoWRelation<FirstEntity, SecondEntity>(OneToManyRelation),
+                ManyToOneRelation = new CoWRelation<SecondEntity, FirstEntity>(ManyToOneRelation),
+                ManyToManyRelation = new CoWRelation<FirstEntity, SecondEntity>(ManyToManyRelation),
+            };
         }
     }
 
@@ -210,28 +224,6 @@ namespace compilation.AllFeatures
         public IRelationChangeSet<SecondEntity, FirstEntity> ManyToOneRelation { get; private set; }
         public IRelationChangeSet<FirstEntity, SecondEntity> ManyToManyRelation { get; private set; }
 
-        public ICollectionChangeSet<TEntity, TProperty>? Get<TEntity, TProperty>(ICollection<TEntity, TProperty> collection)
-            where TEntity : Entity
-            where TProperty : Properties
-        {
-            if (FirstCollection.Info == collection.Info) return FirstCollection as ICollectionChangeSet<TEntity, TProperty>;
-            if (SecondCollection.Info == collection.Info) return SecondCollection as ICollectionChangeSet<TEntity, TProperty>;
-
-            throw new System.InvalidOperationException("Unable to find collection's changes set");
-        }
-
-        public IRelationChangeSet<TParent, TChild>? Get<TParent, TChild>(IRelation<TParent, TChild> relation)
-            where TParent : Entity
-            where TChild : Entity
-        {
-            if (OneToOneRelation.Info == relation.Info) return OneToOneRelation as IRelationChangeSet<TParent, TChild>;
-            if (OneToManyRelation.Info == relation.Info) return OneToManyRelation as IRelationChangeSet<TParent, TChild>;
-            if (ManyToOneRelation.Info == relation.Info) return ManyToOneRelation as IRelationChangeSet<TParent, TChild>;
-            if (ManyToManyRelation.Info == relation.Info) return ManyToManyRelation as IRelationChangeSet<TParent, TChild>;
-
-            throw new System.InvalidOperationException($"Unable to find relation's change set");
-        }
-
         public IChangesFrame Invert()
         {
             return new FakeChangesFrame()
@@ -246,16 +238,16 @@ namespace compilation.AllFeatures
             };
         }
 
-        public void Apply(IModel model)
+        public async global::System.Threading.Tasks.Task ApplyAsync(IModel model, global::System.Threading.CancellationToken token = default)
         {
             var modelShard = model.Shard<IMutableFakeModelShard>();
 
-            OneToOneRelation.Apply(modelShard.OneToOneRelation);
-            OneToManyRelation.Apply(modelShard.OneToManyRelation);
-            ManyToOneRelation.Apply(modelShard.ManyToOneRelation);
-            ManyToManyRelation.Apply(modelShard.ManyToManyRelation);
-            FirstCollection.Apply(modelShard.FirstCollection);
-            SecondCollection.Apply(modelShard.SecondCollection);
+            await modelShard.OneToOneRelation.ApplyAsync(OneToOneRelation, token);
+            await modelShard.OneToManyRelation.ApplyAsync(OneToManyRelation, token);
+            await modelShard.ManyToOneRelation.ApplyAsync(ManyToOneRelation, token);
+            await modelShard.ManyToManyRelation.ApplyAsync(ManyToManyRelation, token);
+            await modelShard.FirstCollection.ApplyAsync(FirstCollection, token);
+            await modelShard.SecondCollection.ApplyAsync(SecondCollection, token);
         }
 
         public bool HasChanges()
@@ -401,6 +393,7 @@ namespace compilation.AllFeatures
         }
     }
 
+
 }
 
 namespace compilation.AllFeatures.Entities
@@ -411,7 +404,7 @@ namespace compilation.AllFeatures.Entities
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed record FirstEntity(global::System.Guid Id) : Entity(Id)
+    public sealed partial record FirstEntity(global::System.Guid Id) : Entity(Id)
     {
         internal FirstEntity() : this(global::System.Guid.NewGuid())
         {
@@ -460,7 +453,7 @@ namespace compilation.AllFeatures.Entities
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute()]
-    public sealed record SecondEntity(global::System.Guid Id) : Entity(Id)
+    public sealed partial record SecondEntity(global::System.Guid Id) : Entity(Id)
     {
         internal SecondEntity() : this(global::System.Guid.NewGuid())
         {

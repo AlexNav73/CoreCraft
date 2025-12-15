@@ -2,7 +2,7 @@
   "shards": [
     {
       "name": "Example",
-      "loadManually": true,
+      "features": [ "linq2db" ],
       "entities": [
         {
           "name": "FirstEntity",
