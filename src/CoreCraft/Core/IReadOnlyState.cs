@@ -1,4 +1,6 @@
-﻿namespace CoreCraft.Core;
+﻿using CoreCraft.ChangesTracking;
+
+namespace CoreCraft.Core;
 
 /// <summary>
 ///     A model shard which can be mutated
@@ -15,9 +17,27 @@
 public interface IReadOnlyState<out TMutableState>
 {
     /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    IChangesFrame Create();
+
+    /// <summary>
     ///     Returns a model shard which can be mutated
     /// </summary>
-    /// <param name="features">A collection of features to apply on the model shard</param>
     /// <returns>A mutable model shard</returns>
-    TMutableState AsMutable(IEnumerable<IFeature> features);
+    TMutableState AsRunCommandModel(IMutableModelChanges changes);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="changes"></param>
+    /// <returns></returns>
+    TMutableState AsLoadModel(IMutableModelChanges changes);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    TMutableState AsApplyModel();
 }

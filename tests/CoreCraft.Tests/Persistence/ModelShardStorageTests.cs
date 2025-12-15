@@ -73,7 +73,7 @@ public class ModelShardStorageTests
     [Test]
     public void LoadCollectionTest()
     {
-        var shard = new FakeModelShard().AsMutable([new CoWFeature()]);
+        var shard = new FakeModelShard().AsLoadModel(A.Fake<IMutableModelChanges>());
 
         shard.Load(_repository!);
 
@@ -85,7 +85,7 @@ public class ModelShardStorageTests
     [Test]
     public void LoadRelationTest()
     {
-        var shard = new FakeModelShard().AsMutable([new CoWFeature()]);
+        var shard = new FakeModelShard().AsLoadModel(A.Fake<IMutableModelChanges>());
 
         shard.Load(_repository!);
 

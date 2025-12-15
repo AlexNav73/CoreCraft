@@ -435,7 +435,7 @@ public class DomainModelTests
         var notificationSent = false;
 
         A.CallTo(() => modelChanges.HasChanges()).Returns(true);
-        A.CallTo(() => modelChanges.Apply(A<IModel>.Ignored)).Throws<Exception>();
+        A.CallTo(() => modelChanges.ApplyAsync(A<IModel>.Ignored)).Throws<Exception>();
 
         model.Subscribe(x => notificationSent = true);
 

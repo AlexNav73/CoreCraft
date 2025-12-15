@@ -52,17 +52,17 @@ public class ModelChangesTests
     }
 
     [Test]
-    public void ApplyChangesTest()
+    public async Task ApplyChangesTest()
     {
         var changesFrame = new FakeChangesFrame();
         var entity = new FirstEntity();
         var props = new FirstEntityProperties();
         var value = "test";
-        var model = new Model(new[] { new FakeModelShard() });
-        var snapshot = new Snapshot(model, new[] { new CoWFeature() });
+        var model = new Model([new FakeModelShard()]);
+        var snapshot = new Snapshot(model, s => s.AsApplyModel());
 
         changesFrame.FirstCollection.Add(CollectionAction.Add, entity, props, props with { NonNullableStringProperty = value });
-        changesFrame.Apply(snapshot);
+        await changesFrame.ApplyAsync(snapshot);
 
         var shard = snapshot.ToModel().Shard<IFakeModelShard>();
 

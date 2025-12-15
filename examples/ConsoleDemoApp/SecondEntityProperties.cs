@@ -1,6 +1,4 @@
-﻿using CoreCraft.Core;
-
-namespace ConsoleDemoApp.Model.Entities
+﻿namespace ConsoleDemoApp.Model.Entities
 {
     public enum SecondEntityEnum : int
     {
@@ -9,20 +7,13 @@ namespace ConsoleDemoApp.Model.Entities
         Second = 2,
     }
 
-    partial record SecondEntityProperties : IHaveEntityId<SecondEntity>
+    partial record SecondEntityProperties
     {
-        public SecondEntity EntityId { get; init; } = new SecondEntity();
-
         [Newtonsoft.Json.JsonIgnore]
         public SecondEntityEnum EnumProperty
         {
             get => (SecondEntityEnum)IntProperty;
             init => IntProperty = (int)value;
         }
-    }
-
-    partial record FirstEntityProperties : IHaveEntityId<FirstEntity>
-    {
-        public FirstEntity EntityId { get; init; } = new FirstEntity();
     }
 }

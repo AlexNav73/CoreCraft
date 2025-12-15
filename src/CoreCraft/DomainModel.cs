@@ -92,7 +92,7 @@ public class DomainModel : IDomainModel
     public async Task Run(Action<IMutableModel, CancellationToken> command, CancellationToken token = default)
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new Snapshot(_modelView.UnsafeModel, [new CoWFeature(), new TrackableFeature(changes)]);
+        var snapshot = new Snapshot(_modelView.UnsafeModel, s => s.AsRunCommandModel(changes));
 
         try
         {
@@ -152,7 +152,7 @@ public class DomainModel : IDomainModel
     public Task Load(IStorage storage, bool force = false, CancellationToken token = default)
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new LoadSnapshot(_modelView.UnsafeModel, [new TrackableFeature(changes)]);
+        var snapshot = new LoadSnapshot(_modelView.UnsafeModel, changes);
 
         return Load(snapshot, changes, () => storage.Load(snapshot, force), token);
     }
@@ -177,7 +177,7 @@ public class DomainModel : IDomainModel
         where T : IMutableModelShard
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new Snapshot(_modelView.UnsafeModel, [new TrackableFeature(changes)]);
+        var snapshot = new Snapshot(_modelView.UnsafeModel, s => s.AsLoadModel(changes));
         var loader = new ModelLoader<T>(((IMutableModel)snapshot).Shard<T>(), force);
 
         return Load(snapshot, changes, () => storage.Load(loader), token);
@@ -203,7 +203,7 @@ public class DomainModel : IDomainModel
         where T : IMutableModelShard
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new Snapshot(_modelView.UnsafeModel, [new TrackableFeature(changes)]);
+        var snapshot = new Snapshot(_modelView.UnsafeModel, s => s.AsLoadModel(changes));
         var loader = new ModelShardLoader<T>(((IMutableModel)snapshot).Shard<T>());
         var configuration = configure(loader);
 
@@ -234,11 +234,11 @@ public class DomainModel : IDomainModel
     {
         if (changes.HasChanges())
         {
-            var snapshot = new Snapshot(_modelView.UnsafeModel, [new CoWFeature()]);
+            var snapshot = new Snapshot(_modelView.UnsafeModel, s => s.AsApplyModel());
 
             try
             {
-                await _scheduler.Enqueue(() => changes.Apply(snapshot), token);
+                await _scheduler.Enqueue(() => changes.ApplyAsync(snapshot, token), token);
             }
             catch (Exception ex)
             {

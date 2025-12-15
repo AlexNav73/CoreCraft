@@ -1,4 +1,5 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Core;
 
@@ -57,4 +58,11 @@ public interface IMutableCollection<TEntity, TProperties> : ICollection<TEntity,
     /// <param name="entity">An entity</param>
     /// <exception cref="KeyNotFoundException">Throws when trying to remove an entity which is not present in the collection</exception>
     void Remove(TEntity entity);
+
+    /// <summary>
+    ///     Applies changes from a collection change set to this collection.
+    /// </summary>
+    /// <param name="changeSet">Changes to apply</param>
+    /// <param name="token"></param>
+    Task ApplyAsync(ICollectionChangeSet<TEntity, TProperties> changeSet, CancellationToken token = default);
 }

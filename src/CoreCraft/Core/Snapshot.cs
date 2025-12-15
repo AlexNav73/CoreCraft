@@ -3,13 +3,13 @@
 internal sealed class Snapshot : IMutableModel, ISnapshot
 {
     private readonly Model _model;
-    private readonly IEnumerable<IFeature> _features;
+    private readonly Func<IReadOnlyState<IMutableModelShard>, IMutableModelShard> _converter;
     private readonly IDictionary<Type, IMutableState<IModelShard>> _copies;
 
-    public Snapshot(Model model, IEnumerable<IFeature> features)
+    public Snapshot(Model model, Func<IReadOnlyState<IMutableModelShard>, IMutableModelShard> converter)
     {
         _model = model;
-        _features = features;
+        _converter = converter;
         _copies = new Dictionary<Type, IMutableState<IModelShard>>();
     }
 
@@ -20,12 +20,17 @@ internal sealed class Snapshot : IMutableModel, ISnapshot
             return (T)shard;
         }
 
-        var modelShard = _model.Shards.OfType<IReadOnlyState<T>>().Single();
-        var mutable = modelShard.AsMutable(_features);
+        var modelShard = _model.Shards.OfType<IReadOnlyState<T>>().SingleOrDefault();
+        if (modelShard is null)
+        {
+            throw new InvalidOperationException($"{typeof(T).Name} model shard doesn't implement IReadOnlyState interface");
+        }
+
+        var mutable = _converter((IReadOnlyState<IMutableModelShard>)modelShard);
 
         _copies.Add(typeof(T), (IMutableState<IModelShard>)mutable);
 
-        return mutable;
+        return (T)mutable;
     }
 
     T IMutableModel.Shard<T>()

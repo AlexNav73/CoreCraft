@@ -32,6 +32,12 @@ public sealed class SyncScheduler : IScheduler
         return Task.FromResult(job());
     }
 
+    /// <inheritdoc/>
+    public Task Enqueue(Func<Task> job, CancellationToken token)
+    {
+        return job();
+    }
+
     /// <summary>
     ///     Immediately starts the job
     /// </summary>

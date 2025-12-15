@@ -58,11 +58,11 @@ public sealed class ModelChanges : IMutableModelChanges
     }
 
     /// <inheritdoc />
-    public void Apply(IModel model)
+    public async Task ApplyAsync(IModel model, CancellationToken token = default)
     {
         foreach (var frame in _frames)
         {
-            frame.Apply(model);
+            await frame.ApplyAsync(model);
         }
     }
 

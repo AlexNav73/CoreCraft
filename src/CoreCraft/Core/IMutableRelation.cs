@@ -1,4 +1,5 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Core;
 
@@ -50,4 +51,11 @@ public interface IMutableRelation<TParent, TChild> : IRelation<TParent, TChild>
         IRepository repository,
         IEnumerable<TParent> parents,
         IEnumerable<TChild> children);
+
+    /// <summary>
+    ///     Applies changes from a relation change set to this relation.
+    /// </summary>
+    /// <param name="changeSet">Change set to apply</param>
+    /// <param name="token"></param>
+    Task ApplyAsync(IRelationChangeSet<TParent, TChild> changeSet, CancellationToken token = default);
 }

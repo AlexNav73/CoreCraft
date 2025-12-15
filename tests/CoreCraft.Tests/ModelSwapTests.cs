@@ -128,6 +128,21 @@ class DelayedAsyncScheduler : IScheduler
             SequentialTaskScheduler.Instance);
     }
 
+    public async Task Enqueue(Func<Task> job, CancellationToken token)
+    {
+        var childtask = await Task.Factory.StartNew(
+            () =>
+            {
+                Thread.Sleep(_commandDelay);
+                return job();
+            },
+            token,
+            TaskCreationOptions.AttachedToParent,
+            SequentialTaskScheduler.Instance);
+
+        await childtask;
+    }
+
     public Task RunParallel(Action job, CancellationToken token)
     {
         return Task.Run(() =>

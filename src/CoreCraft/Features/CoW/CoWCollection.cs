@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.ChangesTracking;
 using CoreCraft.Persistence;
 
 namespace CoreCraft.Features.CoW;
@@ -92,6 +93,14 @@ public sealed class CoWCollection<TEntity, TProperties> :
         _copy ??= (IMutableCollection<TEntity, TProperties>)_collection.Copy();
 
         _copy.Remove(entity);
+    }
+
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.ApplyAsync(ICollectionChangeSet{TEntity, TProperties}, CancellationToken)"/>
+    public Task ApplyAsync(ICollectionChangeSet<TEntity, TProperties> changeSet, CancellationToken token)
+    {
+        _copy ??= (IMutableCollection<TEntity, TProperties>)_collection.Copy();
+
+        return _copy.ApplyAsync(changeSet, token);
     }
 
     /// <inheritdoc cref="ILoadable.Load(IRepository)"/>

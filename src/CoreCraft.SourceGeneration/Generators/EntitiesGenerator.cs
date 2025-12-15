@@ -2,13 +2,10 @@
 
 namespace CoreCraft.SourceGeneration.Generators;
 
-internal sealed class EntitiesGenerator(IndentedTextWriter code) : GeneratorCommon
+internal class EntitiesGenerator(IndentedTextWriter code) : GeneratorCommon
 {
     public void Generate(IEnumerable<ModelShard> shards)
     {
-        code.WriteLine("using CoreCraft.Core;");
-        code.EmptyLine();
-
         foreach (var modelShard in shards)
         {
             DefineEntities(modelShard);
@@ -27,10 +24,10 @@ internal sealed class EntitiesGenerator(IndentedTextWriter code) : GeneratorComm
         }
     }
 
-    private void DefineEntityType(Entity entity)
+    protected virtual void DefineEntityType(Entity entity)
     {
         code.GeneratedClassAttributes(entity.Collection.Shard.Scheme.Debug);
-        code.WriteLine($"public sealed record {entity.Name}(global::System.Guid Id) : Entity(Id)");
+        code.WriteLine($"public sealed partial record {entity.Name}(global::System.Guid Id) : Entity(Id)");
         code.Block(() =>
         {
             code.WriteLine($"internal {entity.Name}() : this(global::System.Guid.NewGuid())");
@@ -40,7 +37,7 @@ internal sealed class EntitiesGenerator(IndentedTextWriter code) : GeneratorComm
         });
     }
 
-    private void DefineEntityPropertiesClass(Entity entity)
+    protected virtual void DefineEntityPropertiesClass(Entity entity)
     {
         code.GeneratedClassAttributes(entity.Collection.Shard.Scheme.Debug);
         code.WriteLine($"public sealed partial record {entity.PropertiesType} : Properties");

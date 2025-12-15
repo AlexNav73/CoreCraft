@@ -2,38 +2,55 @@
 
 namespace CoreCraft.SourceGeneration.Generators;
 
-internal static class ModelGenerator
+internal class ModelGenerator(
+    IndentedTextWriter code,
+    ModelShardGenerator modelShardGenerator,
+    EntitiesGenerator entitiesGenerator)
 {
-    public static string Generate(string assemblyName, string modelName, ModelScheme modelScheme)
+    protected readonly IndentedTextWriter Code = code;
+
+    public void Generate(string assemblyName, string modelName, ModelScheme modelScheme)
     {
         var @namespace = $"{assemblyName}.{modelName}";
-        using var writer = new StringWriter();
-        using var code = new IndentedTextWriter(writer, "    ");
 
-        code.Preamble();
+        Code.Preamble();
 
-        code.WriteLine($"namespace {@namespace}");
-        code.Block(() =>
+        Code.WriteLine($"namespace {@namespace}");
+        Code.Block(() =>
         {
-            code.WriteLine("using CoreCraft;");
-            code.WriteLine("using CoreCraft.Core;");
-            code.WriteLine("using CoreCraft.Views;");
-            code.WriteLine("using CoreCraft.ChangesTracking;");
-            code.WriteLine("using CoreCraft.Persistence;");
-            code.WriteLine("using CoreCraft.Persistence.History;");
-            code.WriteLine($"using {@namespace}.Entities;");
-            code.EmptyLine();
+            EmitModelUsingDirectives();
 
-            new ModelShardGenerator(code).Generate(modelScheme.Shards);
+            Code.WriteLine($"using {@namespace}.Entities;");
+            Code.EmptyLine();
+
+            modelShardGenerator.Generate(modelScheme.Shards);
         });
-        code.EmptyLine();
+        Code.EmptyLine();
 
-        code.WriteLine($"namespace {@namespace}.Entities");
-        code.Block(() =>
+        Code.WriteLine($"namespace {@namespace}.Entities");
+        Code.Block(() =>
         {
-            new EntitiesGenerator(code).Generate(modelScheme.Shards);
-        });
+            EmitEntitiesUsingDirectives();
+            Code.EmptyLine();
 
-        return writer.ToString();
+            entitiesGenerator.Generate(modelScheme.Shards);
+        });
+    }
+
+    protected virtual void EmitModelUsingDirectives()
+    {
+        Code.WriteLine("using CoreCraft;");
+        Code.WriteLine("using CoreCraft.Core;");
+        Code.WriteLine("using CoreCraft.Views;");
+        Code.WriteLine("using CoreCraft.Features.CoW;");
+        Code.WriteLine("using CoreCraft.Features.Tracking;");
+        Code.WriteLine("using CoreCraft.ChangesTracking;");
+        Code.WriteLine("using CoreCraft.Persistence;");
+        Code.WriteLine("using CoreCraft.Persistence.History;");
+    }
+
+    protected virtual void EmitEntitiesUsingDirectives()
+    {
+        Code.WriteLine("using CoreCraft.Core;");
     }
 }

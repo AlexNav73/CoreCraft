@@ -26,10 +26,17 @@ internal sealed class ApplicationModelGenerator : GeneratorBase
             {
                 throw new InvalidOperationException($"Failed to deserialize model file [{name}]");
             }
-            
-            var code = ModelGenerator.Generate(assemblyName, name, modelScheme);
 
-            AddSourceFile(context, name, code);
+            using var writer = new StringWriter();
+            using var code = new IndentedTextWriter(writer, "    ");
+            var generator = new ModelGenerator(
+                code,
+                new ModelShardGenerator(code),
+                new EntitiesGenerator(code));
+
+            generator.Generate(assemblyName, name, modelScheme);
+
+            AddSourceFile(context, name, writer.ToString());
         }
     }
 }
