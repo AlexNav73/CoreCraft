@@ -9,7 +9,6 @@ using CoreCraft.Subscription;
 using CoreCraft.Subscription.Extensions;
 using LinqToDB;
 using LinqToDB.Data;
-using LinqToDB.Mapping;
 
 namespace ConsoleDemoApp;
 
@@ -17,6 +16,10 @@ static class Program
 {
     private const string Path = "test.db";
     private const string History = "history.json";
+    
+    private const ConsoleColor SectionColor = ConsoleColor.DarkRed;
+    private const ConsoleColor ChangesColor = ConsoleColor.Green;
+    private const ConsoleColor SqlQueriesColor = ConsoleColor.DarkGray;
 
     public static async Task Main()
     {
@@ -32,16 +35,16 @@ static class Program
         DataConnection.TurnTraceSwitchOn();
         DataConnection.WriteTraceLine = (s1, s2, lvl) =>
         {
-            Console.WriteLine(s1);
+            ConsoleWriteLine(s1, SqlQueriesColor);
         };
 
         var options = new DataOptions()
             .UseSQLite(@$"DataSource={Path};")
-            .UseMappingSchema(new MyCustomMappingSchema());
+            .UseMappingSchema(new ExampleMappingSchema());
         using var db = new DataConnection(options);
 
-        await db.CreateTableAsync<FirstEntityProperties>();
-        await db.CreateTableAsync<SecondEntityProperties>();
+        await db.CreateTableAsync<FirstEntityProperties>(schemaName: ExampleModelShardInfo.FirstCollectionInfo.ShardName);
+        await db.CreateTableAsync<SecondEntityProperties>(schemaName: ExampleModelShardInfo.SecondCollectionInfo.ShardName);
 
         var storage = new SqliteStorage(Path, [], Console.WriteLine);
         var historyStorage = new JsonStorage(History, new() { Formatting = Newtonsoft.Json.Formatting.Indented });
@@ -49,7 +52,7 @@ static class Program
 
         using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
-            Console.WriteLine("======================== Modifying ========================");
+            ConsoleWriteLine("======================== Modifying ========================", SectionColor);
 
             await model.Run<IMutableExampleModelShard>(async (shard, _) =>
             {
@@ -103,29 +106,29 @@ static class Program
             });
         }
 
-        Console.WriteLine("======================== Saving ========================");
+        ConsoleWriteLine("======================== Saving ========================", SectionColor);
         await model.Save(storage);
         await model.History.Save(historyStorage);
 
         model = new UndoRedoDomainModel([new ExampleModelShard(db)], new SyncScheduler());
         using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
-            Console.WriteLine("======================== Loading ========================");
+            ConsoleWriteLine("======================== Loading ========================", SectionColor);
 
             await model.History.Load(historyStorage);
             await model.Load(storage, force: true);
 
-            Console.WriteLine("======================== Adding new change ========================");
+            ConsoleWriteLine("======================== Adding new change ========================", SectionColor);
 
             await model.Run<IMutableExampleModelShard>(async (shard, _) =>
             {
-                //shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
-                await shard.FirstCollection.AddAsync(new() { StringProperty = "test", IntegerProperty = 42 });
+                //shard.FirstCollection.Add(new() { StringProperty = "modified after load history", IntegerProperty = 42 });
+                await shard.FirstCollection.AddAsync(new() { StringProperty = "modified after load history", IntegerProperty = 42 });
             });
             await model.History.Save(historyStorage);
             await model.History.Load(historyStorage);
 
-            Console.WriteLine("======================== Undo after load ========================");
+            ConsoleWriteLine("======================== Undo after load ========================", SectionColor);
 
             var historySize = model.History.UndoStack.Count;
             for (int i = 0; i < historySize; i++)
@@ -139,66 +142,32 @@ static class Program
     {
         foreach (var c in change.Hunk.FirstCollection)
         {
-            Console.WriteLine($"Entity [{c.Entity}] has been {c.Action}ed.");
-            Console.WriteLine($"   Old data: {c.OldData}");
-            Console.WriteLine($"   New data: {c.NewData}");
+            ConsoleWriteLine($"Entity [{c.Entity}] has been {c.Action}ed.", ChangesColor);
+            ConsoleWriteLine($"   Old data: {c.OldData}", ChangesColor);
+            ConsoleWriteLine($"   New data: {c.NewData}", ChangesColor);
             Console.WriteLine();
         }
 
         foreach (var c in change.Hunk.SecondCollection)
         {
-            Console.WriteLine($"Entity [{c.Entity}] has been {c.Action}ed.");
-            Console.WriteLine($"   Old data: {c.OldData}");
-            Console.WriteLine($"   New data: {c.NewData}");
+            ConsoleWriteLine($"Entity [{c.Entity}] has been {c.Action}ed.", ChangesColor);
+            ConsoleWriteLine($"   Old data: {c.OldData}", ChangesColor);
+            ConsoleWriteLine($"   New data: {c.NewData}", ChangesColor);
             Console.WriteLine();
         }
 
         foreach (var c in change.Hunk.OneToOneRelation)
         {
-            Console.WriteLine($"Parent [{c.Parent}] and Child [{c.Child}] has been {c.Action}.");
+            ConsoleWriteLine($"Parent [{c.Parent}] and Child [{c.Child}] has been {c.Action}.", ChangesColor);
             Console.WriteLine();
         }
     }
-}
 
-/// <summary>
-/// 
-/// </summary>
-public class MyCustomMappingSchema : MappingSchema
-{
-    /// <summary>
-    /// 
-    /// </summary>
-    public MyCustomMappingSchema() : base(nameof(MyCustomMappingSchema))
+    private static void ConsoleWriteLine(string? value, ConsoleColor color)
     {
-        var builder = new FluentMappingBuilder(this);
-        ConfigureMappings(builder);
-        builder.Build();
-    }
-
-    private static void ConfigureMappings(FluentMappingBuilder builder)
-    {
-        builder.Entity<FirstEntityProperties>()
-            .HasTableName(ExampleModelShardInfo.FirstCollectionInfo.Name)
-            .HasSchemaName(ExampleModelShardInfo.FirstCollectionInfo.ShardName)
-            .Property(p => p.EntityId)
-                .IsPrimaryKey()
-                .IsNotNull()
-                .HasDataType(DataType.Guid)
-                .HasConversion(x => x.Id, x => new FirstEntity(x));
-
-        builder.Entity<SecondEntityProperties>()
-            .HasTableName(ExampleModelShardInfo.SecondCollectionInfo.Name)
-            .HasSchemaName(ExampleModelShardInfo.FirstCollectionInfo.ShardName)
-            .Property(p => p.EntityId)
-                .IsPrimaryKey()
-                .HasDataType(DataType.Guid)
-                .IsNotNull()
-                .HasConversion(x => x.Id, x => new SecondEntity(x))
-            .Property(p => p.EnumProperty)
-                .IsNotColumn()
-                .HasSkipOnInsert()
-                .SkipOnEntityFetch()
-                .HasSkipOnUpdate();
+        var oldColor = Console.ForegroundColor;
+        Console.ForegroundColor = color;
+        Console.WriteLine(value);
+        Console.ForegroundColor = oldColor;
     }
 }

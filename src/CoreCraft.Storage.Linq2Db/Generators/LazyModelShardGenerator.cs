@@ -1,6 +1,7 @@
 ﻿using CoreCraft.SourceGeneration;
 using CoreCraft.SourceGeneration.Extensions;
 using CoreCraft.SourceGeneration.Generators;
+using LinqToDB.Mapping;
 
 namespace CoreCraft.Storage.Linq2Db.Generators;
 
@@ -301,5 +302,60 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
         {
             return $"await modelShard.{name}.ApplyAsync({name}, token);";
         }
+    }
+
+    protected override void DefineModelShardSpecificClasses(ModelShard modelShard)
+    {
+        DefineMappingSchemaClass(modelShard);
+    }
+
+    private void DefineMappingSchemaClass(ModelShard modelShard)
+    {
+        var visibility = GetInternalTypeVisibility(modelShard);
+
+        Code.GeneratedClassAttributes(modelShard.Scheme.Debug);
+        Code.Class(visibility, "sealed partial", $"{modelShard.Name}MappingSchema",
+            [
+                "MappingSchema"
+            ],
+            () =>
+            {
+                Code.WriteLine($"public {modelShard.Name}MappingSchema() : base(nameof({modelShard.Name}MappingSchema))");
+                Code.Block(() =>
+                {
+                    Code.WriteLine("var builder = new FluentMappingBuilder(this);");
+                    Code.WriteLine("ConfigureMappings(builder);");
+                    Code.WriteLine("builder.Build();");
+                });
+                Code.WriteLine();
+
+                Code.WriteLine("private void ConfigureMappings(FluentMappingBuilder builder)");
+                Code.Block(() =>
+                {
+                    foreach (var entity in modelShard.Collections.Select(x => x.Entity))
+                    {
+                        Code.WriteLine($"builder.Entity<{entity.PropertiesType}>()");
+                        Code.WithIndent(c =>
+                        {
+                            c.WriteLine($".HasTableName({modelShard.Name}ModelShardInfo.{entity.Collection.Name}Info.Name)");
+                            c.WriteLine($".HasSchemaName({modelShard.Name}ModelShardInfo.{entity.Collection.Name}Info.ShardName)");
+                            c.WriteLine($".Property(p => p.EntityId)");
+                            c.WithIndent(c2 =>
+                            {
+                                c2.WriteLine(".IsPrimaryKey()");
+                                c2.WriteLine(".IsNotNull()");
+                                c2.WriteLine(".HasDataType(DataType.Guid)");
+                                c2.WriteLine($".HasConversion(x => x.Id, x => new {entity.Name}(x));");
+                            });
+                        });
+                        Code.WriteLine();
+                    }
+
+                    Code.WriteLine("ConfigureEntityMappings(builder);");
+                });
+                Code.WriteLine();
+
+                Code.WriteLine("partial void ConfigureEntityMappings(FluentMappingBuilder builder);");
+            });
     }
 }
