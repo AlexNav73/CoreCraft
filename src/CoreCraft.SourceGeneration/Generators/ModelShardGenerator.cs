@@ -28,6 +28,8 @@ internal class ModelShardGenerator(IndentedTextWriter code) : GeneratorCommon
             Code.EmptyLine();
             DefineModelShardViewClass(modelShard);
             Code.EmptyLine();
+            DefineModelShardSpecificClasses(modelShard);
+            Code.EmptyLine();
         }
     }
 
@@ -642,6 +644,10 @@ internal class ModelShardGenerator(IndentedTextWriter code) : GeneratorCommon
                 Code.WriteLine("throw new global::System.InvalidOperationException(\"Cannot save model shard's view. Call Save on the real model shard.\");");
             });
         }
+    }
+
+    protected virtual void DefineModelShardSpecificClasses(ModelShard modelShard)
+    {
     }
 
     protected static string GetInternalTypeVisibility(ModelShard modelShard)

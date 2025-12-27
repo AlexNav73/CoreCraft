@@ -17,6 +17,7 @@ internal sealed class LazyModelGenerator(
         Code.WriteLine("using CoreCraft.Storage.Linq2Db.Features;");
         Code.WriteLine("using LinqToDB;");
         Code.WriteLine("using LinqToDB.Data;");
+        Code.WriteLine("using LinqToDB.Mapping;");
     }
 
     protected override void EmitEntitiesUsingDirectives()
