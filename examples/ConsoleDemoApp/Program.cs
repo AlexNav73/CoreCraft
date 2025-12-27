@@ -67,10 +67,16 @@ static class Program
                 var entity = await shard.FirstCollection.Entities.FirstAsync();
                 //var entity = shard.FirstCollection.First();
 
-                await shard.FirstCollection.ModifyAsync(entity, props => props.StringProperty, "modified 1");
-                await shard.FirstCollection.ModifyAsync(entity, props => props.IntegerProperty, "modified 2".GetHashCode());
-                await shard.FirstCollection.ModifyAsync(entity, props => props.StringProperty, "modified 3");
-                await shard.FirstCollection.ModifyAsync(entity, props => props.IntegerProperty, "modified 3".GetHashCode());
+                await shard.FirstCollection.ModifyAsync(entity, props => new()
+                {
+                    StringProperty = "modified 1",
+                    IntegerProperty = "modified 1".GetHashCode()
+                });
+                await shard.FirstCollection.ModifyAsync(entity, props => new()
+                {
+                    StringProperty = "modified 2",
+                    IntegerProperty = "modified 2".GetHashCode()
+                });
 
                 //shard.FirstCollection.Modify(entity, props => props with { StringProperty = "modified 1" });
                 //shard.FirstCollection.Modify(entity, props => props with { IntegerProperty = "modified 2".GetHashCode() });
@@ -83,7 +89,7 @@ static class Program
                 var entity = await shard.SecondCollection.Entities.FirstAsync();
                 //var entity = shard.SecondCollection.First();
 
-                await shard.SecondCollection.ModifyAsync(entity, props => props.IntProperty, (int)SecondEntityEnum.Second);
+                await shard.SecondCollection.ModifyAsync(entity, props => new() { IntProperty = (int)SecondEntityEnum.Second });
                 //shard.SecondCollection.Modify(entity, props => props with { IntProperty = (int)SecondEntityEnum.Second });
             });
 

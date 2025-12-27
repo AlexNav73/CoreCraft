@@ -65,16 +65,17 @@ public sealed class TrackableLazyCollection<TEntity, TProperties> :
         return _collection.ContainsAsync(entity, token);
     }
 
-    public async Task ModifyAsync<T>(TEntity entity, Expression<Func<TProperties, T>> property, T value, CancellationToken token = default)
+    public async Task<TProperties?> ModifyAsync(TEntity entity, Expression<Func<TProperties, TProperties>> modifier, CancellationToken token = default)
     {
         var oldProps = await _collection.GetAsync(entity, token);
-        await _collection.ModifyAsync(entity, property, value, token);
-        var newProps = await _collection.GetAsync(entity, token);
+        var newProps = await _collection.ModifyAsync(entity, modifier, token);
 
         if (oldProps is null || !oldProps.Equals(newProps))
         {
             _changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
         }
+
+        return newProps;
     }
 
     public async Task RemoveAsync(TEntity entity, CancellationToken token = default)

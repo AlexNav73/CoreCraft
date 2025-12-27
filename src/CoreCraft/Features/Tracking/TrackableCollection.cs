@@ -78,16 +78,17 @@ public sealed class TrackableCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})" />
-    public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
+    public TProperties Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {
         var oldProps = _collection.Get(entity);
-        _collection.Modify(entity, modifier);
-        var newProps = _collection.Get(entity);
+        var newProps = _collection.Modify(entity, modifier);
 
         if (!oldProps.Equals(newProps))
         {
             _changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
         }
+
+        return newProps;
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Remove(TEntity)" />

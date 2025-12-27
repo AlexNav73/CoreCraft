@@ -50,7 +50,7 @@ public interface IMutableCollection<TEntity, TProperties> : ICollection<TEntity,
     /// <param name="entity">An entity</param>
     /// <param name="modifier">A function which takes old properties and returns new properties with modifications</param>
     /// <exception cref="KeyNotFoundException">Throws when trying to modify an entity which is not present in the collection</exception>
-    void Modify(TEntity entity, Func<TProperties, TProperties> modifier);
+    TProperties Modify(TEntity entity, Func<TProperties, TProperties> modifier);
 
     /// <summary>
     ///     Removes entity with properties from the collection

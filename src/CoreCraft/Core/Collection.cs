@@ -101,11 +101,13 @@ public sealed class Collection<TEntity, TProperties> :
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})"/>
-    public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
+    public TProperties Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {
         if (_relation.TryGetValue(entity, out var properties))
         {
-            _relation[entity] = modifier(properties);
+            var newData = modifier(properties);
+            _relation[entity] = newData;
+            return newData;
         }
         else
         {
