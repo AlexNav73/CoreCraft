@@ -19,7 +19,7 @@ internal class LazyEntitiesGenerator(IndentedTextWriter code) : EntitiesGenerato
         code.WriteLine($"partial record {entity.PropertiesType} : Properties, IHaveEntityId<{entity.Name}>");
         code.Block(() =>
         {
-            code.WriteLine($"public {DefineProperty(entity.Name, "EntityId", "get;")} = new {entity.Name}();");
+            code.WriteLine($"public {DefineProperty(entity.Name, "EntityId", "get; init;")} = new {entity.Name}();");
         });
     }
 }
