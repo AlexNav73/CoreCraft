@@ -31,9 +31,6 @@ public sealed class LazyCollection<TEntity, TProperties> :
     /// <inheritdoc />
     public CollectionInfo Info { get; }
 
-    /// <inheritdoc />
-    public IQueryable<TEntity> Entities => _table.Select(p => p.EntityId);
-
     /// <summary>
     /// 
     /// </summary>

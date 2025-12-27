@@ -12,11 +12,6 @@ public interface ILazyCollection<TEntity, TProperties> : IQueryable<TProperties>
     where TProperties : Properties, IHaveEntityId<TEntity>
 {
     /// <summary>
-    /// 
-    /// </summary>
-    IQueryable<TEntity> Entities { get; }
-
-    /// <summary>
     ///     Returns properties of a given entity
     /// </summary>
     /// <param name="entity">An entity</param>
