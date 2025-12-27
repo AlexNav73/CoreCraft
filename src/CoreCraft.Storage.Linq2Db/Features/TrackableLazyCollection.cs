@@ -31,8 +31,6 @@ public sealed class TrackableLazyCollection<TEntity, TProperties> :
 
     /// <inheritdoc cref="IHaveInfo{T}.Info" />
     public CollectionInfo Info => _collection.Info;
-
-    public IQueryable<TEntity> Entities => _collection.Entities;
     
     public Type ElementType => _collection.ElementType;
     
