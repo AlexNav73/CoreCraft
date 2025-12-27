@@ -18,6 +18,7 @@ public sealed class LazyCollection<TEntity, TProperties> :
     where TProperties : Properties, IHaveEntityId<TEntity>
 {
     private readonly ITable<TProperties> _table;
+    private readonly Dictionary<TEntity, TProperties> _cache = [];
 
     /// <inheritdoc />
     public Type ElementType => _table.ElementType;
@@ -53,6 +54,8 @@ public sealed class LazyCollection<TEntity, TProperties> :
     {
         var inserted = await _table.InsertWithOutputAsync(properties, token);
 
+        _cache.Add(inserted.EntityId, inserted);
+
         return inserted.EntityId;
     }
 
@@ -63,12 +66,24 @@ public sealed class LazyCollection<TEntity, TProperties> :
             .Where(x => x.EntityId == entity)
             .UpdateWithOutputAsync(modifier, (deleted, inserted) => inserted, token);
 
-        return result.SingleOrDefault();
+        var properties = result.SingleOrDefault();
+
+        if (_cache.ContainsKey(entity) && properties is not null)
+        {
+            _cache[entity] = properties;
+        }
+
+        return properties;
     }
 
     /// <inheritdoc />
     public Task RemoveAsync(TEntity entity, CancellationToken token = default)
     {
+        if (_cache.ContainsKey(entity))
+        {
+            _cache.Remove(entity);
+        }
+
         return _table.Where(p => p.EntityId == entity)
             .DeleteAsync(token);
     }
@@ -76,6 +91,11 @@ public sealed class LazyCollection<TEntity, TProperties> :
     /// <inheritdoc />
     public Task<TProperties?> GetAsync(TEntity entity, CancellationToken token = default)
     {
+        if (_cache.TryGetValue(entity, out var properties))
+        {
+            return Task.FromResult<TProperties?>(properties);
+        }
+
         return _table.FirstOrDefaultAsync(p => p.EntityId == entity, token);
     }
 
@@ -96,18 +116,14 @@ public sealed class LazyCollection<TEntity, TProperties> :
             switch (change.Action)
             {
                 case CollectionAction.Add:
-                    // Insert the new data row. Use InsertWithOutputAsync to ensure inserted values are returned if needed.
-                    await _table.InsertWithOutputAsync(change.NewData!, token).ConfigureAwait(false);
+                    await AddAsync(change.NewData!, token);
                     break;
                 case CollectionAction.Remove:
-                    await _table.Where(p => p.EntityId == change.Entity)
-                        .DeleteAsync(token).ConfigureAwait(false);
+                    await RemoveAsync(change.Entity, token);
                     break;
                 case CollectionAction.Modify:
-                    // Replace approach: delete existing row then insert new one.
-                    await _table.Where(p => p.EntityId == change.Entity)
-                        .DeleteAsync(token).ConfigureAwait(false);
-                    await _table.InsertWithOutputAsync(change.NewData!, token).ConfigureAwait(false);
+                    await RemoveAsync(change.Entity, token);
+                    await AddAsync(change.NewData!, token);
                     break;
                 default:
                     throw new NotSupportedException($"An action [{change.Action}] is not supported.");
