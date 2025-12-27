@@ -33,11 +33,10 @@ public interface IMutableLazyCollection<TEntity, TProperties> : ILazyCollection<
     ///     Modifies properties of the given entity
     /// </summary>
     /// <param name="entity">An entity</param>
-    /// <param name="property"></param>
-    /// <param name="value"></param>
+    /// <param name="modifier"></param>
     /// <param name="token">Cancellation token to cancel the asynchronous operation</param>
     /// <exception cref="KeyNotFoundException">Throws when trying to modify an entity which is not present in the collection</exception>
-    Task ModifyAsync<T>(TEntity entity, Expression<Func<TProperties, T>> property, T value, CancellationToken token = default);
+    Task<TProperties?> ModifyAsync(TEntity entity, Expression<Func<TProperties, TProperties>> modifier, CancellationToken token = default);
 
     /// <summary>
     ///     Removes entity with properties from the collection

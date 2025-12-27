@@ -80,11 +80,11 @@ public sealed class CoWCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})"/>
-    public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
+    public TProperties Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {
         _copy ??= (IMutableCollection<TEntity, TProperties>)_collection.Copy();
 
-        _copy.Modify(entity, modifier);
+        return _copy.Modify(entity, modifier);
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Remove(TEntity)"/>
