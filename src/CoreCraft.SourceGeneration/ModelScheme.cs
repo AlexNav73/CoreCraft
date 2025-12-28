@@ -24,13 +24,15 @@ internal sealed record ModelShard
 
 internal sealed record Collection(string Name, Entity Entity, ModelShard Shard, bool LoadManually = false)
 {
-    public string Type => $"Collection<{Entity.Name}, {Entity.PropertiesType}>";
+    public string EntityPropertyTypes => $"{Entity.Name}, {Entity.PropertiesType}";
 
-    public string ViewType => $"ICollectionView<{Entity.Name}, {Entity.PropertiesType}>";
+    public string Type => $"Collection<{EntityPropertyTypes}>";
+
+    public string ViewType => $"ICollectionView<{EntityPropertyTypes}>";
 
     public string MutableType => $"Mutable{Type}";
 
-    public string ChangesType => $"CollectionChangeSet<{Entity.Name}, {Entity.PropertiesType}>";
+    public string ChangesType => $"CollectionChangeSet<{EntityPropertyTypes}>";
 }
 
 internal sealed record Relation(string Name, Collection Parent, Collection Child, RelationType RelationType, ModelShard Shard)

@@ -18,6 +18,7 @@ internal sealed class LazyModelGenerator(
         Code.WriteLine("using LinqToDB;");
         Code.WriteLine("using LinqToDB.Data;");
         Code.WriteLine("using LinqToDB.Mapping;");
+        Code.WriteLine("using LinqToDB.Interceptors;");
     }
 
     protected override void EmitEntitiesUsingDirectives()
