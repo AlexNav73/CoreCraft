@@ -3,8 +3,9 @@ using ConsoleDemoApp.Model.Entities;
 using CoreCraft;
 using CoreCraft.Scheduling;
 using CoreCraft.Storage.Json;
-using CoreCraft.Storage.Sqlite;
+using CoreCraft.Storage.Linq2Db;
 using CoreCraft.Storage.Linq2Db.Extensions;
+using CoreCraft.Storage.Sqlite;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Extensions;
 using LinqToDB;
@@ -49,6 +50,9 @@ static class Program
         var storage = new SqliteStorage(Path, [], Console.WriteLine);
         var historyStorage = new JsonStorage(History, new() { Formatting = Newtonsoft.Json.Formatting.Indented });
         var model = new UndoRedoDomainModel([new ExampleModelShard(db)], new SyncScheduler());
+
+        db.AddInterceptor(new ExampleModelShardInterceptor(model));
+        model.AddInterceptor(new TransactionInterceptor(db));
 
         using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {

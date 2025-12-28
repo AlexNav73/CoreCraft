@@ -13,7 +13,8 @@ namespace CoreCraft.Storage.Linq2Db;
 /// <typeparam name="TProperties"></typeparam>
 public sealed class LazyCollection<TEntity, TProperties> :
     IMutableLazyCollection<TEntity, TProperties>,
-    IMutableState<ILazyCollection<TEntity, TProperties>>
+    IMutableState<ILazyCollection<TEntity, TProperties>>,
+    IEntityCache<TEntity, TProperties>
     where TEntity : Entity
     where TProperties : Properties, IHaveEntityId<TEntity>
 {
@@ -54,7 +55,7 @@ public sealed class LazyCollection<TEntity, TProperties> :
     {
         var inserted = await _table.InsertWithOutputAsync(properties, token);
 
-        _cache.Add(inserted.EntityId, inserted);
+        CacheImpl(inserted);
 
         return inserted.EntityId;
     }
@@ -68,9 +69,9 @@ public sealed class LazyCollection<TEntity, TProperties> :
 
         var properties = result.SingleOrDefault();
 
-        if (_cache.ContainsKey(entity) && properties is not null)
+        if (properties is not null)
         {
-            _cache[entity] = properties;
+            CacheImpl(properties);
         }
 
         return properties;
@@ -131,6 +132,11 @@ public sealed class LazyCollection<TEntity, TProperties> :
         }
     }
 
+    void IEntityCache<TEntity, TProperties>.Cache(TProperties properties)
+    {
+        CacheImpl(properties);
+    }
+
     /// <inheritdoc />
     public IEnumerator<TProperties> GetEnumerator()
     {
@@ -140,5 +146,17 @@ public sealed class LazyCollection<TEntity, TProperties> :
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    private void CacheImpl(TProperties properties)
+    {
+        if (_cache.ContainsKey(properties.EntityId))
+        {
+            _cache[properties.EntityId] = properties;
+        }
+        else
+        {
+            _cache.Add(properties.EntityId, properties);
+        }
     }
 }

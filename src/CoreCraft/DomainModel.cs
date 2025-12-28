@@ -1,8 +1,6 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Commands;
 using CoreCraft.Exceptions;
-using CoreCraft.Features.CoW;
-using CoreCraft.Features.Tracking;
 using CoreCraft.Persistence;
 using CoreCraft.Persistence.Lazy;
 using CoreCraft.Scheduling;
@@ -20,6 +18,7 @@ public class DomainModel : IDomainModel
     private readonly ModelView _modelView;
     private readonly IScheduler _scheduler;
     private readonly ModelSubscription _modelSubscription;
+    private readonly HashSet<Interceptor> _interceptors;
 
     private volatile Change<IModelChanges>? _currentChanges;
 
@@ -39,6 +38,7 @@ public class DomainModel : IDomainModel
         _modelView = new ModelView(shards);
         _scheduler = scheduler;
         _modelSubscription = new ModelSubscription();
+        _interceptors = new HashSet<Interceptor>();
     }
 
     /// <inheritdoc cref="IModel.Shard{T}"/>
@@ -96,7 +96,20 @@ public class DomainModel : IDomainModel
 
         try
         {
-            await _scheduler.Enqueue(() => command(snapshot, token), token);
+            await _scheduler.Enqueue(() =>
+            {
+                try
+                {
+                    Invoke(x => x.BeforeCommand());
+                    command(snapshot, token);
+                    Invoke(x => x.AfterCommand());
+                }
+                catch (Exception ex)
+                {
+                    Invoke(x => x.CommandFailed(ex));
+                    throw;
+                }
+            }, token);
         }
         catch (Exception ex)
         {
@@ -211,6 +224,15 @@ public class DomainModel : IDomainModel
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="interceptor"></param>
+    public void AddInterceptor(Interceptor interceptor)
+    {
+        _interceptors.Add(interceptor);
+    }
+
+    /// <summary>
     ///     Provides direct access to the underlying collection of model shards in a read-only manner.
     /// </summary>
     /// <remarks>
@@ -238,7 +260,17 @@ public class DomainModel : IDomainModel
 
             try
             {
-                await _scheduler.Enqueue(() => changes.ApplyAsync(snapshot, token), token);
+                await _scheduler.Enqueue(() =>
+                {
+                    Invoke(x => x.BeforeApply());
+                    return changes.ApplyAsync(snapshot, token)
+                        .ContinueWith(
+                            t => Invoke(x => x.AfterApply()),
+                            TaskContinuationOptions.NotOnFaulted | TaskContinuationOptions.ExecuteSynchronously)
+                        .ContinueWith(
+                            t => Invoke(x => x.ApplyFailed(t.Exception!)),
+                            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+                }, token);
             }
             catch (Exception ex)
             {
@@ -292,5 +324,13 @@ public class DomainModel : IDomainModel
     private static Change<IModelChanges> CreateChangeObject(ModelChangeResult result, IModelChanges changes)
     {
         return new Change<IModelChanges>(result.OldModel, result.NewModel, changes);
+    }
+
+    private void Invoke(Action<Interceptor> notify)
+    {
+        foreach (var interceptor in _interceptors)
+        {
+            notify(interceptor);
+        }
     }
 }

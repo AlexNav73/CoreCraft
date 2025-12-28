@@ -270,10 +270,6 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
         });
     }
 
-    protected override void DefineModelShardViewClass(ModelShard modelShard)
-    {
-    }
-
     protected override void DefineApplyMethod(ModelShard modelShard)
     {
         Code.WriteLine($"public async global::System.Threading.Tasks.Task ApplyAsync(IModel model, global::System.Threading.CancellationToken token)");
@@ -307,6 +303,8 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
     protected override void DefineModelShardSpecificClasses(ModelShard modelShard)
     {
         DefineMappingSchemaClass(modelShard);
+        Code.WriteLine();
+        DefineModelShardInterceptor(modelShard);
     }
 
     private void DefineMappingSchemaClass(ModelShard modelShard)
@@ -357,5 +355,58 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
 
                 Code.WriteLine("partial void ConfigureEntityMappings(FluentMappingBuilder builder);");
             });
+    }
+
+    private void DefineModelShardInterceptor(ModelShard modelShard)
+    {
+        var visibility = GetInternalTypeVisibility(modelShard);
+
+        Code.GeneratedClassAttributes(modelShard.Scheme.Debug);
+        Code.Class(visibility, "sealed", $"{modelShard.Name}ModelShardInterceptor",
+            [
+                "EntityServiceInterceptor"
+            ],
+            () =>
+            {
+
+                foreach (var collection in modelShard.Collections)
+                {
+                    Code.WriteLine(DefineProperty($"IEntityCache<{collection.EntityPropertyTypes}>", collection.Name, "get;"));
+                }
+                Code.EmptyLine();
+
+                Code.WriteLine($"public {modelShard.Name}ModelShardInterceptor(IModel model)");
+                Code.Block(() =>
+                {
+                    Code.WriteLine($"var shard = model.Shard<I{modelShard.Name}ModelShard>();");
+                    Code.EmptyLine();
+
+                    foreach (var collection in modelShard.Collections)
+                    {
+                        Code.WriteLine($"{collection.Name} = (IEntityCache<{collection.EntityPropertyTypes}>)shard.{collection.Name};");
+                    }
+                });
+                Code.WriteLine();
+
+                Code.WriteLine("public override object EntityCreated(EntityCreatedEventData eventData, object entity)");
+                Code.Block(() =>
+                {
+                    foreach (var collection in modelShard.Collections)
+                    {
+                        Code.WriteLine($"if (eventData.SchemaName == {modelShard.Name}ModelShardInfo.{collection.Name}Info.ShardName && eventData.TableName == {modelShard.Name}ModelShardInfo.{collection.Name}Info.Name && entity is {collection.Entity.PropertiesType} {ToCamelCase(collection.Entity.PropertiesType)})");
+                        Code.Block(() =>
+                        {
+                            Code.WriteLine($"{collection.Name}.Cache({ToCamelCase(collection.Entity.PropertiesType)});");
+                        });
+                    }
+                    Code.WriteLine();
+
+                    Code.WriteLine("return base.EntityCreated(eventData, entity);");
+                });
+            });
+    }
+
+    protected override void DefineModelShardViewClass(ModelShard modelShard)
+    {
     }
 }
