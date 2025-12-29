@@ -44,9 +44,6 @@ static class Program
             .UseMappingSchema(new ExampleMappingSchema());
         using var db = new DataConnection(options);
 
-        await db.CreateTableAsync<FirstEntityProperties>(schemaName: ExampleModelShardInfo.FirstCollectionInfo.ShardName);
-        await db.CreateTableAsync<SecondEntityProperties>(schemaName: ExampleModelShardInfo.SecondCollectionInfo.ShardName);
-
         var storage = new SqliteStorage(Path, [], Console.WriteLine);
         var historyStorage = new JsonStorage(History, new() { Formatting = Newtonsoft.Json.Formatting.Indented });
         var model = new UndoRedoDomainModel([new ExampleModelShard(db)], new SyncScheduler());
@@ -67,6 +64,7 @@ static class Program
                 //var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5, FloatProperty = 0.75f, IntProperty = (int)SecondEntityEnum.Second });
 
                 //shard.OneToOneRelation.Add(first, second);
+                await shard.OneToOneRelation.AddAsync(first, second);
             });
 
             await model.Run<IMutableExampleModelShard>(async (shard, _) =>
