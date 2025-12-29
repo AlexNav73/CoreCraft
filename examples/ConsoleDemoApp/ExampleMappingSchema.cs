@@ -3,9 +3,6 @@ using LinqToDB.Mapping;
 
 namespace ConsoleDemoApp.Model;
 
-/// <summary>
-/// 
-/// </summary>
 partial class ExampleMappingSchema
 {
     partial void ConfigureEntityMappings(FluentMappingBuilder builder)

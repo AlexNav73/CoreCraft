@@ -101,6 +101,7 @@ public class DomainModel : IDomainModel
                 try
                 {
                     Invoke(x => x.BeforeCommand());
+                    // FIXME: if the command is an async method then the exception won't be caught here
                     command(snapshot, token);
                     Invoke(x => x.AfterCommand());
                 }
