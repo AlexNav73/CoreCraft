@@ -40,7 +40,7 @@ internal sealed partial class HomePageViewModel : DisposableObservableObject
         if (NewItemName != null)
         {
             await _model.Run<IMutableToDoModelShard>(
-                (shard, _) => shard.Lists.Add(new() { Name = NewItemName }));
+                shard => shard.Lists.Add(new() { Name = NewItemName }));
 
             NewItemName = null;
         }

@@ -59,7 +59,7 @@ public class DomainModelTests
             Assert.That(subscriptionCalledImmidiately, Is.True);
         });
 
-        await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
+        await model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
     }
 
     [Test]
@@ -79,7 +79,7 @@ public class DomainModelTests
                 Assert.That(subscriptionCalledImmidiately, Is.True);
             });
 
-        await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
+        await model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
     }
 
     [Test]
@@ -103,7 +103,7 @@ public class DomainModelTests
             storage,
             m => changesReceived = true);
 
-        await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
+        await model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
 
         Assert.That(changesReceived, Is.True);
     }
@@ -121,7 +121,7 @@ public class DomainModelTests
         model.Subscribe(c => changesReceived = true);
 
         var before = model.Shard<IFakeModelShard>();
-        await model.Run<IMutableFakeModelShard>((shard, _) => { });
+        await model.Run<IMutableFakeModelShard>(shard => { });
         var after = model.Shard<IFakeModelShard>();
 
         Assert.That(changesReceived, Is.False);
@@ -134,7 +134,7 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel([new FakeModelShard()], storage);
 
-        Assert.ThrowsAsync<CommandInvocationException>(() => model.Run<IMutableFakeModelShard>((shard, _) => throw new Exception("BOOM!")));
+        Assert.ThrowsAsync<CommandInvocationException>(() => model.Run<IMutableFakeModelShard>(shard => throw new Exception("BOOM!")));
     }
 
     [Test]
@@ -142,9 +142,9 @@ public class DomainModelTests
     {
         var storage = A.Fake<IStorage>();
         var model = new TestDomainModel([new FakeModelShard()], storage);
-        var command = A.Fake<ICommand>();
+        var command = A.Fake<IAsyncCommand>();
 
-        A.CallTo(() => command.Execute(A<IMutableModel>.Ignored, A<CancellationToken>.Ignored))
+        A.CallTo(() => command.ExecuteAsync(A<IMutableModel>.Ignored, A<CancellationToken>.Ignored))
             .Throws<Exception>();
 
         Assert.ThrowsAsync<CommandInvocationException>(() => model.Run(command));
@@ -158,7 +158,7 @@ public class DomainModelTests
             .Throws<InvalidOperationException>();
         var model = new UndoRedoDomainModel([new FakeModelShard()], new SyncScheduler());
 
-        var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
+        var _ = model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
 
         Assert.ThrowsAsync<ModelSaveException>(() => model.History.Update(storage));
     }
@@ -184,7 +184,7 @@ public class DomainModelTests
         var historyStorage = A.Fake<IHistoryStorage>();
         var model = new UndoRedoDomainModel([new FakeModelShard()], new SyncScheduler());
 
-        var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
+        var _ = model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
 
         Assert.That(model.History.UndoStack.Count, Is.EqualTo(1));
         Assert.That(model.History.RedoStack.Count, Is.EqualTo(0));
@@ -209,8 +209,8 @@ public class DomainModelTests
         var storage = A.Fake<IStorage>();
         var model = new UndoRedoDomainModel([new FakeModelShard()], new SyncScheduler());
 
-        var _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
-        _ = model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
+        var _ = model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
+        _ = model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
 
         var task = model.History.Update(storage);
 
@@ -450,10 +450,7 @@ public class DomainModelTests
         var model = new TestDomainModel([new FakeModelShard()], storage);
         var originalShard = model.Shard<IFakeModelShard>();
 
-        await model.Run<IMutableFakeModelShard>((shard, _) =>
-        {
-            shard.FirstCollection.Add(new());
-        });
+        await model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
 
         var changedShard = model.Shard<IFakeModelShard>();
 
@@ -469,7 +466,7 @@ public class DomainModelTests
         var model = new TestDomainModel([new FakeModelShard()], storage);
         var originalShard = model.Shard<IFakeModelShard>();
 
-        await model.Run<IMutableFakeModelShard>((shard, _) =>
+        await model.Run<IMutableFakeModelShard>(shard =>
         {
             var parent = shard.FirstCollection.Add(new());
             var child = shard.SecondCollection.Add(new());

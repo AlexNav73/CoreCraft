@@ -23,7 +23,7 @@ public sealed class AsyncScheduler : IScheduler
         return Task.Factory.StartNew(
             job,
             token,
-            TaskCreationOptions.DenyChildAttach,
+            TaskCreationOptions.AttachedToParent,
             SequentialTaskScheduler.Instance);
     }
 
@@ -38,7 +38,7 @@ public sealed class AsyncScheduler : IScheduler
         return Task.Factory.StartNew(
             job,
             token,
-            TaskCreationOptions.DenyChildAttach,
+            TaskCreationOptions.AttachedToParent,
             SequentialTaskScheduler.Instance);
     }
 
@@ -52,15 +52,19 @@ public sealed class AsyncScheduler : IScheduler
     /// <param name="job">A delegate that represents the asynchronous operation to execute. Cannot be null.</param>
     /// <param name="token">A cancellation token that can be used to cancel the scheduled job before it starts.</param>
     /// <returns>A task that represents the scheduled job. The task completes when the job has finished executing.</returns>
-    public async Task Enqueue(Func<Task> job, CancellationToken token)
+    public Task EnqueueAsync(Func<Task> job, CancellationToken token)
     {
-        var childTask = await Task.Factory.StartNew(
-            job,
+        // Use a TaskFactory that targets the SequentialTaskScheduler so the delegate runs on it
+        // and any child tasks that use TaskScheduler.Current (e.g. Task.Factory.StartNew)
+        // will also be scheduled on the same scheduler. Unwrap the resulting Task<Task>
+        // to return a Task that completes when the inner job task completes.
+        var factory = new TaskFactory(
             token,
             TaskCreationOptions.AttachedToParent,
+            TaskContinuationOptions.None,
             SequentialTaskScheduler.Instance);
 
-        await childTask;
+        return factory.StartNew(job, token).Unwrap();
     }
 
     /// <summary>

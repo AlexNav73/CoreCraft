@@ -75,34 +75,46 @@ public class DomainModel : IDomainModel
         return new ModelShardSubscriptionBuilder<T>(_modelSubscription.GetOrCreateSubscriptionFor<T>(), _currentChanges);
     }
 
-    /// <inheritdoc cref="IDomainModel.Run{T}(Action{T, CancellationToken}, CancellationToken)"/>
-    public async Task Run<T>(Action<T, CancellationToken> command, CancellationToken token = default)
+    /// <inheritdoc cref="IDomainModel.Run{T}(Action{T}, CancellationToken)"/>
+    public async Task Run<T>(Action<T> command, CancellationToken token = default)
+        where T : IMutableModelShard
+    {
+        await Run((m, t) =>
+        {
+            command(m.Shard<T>());
+
+            return Task.CompletedTask;
+        }, token);
+    }
+
+    /// <inheritdoc cref="IDomainModel.Run{T}(Func{T, CancellationToken, Task}, CancellationToken)"/>
+    public async Task Run<T>(Func<T, CancellationToken, Task> command, CancellationToken token = default)
         where T : IMutableModelShard
     {
         await Run((m, t) => command(m.Shard<T>(), t), token);
     }
 
-    /// <inheritdoc cref="IDomainModel.Run(ICommand, CancellationToken)"/>
-    public async Task Run(ICommand command, CancellationToken token = default)
+    /// <inheritdoc cref="IDomainModel.Run(IAsyncCommand, CancellationToken)"/>
+    public async Task Run(IAsyncCommand command, CancellationToken token = default)
     {
-        await Run(command.Execute, token);
+        await Run(command.ExecuteAsync, token);
     }
 
-    /// <inheritdoc cref="IDomainModel.Run(Action{IMutableModel, CancellationToken}, CancellationToken)"/>
-    public async Task Run(Action<IMutableModel, CancellationToken> command, CancellationToken token = default)
+    /// <inheritdoc cref="IDomainModel.Run(Func{IMutableModel, CancellationToken, Task}, CancellationToken)"/>
+    public async Task Run(Func<IMutableModel, CancellationToken, Task> command, CancellationToken token = default)
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
         var snapshot = new Snapshot(_modelView.UnsafeModel, s => s.AsRunCommandModel(changes));
 
         try
         {
-            await _scheduler.Enqueue(() =>
+            await _scheduler.EnqueueAsync(async () =>
             {
+                Invoke(x => x.BeforeCommand());
                 try
                 {
-                    Invoke(x => x.BeforeCommand());
                     // FIXME: if the command is an async method then the exception won't be caught here
-                    command(snapshot, token);
+                    await command(snapshot, token);
                     Invoke(x => x.AfterCommand());
                 }
                 catch (Exception ex)
@@ -261,7 +273,7 @@ public class DomainModel : IDomainModel
 
             try
             {
-                await _scheduler.Enqueue(async () =>
+                await _scheduler.EnqueueAsync(async () =>
                 {
                     Invoke(x => x.BeforeApply());
                     try

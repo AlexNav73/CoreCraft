@@ -40,12 +40,12 @@ internal partial class ToDoItemViewModel : ObservableObject
     partial void OnNameChanged(string value)
     {
         var _ = _model.Run<IMutableToDoModelShard>(
-            (shard, _) => shard.Items.Modify(Entity, p => p with { Name = value }));
+            shard => shard.Items.Modify(Entity, p => p with { Name = value }));
     }
 
     partial void OnIsCheckedChanged(bool value)
     {
         var _ = _model.Run<IMutableToDoModelShard>(
-            (shard, _) => shard.Items.Modify(Entity, p => p with { IsChecked = value }));
+            shard => shard.Items.Modify(Entity, p => p with { IsChecked = value }));
     }
 }
