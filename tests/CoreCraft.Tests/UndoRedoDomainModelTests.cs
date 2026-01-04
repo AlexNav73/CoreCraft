@@ -280,16 +280,16 @@ public class UndoRedoDomainModelTests
 
     private async Task ExecuteAddCommand()
     {
-        await _model.Run<IMutableFakeModelShard>(static (shard, _) => shard.FirstCollection.Add(new()));
+        await _model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
     }
 
     private async Task ExecuteRemoveCommand(FirstEntity entity)
     {
-        await _model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Remove(entity));
+        await _model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Remove(entity));
     }
 
     private async Task ExecuteModifyCommand(FirstEntity entity, string value)
     {
-        await _model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Modify(entity, p => p with { NullableStringProperty = value }));
+        await _model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Modify(entity, p => p with { NullableStringProperty = value }));
     }
 }

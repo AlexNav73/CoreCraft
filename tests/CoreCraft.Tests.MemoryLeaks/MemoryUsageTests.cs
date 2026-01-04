@@ -45,12 +45,12 @@ public class MemoryUsageTests
     [Test]
     public async Task CollectionsAndRelationsAreCopiedOnlyWhenModifiedTest()
     {
-        var model = new FakeModel(new[]
-        {
+        var model = new FakeModel(
+        [
             new FakeModelShard()
-        });
+        ]);
 
-        await model.Run<IMutableFakeModelShard>((shard, _) =>
+        await model.Run<IMutableFakeModelShard>(shard =>
         {
             var parent = shard.FirstCollection.Add(new());
             var child = shard.SecondCollection.Add(new());
@@ -60,7 +60,7 @@ public class MemoryUsageTests
 
         var memoryCheckPoint1 = dotMemory.Check();
 
-        await model.Run<IMutableFakeModelShard>((shard, _) =>
+        await model.Run<IMutableFakeModelShard>(shard =>
         {
             var parent = shard.FirstCollection.First();
             var child = shard.SecondCollection.Add(new());

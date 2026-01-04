@@ -33,7 +33,7 @@ public sealed class SyncScheduler : IScheduler
     }
 
     /// <inheritdoc/>
-    public Task Enqueue(Func<Task> job, CancellationToken token)
+    public Task EnqueueAsync(Func<Task> job, CancellationToken token)
     {
         return job();
     }

@@ -57,7 +57,7 @@ internal sealed partial class ItemsPageViewModel : DisposableObservableObject, I
         if (NewItemName != null)
         {
             await _model.Run<IMutableToDoModelShard>(
-                (shard, _) => 
+                shard => 
                 {
                     var item = shard.Items.Add(new() { Name = NewItemName });
                     shard.ListToItems.Add(Entity, item);

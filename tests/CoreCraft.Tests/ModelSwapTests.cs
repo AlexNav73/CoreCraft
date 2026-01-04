@@ -21,10 +21,7 @@ public class ModelSwapTests
             Assert.That(shard.FirstCollection.Count, Is.EqualTo(0));
         });
 
-        await model.Run<IMutableFakeModelShard>((shard, _) =>
-        {
-            shard.FirstCollection.Add(new() { NonNullableStringProperty = "test" });
-        });
+        await model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new() { NonNullableStringProperty = "test" }));
 
         var shard = model.Shard<IFakeModelShard>();
 
@@ -128,7 +125,7 @@ class DelayedAsyncScheduler : IScheduler
             SequentialTaskScheduler.Instance);
     }
 
-    public async Task Enqueue(Func<Task> job, CancellationToken token)
+    public async Task EnqueueAsync(Func<Task> job, CancellationToken token)
     {
         var childtask = await Task.Factory.StartNew(
             () =>

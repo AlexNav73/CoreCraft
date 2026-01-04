@@ -3,7 +3,7 @@ using CoreCraft.Core;
 
 namespace CoreCraft.Tests.Infrastructure.Commands;
 
-public class AddLotOfEntitiesCommand : ICommand
+public class AddLotOfEntitiesCommand : IAsyncCommand
 {
     private readonly int _count;
 
@@ -12,7 +12,7 @@ public class AddLotOfEntitiesCommand : ICommand
         _count = count;
     }
 
-    public void Execute(IMutableModel model, CancellationToken token)
+    public Task ExecuteAsync(IMutableModel model, CancellationToken token)
     {
         var modelShard = model.Shard<IMutableFakeModelShard>();
 
@@ -34,5 +34,7 @@ public class AddLotOfEntitiesCommand : ICommand
             modelShard.OneToManyRelation.Add(first, second);
             modelShard.OneToOneRelation.Add(first, second);
         }
+
+        return Task.CompletedTask;
     }
 }
