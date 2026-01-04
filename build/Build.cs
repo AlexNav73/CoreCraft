@@ -145,6 +145,13 @@ internal partial class Build : NukeBuild
                 .AddPackageTags("Model", "Domain", "SourceGenerator", "Generator"));
 
             DotNetPack(s => s
+                .SetProject(Solution.CoreCraft_Storage_Linq2Db)
+                .Apply(PackSettingsBase)
+                .SetVersion(MakePreviewIfNeeded("0.1.0", "0.1.0"))
+                .SetDescription("Linq2Db-based storage provider for CoreCraft. Provides persistence for domain models with lazy-loaded collections and relations.")
+                .AddPackageTags("Model", "Domain", "Linq2Db", "SourceGenerator", "Generator"));
+
+            DotNetPack(s => s
                 .SetProject(Solution.CoreCraft_Storage_Sqlite)
                 .Apply(PackSettingsBase)
                 .SetVersion(MakePreviewIfNeeded("0.7.0", "0.8.0"))
@@ -166,7 +173,7 @@ internal partial class Build : NukeBuild
                 .SetNoRestore(SucceededTargets.Contains(Restore))
                 .SetNoBuild(SucceededTargets.Contains(Compile))
                 .SetAuthors("Aliaksandr Navitski")
-                .SetCopyright("Copyright (c) Aliaksandr Navitski 2024.")
+                .SetCopyright("Copyright (c) Aliaksandr Navitski 2026.")
                 .SetPackageProjectUrl(GitRepository.HttpsUrl)
                 .SetRepositoryUrl(GitRepository.HttpsUrl)
                 .SetOutputDirectory(PackagesDirectory)
