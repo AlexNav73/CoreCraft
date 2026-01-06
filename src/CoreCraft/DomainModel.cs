@@ -261,16 +261,19 @@ public class DomainModel : IDomainModel
 
             try
             {
-                await _scheduler.Enqueue(() =>
+                await _scheduler.Enqueue(async () =>
                 {
                     Invoke(x => x.BeforeApply());
-                    return changes.ApplyAsync(snapshot, token)
-                        .ContinueWith(
-                            t => Invoke(x => x.AfterApply()),
-                            TaskContinuationOptions.NotOnFaulted | TaskContinuationOptions.ExecuteSynchronously)
-                        .ContinueWith(
-                            t => Invoke(x => x.ApplyFailed(t.Exception!)),
-                            TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+                    try
+                    {
+                        await changes.ApplyAsync(snapshot, token);
+                        Invoke(x => x.AfterApply());
+                    }
+                    catch (Exception ex)
+                    {
+                        Invoke(x => x.ApplyFailed(ex));
+                        throw;
+                    }
                 }, token);
             }
             catch (Exception ex)
