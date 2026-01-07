@@ -9,12 +9,14 @@ internal sealed class LazyModelGenerator(
 {
     protected override void EmitModelUsingDirectives()
     {
+        Code.WriteLine("using CoreCraft;");
         Code.WriteLine("using CoreCraft.Core;");
         Code.WriteLine("using CoreCraft.ChangesTracking;");
         Code.WriteLine("using CoreCraft.Persistence;");
         Code.WriteLine("using CoreCraft.Persistence.History;");
         Code.WriteLine("using CoreCraft.Storage.Linq2Db;");
         Code.WriteLine("using CoreCraft.Storage.Linq2Db.Features;");
+        Code.WriteLine("using CoreCraft.Storage.Linq2Db.Views;");
         Code.WriteLine("using LinqToDB;");
         Code.WriteLine("using LinqToDB.Data;");
         Code.WriteLine("using LinqToDB.Mapping;");

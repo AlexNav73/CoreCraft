@@ -339,7 +339,7 @@ namespace compilation.AllFeatures
 
         public FakeModelShardView(IDomainModel model)
         {
-            var builder = model.View<IFakeModelShard, IFakeChangesFrame>();
+            var builder = new ViewBuilder<IFakeModelShard, IFakeChangesFrame>(model);
 
             FirstCollection = builder.Create(static shard => shard.FirstCollection, static frame => frame.FirstCollection);
             SecondCollection = builder.Create(static shard => shard.SecondCollection, static frame => frame.SecondCollection);

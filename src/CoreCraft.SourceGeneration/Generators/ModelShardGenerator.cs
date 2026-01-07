@@ -565,7 +565,7 @@ internal class ModelShardGenerator(IndentedTextWriter code) : GeneratorCommon
             Code.WriteLine($"public {modelShard.Name}ModelShardView(IDomainModel model)");
             Code.Block(() =>
             {
-                Code.WriteLine($"var builder = model.View<I{modelShard.Name}ModelShard, I{modelShard.Name}ChangesFrame>();");
+                Code.WriteLine($"var builder = new ViewBuilder<I{modelShard.Name}ModelShard, I{modelShard.Name}ChangesFrame>(model);");
                 Code.EmptyLine();
 
                 foreach (var collection in modelShard.Collections)

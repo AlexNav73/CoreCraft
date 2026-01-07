@@ -293,7 +293,7 @@ namespace compilation.LoadManually
 
         public FakeModelShardView(IDomainModel model)
         {
-            var builder = model.View<IFakeModelShard, IFakeChangesFrame>();
+            var builder = new ViewBuilder<IFakeModelShard, IFakeChangesFrame>(model);
 
             FirstCollection = builder.Create(static shard => shard.FirstCollection, static frame => frame.FirstCollection);
             SecondCollection = builder.Create(static shard => shard.SecondCollection, static frame => frame.SecondCollection);
@@ -520,7 +520,7 @@ namespace compilation.LoadManually
 
         public LazyShardModelShardView(IDomainModel model)
         {
-            var builder = model.View<ILazyShardModelShard, ILazyShardChangesFrame>();
+            var builder = new ViewBuilder<ILazyShardModelShard, ILazyShardChangesFrame>(model);
 
 
         }
