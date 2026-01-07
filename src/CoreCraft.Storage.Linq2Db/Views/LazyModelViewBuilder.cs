@@ -1,8 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using CoreCraft.ChangesTracking;
+using CoreCraft.Core;
 using CoreCraft.Subscription.Builders;
 
-namespace CoreCraft.Views;
+namespace CoreCraft.Storage.Linq2Db.Views;
 
 /// <summary>
 ///     Provides methods for creating views of collections and relations within a domain model.
@@ -16,17 +17,17 @@ namespace CoreCraft.Views;
 /// </remarks>
 /// <typeparam name="TShard">The model shard type.</typeparam>
 /// <typeparam name="TFrame">The changes frame type.</typeparam>
-public sealed class ViewBuilder<TShard, TFrame>
+public sealed class LazyModelViewBuilder<TShard, TFrame>
     where TShard : IModelShard
     where TFrame : class, IChangesFrame
 {
     private readonly IDomainModel _model;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="ViewBuilder{TShard, TFrame}"/> class.
+    ///     Initializes a new instance of the <see cref="LazyModelViewBuilder{TShard, TFrame}"/> class.
     /// </summary>
     /// <param name="model">The domain model instance.</param>
-    public ViewBuilder(IDomainModel model)
+    public LazyModelViewBuilder(IDomainModel model)
     {
         _model = model;
     }
@@ -40,17 +41,17 @@ public sealed class ViewBuilder<TShard, TFrame>
     /// <param name="changesAccessor">A function to access the collection's change set.</param>
     /// <param name="expression">The string representation of the <paramref name="changesAccessor"/> function.</param>
     /// <returns>The created collection view.</returns>
-    public ICollectionView<TEntity, TProperties> Create<TEntity, TProperties>(
-        Func<TShard, ICollection<TEntity, TProperties>> accessor,
+    public ILazyCollectionView<TEntity, TProperties> Create<TEntity, TProperties>(
+        Func<TShard, ILazyCollection<TEntity, TProperties>> accessor,
         Func<TFrame, ICollectionChangeSet<TEntity, TProperties>> changesAccessor,
         [CallerArgumentExpression(nameof(changesAccessor))] string expression = "")
         where TEntity : Entity
-        where TProperties : Properties
+        where TProperties : Properties, IHaveEntityId<TEntity>
     {
         var builder = (CollectionSubscriptionBuilder<TFrame, TEntity, TProperties>)_model
             .For<TFrame>()
             .With(changesAccessor, expression);
-        var newView = new CollectionView<TShard, TFrame, TEntity, TProperties>(
+        var newView = new LazyCollectionView<TShard, TFrame, TEntity, TProperties>(
             accessor(_model.Shard<TShard>()),
             accessor,
             () => _model.For<TFrame>().With(changesAccessor, expression));
@@ -67,8 +68,8 @@ public sealed class ViewBuilder<TShard, TFrame>
     /// <param name="changesAccessor">A function to access the relation's change set.</param>
     /// <param name="expression">The string representation of the <paramref name="changesAccessor"/> function.</param>
     /// <returns>The created relation view.</returns>
-    public IRelationView<TParent, TChild> Create<TParent, TChild>(
-        Func<TShard, IRelation<TParent, TChild>> accessor,
+    public ILazyRelationView<TParent, TChild> Create<TParent, TChild>(
+        Func<TShard, ILazyRelation<TParent, TChild>> accessor,
         Func<TFrame, IRelationChangeSet<TParent, TChild>> changesAccessor,
         [CallerArgumentExpression(nameof(changesAccessor))] string expression = "")
         where TParent : Entity
@@ -77,7 +78,7 @@ public sealed class ViewBuilder<TShard, TFrame>
         var builder = (RelationSubscriptionBuilder<TFrame, TParent, TChild>)_model
             .For<TFrame>()
             .With(changesAccessor, expression);
-        var newView = new RelationView<TShard, TFrame, TParent, TChild>(
+        var newView = new LazyRelationView<TShard, TFrame, TParent, TChild>(
             accessor(_model.Shard<TShard>()),
             accessor,
             () => _model.For<TFrame>().With(changesAccessor, expression));

@@ -6,7 +6,6 @@ using CoreCraft.Persistence.Lazy;
 using CoreCraft.Scheduling;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Builders;
-using CoreCraft.Views;
 
 namespace CoreCraft;
 
@@ -45,14 +44,6 @@ public class DomainModel : IDomainModel
     public T Shard<T>() where T : IModelShard
     {
         return _modelView.UnsafeModel.Shard<T>();
-    }
-
-    /// <inheritdoc cref="IDomainModel.View{TShard, TFrame}()"/>
-    public ViewBuilder<TShard, TFrame> View<TShard, TFrame>()
-        where TShard : IModelShard
-        where TFrame : class, IChangesFrame
-    {
-        return new ViewBuilder<TShard, TFrame>(this);
     }
 
     /// <inheritdoc cref="IDomainModel.Subscribe(Action{Change{IModelChanges}})"/>

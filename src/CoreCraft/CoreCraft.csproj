@@ -23,6 +23,8 @@
       <InternalsVisibleTo Include="CoreCraft.Tests" />
       <InternalsVisibleTo Include="CoreCraft.Storage.Sqlite.Tests" />
       <InternalsVisibleTo Include="CoreCraft.Storage.Json.Tests" />
+      
+      <InternalsVisibleTo Include="CoreCraft.Storage.Linq2Db" />
   </ItemGroup>
 
 </Project>

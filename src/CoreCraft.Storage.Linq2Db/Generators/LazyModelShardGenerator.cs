@@ -487,5 +487,108 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
 
     protected override void DefineModelShardViewClass(ModelShard modelShard)
     {
+        var visibility = GetInternalTypeVisibility(modelShard);
+
+        Code.GeneratedClassAttributes(modelShard.Scheme.Debug);
+        Code.Class(visibility, "sealed partial", $"{modelShard.Name}ModelShardView",
+            [
+                "global::System.IDisposable"
+            ],
+            () =>
+            {
+                Code.WriteLine("private bool _disposed = false;");
+                Code.EmptyLine();
+
+                ImplementCtor(modelShard);
+                Code.EmptyLine();
+                ImplementModelShardInterface(modelShard);
+                Code.EmptyLine();
+                ImplementDisposeInterface(modelShard);
+            });
+
+        void ImplementCtor(ModelShard modelShard)
+        {
+            Code.WriteLine($"public {modelShard.Name}ModelShardView(IDomainModel model)");
+            Code.Block(() =>
+            {
+                Code.WriteLine($"var builder = new LazyModelViewBuilder<I{modelShard.Name}ModelShard, I{modelShard.Name}ChangesFrame>(model);");
+                Code.EmptyLine();
+
+                foreach (var collection in modelShard.Collections)
+                {
+                    Code.WriteLine($"{collection.Name} = builder.Create(static shard => shard.{collection.Name}, static frame => frame.{collection.Name});");
+                }
+                Code.EmptyLine();
+
+                foreach (var relation in modelShard.Relations)
+                {
+                    Code.WriteLine($"{relation.Name} = builder.Create(static shard => shard.{relation.Name}, static frame => frame.{relation.Name});");
+                }
+            });
+        }
+
+        void ImplementDisposeInterface(ModelShard modelShard)
+        {
+            Code.WriteLine("public void Dispose()");
+            Code.Block(() =>
+            {
+                Code.WriteLine("Dispose(true);");
+                Code.WriteLine("global::System.GC.SuppressFinalize(this);");
+            });
+            Code.EmptyLine();
+
+            Code.WriteLine($"~{modelShard.Name}ModelShardView()");
+            Code.Block(() =>
+            {
+                Code.WriteLine("Dispose(false);");
+            });
+            Code.EmptyLine();
+
+            Code.WriteLine("private void Dispose(bool disposing)");
+            Code.Block(() =>
+            {
+                Code.WriteLine("if (_disposed)");
+                Code.Block(() =>
+                {
+                    Code.WriteLine("return;");
+                });
+                Code.EmptyLine();
+
+                foreach (var collection in modelShard.Collections)
+                {
+                    Code.WriteLine($"{collection.Name}.Dispose();");
+                }
+                Code.EmptyLine();
+
+                foreach (var relation in modelShard.Relations)
+                {
+                    Code.WriteLine($"{relation.Name}.Dispose();");
+                }
+                Code.EmptyLine();
+
+                Code.WriteLine("_disposed = true;");
+            });
+        }
+
+        void ImplementModelShardInterface(ModelShard modelShard)
+        {
+            foreach (var collection in modelShard.Collections)
+            {
+                Code.WriteLine($"public ILazyCollectionView<{collection.EntityPropertyTypes}> {collection.Name} {{ get; private set; }}");
+            }
+            Code.EmptyLine();
+
+            foreach (var relation in modelShard.Relations)
+            {
+                Code.WriteLine($"public ILazyRelationView<{relation.Parent.Entity.Name}, {relation.Child.Entity.Name}> {relation.Name} {{ get; private set; }}");
+            }
+            Code.EmptyLine();
+
+            Code.WriteLine("public void Save(IRepository repository)");
+            Code.Block(() =>
+            {
+                Code.WriteLine("throw new global::System.InvalidOperationException(\"Cannot save model shard's view. Call Save on the real model shard.\");");
+            });
+        }
     }
 }
