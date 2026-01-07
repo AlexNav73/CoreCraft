@@ -2,26 +2,20 @@
 
 namespace CoreCraft.Storage.Linq2Db;
 
-public interface IRelationType<out TEntity>
-    where TEntity : Entity
+public interface IRelationType
 {
-    TEntity Id { get; }
 }
 
-public record One<TEntity>(TEntity Id) : IRelationType<TEntity>
-    where TEntity : Entity
+public sealed record One : IRelationType
 {
-    public static implicit operator TEntity(One<TEntity> one) => one.Id;
-    public static implicit operator One<TEntity>(TEntity entity) => new(entity);
 }
 
-public record Many<TEntity>(TEntity Id) : IRelationType<TEntity>
-    where TEntity : Entity
+public sealed record Many : IRelationType
 {
-    public static implicit operator TEntity(Many<TEntity> one) => one.Id;
-    public static implicit operator Many<TEntity>(TEntity entity) => new(entity);
 }
 
-public sealed record ParentToChild<TParent, TChild>(TParent Parent, TChild Child)
-    where TParent : IRelationType<Entity>
-    where TChild : IRelationType<Entity>;
+public sealed record ParentToChild<TParent, TChild, TParentRelation, TChildRelation>(TParent Parent, TChild Child) : Pair<TParent, TChild>(Parent, Child)
+    where TParent : Entity
+    where TChild : Entity
+    where TParentRelation : IRelationType
+    where TChildRelation : IRelationType;

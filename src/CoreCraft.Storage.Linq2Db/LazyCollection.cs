@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
 using LinqToDB;
+using LinqToDB.Async;
 
 namespace CoreCraft.Storage.Linq2Db;
 
@@ -63,11 +64,11 @@ public sealed class LazyCollection<TEntity, TProperties> :
     /// <inheritdoc />
     public async Task<TProperties?> ModifyAsync(TEntity entity, Expression<Func<TProperties, TProperties>> modifier, CancellationToken token = default)
     {
-        var result = await _table
+        var result = _table
             .Where(x => x.EntityId == entity)
-            .UpdateWithOutputAsync(modifier, (deleted, inserted) => inserted, token);
+            .UpdateWithOutputAsync(modifier, (deleted, inserted) => inserted);
 
-        var properties = result.SingleOrDefault();
+        var properties = await result.SingleOrDefaultAsync(token);
 
         if (properties is not null)
         {

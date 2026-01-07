@@ -1,5 +1,6 @@
 ﻿using CoreCraft.Core;
 using LinqToDB;
+using LinqToDB.Async;
 
 namespace CoreCraft.Storage.Linq2Db.Extensions;
 

@@ -9,6 +9,7 @@ using CoreCraft.Storage.Sqlite;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Extensions;
 using LinqToDB;
+using LinqToDB.Async;
 using LinqToDB.Data;
 
 namespace ConsoleDemoApp;
@@ -42,6 +43,7 @@ static class Program
         var options = new DataOptions()
             .UseSQLite(@$"DataSource={Path};")
             .UseMappingSchema(new ExampleMappingSchema());
+
         using var db = new DataConnection(options);
 
         var storage = new SqliteStorage(Path, [], Console.WriteLine);
@@ -91,10 +93,17 @@ static class Program
 
             await model.Run<IMutableExampleModelShard>(async (shard, _) =>
             {
-                var entity = await shard.SecondCollection.Entities.FirstAsync();
+                //var entity = await shard.SecondCollection.Entities.FirstAsync();
                 //var entity = shard.SecondCollection.First();
 
-                await shard.SecondCollection.ModifyAsync(entity, props => new() { IntProperty = (int)SecondEntityEnum.Second });
+                var pairs = await shard.FirstCollection
+                    .JoinWith(shard.OneToOneRelation, (props, pair) => new { props, pair.Child })
+                    .JoinWith(shard.SecondCollection, x => x.Child, (x, second) => new { First = x.props, Second = second })
+                    .FirstOrDefaultAsync();
+
+                await shard.SecondCollection.ModifyAsync(pairs!.Second.EntityId, props => new() { IntProperty = (int)SecondEntityEnum.First });
+                //await shard.SecondCollection.ModifyAsync(entity, props => new() { IntProperty = (int)SecondEntityEnum.Second });
+
                 //shard.SecondCollection.Modify(entity, props => props with { IntProperty = (int)SecondEntityEnum.Second });
             });
 
