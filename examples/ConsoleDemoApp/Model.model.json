@@ -66,12 +66,6 @@
           "relationType": "OneToMany"
         },
         {
-          "name": "ManyToOneRelation",
-          "parent": "SecondEntity",
-          "child": "FirstEntity",
-          "relationType": "OneToMany"
-        },
-        {
           "name": "ManyToManyRelation",
           "parent": "FirstEntity",
           "child": "SecondEntity",

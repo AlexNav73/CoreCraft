@@ -1,7 +1,6 @@
 ﻿using CoreCraft.SourceGeneration;
 using CoreCraft.SourceGeneration.Extensions;
 using CoreCraft.SourceGeneration.Generators;
-using LinqToDB.Mapping;
 
 namespace CoreCraft.Storage.Linq2Db.Generators;
 
@@ -70,7 +69,7 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                     var childTypeName = relation.Child.Entity.Name;
                     var parentRelationType = relation.RelationType is RelationType.OneToOne or RelationType.OneToMany ? "One" : "Many";
                     var childRelationType = relation.RelationType is RelationType.OneToOne ? "One" : "Many";
-                    Code.WriteLine($"db.CreateTable<ParentToChild<{parentRelationType}<{parentTypeName}>, {childRelationType}<{childTypeName}>>>(");
+                    Code.WriteLine($"db.CreateTable<ParentToChild<{parentTypeName}, {childTypeName}, {parentRelationType}, {childRelationType}>>(");
                     Code.WithIndent(c =>
                     {
                         c.WriteLine($"schemaName: {modelShard.Name}ModelShardInfo.{relation.Name}Info.ShardName,");
@@ -97,34 +96,18 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                     var parentRelationType = relation.RelationType is RelationType.OneToOne or RelationType.OneToMany ? "One" : "Many";
                     var childRelationType = relation.RelationType is RelationType.OneToOne ? "One" : "Many";
 
-                    Code.WriteLine($"{relation.Name} = new LazyRelation<{parentTypeName}, {childTypeName}, {parentRelationType}<{parentTypeName}>, {childRelationType}<{childTypeName}>>(");
+                    Code.WriteLine($"{relation.Name} = new LazyRelation<{parentTypeName}, {childTypeName}, {parentRelationType}, {childRelationType}>(");
                     Code.WithIndent(c =>
                     {
                         c.WriteLine($"{modelShard.Name}ModelShardInfo.{relation.Name}Info,");
                         var getTableExpression = relation.RelationType switch
                         {
-                            RelationType.OneToOne => $"db.GetTable<ParentToChild<One<{parentTypeName}>, One<{childTypeName}>>>(),",
-                            RelationType.OneToMany => $"db.GetTable<ParentToChild<One<{parentTypeName}>, Many<{childTypeName}>>>(),",
-                            RelationType.ManyToMany => $"db.GetTable<ParentToChild<Many<{parentTypeName}>, Many<{childTypeName}>>>(),",
+                            RelationType.OneToOne => $"db.GetTable<ParentToChild<{parentTypeName}, {childTypeName}, One, One>>());",
+                            RelationType.OneToMany => $"db.GetTable<ParentToChild<{parentTypeName}, {childTypeName}, One, Many>>());",
+                            RelationType.ManyToMany => $"db.GetTable<ParentToChild<{parentTypeName}, {childTypeName}, Many, Many>>());",
                             var t => throw new NotSupportedException($"{t} is not supported relation type")
                         };
                         Code.WriteLine(getTableExpression);
-                        var parentRelationFactoryExpression = relation.RelationType switch
-                        {
-                            RelationType.OneToOne => $"e => new One<{parentTypeName}>(e),",
-                            RelationType.OneToMany => $"e => new One<{parentTypeName}>(e),",
-                            RelationType.ManyToMany => $"e => new Many<{parentTypeName}>(e),",
-                            var t => throw new NotSupportedException($"{t} is not supported relation type")
-                        };
-                        Code.WriteLine(parentRelationFactoryExpression);
-                        var childRelationFactoryExpression = relation.RelationType switch
-                        {
-                            RelationType.OneToOne => $"e => new One<{childTypeName}>(e));",
-                            RelationType.OneToMany => $"e => new Many<{childTypeName}>(e));",
-                            RelationType.ManyToMany => $"e => new Many<{childTypeName}>(e));",
-                            var t => throw new NotSupportedException($"{t} is not supported relation type")
-                        };
-                        Code.WriteLine(childRelationFactoryExpression);
                     });
                 }
             });
@@ -385,6 +368,7 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                 {
                     foreach (var entity in modelShard.Collections.Select(x => x.Entity))
                     {
+                        Code.WriteLine($"SetConvertExpression<byte[], {entity.Name}>(x => new {entity.Name}(new Guid(x)));");
                         Code.WriteLine($"builder.Entity<{entity.PropertiesType}>()");
                         Code.WithIndent(c =>
                         {
@@ -407,13 +391,13 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                         var parentTypeName = relation.Parent.Entity.Name;
                         var childTypeName = relation.Child.Entity.Name;
                         var parentRelationType = relation.RelationType is RelationType.OneToOne or RelationType.OneToMany
-                            ? $"One<{relation.Parent.Entity.Name}>"
-                            : $"Many<{relation.Parent.Entity.Name}>";
+                            ? $"One"
+                            : $"Many";
                         var childRelationType = relation.RelationType is RelationType.OneToOne
-                            ? $"One<{relation.Child.Entity.Name}>"
-                            : $"Many<{relation.Child.Entity.Name}>";
+                            ? $"One"
+                            : $"Many";
 
-                        Code.WriteLine($"builder.Entity<ParentToChild<{parentRelationType}, {childRelationType}>>()");
+                        Code.WriteLine($"builder.Entity<ParentToChild<{parentTypeName}, {childTypeName}, {parentRelationType}, {childRelationType}>>()");
                         Code.WithIndent(c =>
                         {
                             c.WriteLine($".HasTableName({modelShard.Name}ModelShardInfo.{relation.Name}Info.Name)");
@@ -425,7 +409,7 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                                 c2.WriteLine(".IsPrimaryKey()");
                                 c2.WriteLine($".HasColumnName(\"{parentTypeName}Id\")");
                                 c2.WriteLine(".HasDataType(DataType.Guid)");
-                                c2.WriteLine($".HasConversion(x => x.Id.Id, x => new {parentRelationType}(new {parentTypeName}(x)))");
+                                c2.WriteLine($".HasConversion(x => x.Id, x => new {parentTypeName}(x))");
                             });
                             c.WriteLine($".Property(p => p.Child)");
                             c.WithIndent(c2 =>
@@ -437,7 +421,7 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                                 }
                                 c2.WriteLine($".HasColumnName(\"{childTypeName}Id\")");
                                 c2.WriteLine(".HasDataType(DataType.Guid)");
-                                c2.WriteLine($".HasConversion(x => x.Id.Id, x => new {childRelationType}(new {childTypeName}(x)));");
+                                c2.WriteLine($".HasConversion(x => x.Id, x => new {childTypeName}(x));");
                             });
                         });
                         Code.WriteLine();
