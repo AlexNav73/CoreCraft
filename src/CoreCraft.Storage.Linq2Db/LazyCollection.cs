@@ -124,8 +124,7 @@ public sealed class LazyCollection<TEntity, TProperties> :
                     await RemoveAsync(change.Entity, token);
                     break;
                 case CollectionAction.Modify:
-                    await RemoveAsync(change.Entity, token);
-                    await AddAsync(change.NewData!, token);
+                    await UpdateAsync(change.Entity, change.OldData!, change.NewData!, token);
                     break;
                 default:
                     throw new NotSupportedException($"An action [{change.Action}] is not supported.");
@@ -147,6 +146,54 @@ public sealed class LazyCollection<TEntity, TProperties> :
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    private async Task UpdateAsync(TEntity entity, TProperties oldData, TProperties newData, CancellationToken token = default)
+    {
+        var oldDataBag = new PropertiesBag();
+        oldData.WriteTo(oldDataBag);
+        var newDataBag = new PropertiesBag();
+        newData.WriteTo(newDataBag);
+        var diff = oldDataBag.Compare(newDataBag);
+
+        var query = _table.Where(p => p.EntityId == entity).AsUpdatable();
+
+        foreach (var pair in diff)
+        {
+            query = query.Set(
+                GetPropertyExpression(pair.Key),
+                GetValueExpression(pair.Value));
+        }
+
+        var result = query.UpdateWithOutputAsync((deleted, updated) => updated);
+
+        var updatedProperties = await result.SingleOrDefaultAsync(token);
+        if (updatedProperties is not null)
+        {
+            CacheImpl(updatedProperties);
+        }
+    }
+
+    private Expression<Func<TProperties, object?>> GetPropertyExpression(string property)
+    {
+        var parameter = Expression.Parameter(typeof(TProperties), "p");
+        
+        var expression = Expression.Lambda<Func<TProperties, object?>>(
+            Expression.Convert(Expression.PropertyOrField(parameter, property), typeof(object)),
+            parameter
+        );
+
+        return expression;
+    }
+
+    private Expression<Func<TProperties, object?>> GetValueExpression(object? value)
+    {
+        var expression = Expression.Lambda<Func<TProperties, object?>>(
+            Expression.Convert(Expression.Constant(value, value?.GetType() ?? typeof(object)), typeof(object)),
+            Expression.Parameter(typeof(TProperties), "p")
+        );
+
+        return expression;
     }
 
     private void CacheImpl(TProperties properties)
