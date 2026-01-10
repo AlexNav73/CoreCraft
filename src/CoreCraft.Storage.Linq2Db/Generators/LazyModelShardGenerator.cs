@@ -69,7 +69,7 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                     var childTypeName = relation.Child.Entity.Name;
                     var parentRelationType = relation.RelationType is RelationType.OneToOne or RelationType.OneToMany ? "One" : "Many";
                     var childRelationType = relation.RelationType is RelationType.OneToOne ? "One" : "Many";
-                    Code.WriteLine($"db.CreateTable<ParentToChild<{parentTypeName}, {childTypeName}, {parentRelationType}, {childRelationType}>>(");
+                    Code.WriteLine($"db.CreateTable<ParentToChild<{parentRelationType}, {parentTypeName}, {childRelationType}, {childTypeName}>>(");
                     Code.WithIndent(c =>
                     {
                         c.WriteLine($"schemaName: {modelShard.Name}ModelShardInfo.{relation.Name}Info.ShardName,");
@@ -102,9 +102,9 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                         c.WriteLine($"{modelShard.Name}ModelShardInfo.{relation.Name}Info,");
                         var getTableExpression = relation.RelationType switch
                         {
-                            RelationType.OneToOne => $"db.GetTable<ParentToChild<{parentTypeName}, {childTypeName}, One, One>>());",
-                            RelationType.OneToMany => $"db.GetTable<ParentToChild<{parentTypeName}, {childTypeName}, One, Many>>());",
-                            RelationType.ManyToMany => $"db.GetTable<ParentToChild<{parentTypeName}, {childTypeName}, Many, Many>>());",
+                            RelationType.OneToOne => $"db.GetTable<ParentToChild<One, {parentTypeName}, One, {childTypeName}>>());",
+                            RelationType.OneToMany => $"db.GetTable<ParentToChild<One, {parentTypeName}, Many, {childTypeName}>>());",
+                            RelationType.ManyToMany => $"db.GetTable<ParentToChild<Many, {parentTypeName}, Many, {childTypeName}>>());",
                             var t => throw new NotSupportedException($"{t} is not supported relation type")
                         };
                         Code.WriteLine(getTableExpression);
@@ -397,7 +397,7 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                             ? $"One"
                             : $"Many";
 
-                        Code.WriteLine($"builder.Entity<ParentToChild<{parentTypeName}, {childTypeName}, {parentRelationType}, {childRelationType}>>()");
+                        Code.WriteLine($"builder.Entity<ParentToChild<{parentRelationType}, {parentTypeName}, {childRelationType}, {childTypeName}>>()");
                         Code.WithIndent(c =>
                         {
                             c.WriteLine($".HasTableName({modelShard.Name}ModelShardInfo.{relation.Name}Info.Name)");

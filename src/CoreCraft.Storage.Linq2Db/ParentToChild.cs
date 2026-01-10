@@ -14,7 +14,7 @@ public sealed record Many : IRelationType
 {
 }
 
-public sealed record ParentToChild<TParent, TChild, TParentRelation, TChildRelation>(TParent Parent, TChild Child) : Pair<TParent, TChild>(Parent, Child)
+public sealed record ParentToChild<TParentRelation, TParent, TChildRelation, TChild>(TParent Parent, TChild Child) : Pair<TParent, TChild>(Parent, Child)
     where TParent : Entity
     where TChild : Entity
     where TParentRelation : IRelationType
