@@ -30,6 +30,9 @@ public sealed class TrackableCollection<TEntity, TProperties> :
     /// <inheritdoc cref="IHaveInfo{T}.Info" />
     public CollectionInfo Info => _collection.Info;
 
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Entities"/>
+    public IEnumerable<TEntity> Entities => _collection.Entities;
+
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _collection.Count;
 
@@ -139,7 +142,7 @@ public sealed class TrackableCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc cref="IEnumerable{T}.GetEnumerator" />
-    public IEnumerator<TEntity> GetEnumerator()
+    public IEnumerator<TProperties> GetEnumerator()
     {
         return _collection.GetEnumerator();
     }

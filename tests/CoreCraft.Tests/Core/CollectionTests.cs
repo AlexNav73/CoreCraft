@@ -23,7 +23,7 @@ public class CollectionTests
         var entity = _collection.Add(firstEntityId, p => p);
 
         Assert.That(_collection.Count, Is.EqualTo(1));
-        Assert.That(_collection.Single(), Is.EqualTo(entity));
+        Assert.That(_collection.Entities.Single(), Is.EqualTo(entity));
         Assert.That(entity.Id, Is.EqualTo(firstEntityId));
     }
 
@@ -35,7 +35,7 @@ public class CollectionTests
         var entity = _collection.Add(new());
 
         Assert.That(_collection.Count, Is.EqualTo(1));
-        Assert.That(_collection.Single(), Is.EqualTo(entity));
+        Assert.That(_collection.Entities.Single(), Is.EqualTo(entity));
         Assert.Throws<DuplicateKeyException>(() =>
         {
             _collection.Add(entity.Id, p => p);
@@ -153,7 +153,7 @@ public class CollectionTests
         var entity = _collection!.Add(new() { NonNullableStringProperty = value });
 
         var copy = _collection.Copy();
-        var copiedEntity = _collection.Single();
+        var copiedEntity = _collection.Entities.Single();
 
         Assert.That(ReferenceEquals(_collection, copy), Is.False);
         Assert.That(_collection.Count, Is.EqualTo(copy.Count));

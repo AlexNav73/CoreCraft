@@ -47,6 +47,14 @@ public sealed class TrackableLazyCollection<TEntity, TProperties> :
         return ((IMutableState<ILazyCollection<TEntity, TProperties>>)_collection).AsReadOnly();
     }
 
+    /// <inheritdoc cref="IMutableLazyCollection{TEntity, TProperties}.Add(TProperties)"/>
+    public TEntity Add(TProperties properties)
+    {
+        var entity = _collection.Add(properties);
+        _changes.Add(CollectionAction.Add, entity, default, properties);
+        return entity;
+    }
+
     /// <inheritdoc cref="IMutableLazyCollection{TEntity, TProperties}.AddAsync(TProperties, CancellationToken)"/>
     public async Task<TEntity> AddAsync(TProperties properties, CancellationToken token = default)
     {
@@ -55,14 +63,37 @@ public sealed class TrackableLazyCollection<TEntity, TProperties> :
         return entity;
     }
 
+    public TProperties? Get(TEntity entity)
+    {
+        return _collection.Get(entity);
+    }
+
     public Task<TProperties?> GetAsync(TEntity entity, CancellationToken token = default)
     {
         return _collection.GetAsync(entity, token);
     }
 
+    public bool Contains(TEntity entity)
+    {
+        return _collection.Contains(entity);
+    }
+
     public Task<bool> ContainsAsync(TEntity entity, CancellationToken token = default)
     {
         return _collection.ContainsAsync(entity, token);
+    }
+
+    public TProperties? Modify(TEntity entity, Expression<Func<TProperties, TProperties>> modifier)
+    {
+        var oldProps = _collection.Get(entity);
+        var newProps = _collection.Modify(entity, modifier);
+
+        if (oldProps is null || !oldProps.Equals(newProps))
+        {
+            _changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
+        }
+
+        return newProps;
     }
 
     public async Task<TProperties?> ModifyAsync(TEntity entity, Expression<Func<TProperties, TProperties>> modifier, CancellationToken token = default)
@@ -76,6 +107,13 @@ public sealed class TrackableLazyCollection<TEntity, TProperties> :
         }
 
         return newProps;
+    }
+
+    public void Remove(TEntity entity)
+    {
+        var properties = _collection.Get(entity);
+        _changes.Add(CollectionAction.Remove, entity, properties, default);
+        _collection.Remove(entity);
     }
 
     public async Task RemoveAsync(TEntity entity, CancellationToken token = default)

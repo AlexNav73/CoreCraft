@@ -34,6 +34,9 @@ public sealed class CoWCollection<TEntity, TProperties> :
     /// <inheritdoc cref="IHaveInfo{T}.Info"/>
     public CollectionInfo Info => _collection.Info;
 
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Entities"/>
+    public IEnumerable<TEntity> Entities => _collection.Entities;
+
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => (_copy ?? _collection).Count;
 
@@ -130,7 +133,7 @@ public sealed class CoWCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc />
-    public IEnumerator<TEntity> GetEnumerator()
+    public IEnumerator<TProperties> GetEnumerator()
     {
         return (_copy ?? _collection).GetEnumerator();
     }

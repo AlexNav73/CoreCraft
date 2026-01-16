@@ -39,8 +39,14 @@ internal sealed class LazyCollectionView<TShard, TFrame, TEntity, TProperties> :
 
     public IQueryProvider Provider => _collection.Provider;
 
+    public TProperties? Get(TEntity entity)
+        => _collection.Get(entity);
+
     public Task<TProperties?> GetAsync(TEntity entity, CancellationToken token = default)
         => _collection.GetAsync(entity, token);
+
+    public bool Contains(TEntity entity)
+        => _collection.Contains(entity);
 
     public Task<bool> ContainsAsync(TEntity entity, CancellationToken token = default)
         => _collection.ContainsAsync(entity, token);

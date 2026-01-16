@@ -67,8 +67,8 @@ public class ModelChangesTests
         var shard = snapshot.ToModel().Shard<IFakeModelShard>();
 
         Assert.That(shard.FirstCollection.Count, Is.EqualTo(1));
-        Assert.That(shard.FirstCollection.First(), Is.EqualTo(entity));
-        Assert.That(shard.FirstCollection.Get(shard.FirstCollection.First()).NonNullableStringProperty, Is.EqualTo(value));
+        Assert.That(shard.FirstCollection.Entities.First(), Is.EqualTo(entity));
+        Assert.That(shard.FirstCollection.Get(shard.FirstCollection.Entities.First()).NonNullableStringProperty, Is.EqualTo(value));
     }
 
     [Test]

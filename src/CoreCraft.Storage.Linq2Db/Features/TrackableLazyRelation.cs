@@ -34,9 +34,9 @@ public sealed class TrackableLazyRelation<TParent, TChild> :
     public RelationInfo Info => _relation.Info;
 
     public Type ElementType => _relation.ElementType;
-    
+
     public Expression Expression => _relation.Expression;
-    
+
     public IQueryProvider Provider => _relation.Provider;
 
     /// <inheritdoc cref="IMutableState{T}.AsReadOnly()" />
@@ -45,10 +45,26 @@ public sealed class TrackableLazyRelation<TParent, TChild> :
         return ((IMutableState<ILazyRelation<TParent, TChild>>)_relation).AsReadOnly();
     }
 
+    public void Add(TParent parent, TChild child)
+    {
+        _relation.Add(parent, child);
+        _changes.Add(RelationAction.Linked, parent, child);
+    }
+
     public async Task AddAsync(TParent parent, TChild child, CancellationToken token = default)
     {
         await _relation.AddAsync(parent, child, token);
         _changes.Add(RelationAction.Linked, parent, child);
+    }
+
+    public void Remove(TParent parent)
+    {
+        var children = _relation.Children(parent).ToList();
+        _relation.Remove(parent);
+        foreach (var child in children)
+        {
+            _changes.Add(RelationAction.Unlinked, parent, child);
+        }
     }
 
     public async Task RemoveAsync(TParent parent, CancellationToken token = default)
@@ -59,6 +75,12 @@ public sealed class TrackableLazyRelation<TParent, TChild> :
         {
             _changes.Add(RelationAction.Unlinked, parent, child);
         }
+    }
+
+    public void Remove(TParent parent, TChild child)
+    {
+        _relation.Remove(parent, child);
+        _changes.Add(RelationAction.Unlinked, parent, child);
     }
 
     public async Task RemoveAsync(TParent parent, TChild child, CancellationToken token = default)
@@ -72,7 +94,7 @@ public sealed class TrackableLazyRelation<TParent, TChild> :
     {
         throw new InvalidOperationException("Unable to apply changes to the relation");
     }
-    
+
     public IEnumerator<Pair<TParent, TChild>> GetEnumerator()
     {
         throw new NotImplementedException();

@@ -7,10 +7,15 @@ namespace CoreCraft.Core;
 /// </summary>
 /// <typeparam name="TEntity">An entity type</typeparam>
 /// <typeparam name="TProperties">A type of a properties</typeparam>
-public interface ICollection<TEntity, TProperties> : IEnumerable<TEntity>, IHaveInfo<CollectionInfo>, ICopy<ICollection<TEntity, TProperties>>
+public interface ICollection<TEntity, TProperties> : IEnumerable<TProperties>, IHaveInfo<CollectionInfo>, ICopy<ICollection<TEntity, TProperties>>
     where TEntity : Entity
     where TProperties : Properties
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    IEnumerable<TEntity> Entities { get; }
+
     /// <summary>
     ///     A count of entities
     /// </summary>

@@ -62,7 +62,7 @@ public class MemoryUsageTests
 
         await model.Run<IMutableFakeModelShard>(shard =>
         {
-            var parent = shard.FirstCollection.First();
+            var parent = shard.FirstCollection.Entities.First();
             var child = shard.SecondCollection.Add(new());
 
             shard.OneToManyRelation.Add(parent, child);

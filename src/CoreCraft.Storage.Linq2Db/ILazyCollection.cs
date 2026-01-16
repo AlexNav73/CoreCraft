@@ -18,7 +18,24 @@ public interface ILazyCollection<TEntity, TProperties> : IQueryable<TProperties>
     /// <param name="token">Cancellation token to cancel the asynchronous operation</param>
     /// <returns>Properties for a given entities</returns>
     /// <exception cref="KeyNotFoundException">Throws when an entity is not present in the collection</exception>
+    TProperties? Get(TEntity entity);
+
+    /// <summary>
+    ///     Returns properties of a given entity
+    /// </summary>
+    /// <param name="entity">An entity</param>
+    /// <param name="token">Cancellation token to cancel the asynchronous operation</param>
+    /// <returns>Properties for a given entities</returns>
+    /// <exception cref="KeyNotFoundException">Throws when an entity is not present in the collection</exception>
     Task<TProperties?> GetAsync(TEntity entity, CancellationToken token = default);
+
+    /// <summary>
+    ///     Tests if a collection contains an entity
+    /// </summary>
+    /// <param name="entity">An entity to check</param>
+    /// <param name="token">Cancellation token to cancel the asynchronous operation</param>
+    /// <returns>True - if a collection contains an entity</returns>
+    bool Contains(TEntity entity);
 
     /// <summary>
     ///     Tests if a collection contains an entity

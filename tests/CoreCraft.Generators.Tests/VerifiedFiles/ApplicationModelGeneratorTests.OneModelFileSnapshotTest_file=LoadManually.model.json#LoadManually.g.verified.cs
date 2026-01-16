@@ -270,7 +270,7 @@ namespace compilation.LoadManually
             if (force) SecondCollection.Load(repository);
             ThirdCollection.Load(repository);
 
-            if (force) OneToOneRelation.Load(repository, FirstCollection, SecondCollection);
+            if (force) OneToOneRelation.Load(repository, FirstCollection.Entities, SecondCollection.Entities);
         }
 
         public void Save(IRepository repository)
