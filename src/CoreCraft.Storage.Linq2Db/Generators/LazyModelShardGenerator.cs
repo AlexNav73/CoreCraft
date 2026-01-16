@@ -93,10 +93,8 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                 {
                     var parentTypeName = relation.Parent.Entity.Name;
                     var childTypeName = relation.Child.Entity.Name;
-                    var parentRelationType = relation.RelationType is RelationType.OneToOne or RelationType.OneToMany ? "One" : "Many";
-                    var childRelationType = relation.RelationType is RelationType.OneToOne ? "One" : "Many";
 
-                    Code.WriteLine($"{relation.Name} = new LazyRelation<{parentTypeName}, {childTypeName}, {parentRelationType}, {childRelationType}>(");
+                    Code.WriteLine($"{relation.Name} = new LazyRelation<{parentTypeName}, {childTypeName}>(");
                     Code.WithIndent(c =>
                     {
                         c.WriteLine($"{modelShard.Name}ModelShardInfo.{relation.Name}Info,");

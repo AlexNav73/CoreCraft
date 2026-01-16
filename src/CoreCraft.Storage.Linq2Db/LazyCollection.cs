@@ -104,6 +104,11 @@ public sealed class LazyCollection<TEntity, TProperties> :
     /// <inheritdoc />
     public Task<bool> ContainsAsync(TEntity entity, CancellationToken token = default)
     {
+        if (_cache.ContainsKey(entity))
+        {
+            return Task.FromResult(true);
+        }
+
         return _table.AnyAsync(p => p.EntityId == entity, token);
     }
 

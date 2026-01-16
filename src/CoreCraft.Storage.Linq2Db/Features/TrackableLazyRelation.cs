@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
+using CoreCraft.Storage.Linq2Db.Extensions;
+using LinqToDB.Async;
 
 namespace CoreCraft.Storage.Linq2Db.Features;
 
@@ -49,15 +51,20 @@ public sealed class TrackableLazyRelation<TParent, TChild> :
         _changes.Add(RelationAction.Linked, parent, child);
     }
 
-    public Task RemoveAsync(TParent parent, CancellationToken token = default)
+    public async Task RemoveAsync(TParent parent, CancellationToken token = default)
     {
-        return _relation.RemoveAsync(parent, token);
+        var children = await _relation.Children(parent).ToListAsync(token);
+        await _relation.RemoveAsync(parent, token);
+        foreach (var child in children)
+        {
+            _changes.Add(RelationAction.Unlinked, parent, child);
+        }
     }
 
-    public Task RemoveAsync(TParent parent, TChild child, CancellationToken token = default)
+    public async Task RemoveAsync(TParent parent, TChild child, CancellationToken token = default)
     {
-        return _relation.RemoveAsync(parent, child, token)
-            .ContinueWith(t => _changes.Add(RelationAction.Unlinked, parent, child), TaskContinuationOptions.ExecuteSynchronously);
+        await _relation.RemoveAsync(parent, child, token);
+        _changes.Add(RelationAction.Unlinked, parent, child);
     }
 
     /// <inheritdoc cref="IMutableLazyRelation{TParent, TChild}.ApplyAsync(IRelationChangeSet{TParent, TChild}, CancellationToken)" />

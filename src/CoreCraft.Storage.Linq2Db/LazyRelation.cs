@@ -7,13 +7,11 @@ using Newtonsoft.Json.Linq;
 
 namespace CoreCraft.Storage.Linq2Db;
 
-public sealed class LazyRelation<TParent, TChild, TParentRelation, TChildRelation> :
+public sealed class LazyRelation<TParent, TChild> :
     IMutableLazyRelation<TParent, TChild>,
     IMutableState<ILazyRelation<TParent, TChild>>
     where TParent : Entity
     where TChild : Entity
-    where TParentRelation : IRelationType
-    where TChildRelation : IRelationType
 {
     private readonly ITable<Pair<TParent, TChild>> _table;
 
