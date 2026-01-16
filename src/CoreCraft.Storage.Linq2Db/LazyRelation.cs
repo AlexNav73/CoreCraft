@@ -39,6 +39,17 @@ public sealed class LazyRelation<TParent, TChild> :
         return this;
     }
 
+    /// <inheritdoc cref="IMutableLazyRelation{TParent, TChild}.Add(TParent, TChild)"/>
+    public void Add(TParent parent, TChild child)
+    {
+        _table
+            .AsValueInsertable()
+            .Value(p => p.Parent, parent)
+            .Value(p => p.Child, child)
+            .Insert();
+    }
+
+    /// <inheritdoc cref="IMutableLazyRelation{TParent, TChild}.AddAsync(TParent, TChild, CancellationToken)"/>
     public Task AddAsync(TParent parent, TChild child, CancellationToken token = default)
     {
         return _table
@@ -48,12 +59,28 @@ public sealed class LazyRelation<TParent, TChild> :
             .InsertAsync(token);
     }
 
+    /// <inheritdoc cref="IMutableLazyRelation{TParent, TChild}.Remove(TParent)"/>
+    public void Remove(TParent parent)
+    {
+        _table
+            .Where(p => p.Parent.Equals(parent))
+            .Delete();
+    }
+
     /// <inheritdoc cref="IMutableLazyRelation{TParent, TChild}.RemoveAsync(TParent, CancellationToken)"/>
     public Task RemoveAsync(TParent parent, CancellationToken token = default)
     {
         return _table
             .Where(p => p.Parent.Equals(parent))
             .DeleteAsync(token);
+    }
+
+    /// <inheritdoc cref="IMutableLazyRelation{TParent, TChild}.Remove(TParent, TChild)"/>
+    public void Remove(TParent parent, TChild child)
+    {
+        _table
+            .Where(p => p.Parent.Equals(parent) && p.Child.Equals(child))
+            .Delete();
     }
 
     /// <inheritdoc cref="IMutableLazyRelation{TParent, TChild}.RemoveAsync(TParent, TChild, CancellationToken)"/>

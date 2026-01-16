@@ -8,10 +8,10 @@ using LinqToDB.Async;
 namespace CoreCraft.Storage.Linq2Db;
 
 /// <summary>
-/// 
+///     A lazy collection implementation that delegates storage to a Linq2DB `ITable`.
 /// </summary>
-/// <typeparam name="TEntity"></typeparam>
-/// <typeparam name="TProperties"></typeparam>
+/// <typeparam name="TEntity">The domain entity type used as an identifier.</typeparam>
+/// <typeparam name="TProperties">The properties record type stored in the database.</typeparam>
 public sealed class LazyCollection<TEntity, TProperties> :
     IMutableLazyCollection<TEntity, TProperties>,
     IMutableState<ILazyCollection<TEntity, TProperties>>,
@@ -35,10 +35,10 @@ public sealed class LazyCollection<TEntity, TProperties> :
     public CollectionInfo Info { get; }
 
     /// <summary>
-    /// 
+    ///     Initializes a new instance of `LazyCollection`.
     /// </summary>
-    /// <param name="table"></param>
-    /// <param name="info"></param>
+    /// <param name="info">Collection metadata describing property schema for this collection.</param>
+    /// <param name="table">Linq2DB table used as the persistent storage for this collection's properties.</param>
     public LazyCollection(CollectionInfo info, ITable<TProperties> table)
     {
         _table = table;
@@ -52,6 +52,16 @@ public sealed class LazyCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc />
+    public TEntity Add(TProperties properties)
+    {
+        var inserted = _table.InsertWithOutput(properties);
+
+        CacheImpl(inserted);
+
+        return inserted.EntityId;
+    }
+
+    /// <inheritdoc />
     public async Task<TEntity> AddAsync(TProperties properties, CancellationToken token = default)
     {
         var inserted = await _table.InsertWithOutputAsync(properties, token);
@@ -59,6 +69,23 @@ public sealed class LazyCollection<TEntity, TProperties> :
         CacheImpl(inserted);
 
         return inserted.EntityId;
+    }
+
+    /// <inheritdoc />
+    public TProperties? Modify(TEntity entity, Expression<Func<TProperties, TProperties>> modifier)
+    {
+        var result = _table
+            .Where(x => x.EntityId == entity)
+            .UpdateWithOutput(modifier, (deleted, inserted) => inserted);
+
+        var properties = result.SingleOrDefault();
+
+        if (properties is not null)
+        {
+            CacheImpl(properties);
+        }
+
+        return properties;
     }
 
     /// <inheritdoc />
@@ -79,6 +106,17 @@ public sealed class LazyCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc />
+    public void Remove(TEntity entity)
+    {
+        if (_cache.ContainsKey(entity))
+        {
+            _cache.Remove(entity);
+        }
+
+        _table.Where(p => p.EntityId == entity).Delete();
+    }
+
+    /// <inheritdoc />
     public Task RemoveAsync(TEntity entity, CancellationToken token = default)
     {
         if (_cache.ContainsKey(entity))
@@ -91,6 +129,17 @@ public sealed class LazyCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc />
+    public TProperties? Get(TEntity entity)
+    {
+        if (_cache.TryGetValue(entity, out var properties))
+        {
+            return properties;
+        }
+
+        return _table.FirstOrDefault(p => p.EntityId == entity);
+    }
+
+    /// <inheritdoc />
     public Task<TProperties?> GetAsync(TEntity entity, CancellationToken token = default)
     {
         if (_cache.TryGetValue(entity, out var properties))
@@ -99,6 +148,12 @@ public sealed class LazyCollection<TEntity, TProperties> :
         }
 
         return _table.FirstOrDefaultAsync(p => p.EntityId == entity, token);
+    }
+
+    /// <inheritdoc />
+    public bool Contains(TEntity entity)
+    {
+        return _cache.ContainsKey(entity) || _table.Any(p => p.EntityId == entity);
     }
 
     /// <inheritdoc />

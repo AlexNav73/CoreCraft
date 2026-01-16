@@ -57,63 +57,49 @@ static class Program
         {
             ConsoleWriteLine("======================== Modifying ========================", SectionColor);
 
-            await model.Run<IMutableExampleModelShard>(async (shard, _) =>
+            await model.Run<IMutableExampleModelShard>(shard =>
             {
-                var first = await shard.FirstCollection.AddAsync(new() { StringProperty = "test", IntegerProperty = 42 });
-                var second = await shard.SecondCollection.AddAsync(new() { BoolProperty = true, DoubleProperty = 0.5, FloatProperty = 0.75f, IntProperty = (int)SecondEntityEnum.Second });
+                var first = shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
+                var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5, FloatProperty = 0.75f, IntProperty = (int)SecondEntityEnum.Second });
 
-                //var first = shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
-                //var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5, FloatProperty = 0.75f, IntProperty = (int)SecondEntityEnum.Second });
-
-                //shard.OneToOneRelation.Add(first, second);
-                await shard.OneToOneRelation.AddAsync(first, second);
+                shard.OneToOneRelation.Add(first, second);
             });
 
-            await model.Run<IMutableExampleModelShard>(async (shard, _) =>
+            await model.Run<IMutableExampleModelShard>(shard =>
             {
-                var entity = await shard.FirstCollection.Entities.FirstAsync();
-                //var entity = shard.FirstCollection.First();
+                var entity = shard.FirstCollection.Entities.First();
 
-                await shard.FirstCollection.ModifyAsync(entity, props => new()
+                shard.FirstCollection.Modify(entity, props => new()
                 {
                     StringProperty = "modified 1",
                     IntegerProperty = "modified 1".GetHashCode()
                 });
-                await shard.FirstCollection.ModifyAsync(entity, props => new()
+                shard.FirstCollection.Modify(entity, props => new()
                 {
                     StringProperty = "modified 2",
                     IntegerProperty = "modified 2".GetHashCode()
                 });
-
-                //shard.FirstCollection.Modify(entity, props => props with { StringProperty = "modified 1" });
-                //shard.FirstCollection.Modify(entity, props => props with { IntegerProperty = "modified 2".GetHashCode() });
-                //shard.FirstCollection.Modify(entity, props => props with { StringProperty = "modified 3" });
-                //shard.FirstCollection.Modify(entity, props => props with { IntegerProperty = "modified 3".GetHashCode() });
             });
 
-            await model.Run<IMutableExampleModelShard>(async (shard, _) =>
+            await model.Run<IMutableExampleModelShard>(shard =>
             {
-                //var entity = await shard.SecondCollection.Entities.FirstAsync();
-                //var entity = shard.SecondCollection.First();
+                var entity = shard.SecondCollection.Entities.First();
 
-                var pairs = await shard.FirstCollection
-                    .JoinWith(shard.OneToOneRelation, (props, pair) => new { props, pair.Child })
-                    .JoinWith(shard.SecondCollection, x => x.Child, (x, second) => new { First = x.props, Second = second })
-                    .FirstOrDefaultAsync();
+                //var pairs = shard.FirstCollection
+                //    .JoinWith(shard.OneToOneRelation, (props, pair) => new { props, pair.Child })
+                //    .JoinWith(shard.SecondCollection, x => x.Child, (x, second) => new { First = x.props, Second = second })
+                //    .FirstOrDefault();
 
-                await shard.SecondCollection.ModifyAsync(pairs!.Second.EntityId, props => new() { IntProperty = (int)SecondEntityEnum.First });
-                //await shard.SecondCollection.ModifyAsync(entity, props => new() { IntProperty = (int)SecondEntityEnum.Second });
-
-                //shard.SecondCollection.Modify(entity, props => props with { IntProperty = (int)SecondEntityEnum.Second });
+                //shard.SecondCollection.Modify(pairs!.Second.EntityId, props => new() { IntProperty = (int)SecondEntityEnum.First });
+ 
+                shard.SecondCollection.Modify(entity, props => new() { IntProperty = (int)SecondEntityEnum.Second });
             });
 
-            await model.Run<IMutableExampleModelShard>(async (shard, _) =>
+            await model.Run<IMutableExampleModelShard>(shard =>
             {
-                var entity = await shard.FirstCollection.Entities.FirstAsync();
-                //var entity = shard.FirstCollection.First();
+                var entity = shard.FirstCollection.Entities.First();
 
-                await shard.FirstCollection.RemoveAsync(entity);
-                //shard.OneToOneRelation.Remove(entity);
+                shard.FirstCollection.Remove(entity);
             });
         }
 
@@ -131,10 +117,9 @@ static class Program
 
             ConsoleWriteLine("======================== Adding new change ========================", SectionColor);
 
-            await model.Run<IMutableExampleModelShard>(async (shard, _) =>
+            await model.Run<IMutableExampleModelShard>(shard =>
             {
-                //shard.FirstCollection.Add(new() { StringProperty = "modified after load history", IntegerProperty = 42 });
-                await shard.FirstCollection.AddAsync(new() { StringProperty = "modified after load history", IntegerProperty = 42 });
+                shard.FirstCollection.Add(new() { StringProperty = "modified after load history", IntegerProperty = 42 });
             });
             await model.History.Save(historyStorage);
             await model.History.Load(historyStorage);

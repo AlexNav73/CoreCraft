@@ -24,27 +24,21 @@ internal sealed class ModelShardLoader<T> : IModelShardLoader<T>
         return this;
     }
 
-    public IModelShardLoader<T> Relation<TParent, TChild>(
+    public IModelShardLoader<T> Relation<TParent, TParentProperties, TChild, TChildProperties>(
         Func<T, IMutableRelation<TParent, TChild>> relation,
-        Func<T, IEnumerable<TParent>> parents,
-        Func<T, IEnumerable<TChild>> children)
+        Func<T, IMutableCollection<TParent, TParentProperties>> parents,
+        Func<T, IMutableCollection<TChild, TChildProperties>> children)
         where TParent : Entity
         where TChild : Entity
+        where TParentProperties : Properties
+        where TChildProperties : Properties
     {
         var parentCollection = parents(_shard);
         var childrenCollection = children(_shard);
 
-        if (parentCollection is ILoadable loadableP)
-        {
-            _collections.Add(loadableP);
-        }
-
-        if (childrenCollection is ILoadable loadableC)
-        {
-            _collections.Add(loadableC);
-        }
-
-        _relations.Add(r => relation(_shard).Load(r, parentCollection, childrenCollection));
+        _collections.Add(parentCollection);
+        _collections.Add(childrenCollection);
+        _relations.Add(r => relation(_shard).Load(r, parentCollection.Entities, childrenCollection.Entities));
 
         return this;
     }

@@ -311,10 +311,10 @@ namespace compilation.AnotherModelFile
             FirstCollection.Load(repository);
             SecondCollection.Load(repository);
 
-            OneToOneRelation.Load(repository, FirstCollection, SecondCollection);
-            OneToManyRelation.Load(repository, FirstCollection, SecondCollection);
-            ManyToOneRelation.Load(repository, SecondCollection, FirstCollection);
-            ManyToManyRelation.Load(repository, FirstCollection, SecondCollection);
+            OneToOneRelation.Load(repository, FirstCollection.Entities, SecondCollection.Entities);
+            OneToManyRelation.Load(repository, FirstCollection.Entities, SecondCollection.Entities);
+            ManyToOneRelation.Load(repository, SecondCollection.Entities, FirstCollection.Entities);
+            ManyToManyRelation.Load(repository, FirstCollection.Entities, SecondCollection.Entities);
         }
 
         public void Save(IRepository repository)

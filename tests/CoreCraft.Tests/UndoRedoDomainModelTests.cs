@@ -87,7 +87,7 @@ public class UndoRedoDomainModelTests
     {
         await ExecuteAddCommand();
 
-        var entity = _model.Shard<IFakeModelShard>().FirstCollection.Single();
+        var entity = _model.Shard<IFakeModelShard>().FirstCollection.Entities.Single();
 
         await ExecuteModifyCommand(entity, "test");
 

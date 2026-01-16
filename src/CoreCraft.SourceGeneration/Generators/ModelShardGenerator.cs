@@ -510,11 +510,11 @@ internal class ModelShardGenerator(IndentedTextWriter code) : GeneratorCommon
                 {
                     if (relation.Parent.LoadManually || relation.Child.LoadManually)
                     {
-                        Code.WriteLine($"if (force) {relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
+                        Code.WriteLine($"if (force) {relation.Name}.Load(repository, {relation.Parent.Name}.Entities, {relation.Child.Name}.Entities);");
                     }
                     else
                     {
-                        Code.WriteLine($"{relation.Name}.Load(repository, {relation.Parent.Name}, {relation.Child.Name});");
+                        Code.WriteLine($"{relation.Name}.Load(repository, {relation.Parent.Name}.Entities, {relation.Child.Name}.Entities);");
                     }
                 }
             });

@@ -47,6 +47,9 @@ public sealed class Collection<TEntity, TProperties> :
     /// <inheritdoc cref="IHaveInfo{T}.Info"/>
     public CollectionInfo Info { get; }
 
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Entities"/>
+    public IEnumerable<TEntity> Entities => _relation.Keys;
+
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _relation.Count;
 
@@ -196,9 +199,9 @@ public sealed class Collection<TEntity, TProperties> :
     }
 
     /// <inheritdoc />
-    public IEnumerator<TEntity> GetEnumerator()
+    public IEnumerator<TProperties> GetEnumerator()
     {
-        return _relation.Keys.GetEnumerator();
+        return _relation.Values.GetEnumerator();
     }
 
     /// <inheritdoc />

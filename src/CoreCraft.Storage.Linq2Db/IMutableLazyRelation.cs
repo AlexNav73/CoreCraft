@@ -7,9 +7,15 @@ public interface IMutableLazyRelation<TParent, TChild> : ILazyRelation<TParent, 
     where TParent : Entity
     where TChild : Entity
 {
+    void Add(TParent parent, TChild child);
+
     Task AddAsync(TParent parent, TChild child, CancellationToken token = default);
     
+    void Remove(TParent parent);
+
     Task RemoveAsync(TParent parent, CancellationToken token = default);
+
+    void Remove(TParent parent, TChild child);
 
     Task RemoveAsync(TParent parent, TChild child, CancellationToken token = default);
 

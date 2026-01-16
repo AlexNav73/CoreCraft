@@ -29,9 +29,11 @@ internal sealed class CollectionView<TShard, TFrame, TEntity, TProperties> : Dat
         _builderFactory = builderFactory;
     }
 
-    public int Count => _collection.Count;
-
     public CollectionInfo Info => _collection.Info;
+
+    public IEnumerable<TEntity> Entities => _collection.Entities;
+    
+    public int Count => _collection.Count;
 
     public bool Contains(TEntity entity)
     {
@@ -48,11 +50,6 @@ internal sealed class CollectionView<TShard, TFrame, TEntity, TProperties> : Dat
         return _collection.Get(entity);
     }
 
-    public IEnumerator<TEntity> GetEnumerator()
-    {
-        return _collection.GetEnumerator();
-    }
-
     public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
     {
         return _collection.Pairs();
@@ -61,6 +58,11 @@ internal sealed class CollectionView<TShard, TFrame, TEntity, TProperties> : Dat
     public void Save(IRepository repository)
     {
         _collection.Save(repository);
+    }
+
+    public IEnumerator<TProperties> GetEnumerator()
+    {
+        return _collection.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
