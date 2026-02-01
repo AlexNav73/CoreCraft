@@ -35,7 +35,7 @@ internal class ModelShardGenerator(IndentedTextWriter code) : GeneratorCommon
 
     protected virtual bool ContainsFeature(ModelShard modelShard)
     {
-        return !modelShard.Features.Any();
+        return !modelShard.Features.Any() || modelShard.Features.Contains("in-memory");
     }
 
     protected virtual void DefineModelShardInterface(ModelShard modelShard, bool isMutable)

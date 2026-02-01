@@ -9,7 +9,6 @@ using CoreCraft.Storage.Sqlite;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Extensions;
 using LinqToDB;
-using LinqToDB.Async;
 using LinqToDB.Data;
 
 namespace ConsoleDemoApp;
@@ -48,16 +47,16 @@ static class Program
 
         var storage = new SqliteStorage(Path, [], Console.WriteLine);
         var historyStorage = new JsonStorage(History, new() { Formatting = Newtonsoft.Json.Formatting.Indented });
-        var model = new UndoRedoDomainModel([new ExampleModelShard(db)], new SyncScheduler());
+        var model = new UndoRedoDomainModel([new ExampleLazyModelShard(db)], new SyncScheduler());
 
-        db.AddInterceptor(new ExampleModelShardInterceptor(model));
+        db.AddInterceptor(new ExampleLazyModelShardInterceptor(model));
         model.AddInterceptor(new TransactionInterceptor(db));
 
         using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
             ConsoleWriteLine("======================== Modifying ========================", SectionColor);
 
-            await model.Run<IMutableExampleModelShard>(shard =>
+            await model.Run<IMutableExampleLazyModelShard>(shard =>
             {
                 var first = shard.FirstCollection.Add(new() { StringProperty = "test", IntegerProperty = 42 });
                 var second = shard.SecondCollection.Add(new() { BoolProperty = true, DoubleProperty = 0.5, FloatProperty = 0.75f, IntProperty = (int)SecondEntityEnum.Second });
@@ -65,7 +64,7 @@ static class Program
                 shard.OneToOneRelation.Add(first, second);
             });
 
-            await model.Run<IMutableExampleModelShard>(shard =>
+            await model.Run<IMutableExampleLazyModelShard>(shard =>
             {
                 var entity = shard.FirstCollection.Entities.First();
 
@@ -81,21 +80,19 @@ static class Program
                 });
             });
 
-            await model.Run<IMutableExampleModelShard>(shard =>
+            await model.Run<IMutableExampleLazyModelShard>(shard =>
             {
                 var entity = shard.SecondCollection.Entities.First();
 
-                //var pairs = shard.FirstCollection
-                //    .JoinWith(shard.OneToOneRelation, (props, pair) => new { props, pair.Child })
-                //    .JoinWith(shard.SecondCollection, x => x.Child, (x, second) => new { First = x.props, Second = second })
-                //    .FirstOrDefault();
+                var pairs = shard.FirstCollection
+                    .JoinWith(shard.OneToOneRelation, (props, pair) => new { props, pair.Child })
+                    .JoinWith(shard.SecondCollection, x => x.Child, (x, second) => new { First = x.props, Second = second })
+                    .FirstOrDefault();
 
-                //shard.SecondCollection.Modify(pairs!.Second.EntityId, props => new() { IntProperty = (int)SecondEntityEnum.First });
- 
-                shard.SecondCollection.Modify(entity, props => new() { IntProperty = (int)SecondEntityEnum.Second });
+                shard.SecondCollection.Modify(pairs!.Second.EntityId, props => new() { IntProperty = (int)SecondEntityEnum.First });
             });
 
-            await model.Run<IMutableExampleModelShard>(shard =>
+            await model.Run<IMutableExampleLazyModelShard>(shard =>
             {
                 var entity = shard.FirstCollection.Entities.First();
 
@@ -107,7 +104,7 @@ static class Program
         await model.Save(storage);
         await model.History.Save(historyStorage);
 
-        model = new UndoRedoDomainModel([new ExampleModelShard(db)], new SyncScheduler());
+        model = new UndoRedoDomainModel([new ExampleLazyModelShard(db)], new SyncScheduler());
         using (model.For<IExampleChangesFrame>().Subscribe(OnExampleShardChanged))
         {
             ConsoleWriteLine("======================== Loading ========================", SectionColor);
@@ -117,7 +114,7 @@ static class Program
 
             ConsoleWriteLine("======================== Adding new change ========================", SectionColor);
 
-            await model.Run<IMutableExampleModelShard>(shard =>
+            await model.Run<IMutableExampleLazyModelShard>(shard =>
             {
                 shard.FirstCollection.Add(new() { StringProperty = "modified after load history", IntegerProperty = 42 });
             });
