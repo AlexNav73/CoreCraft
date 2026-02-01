@@ -366,7 +366,7 @@ internal sealed class LazyModelShardGenerator(IndentedTextWriter code)
                 {
                     foreach (var entity in modelShard.Collections.Select(x => x.Entity))
                     {
-                        Code.WriteLine($"SetConvertExpression<byte[], {entity.Name}>(x => new {entity.Name}(new Guid(x)));");
+                        Code.WriteLine($"SetConvertExpression<byte[], {entity.Name}>(x => new {entity.Name}(new global::System.Guid(x)));");
                         Code.WriteLine($"builder.Entity<{entity.PropertiesType}>()");
                         Code.WithIndent(c =>
                         {
