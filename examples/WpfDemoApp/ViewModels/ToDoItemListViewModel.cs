@@ -55,7 +55,7 @@ internal partial class ToDoItemListViewModel : ObservableObject, IHasEntity<ToDo
     [RelayCommand]
     private async Task Remove()
     {
-        await _model.Run<IMutableToDoModelShard>((shard, _) =>
+        await _model.Run<IMutableToDoModelShard>(shard =>
         {
             shard.ListToItems.Remove(Entity);
             shard.Lists.Remove(Entity);

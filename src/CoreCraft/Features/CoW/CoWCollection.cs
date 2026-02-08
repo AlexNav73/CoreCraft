@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.ChangesTracking;
 using CoreCraft.Persistence;
 
 namespace CoreCraft.Features.CoW;
@@ -32,6 +33,9 @@ public sealed class CoWCollection<TEntity, TProperties> :
 
     /// <inheritdoc cref="IHaveInfo{T}.Info"/>
     public CollectionInfo Info => _collection.Info;
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Entities"/>
+    public IEnumerable<TEntity> Entities => _collection.Entities;
 
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => (_copy ?? _collection).Count;
@@ -79,11 +83,11 @@ public sealed class CoWCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})"/>
-    public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
+    public TProperties Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {
         _copy ??= (IMutableCollection<TEntity, TProperties>)_collection.Copy();
 
-        _copy.Modify(entity, modifier);
+        return _copy.Modify(entity, modifier);
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Remove(TEntity)"/>
@@ -92,6 +96,14 @@ public sealed class CoWCollection<TEntity, TProperties> :
         _copy ??= (IMutableCollection<TEntity, TProperties>)_collection.Copy();
 
         _copy.Remove(entity);
+    }
+
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.ApplyAsync(ICollectionChangeSet{TEntity, TProperties}, CancellationToken)"/>
+    public Task ApplyAsync(ICollectionChangeSet<TEntity, TProperties> changeSet, CancellationToken token)
+    {
+        _copy ??= (IMutableCollection<TEntity, TProperties>)_collection.Copy();
+
+        return _copy.ApplyAsync(changeSet, token);
     }
 
     /// <inheritdoc cref="ILoadable.Load(IRepository)"/>
@@ -121,7 +133,7 @@ public sealed class CoWCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc />
-    public IEnumerator<TEntity> GetEnumerator()
+    public IEnumerator<TProperties> GetEnumerator()
     {
         return (_copy ?? _collection).GetEnumerator();
     }

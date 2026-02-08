@@ -1,16 +1,17 @@
 ﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Views;
 
 namespace CoreCraft.Subscription.Builders;
 
-internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : ICollectionSubscriptionBuilder<TEntity, TProperties>
-    where T : class, IChangesFrame
+internal sealed class CollectionSubscriptionBuilder<TFrame, TEntity, TProperties> : ICollectionSubscriptionBuilder<TEntity, TProperties>
+    where TFrame : class, IChangesFrame
     where TEntity : Entity
     where TProperties : Properties
 {
-    private readonly CollectionSubscription<T, TEntity, TProperties> _root;
-    private readonly Change<T>? _changes;
+    private readonly CollectionSubscription<TFrame, TEntity, TProperties> _root;
+    private readonly Change<TFrame>? _changes;
 
-    public CollectionSubscriptionBuilder(CollectionSubscription<T, TEntity, TProperties> root, Change<T>? changes)
+    public CollectionSubscriptionBuilder(CollectionSubscription<TFrame, TEntity, TProperties> root, Change<TFrame>? changes)
     {
         _root = root;
         _changes = changes;
@@ -54,9 +55,22 @@ internal sealed class CollectionSubscriptionBuilder<T, TEntity, TProperties> : I
         return subscription;
     }
 
+    internal TView SubscribeView<TView>(TView newView)
+        where TView : DataView<TFrame>
+    {
+        var view = _root.SubscribeView(newView);
+
+        if (_changes is not null)
+        {
+            view.OnNext(_changes);
+        }
+
+        return view;
+    }
+
     private void NotifyIfHasChanges(Action<ICollectionChangeSet<TEntity, TProperties>> action)
     {
-        if (_changes != null)
+        if (_changes is not null)
         {
             var collection = _root.Accessor(_changes.Hunk);
             if (collection.HasChanges())

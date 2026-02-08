@@ -23,7 +23,7 @@ public sealed class AsyncScheduler : IScheduler
         return Task.Factory.StartNew(
             job,
             token,
-            TaskCreationOptions.DenyChildAttach,
+            TaskCreationOptions.AttachedToParent,
             SequentialTaskScheduler.Instance);
     }
 
@@ -38,8 +38,33 @@ public sealed class AsyncScheduler : IScheduler
         return Task.Factory.StartNew(
             job,
             token,
-            TaskCreationOptions.DenyChildAttach,
+            TaskCreationOptions.AttachedToParent,
             SequentialTaskScheduler.Instance);
+    }
+
+    /// <summary>
+    ///     Queues an asynchronous job for sequential execution within the scheduler.
+    /// </summary>
+    /// <remarks>
+    ///     Jobs are executed in the order they are enqueued. If the cancellation token is triggered
+    ///     before the job starts, the job will not be executed and the returned task will be canceled.
+    /// </remarks>
+    /// <param name="job">A delegate that represents the asynchronous operation to execute. Cannot be null.</param>
+    /// <param name="token">A cancellation token that can be used to cancel the scheduled job before it starts.</param>
+    /// <returns>A task that represents the scheduled job. The task completes when the job has finished executing.</returns>
+    public Task EnqueueAsync(Func<Task> job, CancellationToken token)
+    {
+        // Use a TaskFactory that targets the SequentialTaskScheduler so the delegate runs on it
+        // and any child tasks that use TaskScheduler.Current (e.g. Task.Factory.StartNew)
+        // will also be scheduled on the same scheduler. Unwrap the resulting Task<Task>
+        // to return a Task that completes when the inner job task completes.
+        var factory = new TaskFactory(
+            token,
+            TaskCreationOptions.AttachedToParent,
+            TaskContinuationOptions.None,
+            SequentialTaskScheduler.Instance);
+
+        return factory.StartNew(job, token).Unwrap();
     }
 
     /// <summary>

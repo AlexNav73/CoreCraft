@@ -1,4 +1,5 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Core;
 
@@ -6,8 +7,8 @@ namespace CoreCraft.Core;
 ///     An mutable counterpart of a <see cref="ICollection{TEntity, TProperties}"/> interface
 /// </summary>
 /// <remarks>
-///     When a <see cref="Commands.ICommand"/> executes it receives a mutable model.
-///     When a <see cref="Commands.ICommand"/> finishes, model notifies all it's subscribers
+///     When a <see cref="Commands.IAsyncCommand"/> executes it receives a mutable model.
+///     When a <see cref="Commands.IAsyncCommand"/> finishes, model notifies all it's subscribers
 ///     that model has been changed and passes a new and old model to the subscriber. When subscriber
 ///     receives models it can only read them, because all modifications must happen inside the commands
 ///     to keep track of changes. Only commands can provide an access to a mutable model shard.
@@ -49,7 +50,7 @@ public interface IMutableCollection<TEntity, TProperties> : ICollection<TEntity,
     /// <param name="entity">An entity</param>
     /// <param name="modifier">A function which takes old properties and returns new properties with modifications</param>
     /// <exception cref="KeyNotFoundException">Throws when trying to modify an entity which is not present in the collection</exception>
-    void Modify(TEntity entity, Func<TProperties, TProperties> modifier);
+    TProperties Modify(TEntity entity, Func<TProperties, TProperties> modifier);
 
     /// <summary>
     ///     Removes entity with properties from the collection
@@ -57,4 +58,11 @@ public interface IMutableCollection<TEntity, TProperties> : ICollection<TEntity,
     /// <param name="entity">An entity</param>
     /// <exception cref="KeyNotFoundException">Throws when trying to remove an entity which is not present in the collection</exception>
     void Remove(TEntity entity);
+
+    /// <summary>
+    ///     Applies changes from a collection change set to this collection.
+    /// </summary>
+    /// <param name="changeSet">Changes to apply</param>
+    /// <param name="token"></param>
+    Task ApplyAsync(ICollectionChangeSet<TEntity, TProperties> changeSet, CancellationToken token = default);
 }

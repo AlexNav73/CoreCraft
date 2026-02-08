@@ -13,9 +13,9 @@ public class AutoSaveDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new AutoSaveDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new AutoSaveDomainModel([new FakeModelShard()], scheduler, storage);
 
-        await model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Add(new()));
+        await model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
 
         A.CallTo(() => storage.Update(A<IEnumerable<IChangesFrame>>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -26,7 +26,7 @@ public class AutoSaveDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new AutoSaveDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new AutoSaveDomainModel([new FakeModelShard()], scheduler, storage);
         var firstCollectionChanged = false;
 
         using (model.For<IFakeChangesFrame>().With(y => y.FirstCollection).Subscribe(c => firstCollectionChanged = true))
@@ -53,7 +53,7 @@ public class AutoSaveDomainModelTests
     {
         var scheduler = new SyncScheduler();
         var storage = A.Fake<IStorage>();
-        var model = new AutoSaveDomainModel(new[] { new FakeModelShard() }, scheduler, storage);
+        var model = new AutoSaveDomainModel([new FakeModelShard()], scheduler, storage);
         var relationChanged = false;
 
         using (model.For<IFakeChangesFrame>().With(y => y.OneToOneRelation).Subscribe(c => relationChanged = true))

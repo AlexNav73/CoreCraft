@@ -1,4 +1,5 @@
-﻿using CoreCraft.Persistence;
+﻿using CoreCraft.ChangesTracking;
+using CoreCraft.Persistence;
 
 namespace CoreCraft.Core;
 
@@ -6,8 +7,8 @@ namespace CoreCraft.Core;
 ///     An mutable counterpart of a <see cref="IRelation{TParent, TChild}"/> interface
 /// </summary>
 /// <remarks>
-///     When a <see cref="Commands.ICommand"/> executes it receives a mutable model.
-///     When a <see cref="Commands.ICommand"/> finishes, model notifies all it's subscribers
+///     When a <see cref="Commands.IAsyncCommand"/> executes it receives a mutable model.
+///     When a <see cref="Commands.IAsyncCommand"/> finishes, model notifies all it's subscribers
 ///     that model has been changed and passes a new and old model to the subscriber. When subscriber
 ///     receives models it can only read them, because all modifications must happen inside the commands
 ///     to keep track of changes. Only commands can provide an access to a mutable model shard.
@@ -50,4 +51,11 @@ public interface IMutableRelation<TParent, TChild> : IRelation<TParent, TChild>
         IRepository repository,
         IEnumerable<TParent> parents,
         IEnumerable<TChild> children);
+
+    /// <summary>
+    ///     Applies changes from a relation change set to this relation.
+    /// </summary>
+    /// <param name="changeSet">Change set to apply</param>
+    /// <param name="token"></param>
+    Task ApplyAsync(IRelationChangeSet<TParent, TChild> changeSet, CancellationToken token = default);
 }

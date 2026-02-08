@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.ChangesTracking;
 using CoreCraft.Persistence;
 
 namespace CoreCraft.Features.CoW;
@@ -61,6 +62,14 @@ public sealed class CoWRelation<TParent, TChild> :
         _copy ??= (IMutableRelation<TParent, TChild>)_relation.Copy();
 
         _copy.Remove(parent, child);
+    }
+
+    /// <inheritdoc cref="IMutableRelation{TParent, TChild}.ApplyAsync(IRelationChangeSet{TParent, TChild}, CancellationToken)" />
+    public Task ApplyAsync(IRelationChangeSet<TParent, TChild> changeSet, CancellationToken token = default)
+    {
+        _copy ??= (IMutableRelation<TParent, TChild>)_relation.Copy();
+        
+        return _copy.ApplyAsync(changeSet);
     }
 
     /// <inheritdoc cref="IMutableRelation{TParent, TChild}.Load(IRepository, IEnumerable{TParent}, IEnumerable{TChild})" />

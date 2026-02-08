@@ -4,7 +4,7 @@ using CoreCraft.Subscription.Builders;
 namespace CoreCraft.Subscription.Extensions;
 
 /// <summary>
-///     A collection of extensions methods for <see cref="ISubscriptionBuilder{T}"/>
+///     A collection of extensions methods for subscription builders
 /// </summary>
 public static class SubscriptionBuilderExtensions
 {
@@ -18,7 +18,7 @@ public static class SubscriptionBuilderExtensions
     public static IDisposable Subscribe<TFrame>(
         this IModelShardSubscriptionBuilder<TFrame> self,
         Action<Change<TFrame>> handler)
-            where TFrame : class, IChangesFrame
+        where TFrame : class, IChangesFrame
     {
         return self.Subscribe(new AnonymousObserver<Change<TFrame>>(handler));
     }
@@ -34,8 +34,8 @@ public static class SubscriptionBuilderExtensions
     public static IDisposable Subscribe<TEntity, TProperties>(
         this ICollectionSubscriptionBuilder<TEntity, TProperties> self,
         Action<Change<ICollectionChangeSet<TEntity, TProperties>>> handler)
-          where TEntity : Entity
-          where TProperties : Properties
+        where TEntity : Entity
+        where TProperties : Properties
     {
         return self.Subscribe(new AnonymousObserver<Change<ICollectionChangeSet<TEntity, TProperties>>>(handler));
     }
@@ -51,8 +51,8 @@ public static class SubscriptionBuilderExtensions
     public static IDisposable Subscribe<TParent, TChild>(
         this IRelationSubscriptionBuilder<TParent, TChild> self,
         Action<Change<IRelationChangeSet<TParent, TChild>>> handler)
-          where TParent : Entity
-          where TChild : Entity
+        where TParent : Entity
+        where TChild : Entity
     {
         return self.Subscribe(new AnonymousObserver<Change<IRelationChangeSet<TParent, TChild>>>(handler));
     }
@@ -68,8 +68,8 @@ public static class SubscriptionBuilderExtensions
     public static IDisposable Bind<TEntity, TProperties>(
         this ICollectionSubscriptionBuilder<TEntity, TProperties> self,
         Action<Change<CollectionChangeGroups<TEntity, TProperties>>> handler)
-          where TEntity : Entity
-          where TProperties : Properties
+        where TEntity : Entity
+        where TProperties : Properties
     {
         return self.Bind(new AnonymousObserver<Change<CollectionChangeGroups<TEntity, TProperties>>>(handler));
     }
@@ -87,8 +87,8 @@ public static class SubscriptionBuilderExtensions
         this ICollectionSubscriptionBuilder<TEntity, TProperties> self,
         TEntity entity,
         Action<IEntityChange<TEntity, TProperties>> handler)
-          where TEntity : Entity
-          where TProperties : Properties
+        where TEntity : Entity
+        where TProperties : Properties
     {
         return self.Bind(entity, new AnonymousObserver<IEntityChange<TEntity, TProperties>>(handler));
     }

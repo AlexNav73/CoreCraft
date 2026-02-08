@@ -8,7 +8,9 @@ namespace CoreCraft.Tests;
 
 public class UndoRedoDomainModelTests
 {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     private UndoRedoDomainModel _model;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     [SetUp]
     public void Setup()
@@ -85,7 +87,7 @@ public class UndoRedoDomainModelTests
     {
         await ExecuteAddCommand();
 
-        var entity = _model.Shard<IFakeModelShard>().FirstCollection.Single();
+        var entity = _model.Shard<IFakeModelShard>().FirstCollection.Entities.Single();
 
         await ExecuteModifyCommand(entity, "test");
 
@@ -278,16 +280,16 @@ public class UndoRedoDomainModelTests
 
     private async Task ExecuteAddCommand()
     {
-        await _model.Run<IMutableFakeModelShard>(static (shard, _) => shard.FirstCollection.Add(new()));
+        await _model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Add(new()));
     }
 
     private async Task ExecuteRemoveCommand(FirstEntity entity)
     {
-        await _model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Remove(entity));
+        await _model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Remove(entity));
     }
 
     private async Task ExecuteModifyCommand(FirstEntity entity, string value)
     {
-        await _model.Run<IMutableFakeModelShard>((shard, _) => shard.FirstCollection.Modify(entity, p => p with { NullableStringProperty = value }));
+        await _model.Run<IMutableFakeModelShard>(shard => shard.FirstCollection.Modify(entity, p => p with { NullableStringProperty = value }));
     }
 }

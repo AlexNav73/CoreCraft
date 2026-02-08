@@ -164,7 +164,9 @@ internal class CollectionSubscriptionTests
         collectionSubscription.Publish(CreateChanges(new()));
 
         // observer is dropped here
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
         observer = null;
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
     }
 
     private FirstEntity BindToEntity(
@@ -177,7 +179,9 @@ internal class CollectionSubscriptionTests
         collectionSubscription.Bind(entity, observer);
 
         // observer is dropped here
-        observer = null;
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
+         observer = null;
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
         return entity;
     }
 

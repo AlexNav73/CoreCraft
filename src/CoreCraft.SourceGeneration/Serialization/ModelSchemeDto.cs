@@ -4,17 +4,19 @@ internal sealed record ModelSchemeDto(bool Debug, IEnumerable<ModelShardDto> Sha
 
 internal sealed record ModelShardDto
 {
-    public string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     public bool LoadManually { get; init; }
 
+    public string[] Features { get; set; } = [];
+
     public VisibilityDto Visibility { get; init; }
 
-    public IEnumerable<EntityDto> Entities { get; init; }
+    public IEnumerable<EntityDto> Entities { get; init; } = [];
 
-    public IEnumerable<CollectionDto> Collections { get; init; }
+    public IEnumerable<CollectionDto> Collections { get; init; } = [];
 
-    public IEnumerable<RelationDto> Relations { get; init; }
+    public IEnumerable<RelationDto> Relations { get; init; } = [];
 }
 
 internal sealed record CollectionDto(string Name, string EntityType, bool LoadManually = false);

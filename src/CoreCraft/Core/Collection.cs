@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using CoreCraft.ChangesTracking;
 using CoreCraft.Exceptions;
 using CoreCraft.Persistence;
 
@@ -45,6 +46,9 @@ public sealed class Collection<TEntity, TProperties> :
 
     /// <inheritdoc cref="IHaveInfo{T}.Info"/>
     public CollectionInfo Info { get; }
+
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Entities"/>
+    public IEnumerable<TEntity> Entities => _relation.Keys;
 
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _relation.Count;
@@ -100,11 +104,13 @@ public sealed class Collection<TEntity, TProperties> :
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})"/>
-    public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
+    public TProperties Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {
         if (_relation.TryGetValue(entity, out var properties))
         {
-            _relation[entity] = modifier(properties);
+            var newData = modifier(properties);
+            _relation[entity] = newData;
+            return newData;
         }
         else
         {
@@ -146,6 +152,37 @@ public sealed class Collection<TEntity, TProperties> :
             _propsFactory);
     }
 
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.ApplyAsync(ICollectionChangeSet{TEntity, TProperties}, CancellationToken)" />
+    public Task ApplyAsync(ICollectionChangeSet<TEntity, TProperties> changeSet, CancellationToken token = default)
+    {
+        foreach (var change in changeSet)
+        {
+            switch (change.Action)
+            {
+                case CollectionAction.Add:
+                    // Add expects NewData to be non-null
+                    Add(change.Entity, change.NewData!);
+                    break;
+                case CollectionAction.Remove:
+                    Remove(change.Entity);
+                    break;
+                case CollectionAction.Modify:
+                    Modify(change.Entity, d =>
+                    {
+                        var bag = new PropertiesBag();
+                        change.NewData!.WriteTo(bag);
+
+                        return (TProperties)d.ReadFrom(bag);
+                    });
+                    break;
+                default:
+                    throw new NotSupportedException($"An action [{change.Action}] is not supported.");
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Pairs()" />
     public IEnumerable<(TEntity entity, TProperties properties)> Pairs()
     {
@@ -162,9 +199,9 @@ public sealed class Collection<TEntity, TProperties> :
     }
 
     /// <inheritdoc />
-    public IEnumerator<TEntity> GetEnumerator()
+    public IEnumerator<TProperties> GetEnumerator()
     {
-        return _relation.Keys.GetEnumerator();
+        return _relation.Values.GetEnumerator();
     }
 
     /// <inheritdoc />

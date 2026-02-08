@@ -22,16 +22,20 @@ public interface IModelShardLoader<T> : ILazyLoader
     ///     Loads a relation associated with the model shard using the provided functions.
     /// </summary>
     /// <typeparam name="TParent">The type of the parent entities in the relation.</typeparam>
+    /// <typeparam name="TParentProperties"></typeparam>
     /// <typeparam name="TChild">The type of the child entities in the relation.</typeparam>
+    /// <typeparam name="TChildProperties"></typeparam>
     /// <param name="relation">A function that returns the relation associated with the model shard.</param>
     /// <param name="parents">A function that returns the parent entities' collection associated with the relation.</param>
     /// <param name="children">A function that returns the child entities' collection associated with the relation.</param>
     /// <returns>The model shard loader.</returns>
-    IModelShardLoader<T> Relation<TParent, TChild>(
+    IModelShardLoader<T> Relation<TParent, TParentProperties, TChild, TChildProperties>(
         Func<T, IMutableRelation<TParent, TChild>> relation,
-        Func<T, IEnumerable<TParent>> parents,
-        Func<T, IEnumerable<TChild>> children)
+        Func<T, IMutableCollection<TParent, TParentProperties>> parents,
+        Func<T, IMutableCollection<TChild, TChildProperties>> children)
         where TParent : Entity
-        where TChild : Entity;
+        where TChild : Entity
+        where TParentProperties : Properties
+        where TChildProperties : Properties;
 }
 

@@ -11,7 +11,8 @@ internal sealed class ModelSubscription : Subscription<IModelChanges>
         _modelShardSubscriptions = new Dictionary<Type, ISubscription<IModelChanges>>();
     }
 
-    public ModelShardSubscription<T> GetOrCreateSubscriptionFor<T>() where T : class, IChangesFrame
+    public ModelShardSubscription<T> GetOrCreateSubscriptionFor<T>()
+        where T : class, IChangesFrame
     {
         if (_modelShardSubscriptions.TryGetValue(typeof(T), out var subs))
         {
@@ -24,13 +25,13 @@ internal sealed class ModelSubscription : Subscription<IModelChanges>
         return subscription;
     }
 
-    public override void Publish(Change<IModelChanges> change)
+    public override void Publish(Change<IModelChanges> change, bool forView = false)
     {
-        base.Publish(change);
+        base.Publish(change, forView);
 
         foreach (var subscription in _modelShardSubscriptions.Values.ToArray())
         {
-            subscription.Publish(change);
+            subscription.Publish(change, forView);
         }
     }
 }

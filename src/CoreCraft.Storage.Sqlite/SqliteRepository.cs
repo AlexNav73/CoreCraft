@@ -358,7 +358,7 @@ internal sealed class SqliteRepository : DisposableBase, ISqliteRepository
             var timestamp = reader.GetInt64(0);
             var modelChanges = new ModelChanges(timestamp);
 
-            foreach (var shard in shards.Cast<IFrameFactory>())
+            foreach (var shard in shards.Cast<IReadOnlyState<IMutableModelShard>>())
             {
                 var change = (IChangesFrameEx)shard.Create();
                 change.Do(new LoadChangesFrameOperation(timestamp, this));

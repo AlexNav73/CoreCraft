@@ -11,7 +11,7 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     where TParent : Entity
     where TChild : Entity
 {
-    private readonly IList<IRelationChange<TParent, TChild>> _changes;
+    private readonly List<IRelationChange<TParent, TChild>> _changes;
 
     /// <summary>
     ///     Ctor
@@ -21,7 +21,7 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     {
     }
 
-    private RelationChangeSet(RelationInfo info, IList<IRelationChange<TParent, TChild>> changes)
+    private RelationChangeSet(RelationInfo info, List<IRelationChange<TParent, TChild>> changes)
     {
         _changes = changes;
 
@@ -30,6 +30,9 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
 
     /// <inheritdoc />
     public RelationInfo Info { get; }
+
+    /// <inheritdoc />
+    public int Count => _changes.Count;
 
     /// <inheritdoc />
     public void Add(RelationAction action, TParent parent, TChild child)
@@ -72,7 +75,7 @@ public sealed class RelationChangeSet<TParent, TChild> : IRelationChangeSet<TPar
     /// <inheritdoc />
     public IRelationChangeSet<TParent, TChild> Invert()
     {
-        var inverted = _changes.Reverse().Select(x => x.Invert()).ToList();
+        var inverted = _changes.AsEnumerable().Reverse().Select(x => x.Invert()).ToList();
         return new RelationChangeSet<TParent, TChild>(Info, inverted);
     }
 

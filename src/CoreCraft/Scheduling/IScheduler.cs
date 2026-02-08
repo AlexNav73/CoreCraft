@@ -33,6 +33,19 @@ public interface IScheduler
     /// <param name="token">Cancellation token</param>
     Task<T> Enqueue<T>(Func<T> job, CancellationToken token);
 
+
+    /// <summary>
+    ///     Queues an asynchronous job for sequential execution within the scheduler.
+    /// </summary>
+    /// <remarks>
+    ///     Jobs are executed in the order they are enqueued. If the cancellation token is triggered
+    ///     before the job starts, the job will not be executed and the returned task will be canceled.
+    /// </remarks>
+    /// <param name="job">A delegate that represents the asynchronous operation to execute. Cannot be null.</param>
+    /// <param name="token">A cancellation token that can be used to cancel the scheduled job before it starts.</param>
+    /// <returns>A task that represents the scheduled job. The task completes when the job has finished executing.</returns>
+    Task EnqueueAsync(Func<Task> job, CancellationToken token);
+
     /// <summary>
     ///     Runs the job in parallel to the execution of jobs,
     ///     scheduled by <see cref="Enqueue(Action, CancellationToken)"/> method

@@ -127,10 +127,9 @@ public class TrackableCollectionTests
     public void TrackableModifyEntityInsideCollectionTest()
     {
         A.CallTo(() => _collection!.Get(A<FirstEntity>.Ignored))
-            .ReturnsNextFromSequence(
-                new FirstEntityProperties(),
-                new FirstEntityProperties() { NullableStringProperty = "test" }
-            );
+            .Returns(new FirstEntityProperties());
+        A.CallTo(() => _collection!.Modify(A<FirstEntity>.Ignored, A<Func<FirstEntityProperties, FirstEntityProperties>>.Ignored))
+            .Returns(new FirstEntityProperties() { NullableStringProperty = "test" });
 
         _trackable!.Modify(A.Dummy<FirstEntity>(), p => p with { NullableStringProperty = "test" });
 

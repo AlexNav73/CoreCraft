@@ -3,7 +3,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace CoreCraft.Generators;
+namespace CoreCraft.SourceGeneration;
 
 public abstract class GeneratorBase : IIncrementalGenerator
 {

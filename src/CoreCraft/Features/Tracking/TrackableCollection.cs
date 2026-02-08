@@ -30,6 +30,9 @@ public sealed class TrackableCollection<TEntity, TProperties> :
     /// <inheritdoc cref="IHaveInfo{T}.Info" />
     public CollectionInfo Info => _collection.Info;
 
+    /// <inheritdoc cref="ICollection{TEntity, TProperties}.Entities"/>
+    public IEnumerable<TEntity> Entities => _collection.Entities;
+
     /// <inheritdoc cref="ICollection{TEntity, TProperties}.Count"/>
     public int Count => _collection.Count;
 
@@ -78,16 +81,17 @@ public sealed class TrackableCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Modify(TEntity, Func{TProperties, TProperties})" />
-    public void Modify(TEntity entity, Func<TProperties, TProperties> modifier)
+    public TProperties Modify(TEntity entity, Func<TProperties, TProperties> modifier)
     {
         var oldProps = _collection.Get(entity);
-        _collection.Modify(entity, modifier);
-        var newProps = _collection.Get(entity);
+        var newProps = _collection.Modify(entity, modifier);
 
         if (!oldProps.Equals(newProps))
         {
             _changes.Add(CollectionAction.Modify, entity, oldProps, newProps);
         }
+
+        return newProps;
     }
 
     /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.Remove(TEntity)" />
@@ -96,6 +100,12 @@ public sealed class TrackableCollection<TEntity, TProperties> :
         var properties = _collection.Get(entity);
         _changes.Add(CollectionAction.Remove, entity, properties, default);
         _collection.Remove(entity);
+    }
+
+    /// <inheritdoc cref="IMutableCollection{TEntity, TProperties}.ApplyAsync(ICollectionChangeSet{TEntity, TProperties}, CancellationToken)"/>
+    public Task ApplyAsync(ICollectionChangeSet<TEntity, TProperties> changeSet, CancellationToken token = default)
+    {
+        throw new InvalidOperationException("Unable to apply changes to the collection");
     }
 
     /// <inheritdoc cref="ILoadable.Load(IRepository)" />
@@ -132,7 +142,7 @@ public sealed class TrackableCollection<TEntity, TProperties> :
     }
 
     /// <inheritdoc cref="IEnumerable{T}.GetEnumerator" />
-    public IEnumerator<TEntity> GetEnumerator()
+    public IEnumerator<TProperties> GetEnumerator()
     {
         return _collection.GetEnumerator();
     }

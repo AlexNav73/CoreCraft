@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -21,7 +20,6 @@ namespace MyCode
 ";
 
         protected async Task Run(
-            [CallerMemberName] string methodName = "",
             Action<GeneratorDriverRunResult?>? verification = null,
             params string[] files)
         {
@@ -34,22 +32,14 @@ namespace MyCode
                 .ToImmutableArray();
             GeneratorDriver driver = CSharpGeneratorDriver.Create([generator], additionalTexts: additionalFiles);
 
-            driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var _, out var _);
+            driver = driver.RunGenerators(compilation);
 
             var runResult = driver.GetRunResult();
 
             verification?.Invoke(runResult);
 
-            foreach (var tree in runResult.GeneratedTrees)
-            {
-                var generatedFileName = Path.GetFileName(tree.FilePath).Replace('.', '_');
-                var generatedSource = tree.GetText().ToString();
-                var fileName = $"{GetType().Name}_{methodName}_{generatedFileName}";
-
-                await Verify(generatedSource)
-                    .UseDirectory("../VerifiedFiles")
-                    .UseFileName(fileName);
-            }
+            await Verify(runResult)
+                .UseDirectory("../VerifiedFiles");
         }
 
         private static Compilation CreateCompilation(string source)
@@ -57,7 +47,7 @@ namespace MyCode
             return CSharpCompilation.Create(
                 "compilation",
                 [CSharpSyntaxTree.ParseText(source)],
-                new[] { MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location) },
+                [MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location)],
                 new CSharpCompilationOptions(OutputKind.ConsoleApplication));
         }
     }

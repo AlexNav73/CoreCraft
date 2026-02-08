@@ -1,8 +1,5 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Core;
-#if NETCOREAPP3_1 || NET48_OR_GREATER
-using CoreCraft.Exceptions;
-#endif
 using CoreCraft.Subscription;
 
 namespace CoreCraft.Tests.Subscription;

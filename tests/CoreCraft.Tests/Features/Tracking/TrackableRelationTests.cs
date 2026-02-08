@@ -64,7 +64,7 @@ public class TrackableRelationTests
         var second = new SecondEntity();
         var third = new SecondEntity();
 
-        A.CallTo(() => _relation.Children(first)).Returns([second, third]);
+        A.CallTo(() => _relation!.Children(first)).Returns([second, third]);
 
         _trackable!.Remove(first);
 

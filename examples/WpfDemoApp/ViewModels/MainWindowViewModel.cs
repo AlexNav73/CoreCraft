@@ -16,10 +16,10 @@ internal partial class MainWindowViewModel : ObservableObject
     private readonly UndoRedoDomainModel _model;
     private readonly Func<string, ISqliteStorage> _storageFactory;
 
-    private readonly ObservableObject _homePage;
+    private readonly DisposableObservableObject _homePage;
 
     [ObservableProperty]
-    private ObservableObject? _page;
+    private DisposableObservableObject? _page;
 
     public MainWindowViewModel(UndoRedoDomainModel model, Func<string, ISqliteStorage> storageFactory)
     {
@@ -74,12 +74,14 @@ internal partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void Select(object parameter)
     {
+        (Page as ItemsPageViewModel)?.Dispose();
         Page = new ItemsPageViewModel(_model, (ToDoList)parameter);
     }
 
     [RelayCommand]
     private void GoHome()
     {
+        (Page as ItemsPageViewModel)?.Dispose();
         Page = _homePage;
     }
 }

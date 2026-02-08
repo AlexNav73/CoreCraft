@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.32112.339
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11304.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCraft", "src\CoreCraft\CoreCraft.csproj", "{58E71AB4-50FE-4D29-92C1-46D6AD01BA1B}"
 EndProject
@@ -43,6 +43,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCraft.Storage.Linq2Db", "src\CoreCraft.Storage.Linq2Db\CoreCraft.Storage.Linq2Db.csproj", "{22669111-D071-4306-4BDB-EF733C9D1E53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -104,6 +106,10 @@ Global
 		{E7F5B270-200E-4A04-8E8A-59EA27FC6F30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7F5B270-200E-4A04-8E8A-59EA27FC6F30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7F5B270-200E-4A04-8E8A-59EA27FC6F30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22669111-D071-4306-4BDB-EF733C9D1E53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22669111-D071-4306-4BDB-EF733C9D1E53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22669111-D071-4306-4BDB-EF733C9D1E53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22669111-D071-4306-4BDB-EF733C9D1E53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,6 +129,7 @@ Global
 		SolutionGuid = {9E61BBAA-E73F-4733-86CA-24FCF8402964}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\CoreCraft.SourceGeneration\CoreCraft.SourceGeneration.projitems*{22669111-d071-4306-4bdb-ef733c9d1e53}*SharedItemsImports = 5
 		src\CoreCraft.SourceGeneration\CoreCraft.SourceGeneration.projitems*{b11d3e00-59b5-4227-ab86-2f20e5fa330b}*SharedItemsImports = 13
 		src\CoreCraft.SourceGeneration\CoreCraft.SourceGeneration.projitems*{bf7c92e9-5688-4bca-961f-511b81d2eff1}*SharedItemsImports = 5
 	EndGlobalSection

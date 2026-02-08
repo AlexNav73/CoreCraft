@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IndentedTextWriterExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GeneratorBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generators\EntitiesGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generators\GeneratorCommon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)generators\ModelGenerator.cs" />

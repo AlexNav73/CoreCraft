@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+    
+  <ItemGroup>
+    <PackageReference Include="linq2db" Version="6.1.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.1" />
+    <PackageReference Include="PolySharp" Version="1.15.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Linq.AsyncEnumerable" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- https://stackoverflow.com/questions/65010453/how-to-pack-a-c-sharp-9-source-generator-and-upload-it-to-the-nuget -->
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <ProjectReference Include="..\CoreCraft\CoreCraft.csproj" />
+  </ItemGroup>
+    
+  <Import Project="..\CoreCraft.SourceGeneration\CoreCraft.SourceGeneration.projitems" Label="Shared" />
+
+</Project>

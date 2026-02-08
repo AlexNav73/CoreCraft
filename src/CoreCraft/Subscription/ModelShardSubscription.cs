@@ -49,17 +49,17 @@ internal sealed class ModelShardSubscription<T> : Subscription<T>, ISubscription
         return subscription;
     }
 
-    public void Publish(Change<IModelChanges> change)
+    public void Publish(Change<IModelChanges> change, bool forView = false)
     {
         if (change.Hunk.TryGetFrame<T>(out var frame) && frame.HasChanges())
         {
             var msg = change.Map(_ => frame);
 
-            Publish(msg);
+            Publish(msg, forView);
 
             foreach (var subscription in _subscriptions.Values.ToArray())
             {
-                subscription.Publish(msg);
+                subscription.Publish(msg, forView);
             }
         }
     }

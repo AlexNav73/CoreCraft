@@ -2,6 +2,7 @@
 using CoreCraft.Commands;
 using CoreCraft.Subscription;
 using CoreCraft.Subscription.Builders;
+using CoreCraft.Views;
 
 namespace CoreCraft;
 
@@ -34,7 +35,20 @@ public interface IDomainModel : IModel
     /// <param name="command">An action with business logic</param>
     /// <param name="token">A cancellation token</param>
     /// <returns>A task to wait till command execution finishes</returns>
-    Task Run<T>(Action<T, CancellationToken> command, CancellationToken token = default)
+    Task Run<T>(Action<T> command, CancellationToken token = default)
+        where T : IMutableModelShard;
+
+    /// <summary>
+    ///     Runs an action as a command on the specific model shard
+    /// </summary>
+    /// <remarks>
+    ///     Type T here is a mutable type of the model shard
+    /// </remarks>
+    /// <typeparam name="T">Is a mutable version of the model shard</typeparam>
+    /// <param name="command">An action with business logic</param>
+    /// <param name="token">A cancellation token</param>
+    /// <returns>A task to wait till command execution finishes</returns>
+    Task Run<T>(Func<T, CancellationToken, Task> command, CancellationToken token = default)
         where T : IMutableModelShard;
 
     /// <summary>
@@ -46,7 +60,7 @@ public interface IDomainModel : IModel
     /// <param name="command">An action with business logic</param>
     /// <param name="token">A cancellation token</param>
     /// <returns>A task to wait till command execution finishes</returns>
-    Task Run(Action<IMutableModel, CancellationToken> command, CancellationToken token = default);
+    Task Run(Func<IMutableModel, CancellationToken, Task> command, CancellationToken token = default);
 
     /// <summary>
     ///     Runs a command on a model
@@ -54,5 +68,5 @@ public interface IDomainModel : IModel
     /// <param name="command">An command object with business logic</param>
     /// <param name="token">A cancellation token</param>
     /// <returns>A task to wait till command execution finishes</returns>
-    Task Run(ICommand command, CancellationToken token = default);
+    Task Run(IAsyncCommand command, CancellationToken token = default);
 }

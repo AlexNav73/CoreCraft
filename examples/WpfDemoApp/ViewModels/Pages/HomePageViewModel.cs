@@ -12,9 +12,9 @@ using WpfDemoApp.Model.Entities;
 
 namespace WpfDemoApp.ViewModels.Pages;
 
-internal sealed partial class HomePageViewModel : ObservableObject
+internal sealed partial class HomePageViewModel : DisposableObservableObject
 {
-    private readonly IDisposable _subscription; // Dispose to unsubscribe
+    private readonly IDisposable _subscription;
 
     private readonly UndoRedoDomainModel _model;
     
@@ -40,7 +40,7 @@ internal sealed partial class HomePageViewModel : ObservableObject
         if (NewItemName != null)
         {
             await _model.Run<IMutableToDoModelShard>(
-                (shard, _) => shard.Lists.Add(new() { Name = NewItemName }));
+                shard => shard.Lists.Add(new() { Name = NewItemName }));
 
             NewItemName = null;
         }
@@ -64,5 +64,10 @@ internal sealed partial class HomePageViewModel : ObservableObject
         {
             Lists.Add(new ToDoItemListViewModel(_model, added.Entity, added.NewData!));
         }
+    }
+
+    protected override void DisposeManagedObjects()
+    {
+        _subscription?.Dispose();
     }
 }

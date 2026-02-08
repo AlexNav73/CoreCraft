@@ -1,8 +1,6 @@
 ﻿using CoreCraft.ChangesTracking;
 using CoreCraft.Commands;
 using CoreCraft.Exceptions;
-using CoreCraft.Features.CoW;
-using CoreCraft.Features.Tracking;
 using CoreCraft.Persistence;
 using CoreCraft.Persistence.Lazy;
 using CoreCraft.Scheduling;
@@ -16,9 +14,10 @@ namespace CoreCraft;
 /// </summary>
 public class DomainModel : IDomainModel
 {
-    private readonly View _view;
+    private readonly ModelView _modelView;
     private readonly IScheduler _scheduler;
     private readonly ModelSubscription _modelSubscription;
+    private readonly HashSet<Interceptor> _interceptors;
 
     private volatile Change<IModelChanges>? _currentChanges;
 
@@ -35,15 +34,16 @@ public class DomainModel : IDomainModel
     /// </summary>
     public DomainModel(IEnumerable<IModelShard> shards, IScheduler scheduler)
     {
-        _view = new View(shards);
+        _modelView = new ModelView(shards);
         _scheduler = scheduler;
         _modelSubscription = new ModelSubscription();
+        _interceptors = new HashSet<Interceptor>();
     }
 
     /// <inheritdoc cref="IModel.Shard{T}"/>
     public T Shard<T>() where T : IModelShard
     {
-        return _view.UnsafeModel.Shard<T>();
+        return _modelView.UnsafeModel.Shard<T>();
     }
 
     /// <inheritdoc cref="IDomainModel.Subscribe(Action{Change{IModelChanges}})"/>
@@ -66,28 +66,54 @@ public class DomainModel : IDomainModel
         return new ModelShardSubscriptionBuilder<T>(_modelSubscription.GetOrCreateSubscriptionFor<T>(), _currentChanges);
     }
 
-    /// <inheritdoc cref="IDomainModel.Run{T}(Action{T, CancellationToken}, CancellationToken)"/>
-    public async Task Run<T>(Action<T, CancellationToken> command, CancellationToken token = default)
+    /// <inheritdoc cref="IDomainModel.Run{T}(Action{T}, CancellationToken)"/>
+    public async Task Run<T>(Action<T> command, CancellationToken token = default)
+        where T : IMutableModelShard
+    {
+        await Run((m, t) =>
+        {
+            command(m.Shard<T>());
+
+            return Task.CompletedTask;
+        }, token);
+    }
+
+    /// <inheritdoc cref="IDomainModel.Run{T}(Func{T, CancellationToken, Task}, CancellationToken)"/>
+    public async Task Run<T>(Func<T, CancellationToken, Task> command, CancellationToken token = default)
         where T : IMutableModelShard
     {
         await Run((m, t) => command(m.Shard<T>(), t), token);
     }
 
-    /// <inheritdoc cref="IDomainModel.Run(ICommand, CancellationToken)"/>
-    public async Task Run(ICommand command, CancellationToken token = default)
+    /// <inheritdoc cref="IDomainModel.Run(IAsyncCommand, CancellationToken)"/>
+    public async Task Run(IAsyncCommand command, CancellationToken token = default)
     {
-        await Run(command.Execute, token);
+        await Run(command.ExecuteAsync, token);
     }
 
-    /// <inheritdoc cref="IDomainModel.Run(Action{IMutableModel, CancellationToken}, CancellationToken)"/>
-    public async Task Run(Action<IMutableModel, CancellationToken> command, CancellationToken token = default)
+    /// <inheritdoc cref="IDomainModel.Run(Func{IMutableModel, CancellationToken, Task}, CancellationToken)"/>
+    public async Task Run(Func<IMutableModel, CancellationToken, Task> command, CancellationToken token = default)
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new Snapshot(_view.UnsafeModel, [new CoWFeature(), new TrackableFeature(changes)]);
+        var snapshot = new Snapshot(_modelView.UnsafeModel, s => s.AsRunCommandModel(changes));
 
         try
         {
-            await _scheduler.Enqueue(() => command(snapshot, token), token);
+            await _scheduler.EnqueueAsync(async () =>
+            {
+                Invoke(x => x.BeforeCommand());
+                try
+                {
+                    // FIXME: if the command is an async method then the exception won't be caught here
+                    await command(snapshot, token);
+                    Invoke(x => x.AfterCommand());
+                }
+                catch (Exception ex)
+                {
+                    Invoke(x => x.CommandFailed(ex));
+                    throw;
+                }
+            }, token);
         }
         catch (Exception ex)
         {
@@ -96,7 +122,7 @@ public class DomainModel : IDomainModel
 
         if (changes.HasChanges())
         {
-            var result = _view.ApplySnapshot(snapshot);
+            var result = _modelView.ApplySnapshot(snapshot);
             var eventArgs = CreateChangeObject(result, changes);
 
             NotifySubscriptions(eventArgs);
@@ -118,7 +144,7 @@ public class DomainModel : IDomainModel
         // change stored model shards (instead a reference to the model in the _view will be replaced with a reference
         // to the new model, leaving old references and model shards untouched). This is exact behavior we need, because
         // when Save is executed it should save state at that moment, but not when 'storage.Save' is executed.
-        var model = _view.UnsafeModel.Shards.ToArray(); // Do not remove ToArray from here!
+        var model = _modelView.UnsafeModel.Shards.ToArray(); // Do not remove ToArray from here!
 
         try
         {
@@ -143,7 +169,7 @@ public class DomainModel : IDomainModel
     public Task Load(IStorage storage, bool force = false, CancellationToken token = default)
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new LoadSnapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
+        var snapshot = new LoadSnapshot(_modelView.UnsafeModel, changes);
 
         return Load(snapshot, changes, () => storage.Load(snapshot, force), token);
     }
@@ -168,7 +194,7 @@ public class DomainModel : IDomainModel
         where T : IMutableModelShard
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
+        var snapshot = new Snapshot(_modelView.UnsafeModel, s => s.AsLoadModel(changes));
         var loader = new ModelLoader<T>(((IMutableModel)snapshot).Shard<T>(), force);
 
         return Load(snapshot, changes, () => storage.Load(loader), token);
@@ -194,11 +220,20 @@ public class DomainModel : IDomainModel
         where T : IMutableModelShard
     {
         var changes = new ModelChanges(DateTime.UtcNow.Ticks);
-        var snapshot = new Snapshot(_view.UnsafeModel, new[] { new TrackableFeature(changes) });
+        var snapshot = new Snapshot(_modelView.UnsafeModel, s => s.AsLoadModel(changes));
         var loader = new ModelShardLoader<T>(((IMutableModel)snapshot).Shard<T>());
         var configuration = configure(loader);
 
         return Load(snapshot, changes, () => storage.Load(configuration), token);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="interceptor"></param>
+    public void AddInterceptor(Interceptor interceptor)
+    {
+        _interceptors.Add(interceptor);
     }
 
     /// <summary>
@@ -213,7 +248,7 @@ public class DomainModel : IDomainModel
     ///         <item>Modifying the returned collection directly can lead to unexpected behavior and data inconsistencies.</item>
     ///     </list>
     /// </remarks>
-    internal IReadOnlyCollection<IModelShard> UnsafeGetModelShards() => _view.UnsafeModel.Shards.ToList();
+    internal IReadOnlyCollection<IModelShard> UnsafeGetModelShards() => _modelView.UnsafeModel.Shards.ToList();
 
     /// <summary>
     ///     Applies changes to the model
@@ -225,18 +260,31 @@ public class DomainModel : IDomainModel
     {
         if (changes.HasChanges())
         {
-            var snapshot = new Snapshot(_view.UnsafeModel, new[] { new CoWFeature() });
+            var snapshot = new Snapshot(_modelView.UnsafeModel, s => s.AsApplyModel());
 
             try
             {
-                await _scheduler.Enqueue(() => changes.Apply(snapshot), token);
+                await _scheduler.EnqueueAsync(async () =>
+                {
+                    Invoke(x => x.BeforeApply());
+                    try
+                    {
+                        await changes.ApplyAsync(snapshot, token);
+                        Invoke(x => x.AfterApply());
+                    }
+                    catch (Exception ex)
+                    {
+                        Invoke(x => x.ApplyFailed(ex));
+                        throw;
+                    }
+                }, token);
             }
             catch (Exception ex)
             {
                 throw new ApplyModelChangesException("Applying changes has failed", ex);
             }
 
-            var result = _view.ApplySnapshot(snapshot);
+            var result = _modelView.ApplySnapshot(snapshot);
             var changeObject = CreateChangeObject(result, changes);
 
             NotifySubscriptions(changeObject);
@@ -263,7 +311,7 @@ public class DomainModel : IDomainModel
 
         if (changes.HasChanges())
         {
-            var result = _view.ApplySnapshot(snapshot);
+            var result = _modelView.ApplySnapshot(snapshot);
             var changeObject = CreateChangeObject(result, changes);
 
             NotifySubscriptions(changeObject);
@@ -274,7 +322,8 @@ public class DomainModel : IDomainModel
     {
         _currentChanges = change;
 
-        _modelSubscription.Publish(change);
+        _modelSubscription.Publish(change, true);
+        _modelSubscription.Publish(change, false);
 
         _currentChanges = null;
     }
@@ -282,5 +331,13 @@ public class DomainModel : IDomainModel
     private static Change<IModelChanges> CreateChangeObject(ModelChangeResult result, IModelChanges changes)
     {
         return new Change<IModelChanges>(result.OldModel, result.NewModel, changes);
+    }
+
+    private void Invoke(Action<Interceptor> notify)
+    {
+        foreach (var interceptor in _interceptors)
+        {
+            notify(interceptor);
+        }
     }
 }
